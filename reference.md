@@ -2601,11 +2601,7 @@ client.query.grep(
 <dl>
 <dd>
 
-**pattern:** `str` 
-
-The pattern, in the Rust `regex` crate's dialect (no backreferences
-or lookaround). Patterns that require no literal bytes are rejected
-with `query_unindexable` unless `allow_scan` is set.
+**pattern:** `str` — Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
     
 </dd>
 </dl>
@@ -2613,10 +2609,7 @@ with `query_unindexable` unless `allow_scan` is set.
 <dl>
 <dd>
 
-**allow_scan:** `typing.Optional[bool]` 
-
-Permit a capped exhaustive scan when the pattern yields no required
-grams. Refused beyond the server's scan budget.
+**case_insensitive:** `typing.Optional[bool]` — Match case-insensitively (`true` or `false`). Defaults to `false`.
     
 </dd>
 </dl>
@@ -2624,11 +2617,7 @@ grams. Refused beyond the server's scan budget.
 <dl>
 <dd>
 
-**allow_stale:** `typing.Optional[bool]` 
-
-When the unindexed tail exceeds the scan budget, return
-indexed-only results (reported via `tail_scanned: false`) instead
-of failing with `index_lagging`.
+**path_prefix:** `typing.Optional[str]` — Complete absolute path used to restrict matches.
     
 </dd>
 </dl>
@@ -2636,10 +2625,7 @@ of failing with `index_lagging`.
 <dl>
 <dd>
 
-**case_insensitive:** `typing.Optional[bool]` 
-
-Match case-insensitively. Verification is exact; the index remains
-consulted through its case-folded grams.
+**allow_scan:** `typing.Optional[bool]` — Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
     
 </dd>
 </dl>
@@ -2647,12 +2633,7 @@ consulted through its case-folded grams.
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` 
-
-Resume cursor from a previous page. The cursor resumes strictly
-after the last candidate the issuing page finished scanning and is
-bound to that page's request; each page is evaluated against the
-namespace head at page time.
+**allow_stale:** `typing.Optional[bool]` — Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
     
 </dd>
 </dl>
@@ -2660,7 +2641,7 @@ namespace head at page time.
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum matches per page.
+**limit:** `typing.Optional[int]` — Maximum matches per page
     
 </dd>
 </dl>
@@ -2668,10 +2649,7 @@ namespace head at page time.
 <dl>
 <dd>
 
-**path_prefix:** `typing.Optional[AbsolutePath]` 
-
-Restrict matches to files under this complete absolute path, resolved
-to a directory inode before candidates are filtered.
+**cursor:** `typing.Optional[str]` — Opaque grep page cursor
     
 </dd>
 </dl>
