@@ -1,0 +1,9 @@
+{
+  "cliVersion": "5.98.3",
+  "generatorName": "fernapi/fern-python-sdk",
+  "generatorVersion": "5.28.0",
+  "generatorConfig": {
+    "client_class_name": "LoonFS"
+  },
+  "invokedBy": "manual"
+}
