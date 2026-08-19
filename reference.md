@@ -1,5 +1,5 @@
 # Reference
-<details><summary><code>client.<a href="src/loonfs/client.py">capabilities</a>() -> CapabilityDocument</code></summary>
+<details><summary><code>client.<a href="src/loonfs_sdk/client.py">capabilities</a>() -> CapabilityDocument</code></summary>
 <dl>
 <dd>
 
@@ -26,7 +26,7 @@ Returns a summary of supported features and limits.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -62,7 +62,7 @@ client.capabilities()
 </details>
 
 ## system
-<details><summary><code>client.system.<a href="src/loonfs/system/client.py">health</a>() -> str</code></summary>
+<details><summary><code>client.system.<a href="src/loonfs_sdk/system/client.py">health</a>() -> str</code></summary>
 <dl>
 <dd>
 
@@ -89,7 +89,7 @@ Returns `ok` when the server is running and can accept requests.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -124,7 +124,7 @@ client.system.health()
 </dl>
 </details>
 
-<details><summary><code>client.system.<a href="src/loonfs/system/client.py">get_metrics</a>() -> str</code></summary>
+<details><summary><code>client.system.<a href="src/loonfs_sdk/system/client.py">get_metrics</a>() -> str</code></summary>
 <dl>
 <dd>
 
@@ -151,7 +151,7 @@ Returns this process's metrics in Prometheus text exposition format 0.0.4. Unlik
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -186,7 +186,7 @@ client.system.get_metrics()
 </dl>
 </details>
 
-<details><summary><code>client.system.<a href="src/loonfs/system/client.py">readiness</a>() -> str</code></summary>
+<details><summary><code>client.system.<a href="src/loonfs_sdk/system/client.py">readiness</a>() -> str</code></summary>
 <dl>
 <dd>
 
@@ -213,7 +213,7 @@ Returns `ready` while the server admits new work. Once shutdown begins and publi
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -249,7 +249,7 @@ client.system.readiness()
 </details>
 
 ## admin
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">list_checkpoints</a>(...) -> ListCheckpointsResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">list_checkpoints</a>(...) -> ListCheckpointsResponse</code></summary>
 <dl>
 <dd>
 
@@ -276,7 +276,7 @@ Lists one page of active checkpoints in checkpoint-id order. Expired checkpoints
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -337,7 +337,7 @@ client.admin.list_checkpoints(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">create_checkpoint</a>(...) -> CreateCheckpointResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">create_checkpoint</a>(...) -> CreateCheckpointResponse</code></summary>
 <dl>
 <dd>
 
@@ -364,7 +364,7 @@ Creates a named, user-owned checkpoint record pinning the current namespace view
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -432,7 +432,7 @@ own clock. Absent means the pin holds until explicitly released.
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">release_checkpoint</a>(...) -> ReleaseCheckpointResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">release_checkpoint</a>(...) -> ReleaseCheckpointResponse</code></summary>
 <dl>
 <dd>
 
@@ -459,7 +459,7 @@ Releases a user-owned checkpoint pin by id. Idempotent: releasing an already-rel
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -513,7 +513,7 @@ client.admin.release_checkpoint(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">get_namespace_diagnostics</a>(...) -> NamespaceDiagnostics</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">get_namespace_diagnostics</a>(...) -> NamespaceDiagnostics</code></summary>
 <dl>
 <dd>
 
@@ -540,7 +540,7 @@ Returns namespace state together with the current manifest and visible WAL tail.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -585,7 +585,7 @@ client.admin.get_namespace_diagnostics(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">get_grep_index_status</a>(...) -> GrepIndexStatusResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">get_grep_index_status</a>(...) -> GrepIndexStatusResponse</code></summary>
 <dl>
 <dd>
 
@@ -612,7 +612,7 @@ Returns whether the namespace's grep index is `disabled`, `backfilling`, or `act
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -657,7 +657,7 @@ client.admin.get_grep_index_status(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">disable_grep_index</a>(...) -> GrepIndexStatusResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">disable_grep_index</a>(...) -> GrepIndexStatusResponse</code></summary>
 <dl>
 <dd>
 
@@ -684,7 +684,7 @@ Disables the namespace's grep root and clears its segment references with one du
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -729,7 +729,7 @@ client.admin.disable_grep_index(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">enable_grep_index</a>(...) -> GrepIndexStatusResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">enable_grep_index</a>(...) -> GrepIndexStatusResponse</code></summary>
 <dl>
 <dd>
 
@@ -756,7 +756,7 @@ Enables the namespace's grep root and asks this deployment's maintenance runner 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -801,7 +801,7 @@ client.admin.enable_grep_index(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">gc_grep_index</a>(...) -> GrepGcResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">gc_grep_index</a>(...) -> GrepGcResponse</code></summary>
 <dl>
 <dd>
 
@@ -828,7 +828,7 @@ Runs one explicit garbage-collection pass over only this namespace's grep-owned 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -896,7 +896,7 @@ takes.
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">maintenance_step</a>(...) -> MaintenanceStepResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">maintenance_step</a>(...) -> MaintenanceStepResponse</code></summary>
 <dl>
 <dd>
 
@@ -923,7 +923,7 @@ Runs one bounded maintenance step. The body selects the actions by naming them: 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1001,7 +1001,7 @@ reorganization step.
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs/admin/client.py">probe_store</a>(...) -> StoreProbeResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">probe_store</a>(...) -> StoreProbeResponse</code></summary>
 <dl>
 <dd>
 
@@ -1028,7 +1028,7 @@ Proves the configured object store honours the create-if-absent, compare-and-swa
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1076,7 +1076,7 @@ client.admin.probe_store(
 </details>
 
 ## namespaces
-<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">create_namespace</a>(...) -> Namespace</code></summary>
+<details><summary><code>client.namespaces.<a href="src/loonfs_sdk/namespaces/client.py">create_namespace</a>(...) -> Namespace</code></summary>
 <dl>
 <dd>
 
@@ -1103,7 +1103,7 @@ Creates a new empty namespace.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1148,7 +1148,7 @@ client.namespaces.create_namespace(
 </dl>
 </details>
 
-<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">get_namespace</a>(...) -> Namespace</code></summary>
+<details><summary><code>client.namespaces.<a href="src/loonfs_sdk/namespaces/client.py">get_namespace</a>(...) -> Namespace</code></summary>
 <dl>
 <dd>
 
@@ -1175,7 +1175,7 @@ Returns the current head and retention state for a namespace.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1220,7 +1220,7 @@ client.namespaces.get_namespace(
 </dl>
 </details>
 
-<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">delete_namespace</a>(...) -> DeleteNamespaceResponse</code></summary>
+<details><summary><code>client.namespaces.<a href="src/loonfs_sdk/namespaces/client.py">delete_namespace</a>(...) -> DeleteNamespaceResponse</code></summary>
 <dl>
 <dd>
 
@@ -1247,7 +1247,7 @@ Marks a namespace as deleted.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1300,7 +1300,7 @@ client.namespaces.delete_namespace(
 </dl>
 </details>
 
-<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">fork_namespace</a>(...) -> Namespace</code></summary>
+<details><summary><code>client.namespaces.<a href="src/loonfs_sdk/namespaces/client.py">fork_namespace</a>(...) -> Namespace</code></summary>
 <dl>
 <dd>
 
@@ -1327,7 +1327,7 @@ Creates a new namespace as a fork from the source namespace's current durable vi
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1382,7 +1382,7 @@ client.namespaces.fork_namespace(
 </details>
 
 ## filesystem
-<details><summary><code>client.filesystem.<a href="src/loonfs/filesystem/client.py">list_changes</a>(...) -> ChangesResponse</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">list_changes</a>(...) -> ChangesResponse</code></summary>
 <dl>
 <dd>
 
@@ -1409,7 +1409,7 @@ Returns committed changes from the write-ahead log. Callers can use this feed to
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1471,7 +1471,7 @@ client.filesystem.list_changes(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs/filesystem/client.py">apply_commit</a>(...) -> CommitResponse</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">apply_commit</a>(...) -> CommitResponse</code></summary>
 <dl>
 <dd>
 
@@ -1498,7 +1498,7 @@ Applies one commit: an ordered, non-empty list of path operations that commit to
 <dd>
 
 ```python
-from loonfs import LoonFS, ActorRef, FilesystemOperation_CreateDirectory
+from loonfs_sdk import LoonFS, ActorRef, FilesystemOperation_CreateDirectory
 
 client = LoonFS(
     token="<token>",
@@ -1604,7 +1604,7 @@ for an explicit commit.
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs/filesystem/client.py">get_file_bytes</a>(...) -> typing.Iterator[bytes]</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">get_file_bytes</a>(...) -> typing.Iterator[bytes]</code></summary>
 <dl>
 <dd>
 
@@ -1631,7 +1631,7 @@ Returns file bytes for the current revision at a path, or for a specific retaine
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1693,7 +1693,7 @@ client.filesystem.get_file_bytes(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs/filesystem/client.py">begin_download</a>(...) -> BeginDownloadResponse</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">begin_download</a>(...) -> BeginDownloadResponse</code></summary>
 <dl>
 <dd>
 
@@ -1720,7 +1720,7 @@ Authorizes one direct read of a file's content object and returns a short-lived 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1782,7 +1782,7 @@ client.filesystem.begin_download(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs/filesystem/client.py">list_path_entries</a>(...) -> ListPathEntriesResponse</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">list_path_entries</a>(...) -> ListPathEntriesResponse</code></summary>
 <dl>
 <dd>
 
@@ -1809,7 +1809,7 @@ Lists a directory at the current namespace head.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1887,7 +1887,7 @@ client.filesystem.list_path_entries(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs/filesystem/client.py">list_file_revisions</a>(...) -> ListFileRevisionsResponse</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">list_file_revisions</a>(...) -> ListFileRevisionsResponse</code></summary>
 <dl>
 <dd>
 
@@ -1914,7 +1914,7 @@ Resolves the current path to a file inode and returns revisions for that file. I
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1984,7 +1984,7 @@ client.filesystem.list_file_revisions(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs/filesystem/client.py">stat_path</a>(...) -> AuthoritativePathEntry</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">stat_path</a>(...) -> AuthoritativePathEntry</code></summary>
 <dl>
 <dd>
 
@@ -2011,7 +2011,7 @@ Returns the current metadata for a path, including inode identity, kind, display
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2073,7 +2073,7 @@ client.filesystem.stat_path(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs/filesystem/client.py">list_trash</a>(...) -> ListTrashResponse</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">list_trash</a>(...) -> ListTrashResponse</code></summary>
 <dl>
 <dd>
 
@@ -2100,7 +2100,7 @@ Returns the namespace's recoverable deletions, oldest deletion first. Entries ne
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2162,7 +2162,7 @@ client.filesystem.list_trash(
 </details>
 
 ## inodes
-<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">stat_inode</a>(...) -> AuthoritativePathEntry</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">stat_inode</a>(...) -> AuthoritativePathEntry</code></summary>
 <dl>
 <dd>
 
@@ -2189,7 +2189,7 @@ Returns the current path entry for a visible inode. Unknown or hidden inodes ans
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2251,7 +2251,7 @@ client.inodes.stat_inode(
 </dl>
 </details>
 
-<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">list_file_revisions_by_inode</a>(...) -> ListFileRevisionsResponse</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">list_file_revisions_by_inode</a>(...) -> ListFileRevisionsResponse</code></summary>
 <dl>
 <dd>
 
@@ -2278,7 +2278,7 @@ Returns retained revisions for a file inode without requiring a current path.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2348,7 +2348,7 @@ client.inodes.list_file_revisions_by_inode(
 </dl>
 </details>
 
-<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">get_file_revision_bytes_by_inode</a>(...) -> typing.Iterator[bytes]</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">get_file_revision_bytes_by_inode</a>(...) -> typing.Iterator[bytes]</code></summary>
 <dl>
 <dd>
 
@@ -2375,7 +2375,7 @@ Reads and verifies one retained file revision by inode ID and revision number.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2438,7 +2438,7 @@ client.inodes.get_file_revision_bytes_by_inode(
 </dl>
 </details>
 
-<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">begin_download_by_inode</a>(...) -> BeginDownloadByInodeResponse</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">begin_download_by_inode</a>(...) -> BeginDownloadByInodeResponse</code></summary>
 <dl>
 <dd>
 
@@ -2465,7 +2465,7 @@ Authorizes a direct read of one retained inode revision. The request body is `{}
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2540,7 +2540,7 @@ client.inodes.begin_download_by_inode(
 </details>
 
 ## query
-<details><summary><code>client.query.<a href="src/loonfs/query/client.py">grep</a>(...) -> GrepResponse</code></summary>
+<details><summary><code>client.query.<a href="src/loonfs_sdk/query/client.py">grep</a>(...) -> GrepResponse</code></summary>
 <dl>
 <dd>
 
@@ -2567,7 +2567,7 @@ Searches file content with a regular expression, accelerated by the namespace's 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2692,7 +2692,7 @@ to a directory inode before candidates are filtered.
 </details>
 
 ## uploads
-<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">begin_upload</a>(...) -> BeginUploadResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">begin_upload</a>(...) -> BeginUploadResponse</code></summary>
 <dl>
 <dd>
 
@@ -2719,7 +2719,7 @@ Starts an upload session for content that may later be attached to a file. Servi
 <dd>
 
 ```python
-from loonfs import LoonFS, BeginUploadRequest_ServiceProxied
+from loonfs_sdk import LoonFS, BeginUploadRequest_ServiceProxied
 
 client = LoonFS(
     token="<token>",
@@ -2773,7 +2773,7 @@ client.uploads.begin_upload(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">get_upload_status</a>(...) -> UploadSessionResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">get_upload_status</a>(...) -> UploadSessionResponse</code></summary>
 <dl>
 <dd>
 
@@ -2800,7 +2800,7 @@ Returns an upload session. A completed session includes a new content token so t
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2854,7 +2854,7 @@ client.uploads.get_upload_status(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">abort_upload</a>(...) -> UploadSessionResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">abort_upload</a>(...) -> UploadSessionResponse</code></summary>
 <dl>
 <dd>
 
@@ -2881,7 +2881,7 @@ Ends an upload session without selecting content and deletes the object it was w
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs_sdk import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2935,7 +2935,7 @@ client.uploads.abort_upload(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">complete_upload</a>(...) -> UploadSessionResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">complete_upload</a>(...) -> UploadSessionResponse</code></summary>
 <dl>
 <dd>
 
@@ -2962,7 +2962,7 @@ Completes an upload. The request mode must match the mode used to start the sess
 <dd>
 
 ```python
-from loonfs import LoonFS, CompleteUploadRequest_ServiceProxied
+from loonfs_sdk import LoonFS, CompleteUploadRequest_ServiceProxied
 
 client = LoonFS(
     token="<token>",
@@ -3025,7 +3025,7 @@ client.uploads.complete_upload(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">upload_content</a>(...) -> UploadContentResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">upload_content</a>(...) -> UploadContentResponse</code></summary>
 <dl>
 <dd>
 
@@ -3103,7 +3103,7 @@ client.uploads.upload_content(...)
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">sign_upload_parts</a>(...) -> SignUploadPartsResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">sign_upload_parts</a>(...) -> SignUploadPartsResponse</code></summary>
 <dl>
 <dd>
 
@@ -3130,7 +3130,7 @@ Returns one short-lived, checksum-bound upload capability per requested part of 
 <dd>
 
 ```python
-from loonfs import LoonFS, UploadPartChecksumClaim, Checksum
+from loonfs_sdk import LoonFS, UploadPartChecksumClaim, Checksum
 
 client = LoonFS(
     token="<token>",

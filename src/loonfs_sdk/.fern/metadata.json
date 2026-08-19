@@ -3,7 +3,10 @@
   "generatorName": "fernapi/fern-python-sdk",
   "generatorVersion": "5.28.0",
   "generatorConfig": {
-    "client_class_name": "LoonFS"
+    "client_class_name": "LoonFS",
+    "package_name": "loonfs_sdk"
   },
+  "originGitCommit": "61b14ab20abbfbeba7c9efd4b6d5532a3a11a30d",
+  "originGitCommitIsDirty": true,
   "invokedBy": "manual"
 }

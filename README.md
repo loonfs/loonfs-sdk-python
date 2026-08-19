@@ -27,11 +27,12 @@ client = LoonFS(
 capabilities = client.capabilities()
 ```
 
-`AsyncLoonFS` is the async variant of the client.
+`AsyncLoonFS` is the async variant of the client. The optional aiohttp transport
+installs with the `aiohttp` extra: `pip install "loonfs-sdk[aiohttp]"`.
 
 ## Generated code
 
-The code is generated with Fern from the LoonFS OpenAPI spec (`docs/specs/openapi.json` in `github.com/loonfs/loonfs`). Regeneration runs from the `fern/` config in that repository (`scripts/generate-sdks.sh`). Do not edit generated files by hand.
+The code is generated with Fern from the LoonFS OpenAPI spec (`docs/specs/openapi.json` in `github.com/loonfs/loonfs`). Regeneration runs from the `sdk/fern/` config in that repository (`scripts/generate-sdks.sh`). Do not edit generated files by hand.
 
 See [reference.md](reference.md) for the full API reference.
 

@@ -68,7 +68,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -117,7 +117,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -157,7 +157,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -192,7 +192,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -226,7 +226,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -260,7 +260,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -294,7 +294,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -342,7 +342,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -396,7 +396,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -431,7 +431,7 @@ class AdminClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -494,7 +494,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -551,7 +551,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -599,7 +599,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -644,7 +644,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -686,7 +686,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -728,7 +728,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -770,7 +770,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -826,7 +826,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -888,7 +888,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -931,7 +931,7 @@ class AsyncAdminClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",

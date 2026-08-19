@@ -71,7 +71,7 @@ class FilesystemClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -136,7 +136,7 @@ class FilesystemClient:
 
         Examples
         --------
-        from loonfs import ActorRef, FilesystemOperation_CreateDirectory, LoonFS
+        from loonfs_sdk import ActorRef, FilesystemOperation_CreateDirectory, LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -199,7 +199,7 @@ class FilesystemClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -247,7 +247,7 @@ class FilesystemClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -303,7 +303,7 @@ class FilesystemClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -360,7 +360,7 @@ class FilesystemClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -408,7 +408,7 @@ class FilesystemClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -456,7 +456,7 @@ class FilesystemClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -521,7 +521,7 @@ class AsyncFilesystemClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -594,7 +594,11 @@ class AsyncFilesystemClient:
         --------
         import asyncio
 
-        from loonfs import ActorRef, AsyncLoonFS, FilesystemOperation_CreateDirectory
+        from loonfs_sdk import (
+            ActorRef,
+            AsyncLoonFS,
+            FilesystemOperation_CreateDirectory,
+        )
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -665,7 +669,7 @@ class AsyncFilesystemClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -722,7 +726,7 @@ class AsyncFilesystemClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -786,7 +790,7 @@ class AsyncFilesystemClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -851,7 +855,7 @@ class AsyncFilesystemClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -907,7 +911,7 @@ class AsyncFilesystemClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -963,7 +967,7 @@ class AsyncFilesystemClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",

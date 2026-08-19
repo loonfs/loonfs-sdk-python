@@ -89,7 +89,7 @@ class QueryClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs_sdk import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -193,7 +193,7 @@ class AsyncQueryClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs_sdk import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",

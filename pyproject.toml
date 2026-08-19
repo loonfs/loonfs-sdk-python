@@ -17,6 +17,9 @@ dependencies = [
     "anyio>=3.5.0",
 ]
 
+[project.optional-dependencies]
+aiohttp = ["httpx-aiohttp>=0.1.8"]
+
 [project.urls]
 Repository = "https://github.com/loonfs/loonfs-sdk-python"
 
