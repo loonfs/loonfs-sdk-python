@@ -137,6 +137,7 @@ if typing.TYPE_CHECKING:
     from .grep_index_lifecycle_disabled import GrepIndexLifecycleDisabled
     from .grep_index_status_response import GrepIndexStatusResponse
     from .grep_match import GrepMatch
+    from .grep_request import GrepRequest
     from .grep_response import GrepResponse
     from .inode_kind import InodeKind
     from .list_checkpoints_response import ListCheckpointsResponse
@@ -324,6 +325,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "GrepIndexLifecycle_Disabled": ".grep_index_lifecycle",
     "GrepIndexStatusResponse": ".grep_index_status_response",
     "GrepMatch": ".grep_match",
+    "GrepRequest": ".grep_request",
     "GrepResponse": ".grep_response",
     "InodeKind": ".inode_kind",
     "ListCheckpointsResponse": ".list_checkpoints_response",
@@ -530,6 +532,7 @@ __all__ = [
     "GrepIndexLifecycle_Disabled",
     "GrepIndexStatusResponse",
     "GrepMatch",
+    "GrepRequest",
     "GrepResponse",
     "InodeKind",
     "ListCheckpointsResponse",

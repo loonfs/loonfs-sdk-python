@@ -19,13 +19,9 @@ from ..errors.not_implemented_error import NotImplementedError
 from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
-from ..types.absolute_path import AbsolutePath
 from ..types.api_error import ApiError as types_api_error_ApiError
 from ..types.grep_response import GrepResponse
 from pydantic import ValidationError
-
-# this is used as the default value for optional parameters
-OMIT = typing.cast(typing.Any, ...)
 
 
 class RawQueryClient:
@@ -37,12 +33,12 @@ class RawQueryClient:
         namespace_id: str,
         *,
         pattern: str,
-        allow_scan: typing.Optional[bool] = OMIT,
-        allow_stale: typing.Optional[bool] = OMIT,
-        case_insensitive: typing.Optional[bool] = OMIT,
-        cursor: typing.Optional[str] = OMIT,
-        limit: typing.Optional[int] = OMIT,
-        path_prefix: typing.Optional[AbsolutePath] = OMIT,
+        case_insensitive: typing.Optional[bool] = None,
+        path_prefix: typing.Optional[str] = None,
+        allow_scan: typing.Optional[bool] = None,
+        allow_stale: typing.Optional[bool] = None,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[GrepResponse]:
         """
@@ -54,35 +50,25 @@ class RawQueryClient:
             Namespace id
 
         pattern : str
-            The pattern, in the Rust `regex` crate's dialect (no backreferences
-            or lookaround). Patterns that require no literal bytes are rejected
-            with `query_unindexable` unless `allow_scan` is set.
-
-        allow_scan : typing.Optional[bool]
-            Permit a capped exhaustive scan when the pattern yields no required
-            grams. Refused beyond the server's scan budget.
-
-        allow_stale : typing.Optional[bool]
-            When the unindexed tail exceeds the scan budget, return
-            indexed-only results (reported via `tail_scanned: false`) instead
-            of failing with `index_lagging`.
+            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
 
         case_insensitive : typing.Optional[bool]
-            Match case-insensitively. Verification is exact; the index remains
-            consulted through its case-folded grams.
+            Match case-insensitively (`true` or `false`). Defaults to `false`.
 
-        cursor : typing.Optional[str]
-            Resume cursor from a previous page. The cursor resumes strictly
-            after the last candidate the issuing page finished scanning and is
-            bound to that page's request; each page is evaluated against the
-            namespace head at page time.
+        path_prefix : typing.Optional[str]
+            Complete absolute path used to restrict matches.
+
+        allow_scan : typing.Optional[bool]
+            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+
+        allow_stale : typing.Optional[bool]
+            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
 
         limit : typing.Optional[int]
-            Maximum matches per page.
+            Maximum matches per page
 
-        path_prefix : typing.Optional[AbsolutePath]
-            Restrict matches to files under this complete absolute path, resolved
-            to a directory inode before candidates are filtered.
+        cursor : typing.Optional[str]
+            Opaque grep page cursor
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -94,21 +80,17 @@ class RawQueryClient:
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/query/grep",
-            method="POST",
-            json={
+            method="GET",
+            params={
+                "pattern": pattern,
+                "case_insensitive": case_insensitive,
+                "path_prefix": path_prefix,
                 "allow_scan": allow_scan,
                 "allow_stale": allow_stale,
-                "case_insensitive": case_insensitive,
-                "cursor": cursor,
                 "limit": limit,
-                "path_prefix": path_prefix,
-                "pattern": pattern,
-            },
-            headers={
-                "content-type": "application/json",
+                "cursor": cursor,
             },
             request_options=request_options,
-            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -242,12 +224,12 @@ class AsyncRawQueryClient:
         namespace_id: str,
         *,
         pattern: str,
-        allow_scan: typing.Optional[bool] = OMIT,
-        allow_stale: typing.Optional[bool] = OMIT,
-        case_insensitive: typing.Optional[bool] = OMIT,
-        cursor: typing.Optional[str] = OMIT,
-        limit: typing.Optional[int] = OMIT,
-        path_prefix: typing.Optional[AbsolutePath] = OMIT,
+        case_insensitive: typing.Optional[bool] = None,
+        path_prefix: typing.Optional[str] = None,
+        allow_scan: typing.Optional[bool] = None,
+        allow_stale: typing.Optional[bool] = None,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[GrepResponse]:
         """
@@ -259,35 +241,25 @@ class AsyncRawQueryClient:
             Namespace id
 
         pattern : str
-            The pattern, in the Rust `regex` crate's dialect (no backreferences
-            or lookaround). Patterns that require no literal bytes are rejected
-            with `query_unindexable` unless `allow_scan` is set.
-
-        allow_scan : typing.Optional[bool]
-            Permit a capped exhaustive scan when the pattern yields no required
-            grams. Refused beyond the server's scan budget.
-
-        allow_stale : typing.Optional[bool]
-            When the unindexed tail exceeds the scan budget, return
-            indexed-only results (reported via `tail_scanned: false`) instead
-            of failing with `index_lagging`.
+            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
 
         case_insensitive : typing.Optional[bool]
-            Match case-insensitively. Verification is exact; the index remains
-            consulted through its case-folded grams.
+            Match case-insensitively (`true` or `false`). Defaults to `false`.
 
-        cursor : typing.Optional[str]
-            Resume cursor from a previous page. The cursor resumes strictly
-            after the last candidate the issuing page finished scanning and is
-            bound to that page's request; each page is evaluated against the
-            namespace head at page time.
+        path_prefix : typing.Optional[str]
+            Complete absolute path used to restrict matches.
+
+        allow_scan : typing.Optional[bool]
+            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+
+        allow_stale : typing.Optional[bool]
+            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
 
         limit : typing.Optional[int]
-            Maximum matches per page.
+            Maximum matches per page
 
-        path_prefix : typing.Optional[AbsolutePath]
-            Restrict matches to files under this complete absolute path, resolved
-            to a directory inode before candidates are filtered.
+        cursor : typing.Optional[str]
+            Opaque grep page cursor
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -299,21 +271,17 @@ class AsyncRawQueryClient:
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/query/grep",
-            method="POST",
-            json={
+            method="GET",
+            params={
+                "pattern": pattern,
+                "case_insensitive": case_insensitive,
+                "path_prefix": path_prefix,
                 "allow_scan": allow_scan,
                 "allow_stale": allow_stale,
-                "case_insensitive": case_insensitive,
-                "cursor": cursor,
                 "limit": limit,
-                "path_prefix": path_prefix,
-                "pattern": pattern,
-            },
-            headers={
-                "content-type": "application/json",
+                "cursor": cursor,
             },
             request_options=request_options,
-            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:

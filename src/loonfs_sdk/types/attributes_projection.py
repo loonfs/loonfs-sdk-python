@@ -11,10 +11,14 @@ from .attributes import Attributes
 
 class AttributesProjection(UniversalBaseModel):
     """
-    One inode's structurally complete attribute projection.
+    Attributes returned for one inode.
+
+    A path entry omits this entire group unless the caller requests attributes.
+    OpenAPI flattens these fields with `allOf`, so none of them can be marked as
+    required on every path entry.
     """
 
-    attributes: Attributes = pydantic.Field()
+    attributes: typing.Optional[Attributes] = pydantic.Field(default=None)
     """
     The complete attribute map at `attributes_revision_no`.
     
@@ -22,7 +26,7 @@ class AttributesProjection(UniversalBaseModel):
     an empty map.
     """
 
-    attributes_revision_no: AttributeRevisionNo = pydantic.Field()
+    attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
     """
     The attribute revision this projection represents.
     """
