@@ -8,11 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class DirectMultipartUploadOptions(UniversalBaseModel):
     """
-    What a `direct_multipart` client asks for when it opens a session.
-
-    A begin request declares no length and no digest: the session exists to
-    receive bytes whose length may not be known yet. All it settles is the
-    geometry the client cuts to.
+    Options for starting a direct multipart upload.
     """
 
     part_size_bytes: typing.Optional[int] = pydantic.Field(default=None)
@@ -20,11 +16,8 @@ class DirectMultipartUploadOptions(UniversalBaseModel):
     Byte length of every part except the last, or `None` for the
     server's default.
     
-    The value bounds the object: a provider accepts at most 10,000
-    parts, so this session can carry at most `part_size_bytes × 10_000`
-    bytes. A client that knows its payload is very large asks for a
-    larger part size; one that does not know its length at all takes the
-    default and keeps asking for part URLs until its stream ends.
+    Providers accept at most 10,000 parts, so this value also limits the
+    maximum upload size. Clients can request larger parts for large files.
     """
 
     if IS_PYDANTIC_V2:

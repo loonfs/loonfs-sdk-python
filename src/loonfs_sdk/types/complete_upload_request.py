@@ -15,9 +15,8 @@ class CompleteUploadRequest_ServiceProxied(UniversalBaseModel):
     """
     Request to complete an upload session.
 
-    `mode` must match the mode used to start the session. Service-proxied and
-    direct-PUT uploads need no other fields. Direct multipart uploads also
-    include the completed parts and the expected content details.
+    `mode` must match the mode used to start the session. Direct uploads
+    include the expected content details. Multipart also includes its parts.
     """
 
     mode: typing.Literal["service_proxied"] = "service_proxied"
@@ -36,12 +35,12 @@ class CompleteUploadRequest_DirectPut(UniversalBaseModel):
     """
     Request to complete an upload session.
 
-    `mode` must match the mode used to start the session. Service-proxied and
-    direct-PUT uploads need no other fields. Direct multipart uploads also
-    include the completed parts and the expected content details.
+    `mode` must match the mode used to start the session. Direct uploads
+    include the expected content details. Multipart also includes its parts.
     """
 
     mode: typing.Literal["direct_put"] = "direct_put"
+    content: UploadContentClaim
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -57,9 +56,8 @@ class CompleteUploadRequest_DirectMultipart(UniversalBaseModel):
     """
     Request to complete an upload session.
 
-    `mode` must match the mode used to start the session. Service-proxied and
-    direct-PUT uploads need no other fields. Direct multipart uploads also
-    include the completed parts and the expected content details.
+    `mode` must match the mode used to start the session. Direct uploads
+    include the expected content details. Multipart also includes its parts.
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"

@@ -4,11 +4,17 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .upload_content_claim import UploadContentClaim
 
 
 class CompleteUploadDirectPut(UniversalBaseModel):
     """
     Complete a direct-PUT upload.
+    """
+
+    content: UploadContentClaim = pydantic.Field()
+    """
+    Expected length and checksum of the stored object.
     """
 
     if IS_PYDANTIC_V2:
