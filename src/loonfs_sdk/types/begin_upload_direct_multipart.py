@@ -14,9 +14,7 @@ class BeginUploadDirectMultipart(UniversalBaseModel):
 
     multipart: typing.Optional[DirectMultipartUploadOptions] = pydantic.Field(default=None)
     """
-    Selects the part geometry; absent takes the server's default.
-    A multipart upload claims its content at completion, so nothing
-    about the payload is declared here.
+    Part size options. The server uses its default when omitted.
     """
 
     if IS_PYDANTIC_V2:

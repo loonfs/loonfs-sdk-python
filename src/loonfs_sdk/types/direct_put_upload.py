@@ -4,25 +4,23 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .content_ref import ContentRef
+from .checksum_algorithm import ChecksumAlgorithm
 from .object_transfer_access import ObjectTransferAccess
 
 
 class DirectPutUpload(UniversalBaseModel):
     """
-    Presigned direct_put upload details. The raw object key is intentionally not public.
+    Details for a direct PUT upload.
     """
 
     access: ObjectTransferAccess = pydantic.Field()
     """
-    Short-lived write capability the client uses without learning the raw object key.
+    Short-lived permission to write the object.
     """
 
-    content_ref: ContentRef = pydantic.Field()
+    checksum_algorithm: ChecksumAlgorithm = pydantic.Field()
     """
-    Immutable object identity the server minted, plus the byte length and
-    checksum covered by the signed request. Completion and the later
-    commit both name exactly this reference.
+    Checksum algorithm the client must use for its completion claim.
     """
 
     if IS_PYDANTIC_V2:

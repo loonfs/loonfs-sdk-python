@@ -9,17 +9,12 @@ from .checksum_algorithm import ChecksumAlgorithm
 
 class DirectMultipartUpload(UniversalBaseModel):
     """
-    Part geometry returned for a direct multipart upload.
-
-    The begin response does not include a content reference or part count
-    because the final payload is not known yet. The server owns the provider
-    upload id and returns the content reference only after completion.
+    Settings returned for a direct multipart upload.
     """
 
     checksum_algorithm: ChecksumAlgorithm = pydantic.Field()
     """
-    Checksum algorithm every part and the complete assembled payload must
-    use for this session.
+    Checksum algorithm for every part and for the complete payload.
     """
 
     part_size_bytes: int = pydantic.Field()

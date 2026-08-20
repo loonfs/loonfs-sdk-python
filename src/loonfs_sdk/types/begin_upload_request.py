@@ -8,7 +8,6 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .direct_multipart_upload_options import DirectMultipartUploadOptions
-from .upload_content_claim import UploadContentClaim
 
 
 class BeginUploadRequest_ServiceProxied(UniversalBaseModel):
@@ -40,7 +39,7 @@ class BeginUploadRequest_DirectPut(UniversalBaseModel):
     """
 
     mode: typing.Literal["direct_put"] = "direct_put"
-    content: UploadContentClaim
+    size_bytes: typing.Optional[int] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

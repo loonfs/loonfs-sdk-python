@@ -4,19 +4,16 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .upload_content_claim import UploadContentClaim
 
 
 class BeginUploadDirectPut(UniversalBaseModel):
     """
-    Write the whole object through one presigned request. The server
-    signs exactly these bytes into the write it authorizes, so the claim
-    is required.
+    Write the whole object through one presigned request.
     """
 
-    content: UploadContentClaim = pydantic.Field()
+    size_bytes: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Byte length and digest of the payload about to be written.
+    Advisory byte length for an early provider-limit check.
     """
 
     if IS_PYDANTIC_V2:
