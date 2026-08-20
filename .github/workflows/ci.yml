@@ -9,11 +9,15 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # 3.8 is the advertised floor; the import must stay valid there.
+        python-version: ['3.8', '3.12']
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[aiohttp]" pytest
       - run: python -c "from loonfs_sdk import LoonFS, AsyncLoonFS"
       - run: python -m pytest src/loonfs_sdk/tests -q
