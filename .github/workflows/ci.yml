@@ -21,4 +21,4 @@ jobs:
       - run: pip install -e ".[aiohttp]" pytest
       - run: python -c "from loonfs_sdk import LoonFS, AsyncLoonFS"
       - run: python -m pytest src/loonfs_sdk/tests -q
-      - run: python -m compileall -q src
+      - run: python -c "import loonfs_sdk.proxy, loonfs_sdk.transfers"

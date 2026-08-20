@@ -25,3 +25,4 @@ Repository = "https://github.com/loonfs/loonfs-sdk-python"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/loonfs_sdk"]
+exclude = ["src/loonfs_sdk/.fern"]
