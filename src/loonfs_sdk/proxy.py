@@ -9,7 +9,7 @@ from urllib.parse import quote
 
 import httpx
 
-__all__ = ["LoonFSProxy", "ROUTES"]
+__all__ = ["LoonFSProxy"]
 
 
 # typing.Dict keeps these runtime-evaluated aliases importable on Python 3.8;
@@ -32,31 +32,31 @@ _HOP_BY_HOP_HEADERS = frozenset(
 )
 
 # These routes must match docs/specs/openapi-proxy.json.
-ROUTES: tuple[tuple[str, str, str], ...] = (
-    ("capabilities", "GET", "/v0/capabilities"),
-    ("list_changes", "GET", "/v0/mounts/{mount}/changes"),
-    ("apply_commit", "POST", "/v0/mounts/{mount}/commits"),
-    ("get_file_bytes", "GET", "/v0/mounts/{mount}/filesystem/content"),
-    ("begin_download", "POST", "/v0/mounts/{mount}/filesystem/downloads"),
-    ("list_path_entries", "GET", "/v0/mounts/{mount}/filesystem/list"),
-    ("list_file_revisions", "GET", "/v0/mounts/{mount}/filesystem/revisions"),
-    ("stat_path", "GET", "/v0/mounts/{mount}/filesystem/stat"),
-    ("list_trash", "GET", "/v0/mounts/{mount}/filesystem/trash"),
-    ("grep", "GET", "/v0/mounts/{mount}/query/grep"),
-    ("begin_upload", "POST", "/v0/mounts/{mount}/uploads"),
-    ("get_upload_status", "GET", "/v0/mounts/{mount}/uploads/{upload_id}"),
-    ("abort_upload", "POST", "/v0/mounts/{mount}/uploads/{upload_id}/abort"),
-    ("complete_upload", "POST", "/v0/mounts/{mount}/uploads/{upload_id}/complete"),
-    ("upload_content", "PUT", "/v0/mounts/{mount}/uploads/{upload_id}/content"),
-    ("sign_upload_parts", "POST", "/v0/mounts/{mount}/uploads/{upload_id}/parts"),
+_ROUTE_TEMPLATES: tuple[tuple[str, str], ...] = (
+    ("GET", "/v0/capabilities"),
+    ("GET", "/v0/namespace-aliases/{namespace_alias}/changes"),
+    ("POST", "/v0/namespace-aliases/{namespace_alias}/commits"),
+    ("GET", "/v0/namespace-aliases/{namespace_alias}/filesystem/content"),
+    ("POST", "/v0/namespace-aliases/{namespace_alias}/filesystem/downloads"),
+    ("GET", "/v0/namespace-aliases/{namespace_alias}/filesystem/list"),
+    ("GET", "/v0/namespace-aliases/{namespace_alias}/filesystem/revisions"),
+    ("GET", "/v0/namespace-aliases/{namespace_alias}/filesystem/stat"),
+    ("GET", "/v0/namespace-aliases/{namespace_alias}/filesystem/trash"),
+    ("GET", "/v0/namespace-aliases/{namespace_alias}/query/grep"),
+    ("POST", "/v0/namespace-aliases/{namespace_alias}/uploads"),
+    ("GET", "/v0/namespace-aliases/{namespace_alias}/uploads/{upload_id}"),
+    ("POST", "/v0/namespace-aliases/{namespace_alias}/uploads/{upload_id}/abort"),
+    ("POST", "/v0/namespace-aliases/{namespace_alias}/uploads/{upload_id}/complete"),
+    ("PUT", "/v0/namespace-aliases/{namespace_alias}/uploads/{upload_id}/content"),
+    ("POST", "/v0/namespace-aliases/{namespace_alias}/uploads/{upload_id}/parts"),
 )
 
 
 def _pattern_for(template: str) -> re.Pattern[str]:
     parts = []
     for segment in template.split("/"):
-        if segment == "{mount}":
-            parts.append(r"(?P<mount>[^/]+)")
+        if segment == "{namespace_alias}":
+            parts.append(r"(?P<namespace_alias>[^/]+)")
         elif segment.startswith("{") and segment.endswith("}"):
             parts.append(r"[^/]+")
         else:
@@ -65,8 +65,7 @@ def _pattern_for(template: str) -> re.Pattern[str]:
 
 
 _COMPILED_ROUTES = tuple(
-    (operation, method, _pattern_for(template))
-    for operation, method, template in ROUTES
+    (method, _pattern_for(template)) for method, template in _ROUTE_TEMPLATES
 )
 
 
@@ -123,11 +122,11 @@ class LoonFSProxy:
         self,
         server_base_url: str,
         token: str,
-        mounts: dict[str, str],
+        namespace_aliases: dict[str, str],
     ) -> None:
         self._server_base_url = server_base_url.rstrip("/")
         self._authorization = f"Bearer {token}".encode("latin-1")
-        self._mounts = dict(mounts)
+        self._namespace_aliases = dict(namespace_aliases)
         self._client = httpx.AsyncClient(timeout=None, follow_redirects=False)
 
     async def __call__(self, scope: dict[str, Any], receive: _Receive, send: _Send) -> None:
@@ -178,20 +177,20 @@ class LoonFSProxy:
             await response.aclose()
 
     def _rewritten_path(self, method: str, path: str) -> str | None:
-        for _operation, route_method, pattern in _COMPILED_ROUTES:
+        for route_method, pattern in _COMPILED_ROUTES:
             if method != route_method:
                 continue
             match = pattern.fullmatch(path)
             if match is None:
                 continue
-            mount = match.groupdict().get("mount")
-            if mount is None:
+            namespace_alias = match.groupdict().get("namespace_alias")
+            if namespace_alias is None:
                 return path
-            namespace_id = self._mounts.get(mount)
+            namespace_id = self._namespace_aliases.get(namespace_alias)
             if namespace_id is None:
                 return None
-            mount_prefix = f"/v0/mounts/{mount}"
-            return f"/v0/namespaces/{quote(namespace_id, safe='')}{path[len(mount_prefix):]}"
+            namespace_alias_prefix = f"/v0/namespace-aliases/{namespace_alias}"
+            return f"/v0/namespaces/{quote(namespace_id, safe='')}{path[len(namespace_alias_prefix):]}"
         return None
 
     async def _lifespan(self, receive: _Receive, send: _Send) -> None:
