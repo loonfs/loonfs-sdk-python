@@ -30,9 +30,6 @@ from pydantic.fields import FieldInfo as _FieldInfo
 
 _logger = logging.getLogger(__name__)
 
-if TYPE_CHECKING:
-    from .http_sse._models import ServerSentEvent
-
 IS_PYDANTIC_V2 = pydantic.VERSION.startswith("2.")
 
 if IS_PYDANTIC_V2:
@@ -133,43 +130,6 @@ from typing_extensions import TypeAlias
 
 T = TypeVar("T")
 Model = TypeVar("Model", bound=pydantic.BaseModel)
-
-
-def parse_sse_obj(sse: "ServerSentEvent", type_: Type[T]) -> T:
-    """
-    Parse a ServerSentEvent into the appropriate type.
-
-    This function handles data-level discrimination where the discriminator
-    (e.g., 'type') is inside the 'data' payload. It parses the SSE data field
-    as JSON and deserializes it into the target type.
-
-    Note: Protocol-level discrimination (where the discriminator comes from
-    the SSE event: field) is handled at code-generation time and does not
-    use this function.
-
-    Args:
-        sse: The ServerSentEvent object to parse
-        type_: The target type to deserialize into
-
-    Returns:
-        The parsed object of type T
-
-    Note:
-        This function is only available in SDK contexts where http_sse module exists.
-    """
-    sse_event = asdict(sse)
-    data_value = sse_event.get("data")
-    if isinstance(data_value, str) and data_value:
-        try:
-            parsed_data = json.loads(data_value)
-            return parse_obj_as(type_, parsed_data)
-        except json.JSONDecodeError as e:
-            _logger.warning(
-                "Failed to parse SSE data field as JSON: %s, data: %s",
-                e,
-                data_value[:100] if len(data_value) > 100 else data_value,
-            )
-    return parse_obj_as(type_, sse_event)
 
 
 _type_adapter_cache: Dict[int, Any] = {}
