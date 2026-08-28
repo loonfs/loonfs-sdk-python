@@ -9,10 +9,11 @@ from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.parse_error import ParsingError
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
-from ..errors.request_timeout_error import RequestTimeoutError
+from ..errors.bad_request_error import BadRequestError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.api_error import ApiError as types_api_error_ApiError
+from ..types.capability_document import CapabilityDocument
 from pydantic import ValidationError
 
 
@@ -20,7 +21,7 @@ class RawSystemClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def health(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[str]:
+    def get_health(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[str]:
         """
         Returns `ok` when the server is running and can accept requests.
 
@@ -42,8 +43,8 @@ class RawSystemClient:
         try:
             if 200 <= _response.status_code < 300:
                 return HttpResponse(response=_response, data=_response.text)  # type: ignore
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -99,8 +100,8 @@ class RawSystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -123,7 +124,7 @@ class RawSystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def readiness(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[str]:
+    def get_readiness(self, *, request_options: typing.Optional[RequestOptions] = None) -> HttpResponse[str]:
         """
         Returns `ready` while the server admits new work. Once shutdown begins and publisher admission closes, answers 503 `shutting_down` so load balancers can drain the instance. `/health` stays the liveness probe: it only reports that the process is up.
 
@@ -145,8 +146,8 @@ class RawSystemClient:
         try:
             if 200 <= _response.status_code < 300:
                 return HttpResponse(response=_response, data=_response.text)  # type: ignore
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -156,13 +157,79 @@ class RawSystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    def get_capabilities(
+        self, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[CapabilityDocument]:
+        """
+        Returns a summary of supported features and limits.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CapabilityDocument]
+            Capability document
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "v0/capabilities",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CapabilityDocument,
+                    parse_obj_as(
+                        type_=CapabilityDocument,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -185,7 +252,7 @@ class AsyncRawSystemClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def health(self, *, request_options: typing.Optional[RequestOptions] = None) -> AsyncHttpResponse[str]:
+    async def get_health(self, *, request_options: typing.Optional[RequestOptions] = None) -> AsyncHttpResponse[str]:
         """
         Returns `ok` when the server is running and can accept requests.
 
@@ -207,8 +274,8 @@ class AsyncRawSystemClient:
         try:
             if 200 <= _response.status_code < 300:
                 return AsyncHttpResponse(response=_response, data=_response.text)  # type: ignore
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -264,8 +331,8 @@ class AsyncRawSystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -288,7 +355,7 @@ class AsyncRawSystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def readiness(self, *, request_options: typing.Optional[RequestOptions] = None) -> AsyncHttpResponse[str]:
+    async def get_readiness(self, *, request_options: typing.Optional[RequestOptions] = None) -> AsyncHttpResponse[str]:
         """
         Returns `ready` while the server admits new work. Once shutdown begins and publisher admission closes, answers 503 `shutting_down` so load balancers can drain the instance. `/health` stays the liveness probe: it only reports that the process is up.
 
@@ -310,8 +377,8 @@ class AsyncRawSystemClient:
         try:
             if 200 <= _response.status_code < 300:
                 return AsyncHttpResponse(response=_response, data=_response.text)  # type: ignore
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -321,13 +388,79 @@ class AsyncRawSystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    async def get_capabilities(
+        self, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[CapabilityDocument]:
+        """
+        Returns a summary of supported features and limits.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CapabilityDocument]
+            Capability document
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "v0/capabilities",
+            method="GET",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CapabilityDocument,
+                    parse_obj_as(
+                        type_=CapabilityDocument,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

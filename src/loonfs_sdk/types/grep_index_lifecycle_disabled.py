@@ -4,11 +4,28 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .namespace_id import NamespaceId
+from .run_no import RunNo
 
 
 class GrepIndexLifecycleDisabled(UniversalBaseModel):
     """
     No index is maintained for this namespace.
+    """
+
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    Namespace the status describes.
+    """
+
+    next_run_no: RunNo = pydantic.Field()
+    """
+    Run number the index allocates next.
+    """
+
+    reorganize_pending: bool = pydantic.Field()
+    """
+    True while a partitioned segment reorganization is in progress.
     """
 
     if IS_PYDANTIC_V2:

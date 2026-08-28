@@ -27,11 +27,6 @@ class ErrorDetails(UniversalBaseModel):
     one machine can share one; the stamp is what tells them apart.
     """
 
-    active_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
-    """
-    Deletion generation actually active for the inode.
-    """
-
     active_writer: typing.Optional[str] = pydantic.Field(default=None)
     """
     Writer id recorded by the current epoch's acquirer, when the head
@@ -46,6 +41,11 @@ class ErrorDetails(UniversalBaseModel):
     actual_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
     """
     Attribute revision that is actually current for the inode.
+    """
+
+    actual_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    Deletion generation actually active for the inode.
     """
 
     actual_head_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
@@ -92,6 +92,11 @@ class ErrorDetails(UniversalBaseModel):
     Attribute revision the request expected to be current.
     """
 
+    expected_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    Deletion generation the undelete expected to be active.
+    """
+
     expected_head_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
     Head sequence a namespace delete required the namespace to still be
@@ -103,7 +108,7 @@ class ErrorDetails(UniversalBaseModel):
     Revision the request expected to be current.
     """
 
-    fenced_epoch: typing.Optional[WriterEpoch] = pydantic.Field(default=None)
+    fenced_writer_epoch: typing.Optional[WriterEpoch] = pydantic.Field(default=None)
     """
     Epoch the failing writer session held when it was displaced.
     """
@@ -118,11 +123,6 @@ class ErrorDetails(UniversalBaseModel):
     Position, in the request's operation list, of the operation that
     failed. A commit applies all of its operations or none of them, so
     this names the one that stopped the whole request.
-    """
-
-    requested_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
-    """
-    Deletion generation an undelete asked to recover.
     """
 
     retention_floor_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)

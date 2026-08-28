@@ -6,17 +6,18 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.absolute_path import AbsolutePath
 from ..types.actor_ref import ActorRef
-from ..types.authoritative_path_entry import AuthoritativePathEntry
 from ..types.begin_download_response import BeginDownloadResponse
 from ..types.change_seq import ChangeSeq
-from ..types.changes_response import ChangesResponse
+from ..types.checkpoint_id import CheckpointId
 from ..types.commit_id import CommitId
 from ..types.commit_response import CommitResponse
 from ..types.content_token import ContentToken
 from ..types.filesystem_operation import FilesystemOperation
+from ..types.list_changes_response import ListChangesResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
 from ..types.list_trash_response import ListTrashResponse
+from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
 from .raw_client import AsyncRawFilesystemClient, RawFilesystemClient
 
@@ -45,10 +46,11 @@ class FilesystemClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> ChangesResponse:
+    ) -> ListChangesResponse:
         """
-        Returns committed changes from the write-ahead log. Callers can use this feed to keep another projection synchronized with WAL history.
+        Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
 
         Parameters
         ----------
@@ -61,12 +63,15 @@ class FilesystemClient:
         limit : typing.Optional[int]
             Maximum page size
 
+        snapshot_id : typing.Optional[CheckpointId]
+            End the feed at this snapshot's captured sequence
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        ChangesResponse
+        ListChangesResponse
             Committed changes
 
         Examples
@@ -80,14 +85,15 @@ class FilesystemClient:
         client.filesystem.list_changes(
             namespace_id="namespace_id",
             after_seq=1000000,
+            snapshot_id="chk_00000000000000000000000000000002",
         )
         """
         _response = self._raw_client.list_changes(
-            namespace_id, after_seq=after_seq, limit=limit, request_options=request_options
+            namespace_id, after_seq=after_seq, limit=limit, snapshot_id=snapshot_id, request_options=request_options
         )
         return _response.data
 
-    def apply_commit(
+    def create_commit(
         self,
         namespace_id: str,
         *,
@@ -142,7 +148,7 @@ class FilesystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.filesystem.apply_commit(
+        client.filesystem.create_commit(
             namespace_id="namespace_id",
             actor=ActorRef(
                 id="usr_8f3c",
@@ -156,7 +162,7 @@ class FilesystemClient:
             ],
         )
         """
-        _response = self._raw_client.apply_commit(
+        _response = self._raw_client.create_commit(
             namespace_id,
             actor=actor,
             commit_id=commit_id,
@@ -173,10 +179,11 @@ class FilesystemClient:
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
-        Returns file bytes for the current revision at a path, or for a specific retained revision when `revision_no` is provided.
+        Returns the current file bytes, a retained revision, or the revision captured by a live snapshot.
 
         Parameters
         ----------
@@ -187,7 +194,10 @@ class FilesystemClient:
             Absolute file path
 
         revision_no : typing.Optional[RevisionNo]
-            Optional prior revision number
+            Optional prior revision number; cannot be combined with snapshot_id
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the file revision captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -211,15 +221,16 @@ class FilesystemClient:
         )
         """
         with self._raw_client.get_file_bytes(
-            namespace_id, path=path, revision_no=revision_no, request_options=request_options
+            namespace_id, path=path, revision_no=revision_no, snapshot_id=snapshot_id, request_options=request_options
         ) as r:
             yield from r.data
 
-    def begin_download(
+    def create_download(
         self,
         namespace_id: str,
         *,
         path: AbsolutePath,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         revision_no: typing.Optional[RevisionNo] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> BeginDownloadResponse:
@@ -233,6 +244,9 @@ class FilesystemClient:
 
         path : AbsolutePath
             Absolute path of the file to read.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the file revision captured by this snapshot
 
         revision_no : typing.Optional[RevisionNo]
             Revision to read, or `None` for the path's current revision.
@@ -253,13 +267,14 @@ class FilesystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.filesystem.begin_download(
+        client.filesystem.create_download(
             namespace_id="namespace_id",
+            snapshot_id="chk_00000000000000000000000000000002",
             path="/docs/report.txt",
         )
         """
-        _response = self._raw_client.begin_download(
-            namespace_id, path=path, revision_no=revision_no, request_options=request_options
+        _response = self._raw_client.create_download(
+            namespace_id, path=path, snapshot_id=snapshot_id, revision_no=revision_no, request_options=request_options
         )
         return _response.data
 
@@ -271,10 +286,11 @@ class FilesystemClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListPathEntriesResponse:
         """
-        Lists a directory at the current namespace head.
+        Lists a directory from the current state or a live snapshot.
 
         Parameters
         ----------
@@ -292,6 +308,9 @@ class FilesystemClient:
 
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the directory state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -312,6 +331,7 @@ class FilesystemClient:
         client.filesystem.list_path_entries(
             namespace_id="namespace_id",
             path="path",
+            snapshot_id="chk_00000000000000000000000000000002",
         )
         """
         _response = self._raw_client.list_path_entries(
@@ -320,6 +340,64 @@ class FilesystemClient:
             limit=limit,
             cursor=cursor,
             include_attributes=include_attributes,
+            snapshot_id=snapshot_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def get_path_entry(
+        self,
+        namespace_id: str,
+        *,
+        path: str,
+        include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PathEntry:
+        """
+        Returns path metadata from the current state or a live snapshot.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        path : str
+            Absolute filesystem path
+
+        include_attributes : typing.Optional[bool]
+            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the path state captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PathEntry
+            Authoritative path entry
+
+        Examples
+        --------
+        from loonfs_sdk import LoonFS
+
+        client = LoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.filesystem.get_path_entry(
+            namespace_id="namespace_id",
+            path="path",
+            snapshot_id="chk_00000000000000000000000000000002",
+        )
+        """
+        _response = self._raw_client.get_path_entry(
+            namespace_id,
+            path=path,
+            include_attributes=include_attributes,
+            snapshot_id=snapshot_id,
             request_options=request_options,
         )
         return _response.data
@@ -373,54 +451,6 @@ class FilesystemClient:
         """
         _response = self._raw_client.list_file_revisions(
             namespace_id, path=path, limit=limit, cursor=cursor, request_options=request_options
-        )
-        return _response.data
-
-    def stat_path(
-        self,
-        namespace_id: str,
-        *,
-        path: str,
-        include_attributes: typing.Optional[bool] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AuthoritativePathEntry:
-        """
-        Returns the current metadata for a path, including inode identity, kind, display name, file content metadata, and the inode's attributes.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        path : str
-            Absolute filesystem path
-
-        include_attributes : typing.Optional[bool]
-            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AuthoritativePathEntry
-            Authoritative path entry
-
-        Examples
-        --------
-        from loonfs_sdk import LoonFS
-
-        client = LoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-        client.filesystem.stat_path(
-            namespace_id="namespace_id",
-            path="path",
-        )
-        """
-        _response = self._raw_client.stat_path(
-            namespace_id, path=path, include_attributes=include_attributes, request_options=request_options
         )
         return _response.data
 
@@ -493,10 +523,11 @@ class AsyncFilesystemClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> ChangesResponse:
+    ) -> ListChangesResponse:
         """
-        Returns committed changes from the write-ahead log. Callers can use this feed to keep another projection synchronized with WAL history.
+        Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
 
         Parameters
         ----------
@@ -509,12 +540,15 @@ class AsyncFilesystemClient:
         limit : typing.Optional[int]
             Maximum page size
 
+        snapshot_id : typing.Optional[CheckpointId]
+            End the feed at this snapshot's captured sequence
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        ChangesResponse
+        ListChangesResponse
             Committed changes
 
         Examples
@@ -533,17 +567,18 @@ class AsyncFilesystemClient:
             await client.filesystem.list_changes(
                 namespace_id="namespace_id",
                 after_seq=1000000,
+                snapshot_id="chk_00000000000000000000000000000002",
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.list_changes(
-            namespace_id, after_seq=after_seq, limit=limit, request_options=request_options
+            namespace_id, after_seq=after_seq, limit=limit, snapshot_id=snapshot_id, request_options=request_options
         )
         return _response.data
 
-    async def apply_commit(
+    async def create_commit(
         self,
         namespace_id: str,
         *,
@@ -607,7 +642,7 @@ class AsyncFilesystemClient:
 
 
         async def main() -> None:
-            await client.filesystem.apply_commit(
+            await client.filesystem.create_commit(
                 namespace_id="namespace_id",
                 actor=ActorRef(
                     id="usr_8f3c",
@@ -624,7 +659,7 @@ class AsyncFilesystemClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.apply_commit(
+        _response = await self._raw_client.create_commit(
             namespace_id,
             actor=actor,
             commit_id=commit_id,
@@ -641,10 +676,11 @@ class AsyncFilesystemClient:
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
-        Returns file bytes for the current revision at a path, or for a specific retained revision when `revision_no` is provided.
+        Returns the current file bytes, a retained revision, or the revision captured by a live snapshot.
 
         Parameters
         ----------
@@ -655,7 +691,10 @@ class AsyncFilesystemClient:
             Absolute file path
 
         revision_no : typing.Optional[RevisionNo]
-            Optional prior revision number
+            Optional prior revision number; cannot be combined with snapshot_id
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the file revision captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -687,16 +726,17 @@ class AsyncFilesystemClient:
         asyncio.run(main())
         """
         async with self._raw_client.get_file_bytes(
-            namespace_id, path=path, revision_no=revision_no, request_options=request_options
+            namespace_id, path=path, revision_no=revision_no, snapshot_id=snapshot_id, request_options=request_options
         ) as r:
             async for _chunk in r.data:
                 yield _chunk
 
-    async def begin_download(
+    async def create_download(
         self,
         namespace_id: str,
         *,
         path: AbsolutePath,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         revision_no: typing.Optional[RevisionNo] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> BeginDownloadResponse:
@@ -710,6 +750,9 @@ class AsyncFilesystemClient:
 
         path : AbsolutePath
             Absolute path of the file to read.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the file revision captured by this snapshot
 
         revision_no : typing.Optional[RevisionNo]
             Revision to read, or `None` for the path's current revision.
@@ -735,16 +778,17 @@ class AsyncFilesystemClient:
 
 
         async def main() -> None:
-            await client.filesystem.begin_download(
+            await client.filesystem.create_download(
                 namespace_id="namespace_id",
+                snapshot_id="chk_00000000000000000000000000000002",
                 path="/docs/report.txt",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.begin_download(
-            namespace_id, path=path, revision_no=revision_no, request_options=request_options
+        _response = await self._raw_client.create_download(
+            namespace_id, path=path, snapshot_id=snapshot_id, revision_no=revision_no, request_options=request_options
         )
         return _response.data
 
@@ -756,10 +800,11 @@ class AsyncFilesystemClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListPathEntriesResponse:
         """
-        Lists a directory at the current namespace head.
+        Lists a directory from the current state or a live snapshot.
 
         Parameters
         ----------
@@ -777,6 +822,9 @@ class AsyncFilesystemClient:
 
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the directory state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -802,6 +850,7 @@ class AsyncFilesystemClient:
             await client.filesystem.list_path_entries(
                 namespace_id="namespace_id",
                 path="path",
+                snapshot_id="chk_00000000000000000000000000000002",
             )
 
 
@@ -813,6 +862,72 @@ class AsyncFilesystemClient:
             limit=limit,
             cursor=cursor,
             include_attributes=include_attributes,
+            snapshot_id=snapshot_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def get_path_entry(
+        self,
+        namespace_id: str,
+        *,
+        path: str,
+        include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> PathEntry:
+        """
+        Returns path metadata from the current state or a live snapshot.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        path : str
+            Absolute filesystem path
+
+        include_attributes : typing.Optional[bool]
+            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the path state captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        PathEntry
+            Authoritative path entry
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs_sdk import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.filesystem.get_path_entry(
+                namespace_id="namespace_id",
+                path="path",
+                snapshot_id="chk_00000000000000000000000000000002",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_path_entry(
+            namespace_id,
+            path=path,
+            include_attributes=include_attributes,
+            snapshot_id=snapshot_id,
             request_options=request_options,
         )
         return _response.data
@@ -874,62 +989,6 @@ class AsyncFilesystemClient:
         """
         _response = await self._raw_client.list_file_revisions(
             namespace_id, path=path, limit=limit, cursor=cursor, request_options=request_options
-        )
-        return _response.data
-
-    async def stat_path(
-        self,
-        namespace_id: str,
-        *,
-        path: str,
-        include_attributes: typing.Optional[bool] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AuthoritativePathEntry:
-        """
-        Returns the current metadata for a path, including inode identity, kind, display name, file content metadata, and the inode's attributes.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        path : str
-            Absolute filesystem path
-
-        include_attributes : typing.Optional[bool]
-            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AuthoritativePathEntry
-            Authoritative path entry
-
-        Examples
-        --------
-        import asyncio
-
-        from loonfs_sdk import AsyncLoonFS
-
-        client = AsyncLoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-
-
-        async def main() -> None:
-            await client.filesystem.stat_path(
-                namespace_id="namespace_id",
-                path="path",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.stat_path(
-            namespace_id, path=path, include_attributes=include_attributes, request_options=request_options
         )
         return _response.data
 

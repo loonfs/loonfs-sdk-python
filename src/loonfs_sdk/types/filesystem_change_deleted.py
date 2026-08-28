@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .deleted_direntry import DeletedDirentry
+from .directory_binding import DirectoryBinding
 
 
 class FilesystemChangeDeleted(UniversalBaseModel):
@@ -13,7 +13,7 @@ class FilesystemChangeDeleted(UniversalBaseModel):
     `committed_seq` as `deletion_seq` when restoring it.
     """
 
-    deleted_direntry: typing.Optional[DeletedDirentry] = pydantic.Field(default=None)
+    deleted_binding: typing.Optional[DirectoryBinding] = pydantic.Field(default=None)
     """
     Directory binding removed by the deletion, when the delete
     recorded one.

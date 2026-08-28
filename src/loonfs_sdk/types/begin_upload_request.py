@@ -7,7 +7,6 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .direct_multipart_upload_options import DirectMultipartUploadOptions
 
 
 class BeginUploadRequest_ServiceProxied(UniversalBaseModel):
@@ -60,7 +59,7 @@ class BeginUploadRequest_DirectMultipart(UniversalBaseModel):
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
-    multipart: typing.Optional[DirectMultipartUploadOptions] = None
+    part_size_bytes: typing.Optional[int] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

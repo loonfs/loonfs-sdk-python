@@ -17,7 +17,6 @@ from ..errors.content_too_large_error import ContentTooLargeError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
-from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.api_error import ApiError as types_api_error_ApiError
@@ -27,7 +26,7 @@ from ..types.complete_upload_request import CompleteUploadRequest
 from ..types.sign_upload_parts_response import SignUploadPartsResponse
 from ..types.upload_content_response import UploadContentResponse
 from ..types.upload_part_checksum_claim import UploadPartChecksumClaim
-from ..types.upload_session_response import UploadSessionResponse
+from ..types.upload_session import UploadSession
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -38,7 +37,7 @@ class RawUploadsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def begin_upload(
+    def create_upload(
         self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[BeginUploadResponse]:
         """
@@ -114,17 +113,6 @@ class RawUploadsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -158,6 +146,17 @@ class RawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -171,9 +170,9 @@ class RawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def get_upload_status(
+    def get_upload(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[UploadSessionResponse]:
+    ) -> HttpResponse[UploadSession]:
         """
         Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 
@@ -190,7 +189,7 @@ class RawUploadsClient:
 
         Returns
         -------
-        HttpResponse[UploadSessionResponse]
+        HttpResponse[UploadSession]
             Upload session state
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -201,9 +200,9 @@ class RawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UploadSessionResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=UploadSessionResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -241,17 +240,6 @@ class RawUploadsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -259,6 +247,17 @@ class RawUploadsClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -278,7 +277,7 @@ class RawUploadsClient:
 
     def abort_upload(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[UploadSessionResponse]:
+    ) -> HttpResponse[UploadSession]:
         """
         Ends an upload session without selecting content and deletes the object it was writing. Repeating it succeeds; a session that already completed cannot be aborted.
 
@@ -295,7 +294,7 @@ class RawUploadsClient:
 
         Returns
         -------
-        HttpResponse[UploadSessionResponse]
+        HttpResponse[UploadSession]
             Upload aborted
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -306,9 +305,9 @@ class RawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UploadSessionResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=UploadSessionResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -342,17 +341,6 @@ class RawUploadsClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -379,6 +367,17 @@ class RawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -399,7 +398,7 @@ class RawUploadsClient:
         *,
         request: CompleteUploadRequest,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[UploadSessionResponse]:
+    ) -> HttpResponse[UploadSession]:
         """
         Completes an upload. The request mode must match the mode used to start the session. Direct uploads include a content claim; multipart also includes completed parts.
 
@@ -418,7 +417,7 @@ class RawUploadsClient:
 
         Returns
         -------
-        HttpResponse[UploadSessionResponse]
+        HttpResponse[UploadSession]
             Upload completed
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -436,9 +435,9 @@ class RawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UploadSessionResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=UploadSessionResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -472,17 +471,6 @@ class RawUploadsClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -520,6 +508,17 @@ class RawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -533,7 +532,7 @@ class RawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def upload_content(
+    def put_upload_content(
         self,
         namespace_id: str,
         upload_id: str,
@@ -652,9 +651,9 @@ class RawUploadsClient:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        typing.Any,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -760,17 +759,6 @@ class RawUploadsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 409:
                 raise ConflictError(
                     headers=dict(_response.headers),
@@ -815,6 +803,17 @@ class RawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -833,7 +832,7 @@ class AsyncRawUploadsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def begin_upload(
+    async def create_upload(
         self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[BeginUploadResponse]:
         """
@@ -909,17 +908,6 @@ class AsyncRawUploadsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -953,6 +941,17 @@ class AsyncRawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -966,9 +965,9 @@ class AsyncRawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def get_upload_status(
+    async def get_upload(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[UploadSessionResponse]:
+    ) -> AsyncHttpResponse[UploadSession]:
         """
         Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 
@@ -985,7 +984,7 @@ class AsyncRawUploadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[UploadSessionResponse]
+        AsyncHttpResponse[UploadSession]
             Upload session state
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -996,9 +995,9 @@ class AsyncRawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UploadSessionResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=UploadSessionResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1036,17 +1035,6 @@ class AsyncRawUploadsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -1054,6 +1042,17 @@ class AsyncRawUploadsClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1073,7 +1072,7 @@ class AsyncRawUploadsClient:
 
     async def abort_upload(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[UploadSessionResponse]:
+    ) -> AsyncHttpResponse[UploadSession]:
         """
         Ends an upload session without selecting content and deletes the object it was writing. Repeating it succeeds; a session that already completed cannot be aborted.
 
@@ -1090,7 +1089,7 @@ class AsyncRawUploadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[UploadSessionResponse]
+        AsyncHttpResponse[UploadSession]
             Upload aborted
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1101,9 +1100,9 @@ class AsyncRawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UploadSessionResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=UploadSessionResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1137,17 +1136,6 @@ class AsyncRawUploadsClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1174,6 +1162,17 @@ class AsyncRawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -1194,7 +1193,7 @@ class AsyncRawUploadsClient:
         *,
         request: CompleteUploadRequest,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[UploadSessionResponse]:
+    ) -> AsyncHttpResponse[UploadSession]:
         """
         Completes an upload. The request mode must match the mode used to start the session. Direct uploads include a content claim; multipart also includes completed parts.
 
@@ -1213,7 +1212,7 @@ class AsyncRawUploadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[UploadSessionResponse]
+        AsyncHttpResponse[UploadSession]
             Upload completed
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1231,9 +1230,9 @@ class AsyncRawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UploadSessionResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=UploadSessionResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1267,17 +1266,6 @@ class AsyncRawUploadsClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1315,6 +1303,17 @@ class AsyncRawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -1328,7 +1327,7 @@ class AsyncRawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def upload_content(
+    async def put_upload_content(
         self,
         namespace_id: str,
         upload_id: str,
@@ -1447,9 +1446,9 @@ class AsyncRawUploadsClient:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        typing.Any,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1555,17 +1554,6 @@ class AsyncRawUploadsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 409:
                 raise ConflictError(
                     headers=dict(_response.headers),
@@ -1606,6 +1594,17 @@ class AsyncRawUploadsClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

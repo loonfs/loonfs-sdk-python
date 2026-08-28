@@ -6,6 +6,8 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
 from .checkpoint_id import CheckpointId
+from .namespace_id import NamespaceId
+from .run_no import RunNo
 
 
 class GrepIndexLifecycleBackfilling(UniversalBaseModel):
@@ -28,6 +30,21 @@ class GrepIndexLifecycleBackfilling(UniversalBaseModel):
     """
     Namespace sequence the pinned checkpoint captured. Reaching it
     is what completes the backfill.
+    """
+
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    Namespace the status describes.
+    """
+
+    next_run_no: RunNo = pydantic.Field()
+    """
+    Run number the index allocates next.
+    """
+
+    reorganize_pending: bool = pydantic.Field()
+    """
+    True while a partitioned segment reorganization is in progress.
     """
 
     if IS_PYDANTIC_V2:

@@ -4,6 +4,9 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .namespace_id import NamespaceId
+from .upload_id import UploadId
+from .upload_mode import UploadMode
 
 
 class UploadSessionStatusAborted(UniversalBaseModel):
@@ -14,6 +17,21 @@ class UploadSessionStatusAborted(UniversalBaseModel):
     aborted_at_ms: int = pydantic.Field()
     """
     Unix-millisecond stamp of the abort.
+    """
+
+    mode: UploadMode = pydantic.Field()
+    """
+    Transport selected when the session began.
+    """
+
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    Namespace that owns the session.
+    """
+
+    upload_id: UploadId = pydantic.Field()
+    """
+    Session represented by this view.
     """
 
     if IS_PYDANTIC_V2:

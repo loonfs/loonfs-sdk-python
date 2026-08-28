@@ -23,18 +23,19 @@ from .types import (
     CompletedUploadPart,
     ContentRef,
     DestinationBehavior,
-    DirectMultipartUploadOptions,
     FilesystemOperation_PutFile,
     ObjectTransferAccess,
     RevisionNo,
     UploadContentClaim,
     UploadPartChecksumClaim,
+    UploadSession,
 )
 
 __all__ = ["GetFileResult", "PutFileResult", "get_file", "put_file"]
 
 
 _MULTIPART_MIN_BYTES = 8 * 1024 * 1024
+_DIRECT_GET_FEATURE = "core.downloads.direct_get"
 _DIRECT_MULTIPART_FEATURE = "core.uploads.direct_multipart"
 _DIRECT_PUT_FEATURE = "core.uploads.direct_put"
 _PROXY_UPLOAD_LIMIT = "upload.max_content_bytes"
@@ -98,7 +99,7 @@ def put_file(
 ) -> PutFileResult:
     """Upload in-memory bytes, complete the upload, and commit the file."""
 
-    begin = _begin_upload(client, namespace_id, content)
+    begin = _create_upload(client, namespace_id, content)
     if http_client is None:
         with httpx.Client() as transfer_client:
             staged = _stage_upload(
@@ -123,7 +124,7 @@ def put_file(
     }
     if message is not None:
         commit_arguments["message"] = message
-    committed = client.filesystem.apply_commit(namespace_id, **commit_arguments)
+    committed = client.filesystem.create_commit(namespace_id, **commit_arguments)
     return PutFileResult(
         namespace_id=committed.namespace_id,
         commit_id=committed.commit_id,
@@ -141,10 +142,15 @@ def get_file(
 ) -> GetFileResult:
     """Download one file revision into memory and verify its checksum."""
 
+    capabilities = client.system.get_capabilities()
+    if not capabilities.features.get(_DIRECT_GET_FEATURE, False):
+        return _get_file_proxied(
+            client, namespace_id=namespace_id, path=path, revision_no=revision_no
+        )
     if revision_no is None:
-        grant = client.filesystem.begin_download(namespace_id, path=path)
+        grant = client.filesystem.create_download(namespace_id, path=path)
     else:
-        grant = client.filesystem.begin_download(
+        grant = client.filesystem.create_download(
             namespace_id,
             path=path,
             revision_no=revision_no,
@@ -173,17 +179,67 @@ def get_file(
     )
 
 
-def _begin_upload(client: LoonFS, namespace_id: str, content: bytes):
-    capabilities = client.capabilities()
+def _get_file_proxied(
+    client: LoonFS,
+    *,
+    namespace_id: str,
+    path: str,
+    revision_no: RevisionNo | None,
+) -> GetFileResult:
+    """Read through LoonFS when direct reads are unavailable.
+
+    Load the content reference first, then request the exact revision so the
+    reference and returned bytes describe the same file version.
+    """
+    if revision_no is None:
+        entry = client.filesystem.get_path_entry(namespace_id, path=path)
+        if entry.inode_kind != "file":
+            raise RuntimeError(f"path {path!r} is a {entry.inode_kind}, not a file")
+        claim = entry.content_ref
+        revision_no = entry.revision_no
+    else:
+        claim = None
+        cursor = None
+        while True:
+            page = client.filesystem.list_file_revisions(
+                namespace_id, path=path, cursor=cursor
+            )
+            for revision in page.revisions:
+                if revision.revision_no == revision_no:
+                    claim = revision.content_ref
+                    break
+            if claim is not None or page.next_cursor is None:
+                break
+            cursor = page.next_cursor
+        if claim is None:
+            raise RuntimeError(f"revision {revision_no} not found for {path!r}")
+    content = b"".join(
+        client.filesystem.get_file_bytes(namespace_id, path=path, revision_no=revision_no)
+    )
+    if len(content) != claim.size_bytes:
+        raise RuntimeError(
+            f"proxied read returned {len(content)} bytes, expected {claim.size_bytes}"
+        )
+    if _checksum(claim.checksum.algorithm, content) != claim.checksum:
+        raise RuntimeError("proxied read checksum did not match its content reference")
+    return GetFileResult(
+        content=content,
+        namespace_id=namespace_id,
+        path=path,
+        revision_no=revision_no,
+        content_ref=claim,
+    )
+
+
+def _create_upload(client: LoonFS, namespace_id: str, content: bytes):
+    capabilities = client.system.get_capabilities()
     features = capabilities.features or {}
     limits = capabilities.limits or {}
     size_bytes = len(content)
     if size_bytes >= _MULTIPART_MIN_BYTES and features.get(
         _DIRECT_MULTIPART_FEATURE, False
     ):
-        request = BeginUploadRequest_DirectMultipart(
-            multipart=DirectMultipartUploadOptions()
-        )
+        request = BeginUploadRequest_DirectMultipart()
     else:
         proxy_limit = limits.get(_PROXY_UPLOAD_LIMIT)
         fits_proxy = proxy_limit is None or size_bytes <= proxy_limit
@@ -202,7 +258,7 @@ def _begin_upload(client: LoonFS, namespace_id: str, content: bytes):
                 f"{size_bytes} bytes exceed the advertised proxy and direct PUT limits, "
                 "and direct multipart is unavailable"
             )
-    return client.uploads.begin_upload(namespace_id, request=request)
+    return client.uploads.create_upload(namespace_id, request=request)
 
 
 def _stage_upload(
@@ -214,7 +270,7 @@ def _stage_upload(
 ) -> _StagedContent:
     if begin.mode == "service_proxied":
         try:
-            client.uploads.upload_content(namespace_id, begin.upload_id, request=content)
+            client.uploads.put_upload_content(namespace_id, begin.upload_id, request=content)
             completion = client.uploads.complete_upload(
                 namespace_id,
                 begin.upload_id,
@@ -228,7 +284,7 @@ def _stage_upload(
         try:
             _send_presigned(
                 transfer_client,
-                begin.direct_put.access,
+                begin.access,
                 "PUT",
                 content=content,
             )
@@ -241,7 +297,7 @@ def _stage_upload(
             request=CompleteUploadRequest_DirectPut(
                 content=UploadContentClaim(
                     size_bytes=len(content),
-                    checksum=_checksum(begin.direct_put.checksum_algorithm, content),
+                    checksum=_checksum(begin.checksum_algorithm, content),
                 )
             ),
         )
@@ -252,8 +308,8 @@ def _stage_upload(
             transfer_client,
             namespace_id,
             begin.upload_id,
-            begin.direct_multipart.part_size_bytes,
-            begin.direct_multipart.checksum_algorithm,
+            begin.part_size_bytes,
+            begin.checksum_algorithm,
             content,
         )
     raise RuntimeError(f"unsupported upload mode {begin.mode!r}")
@@ -352,14 +408,14 @@ def _send_presigned(
     return response
 
 
-def _completed_content(response) -> _StagedContent:
+def _completed_content(response: UploadSession) -> _StagedContent:
     if response.status != "completed":
         raise RuntimeError(
             f"upload {response.upload_id!r} completed with status "
             f"{response.status!r}"
         )
     return _StagedContent(
-        content_ref=ContentRef(**response.content_ref),
+        content_ref=response.content_ref,
         content_token=response.content_token,
     )
 

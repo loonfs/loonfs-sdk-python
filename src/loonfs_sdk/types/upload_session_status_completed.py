@@ -6,6 +6,9 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .content_ref import ContentRef
 from .content_token import ContentToken
+from .namespace_id import NamespaceId
+from .upload_id import UploadId
+from .upload_mode import UploadMode
 
 
 class UploadSessionStatusCompleted(UniversalBaseModel):
@@ -27,6 +30,21 @@ class UploadSessionStatusCompleted(UniversalBaseModel):
     """
     Fresh proof for a later commit. This is absent after the token
     minting window closes, while `content_ref` remains available.
+    """
+
+    mode: UploadMode = pydantic.Field()
+    """
+    Transport selected when the session began.
+    """
+
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    Namespace that owns the session.
+    """
+
+    upload_id: UploadId = pydantic.Field()
+    """
+    Session represented by this view.
     """
 
     if IS_PYDANTIC_V2:

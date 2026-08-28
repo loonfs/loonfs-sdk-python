@@ -1,68 +1,6 @@
 # Reference
-<details><summary><code>client.<a href="src/loonfs_sdk/client.py">capabilities</a>() -> CapabilityDocument</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns a summary of supported features and limits.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs_sdk import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.capabilities()
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
 ## system
-<details><summary><code>client.system.<a href="src/loonfs_sdk/system/client.py">health</a>() -> str</code></summary>
+<details><summary><code>client.system.<a href="src/loonfs_sdk/system/client.py">get_health</a>() -> str</code></summary>
 <dl>
 <dd>
 
@@ -96,7 +34,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.system.health()
+client.system.get_health()
 
 ```
 </dd>
@@ -186,7 +124,7 @@ client.system.get_metrics()
 </dl>
 </details>
 
-<details><summary><code>client.system.<a href="src/loonfs_sdk/system/client.py">readiness</a>() -> str</code></summary>
+<details><summary><code>client.system.<a href="src/loonfs_sdk/system/client.py">get_readiness</a>() -> str</code></summary>
 <dl>
 <dd>
 
@@ -220,7 +158,69 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.system.readiness()
+client.system.get_readiness()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.system.<a href="src/loonfs_sdk/system/client.py">get_capabilities</a>() -> CapabilityDocument</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a summary of supported features and limits.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs_sdk import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.system.get_capabilities()
 
 ```
 </dd>
@@ -337,7 +337,7 @@ client.admin.list_checkpoints(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">create_checkpoint</a>(...) -> CreateCheckpointResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">create_checkpoint</a>(...) -> Checkpoint</code></summary>
 <dl>
 <dd>
 
@@ -585,7 +585,7 @@ client.admin.get_namespace_diagnostics(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">get_grep_index_status</a>(...) -> GrepIndexStatusResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">get_grep_index</a>(...) -> GrepIndex</code></summary>
 <dl>
 <dd>
 
@@ -619,7 +619,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.get_grep_index_status(
+client.admin.get_grep_index(
     namespace_id="namespace_id",
 )
 
@@ -657,7 +657,7 @@ client.admin.get_grep_index_status(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">disable_grep_index</a>(...) -> GrepIndexStatusResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">disable_grep_index</a>(...) -> GrepIndex</code></summary>
 <dl>
 <dd>
 
@@ -729,7 +729,7 @@ client.admin.disable_grep_index(
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">enable_grep_index</a>(...) -> GrepIndexStatusResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">enable_grep_index</a>(...) -> GrepIndex</code></summary>
 <dl>
 <dd>
 
@@ -896,7 +896,7 @@ takes.
 </dl>
 </details>
 
-<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">maintenance_step</a>(...) -> MaintenanceStepResponse</code></summary>
+<details><summary><code>client.admin.<a href="src/loonfs_sdk/admin/client.py">run_maintenance</a>(...) -> MaintenanceStepResponse</code></summary>
 <dl>
 <dd>
 
@@ -908,7 +908,7 @@ takes.
 <dl>
 <dd>
 
-Runs one bounded maintenance step. The body selects the actions by naming them: `metadata` folds the WAL tail once it reaches the threshold and merges one bounded reorganization unit, `advance_retention: true` advances the retention floor, and `gc` runs one bounded garbage-collection pass. Selected actions run in that order, each reports separately, and an absent report means the body did not select that action. A body that selects nothing is rejected. Nothing surrenders replay history or sweeps objects unless the body asked for it. A deleted namespace accepts a step that selects `gc` alone, which is how its reclaimable state is collected; any other selection is refused. Step-driven GC defaults to 1024 candidates and returns its cursor for a later step rather than looping internally. Losing the root race is an outcome, not an error.
+Runs one bounded maintenance step. Include `metadata_maintenance`, `retention`, or `gc` to select actions. Each selector is an options object, and an empty object uses server defaults. Actions run in that order, and only selected actions appear in the response. At least one action is required. A deleted namespace accepts only `gc`. GC processes up to 1024 candidates by default and returns a cursor when more work remains. A lost root update race is reported as an outcome.
 </dd>
 </dl>
 </dd>
@@ -930,7 +930,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.maintenance_step(
+client.admin.run_maintenance(
     namespace_id="namespace_id",
 )
 
@@ -956,21 +956,10 @@ client.admin.maintenance_step(
 <dl>
 <dd>
 
-**advance_retention:** `typing.Optional[bool]` 
-
-Advance the retention floor to the flushed manifest head. Nothing
-surrenders replay history unless this is true.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **gc:** `typing.Optional[GcRequest]` 
 
-Run one bounded mark-and-sweep garbage-collection pass. Nothing
-sweeps unless this is present.
+Run one bounded mark-and-sweep garbage-collection pass. Omit this
+field to skip garbage collection.
     
 </dd>
 </dl>
@@ -978,10 +967,21 @@ sweeps unless this is present.
 <dl>
 <dd>
 
-**metadata:** `typing.Optional[MetadataMaintenanceRequest]` 
+**metadata_maintenance:** `typing.Optional[MetadataMaintenanceRequest]` 
 
-Flush the visible WAL tail into metadata tables, then run one bounded
+Flush the visible WAL tail into metadata segments, then run one bounded
 reorganization step.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**retention:** `typing.Optional[AdvanceRetentionRequest]` 
+
+Advance the retention floor to the flushed manifest head. Include this
+field to select the action.
     
 </dd>
 </dl>
@@ -1381,8 +1381,7 @@ client.namespaces.fork_namespace(
 </dl>
 </details>
 
-## filesystem
-<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">list_changes</a>(...) -> ChangesResponse</code></summary>
+<details><summary><code>client.namespaces.<a href="src/loonfs_sdk/namespaces/client.py">list_snapshots</a>(...) -> ListSnapshotsResponse</code></summary>
 <dl>
 <dd>
 
@@ -1394,7 +1393,357 @@ client.namespaces.fork_namespace(
 <dl>
 <dd>
 
-Returns committed changes from the write-ahead log. Callers can use this feed to keep another projection synchronized with WAL history.
+Lists live snapshots in snapshot-id order. Released and expired snapshots are omitted.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs_sdk import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.list_snapshots(
+    namespace_id="namespace_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` — Maximum page size
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `typing.Optional[str]` — Opaque snapshot-list page cursor
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.namespaces.<a href="src/loonfs_sdk/namespaces/client.py">create_snapshot</a>(...) -> SnapshotSummary</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a snapshot of the current namespace state. Every call creates a new snapshot.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs_sdk import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.create_snapshot(
+    namespace_id="namespace_id",
+    name="name",
+    ttl_ms=1000000,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**name:** `str` — A label that does not need to be unique.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ttl_ms:** `int` — Snapshot lifetime from the current server time, in milliseconds.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.namespaces.<a href="src/loonfs_sdk/namespaces/client.py">extend_snapshot</a>(...) -> SnapshotSummary</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs_sdk import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.extend_snapshot(
+    namespace_id="namespace_id",
+    snapshot_id="snapshot_id",
+    ttl_ms=1000000,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `str` — Snapshot id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**ttl_ms:** `int` — Requested lifetime from the server's current time, in milliseconds.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.namespaces.<a href="src/loonfs_sdk/namespaces/client.py">release_snapshot</a>(...) -> ReleaseSnapshotResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Releases a snapshot by id. Repeated releases succeed.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs_sdk import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.release_snapshot(
+    namespace_id="namespace_id",
+    snapshot_id="snapshot_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `str` — Snapshot id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## filesystem
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">list_changes</a>(...) -> ListChangesResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
 </dd>
 </dl>
 </dd>
@@ -1419,6 +1768,7 @@ client = LoonFS(
 client.filesystem.list_changes(
     namespace_id="namespace_id",
     after_seq=1000000,
+    snapshot_id="chk_00000000000000000000000000000002",
 )
 
 ```
@@ -1459,6 +1809,14 @@ client.filesystem.list_changes(
 <dl>
 <dd>
 
+**snapshot_id:** `typing.Optional[CheckpointId]` — End the feed at this snapshot's captured sequence
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -1471,7 +1829,7 @@ client.filesystem.list_changes(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">apply_commit</a>(...) -> CommitResponse</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">create_commit</a>(...) -> CommitResponse</code></summary>
 <dl>
 <dd>
 
@@ -1505,7 +1863,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.filesystem.apply_commit(
+client.filesystem.create_commit(
     namespace_id="namespace_id",
     actor=ActorRef(
         id="usr_8f3c",
@@ -1616,7 +1974,7 @@ for an explicit commit.
 <dl>
 <dd>
 
-Returns file bytes for the current revision at a path, or for a specific retained revision when `revision_no` is provided.
+Returns the current file bytes, a retained revision, or the revision captured by a live snapshot.
 </dd>
 </dl>
 </dd>
@@ -1673,7 +2031,15 @@ client.filesystem.get_file_bytes(
 <dl>
 <dd>
 
-**revision_no:** `typing.Optional[RevisionNo]` — Optional prior revision number
+**revision_no:** `typing.Optional[RevisionNo]` — Optional prior revision number; cannot be combined with snapshot_id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[CheckpointId]` — Use the file revision captured by this snapshot
     
 </dd>
 </dl>
@@ -1693,7 +2059,7 @@ client.filesystem.get_file_bytes(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">begin_download</a>(...) -> BeginDownloadResponse</code></summary>
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">create_download</a>(...) -> BeginDownloadResponse</code></summary>
 <dl>
 <dd>
 
@@ -1727,8 +2093,9 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.filesystem.begin_download(
+client.filesystem.create_download(
     namespace_id="namespace_id",
+    snapshot_id="chk_00000000000000000000000000000002",
     path="/docs/report.txt",
 )
 
@@ -1755,6 +2122,14 @@ client.filesystem.begin_download(
 <dd>
 
 **path:** `AbsolutePath` — Absolute path of the file to read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[CheckpointId]` — Use the file revision captured by this snapshot
     
 </dd>
 </dl>
@@ -1794,7 +2169,7 @@ client.filesystem.begin_download(
 <dl>
 <dd>
 
-Lists a directory at the current namespace head.
+Lists a directory from the current state or a live snapshot.
 </dd>
 </dl>
 </dd>
@@ -1819,6 +2194,7 @@ client = LoonFS(
 client.filesystem.list_path_entries(
     namespace_id="namespace_id",
     path="path",
+    snapshot_id="chk_00000000000000000000000000000002",
 )
 
 ```
@@ -1868,6 +2244,112 @@ client.filesystem.list_path_entries(
 <dd>
 
 **include_attributes:** `typing.Optional[bool]` — Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[CheckpointId]` — Use the directory state captured by this snapshot
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">get_path_entry</a>(...) -> PathEntry</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns path metadata from the current state or a live snapshot.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs_sdk import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.filesystem.get_path_entry(
+    namespace_id="namespace_id",
+    path="path",
+    snapshot_id="chk_00000000000000000000000000000002",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**path:** `str` — Absolute filesystem path
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_attributes:** `typing.Optional[bool]` — Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[CheckpointId]` — Use the path state captured by this snapshot
     
 </dd>
 </dl>
@@ -1984,95 +2466,6 @@ client.filesystem.list_file_revisions(
 </dl>
 </details>
 
-<details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">stat_path</a>(...) -> AuthoritativePathEntry</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns the current metadata for a path, including inode identity, kind, display name, file content metadata, and the inode's attributes.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs_sdk import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.filesystem.stat_path(
-    namespace_id="namespace_id",
-    path="path",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**namespace_id:** `str` — Namespace id
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**path:** `str` — Absolute filesystem path
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**include_attributes:** `typing.Optional[bool]` — Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
 <details><summary><code>client.filesystem.<a href="src/loonfs_sdk/filesystem/client.py">list_trash</a>(...) -> ListTrashResponse</code></summary>
 <dl>
 <dd>
@@ -2161,8 +2554,138 @@ client.filesystem.list_trash(
 </dl>
 </details>
 
+## query
+<details><summary><code>client.query.<a href="src/loonfs_sdk/query/client.py">grep</a>(...) -> GrepResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs_sdk import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.query.grep(
+    namespace_id="namespace_id",
+    pattern="pattern",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**pattern:** `str` — Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**case_insensitive:** `typing.Optional[bool]` — Match case-insensitively (`true` or `false`). Defaults to `false`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**path_prefix:** `typing.Optional[str]` — Complete absolute path used to restrict matches.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**allow_scan:** `typing.Optional[bool]` — Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**allow_stale:** `typing.Optional[bool]` — Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` — Maximum matches per page
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `typing.Optional[str]` — Opaque grep page cursor
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## inodes
-<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">stat_inode</a>(...) -> AuthoritativePathEntry</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">get_inode</a>(...) -> PathEntry</code></summary>
 <dl>
 <dd>
 
@@ -2196,7 +2719,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.inodes.stat_inode(
+client.inodes.get_inode(
     namespace_id="namespace_id",
     inode_id="ino_123",
 )
@@ -2232,6 +2755,111 @@ client.inodes.stat_inode(
 <dd>
 
 **include_attributes:** `typing.Optional[bool]` — Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">list_inode_children</a>(...) -> ListInodeChildrenResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs_sdk import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.inodes.list_inode_children(
+    namespace_id="namespace_id",
+    inode_id="ino_123",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**inode_id:** `str` — Directory inode ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` — Maximum page size
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `typing.Optional[str]` — Opaque directory page cursor
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**include_attributes:** `typing.Optional[bool]` — Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
     
 </dd>
 </dl>
@@ -2438,7 +3066,7 @@ client.inodes.get_file_revision_bytes_by_inode(
 </dl>
 </details>
 
-<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">begin_download_by_inode</a>(...) -> BeginDownloadByInodeResponse</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs_sdk/inodes/client.py">create_download_by_inode</a>(...) -> BeginDownloadByInodeResponse</code></summary>
 <dl>
 <dd>
 
@@ -2472,7 +3100,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.inodes.begin_download_by_inode(
+client.inodes.create_download_by_inode(
     namespace_id="namespace_id",
     inode_id="ino_123",
     revision_no=1000000,
@@ -2539,138 +3167,8 @@ client.inodes.begin_download_by_inode(
 </dl>
 </details>
 
-## query
-<details><summary><code>client.query.<a href="src/loonfs_sdk/query/client.py">grep</a>(...) -> GrepResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs_sdk import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.query.grep(
-    namespace_id="namespace_id",
-    pattern="pattern",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**namespace_id:** `str` — Namespace id
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**pattern:** `str` — Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**case_insensitive:** `typing.Optional[bool]` — Match case-insensitively (`true` or `false`). Defaults to `false`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**path_prefix:** `typing.Optional[str]` — Complete absolute path used to restrict matches.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**allow_scan:** `typing.Optional[bool]` — Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**allow_stale:** `typing.Optional[bool]` — Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**limit:** `typing.Optional[int]` — Maximum matches per page
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**cursor:** `typing.Optional[str]` — Opaque grep page cursor
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
 ## uploads
-<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">begin_upload</a>(...) -> BeginUploadResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">create_upload</a>(...) -> BeginUploadResponse</code></summary>
 <dl>
 <dd>
 
@@ -2704,7 +3202,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.uploads.begin_upload(
+client.uploads.create_upload(
     namespace_id="namespace_id",
     request=BeginUploadRequest_ServiceProxied(),
 )
@@ -2751,7 +3249,7 @@ client.uploads.begin_upload(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">get_upload_status</a>(...) -> UploadSessionResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">get_upload</a>(...) -> UploadSession</code></summary>
 <dl>
 <dd>
 
@@ -2785,7 +3283,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.uploads.get_upload_status(
+client.uploads.get_upload(
     namespace_id="namespace_id",
     upload_id="upload_id",
 )
@@ -2832,7 +3330,7 @@ client.uploads.get_upload_status(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">abort_upload</a>(...) -> UploadSessionResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">abort_upload</a>(...) -> UploadSession</code></summary>
 <dl>
 <dd>
 
@@ -2913,7 +3411,7 @@ client.uploads.abort_upload(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">complete_upload</a>(...) -> UploadSessionResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">complete_upload</a>(...) -> UploadSession</code></summary>
 <dl>
 <dd>
 
@@ -3003,7 +3501,7 @@ client.uploads.complete_upload(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">upload_content</a>(...) -> UploadContentResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs_sdk/uploads/client.py">put_upload_content</a>(...) -> UploadContentResponse</code></summary>
 <dl>
 <dd>
 
@@ -3030,7 +3528,7 @@ Uploads bytes into a service-proxied upload session and returns the content refe
 <dd>
 
 ```python
-client.uploads.upload_content(...)
+client.uploads.put_upload_content(...)
 ```
 </dd>
 </dl>

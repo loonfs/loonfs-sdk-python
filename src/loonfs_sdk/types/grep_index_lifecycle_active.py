@@ -5,6 +5,8 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
+from .namespace_id import NamespaceId
+from .run_no import RunNo
 
 
 class GrepIndexLifecycleActive(UniversalBaseModel):
@@ -22,6 +24,21 @@ class GrepIndexLifecycleActive(UniversalBaseModel):
     """
     Offset of the next change event within `built_through_seq`, or
     zero when the whole commit is represented.
+    """
+
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    Namespace the status describes.
+    """
+
+    next_run_no: RunNo = pydantic.Field()
+    """
+    Run number the index allocates next.
+    """
+
+    reorganize_pending: bool = pydantic.Field()
+    """
+    True while a partitioned segment reorganization is in progress.
     """
 
     if IS_PYDANTIC_V2:

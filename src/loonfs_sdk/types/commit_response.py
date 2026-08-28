@@ -4,8 +4,10 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .actor_ref import ActorRef
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
+from .filesystem_change import FilesystemChange
 from .namespace_id import NamespaceId
 
 
@@ -17,6 +19,9 @@ class CommitResponse(UniversalBaseModel):
     explicit commits, embedded or remote. The commit id is the caller's
     reconciliation handle: resubmitting the same request with the same id
     replays this result instead of committing twice.
+
+    The response includes the same attribution and events as
+    [`CommittedChange`], including IDs created by the commit.
     """
 
     commit_id: CommitId = pydantic.Field()
@@ -25,9 +30,32 @@ class CommitResponse(UniversalBaseModel):
     generated on the caller's behalf when the request carried none.
     """
 
+    committed_at_ms: int = pydantic.Field()
+    """
+    Wall-clock stamp of the commit, in Unix milliseconds.
+    Observational: `committed_seq` is the order.
+    """
+
+    committed_by: ActorRef = pydantic.Field()
+    """
+    Actor responsible for the commit, as supplied by the application.
+    """
+
     committed_seq: ChangeSeq = pydantic.Field()
     """
     Sequence number where the commit became visible.
+    """
+
+    events: typing.Optional[typing.List[FilesystemChange]] = pydantic.Field(default=None)
+    """
+    Semantic filesystem events in commit order. This is omitted only when
+    replaying a commit whose WAL history is no longer retained.
+    """
+
+    message: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Caller annotation, omitted when absent and carrying no filesystem
+    semantics.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

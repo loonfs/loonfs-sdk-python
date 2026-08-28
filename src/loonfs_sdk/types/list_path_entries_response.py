@@ -5,9 +5,9 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
-from .authoritative_path_entry import AuthoritativePathEntry
 from .change_seq import ChangeSeq
 from .namespace_id import NamespaceId
+from .path_entry import PathEntry
 
 
 class ListPathEntriesResponse(UniversalBaseModel):
@@ -19,7 +19,7 @@ class ListPathEntriesResponse(UniversalBaseModel):
     grow without reshaping `entries`.
     """
 
-    entries: typing.List[AuthoritativePathEntry] = pydantic.Field()
+    entries: typing.List[PathEntry] = pydantic.Field()
     """
     Directory entries for this page.
     

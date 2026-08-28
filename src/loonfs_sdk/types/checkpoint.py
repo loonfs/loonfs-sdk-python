@@ -7,7 +7,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
 from .checkpoint_id import CheckpointId
 from .checkpoint_owner_summary import CheckpointOwnerSummary
-from .manifest_id import ManifestId
+from .manifest_no import ManifestNo
+from .namespace_id import NamespaceId
 
 
 class Checkpoint(UniversalBaseModel):
@@ -39,9 +40,14 @@ class Checkpoint(UniversalBaseModel):
     a root, so it is still listed.
     """
 
-    manifest_id: ManifestId = pydantic.Field()
+    manifest_no: ManifestNo = pydantic.Field()
     """
     Manifest pinned by the checkpoint.
+    """
+
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    Namespace that owns the checkpoint.
     """
 
     owner: CheckpointOwnerSummary = pydantic.Field()

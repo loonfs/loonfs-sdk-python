@@ -4,10 +4,11 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.create_checkpoint_response import CreateCheckpointResponse
+from ..types.advance_retention_request import AdvanceRetentionRequest
+from ..types.checkpoint import Checkpoint
 from ..types.gc_request import GcRequest
 from ..types.grep_gc_response import GrepGcResponse
-from ..types.grep_index_status_response import GrepIndexStatusResponse
+from ..types.grep_index import GrepIndex
 from ..types.list_checkpoints_response import ListCheckpointsResponse
 from ..types.maintenance_step_response import MaintenanceStepResponse
 from ..types.metadata_maintenance_request import MetadataMaintenanceRequest
@@ -90,7 +91,7 @@ class AdminClient:
         name: str,
         ttl_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> CreateCheckpointResponse:
+    ) -> Checkpoint:
         """
         Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance/admin operation, not a file mutation.
 
@@ -112,8 +113,8 @@ class AdminClient:
 
         Returns
         -------
-        CreateCheckpointResponse
-            Namespace envelope containing the created checkpoint
+        Checkpoint
+            The created checkpoint
 
         Examples
         --------
@@ -205,9 +206,9 @@ class AdminClient:
         _response = self._raw_client.get_namespace_diagnostics(namespace_id, request_options=request_options)
         return _response.data
 
-    def get_grep_index_status(
+    def get_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GrepIndexStatusResponse:
+    ) -> GrepIndex:
         """
         Returns whether the namespace's grep index is `disabled`, `backfilling`, or `active`, including build progress when available. A namespace that has never enabled the index is `disabled`. This operation requires a deployment that maintains grep indexes and does not change the index.
 
@@ -221,7 +222,7 @@ class AdminClient:
 
         Returns
         -------
-        GrepIndexStatusResponse
+        GrepIndex
             Grep index status and build progress
 
         Examples
@@ -232,16 +233,16 @@ class AdminClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.admin.get_grep_index_status(
+        client.admin.get_grep_index(
             namespace_id="namespace_id",
         )
         """
-        _response = self._raw_client.get_grep_index_status(namespace_id, request_options=request_options)
+        _response = self._raw_client.get_grep_index(namespace_id, request_options=request_options)
         return _response.data
 
     def disable_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GrepIndexStatusResponse:
+    ) -> GrepIndex:
         """
         Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
@@ -255,7 +256,7 @@ class AdminClient:
 
         Returns
         -------
-        GrepIndexStatusResponse
+        GrepIndex
             Grep root disabled or already disabled
 
         Examples
@@ -275,7 +276,7 @@ class AdminClient:
 
     def enable_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GrepIndexStatusResponse:
+    ) -> GrepIndex:
         """
         Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
@@ -289,7 +290,7 @@ class AdminClient:
 
         Returns
         -------
-        GrepIndexStatusResponse
+        GrepIndex
             Grep root enabled or already enabled
 
         Examples
@@ -357,34 +358,34 @@ class AdminClient:
         )
         return _response.data
 
-    def maintenance_step(
+    def run_maintenance(
         self,
         namespace_id: str,
         *,
-        advance_retention: typing.Optional[bool] = OMIT,
         gc: typing.Optional[GcRequest] = OMIT,
-        metadata: typing.Optional[MetadataMaintenanceRequest] = OMIT,
+        metadata_maintenance: typing.Optional[MetadataMaintenanceRequest] = OMIT,
+        retention: typing.Optional[AdvanceRetentionRequest] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> MaintenanceStepResponse:
         """
-        Runs one bounded maintenance step. The body selects the actions by naming them: `metadata` folds the WAL tail once it reaches the threshold and merges one bounded reorganization unit, `advance_retention: true` advances the retention floor, and `gc` runs one bounded garbage-collection pass. Selected actions run in that order, each reports separately, and an absent report means the body did not select that action. A body that selects nothing is rejected. Nothing surrenders replay history or sweeps objects unless the body asked for it. A deleted namespace accepts a step that selects `gc` alone, which is how its reclaimable state is collected; any other selection is refused. Step-driven GC defaults to 1024 candidates and returns its cursor for a later step rather than looping internally. Losing the root race is an outcome, not an error.
+        Runs one bounded maintenance step. Include `metadata_maintenance`, `retention`, or `gc` to select actions. Each selector is an options object, and an empty object uses server defaults. Actions run in that order, and only selected actions appear in the response. At least one action is required. A deleted namespace accepts only `gc`. GC processes up to 1024 candidates by default and returns a cursor when more work remains. A lost root update race is reported as an outcome.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        advance_retention : typing.Optional[bool]
-            Advance the retention floor to the flushed manifest head. Nothing
-            surrenders replay history unless this is true.
-
         gc : typing.Optional[GcRequest]
-            Run one bounded mark-and-sweep garbage-collection pass. Nothing
-            sweeps unless this is present.
+            Run one bounded mark-and-sweep garbage-collection pass. Omit this
+            field to skip garbage collection.
 
-        metadata : typing.Optional[MetadataMaintenanceRequest]
-            Flush the visible WAL tail into metadata tables, then run one bounded
+        metadata_maintenance : typing.Optional[MetadataMaintenanceRequest]
+            Flush the visible WAL tail into metadata segments, then run one bounded
             reorganization step.
+
+        retention : typing.Optional[AdvanceRetentionRequest]
+            Advance the retention floor to the flushed manifest head. Include this
+            field to select the action.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -402,12 +403,16 @@ class AdminClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.admin.maintenance_step(
+        client.admin.run_maintenance(
             namespace_id="namespace_id",
         )
         """
-        _response = self._raw_client.maintenance_step(
-            namespace_id, advance_retention=advance_retention, gc=gc, metadata=metadata, request_options=request_options
+        _response = self._raw_client.run_maintenance(
+            namespace_id,
+            gc=gc,
+            metadata_maintenance=metadata_maintenance,
+            retention=retention,
+            request_options=request_options,
         )
         return _response.data
 
@@ -522,7 +527,7 @@ class AsyncAdminClient:
         name: str,
         ttl_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> CreateCheckpointResponse:
+    ) -> Checkpoint:
         """
         Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance/admin operation, not a file mutation.
 
@@ -544,8 +549,8 @@ class AsyncAdminClient:
 
         Returns
         -------
-        CreateCheckpointResponse
-            Namespace envelope containing the created checkpoint
+        Checkpoint
+            The created checkpoint
 
         Examples
         --------
@@ -663,9 +668,9 @@ class AsyncAdminClient:
         _response = await self._raw_client.get_namespace_diagnostics(namespace_id, request_options=request_options)
         return _response.data
 
-    async def get_grep_index_status(
+    async def get_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GrepIndexStatusResponse:
+    ) -> GrepIndex:
         """
         Returns whether the namespace's grep index is `disabled`, `backfilling`, or `active`, including build progress when available. A namespace that has never enabled the index is `disabled`. This operation requires a deployment that maintains grep indexes and does not change the index.
 
@@ -679,7 +684,7 @@ class AsyncAdminClient:
 
         Returns
         -------
-        GrepIndexStatusResponse
+        GrepIndex
             Grep index status and build progress
 
         Examples
@@ -695,19 +700,19 @@ class AsyncAdminClient:
 
 
         async def main() -> None:
-            await client.admin.get_grep_index_status(
+            await client.admin.get_grep_index(
                 namespace_id="namespace_id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_grep_index_status(namespace_id, request_options=request_options)
+        _response = await self._raw_client.get_grep_index(namespace_id, request_options=request_options)
         return _response.data
 
     async def disable_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GrepIndexStatusResponse:
+    ) -> GrepIndex:
         """
         Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
@@ -721,7 +726,7 @@ class AsyncAdminClient:
 
         Returns
         -------
-        GrepIndexStatusResponse
+        GrepIndex
             Grep root disabled or already disabled
 
         Examples
@@ -749,7 +754,7 @@ class AsyncAdminClient:
 
     async def enable_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> GrepIndexStatusResponse:
+    ) -> GrepIndex:
         """
         Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
@@ -763,7 +768,7 @@ class AsyncAdminClient:
 
         Returns
         -------
-        GrepIndexStatusResponse
+        GrepIndex
             Grep root enabled or already enabled
 
         Examples
@@ -847,34 +852,34 @@ class AsyncAdminClient:
         )
         return _response.data
 
-    async def maintenance_step(
+    async def run_maintenance(
         self,
         namespace_id: str,
         *,
-        advance_retention: typing.Optional[bool] = OMIT,
         gc: typing.Optional[GcRequest] = OMIT,
-        metadata: typing.Optional[MetadataMaintenanceRequest] = OMIT,
+        metadata_maintenance: typing.Optional[MetadataMaintenanceRequest] = OMIT,
+        retention: typing.Optional[AdvanceRetentionRequest] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> MaintenanceStepResponse:
         """
-        Runs one bounded maintenance step. The body selects the actions by naming them: `metadata` folds the WAL tail once it reaches the threshold and merges one bounded reorganization unit, `advance_retention: true` advances the retention floor, and `gc` runs one bounded garbage-collection pass. Selected actions run in that order, each reports separately, and an absent report means the body did not select that action. A body that selects nothing is rejected. Nothing surrenders replay history or sweeps objects unless the body asked for it. A deleted namespace accepts a step that selects `gc` alone, which is how its reclaimable state is collected; any other selection is refused. Step-driven GC defaults to 1024 candidates and returns its cursor for a later step rather than looping internally. Losing the root race is an outcome, not an error.
+        Runs one bounded maintenance step. Include `metadata_maintenance`, `retention`, or `gc` to select actions. Each selector is an options object, and an empty object uses server defaults. Actions run in that order, and only selected actions appear in the response. At least one action is required. A deleted namespace accepts only `gc`. GC processes up to 1024 candidates by default and returns a cursor when more work remains. A lost root update race is reported as an outcome.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        advance_retention : typing.Optional[bool]
-            Advance the retention floor to the flushed manifest head. Nothing
-            surrenders replay history unless this is true.
-
         gc : typing.Optional[GcRequest]
-            Run one bounded mark-and-sweep garbage-collection pass. Nothing
-            sweeps unless this is present.
+            Run one bounded mark-and-sweep garbage-collection pass. Omit this
+            field to skip garbage collection.
 
-        metadata : typing.Optional[MetadataMaintenanceRequest]
-            Flush the visible WAL tail into metadata tables, then run one bounded
+        metadata_maintenance : typing.Optional[MetadataMaintenanceRequest]
+            Flush the visible WAL tail into metadata segments, then run one bounded
             reorganization step.
+
+        retention : typing.Optional[AdvanceRetentionRequest]
+            Advance the retention floor to the flushed manifest head. Include this
+            field to select the action.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -897,15 +902,19 @@ class AsyncAdminClient:
 
 
         async def main() -> None:
-            await client.admin.maintenance_step(
+            await client.admin.run_maintenance(
                 namespace_id="namespace_id",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.maintenance_step(
-            namespace_id, advance_retention=advance_retention, gc=gc, metadata=metadata, request_options=request_options
+        _response = await self._raw_client.run_maintenance(
+            namespace_id,
+            gc=gc,
+            metadata_maintenance=metadata_maintenance,
+            retention=retention,
+            request_options=request_options,
         )
         return _response.data
 

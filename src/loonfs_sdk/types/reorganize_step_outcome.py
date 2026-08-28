@@ -129,7 +129,7 @@ class ReorganizeStepOutcome_CompactionRequired(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ReorganizeStepOutcome_Superseded(UniversalBaseModel):
+class ReorganizeStepOutcome_RootAdvanced(UniversalBaseModel):
     """
     What the metadata-reorganization part of a maintenance step did.
 
@@ -137,7 +137,7 @@ class ReorganizeStepOutcome_Superseded(UniversalBaseModel):
     consumes are engine policy, not a wire contract.
     """
 
-    outcome: typing.Literal["superseded"] = "superseded"
+    outcome: typing.Literal["root_advanced"] = "root_advanced"
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -157,7 +157,7 @@ ReorganizeStepOutcome = typing_extensions.Annotated[
         ReorganizeStepOutcome_CompactionRunning,
         ReorganizeStepOutcome_CompactionAtCapacity,
         ReorganizeStepOutcome_CompactionRequired,
-        ReorganizeStepOutcome_Superseded,
+        ReorganizeStepOutcome_RootAdvanced,
     ],
     pydantic.Field(discriminator="outcome"),
 ]
