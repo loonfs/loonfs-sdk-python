@@ -16,17 +16,16 @@ from .change_seq import ChangeSeq
 from .content_ref import ContentRef
 from .delete_directory_behavior import DeleteDirectoryBehavior
 from .destination_behavior import DestinationBehavior
+from .display_name import DisplayName
 from .revision_no import RevisionNo
 
 
 class FilesystemOperation_CreateDirectory(UniversalBaseModel):
     """
-    One path-oriented filesystem operation.
+    One filesystem operation.
 
-    Unknown fields are rejected because concurrency guards are optional. A
-    misspelled guard must fail decoding instead of silently becoming `None`
-    and allowing an unguarded write. Any future fieldless variant must use
-    empty braces so serde also rejects unexpected fields for that variant.
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
     """
 
     kind: typing.Literal["create_directory"] = "create_directory"
@@ -43,14 +42,34 @@ class FilesystemOperation_CreateDirectory(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_CreateDirectoryByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
+    """
+
+    kind: typing.Literal["create_directory_by_inode"] = "create_directory_by_inode"
+    display_name: DisplayName
+    parent_inode_id: str
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_PutFile(UniversalBaseModel):
     """
-    One path-oriented filesystem operation.
+    One filesystem operation.
 
-    Unknown fields are rejected because concurrency guards are optional. A
-    misspelled guard must fail decoding instead of silently becoming `None`
-    and allowing an unguarded write. Any future fieldless variant must use
-    empty braces so serde also rejects unexpected fields for that variant.
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
     """
 
     kind: typing.Literal["put_file"] = "put_file"
@@ -69,14 +88,58 @@ class FilesystemOperation_PutFile(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_PutFileByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
+    """
+
+    kind: typing.Literal["put_file_by_inode"] = "put_file_by_inode"
+    content_ref: ContentRef
+    display_name: DisplayName
+    parent_inode_id: str
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class FilesystemOperation_PutFileRevisionByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
+    """
+
+    kind: typing.Literal["put_file_revision_by_inode"] = "put_file_revision_by_inode"
+    content_ref: ContentRef
+    expected_revision_no: RevisionNo
+    inode_id: str
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_DeletePath(UniversalBaseModel):
     """
-    One path-oriented filesystem operation.
+    One filesystem operation.
 
-    Unknown fields are rejected because concurrency guards are optional. A
-    misspelled guard must fail decoding instead of silently becoming `None`
-    and allowing an unguarded write. Any future fieldless variant must use
-    empty braces so serde also rejects unexpected fields for that variant.
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
     """
 
     kind: typing.Literal["delete_path"] = "delete_path"
@@ -94,14 +157,35 @@ class FilesystemOperation_DeletePath(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_DeleteByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
+    """
+
+    kind: typing.Literal["delete_by_inode"] = "delete_by_inode"
+    behavior: typing.Optional[DeleteDirectoryBehavior] = None
+    expected_binding_generation: str
+    inode_id: str
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_MovePath(UniversalBaseModel):
     """
-    One path-oriented filesystem operation.
+    One filesystem operation.
 
-    Unknown fields are rejected because concurrency guards are optional. A
-    misspelled guard must fail decoding instead of silently becoming `None`
-    and allowing an unguarded write. Any future fieldless variant must use
-    empty braces so serde also rejects unexpected fields for that variant.
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
     """
 
     kind: typing.Literal["move_path"] = "move_path"
@@ -119,14 +203,37 @@ class FilesystemOperation_MovePath(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_MoveByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
+    """
+
+    kind: typing.Literal["move_by_inode"] = "move_by_inode"
+    behavior: typing.Optional[DestinationBehavior] = None
+    expected_binding_generation: str
+    inode_id: str
+    to_display_name: DisplayName
+    to_parent_inode_id: str
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_CopyPath(UniversalBaseModel):
     """
-    One path-oriented filesystem operation.
+    One filesystem operation.
 
-    Unknown fields are rejected because concurrency guards are optional. A
-    misspelled guard must fail decoding instead of silently becoming `None`
-    and allowing an unguarded write. Any future fieldless variant must use
-    empty braces so serde also rejects unexpected fields for that variant.
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
     """
 
     kind: typing.Literal["copy_path"] = "copy_path"
@@ -146,12 +253,10 @@ class FilesystemOperation_CopyPath(UniversalBaseModel):
 
 class FilesystemOperation_Undelete(UniversalBaseModel):
     """
-    One path-oriented filesystem operation.
+    One filesystem operation.
 
-    Unknown fields are rejected because concurrency guards are optional. A
-    misspelled guard must fail decoding instead of silently becoming `None`
-    and allowing an unguarded write. Any future fieldless variant must use
-    empty braces so serde also rejects unexpected fields for that variant.
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
     """
 
     kind: typing.Literal["undelete"] = "undelete"
@@ -171,12 +276,10 @@ class FilesystemOperation_Undelete(UniversalBaseModel):
 
 class FilesystemOperation_RestoreRevision(UniversalBaseModel):
     """
-    One path-oriented filesystem operation.
+    One filesystem operation.
 
-    Unknown fields are rejected because concurrency guards are optional. A
-    misspelled guard must fail decoding instead of silently becoming `None`
-    and allowing an unguarded write. Any future fieldless variant must use
-    empty braces so serde also rejects unexpected fields for that variant.
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
     """
 
     kind: typing.Literal["restore_revision"] = "restore_revision"
@@ -195,12 +298,10 @@ class FilesystemOperation_RestoreRevision(UniversalBaseModel):
 
 class FilesystemOperation_UpdateAttributes(UniversalBaseModel):
     """
-    One path-oriented filesystem operation.
+    One filesystem operation.
 
-    Unknown fields are rejected because concurrency guards are optional. A
-    misspelled guard must fail decoding instead of silently becoming `None`
-    and allowing an unguarded write. Any future fieldless variant must use
-    empty braces so serde also rejects unexpected fields for that variant.
+    Unknown fields are rejected so a misspelled concurrency guard cannot be ignored.
+    Fieldless variants must use empty braces so serde rejects unexpected fields.
     """
 
     kind: typing.Literal["update_attributes"] = "update_attributes"
@@ -225,9 +326,14 @@ class FilesystemOperation_UpdateAttributes(UniversalBaseModel):
 FilesystemOperation = typing_extensions.Annotated[
     typing.Union[
         FilesystemOperation_CreateDirectory,
+        FilesystemOperation_CreateDirectoryByInode,
         FilesystemOperation_PutFile,
+        FilesystemOperation_PutFileByInode,
+        FilesystemOperation_PutFileRevisionByInode,
         FilesystemOperation_DeletePath,
+        FilesystemOperation_DeleteByInode,
         FilesystemOperation_MovePath,
+        FilesystemOperation_MoveByInode,
         FilesystemOperation_CopyPath,
         FilesystemOperation_Undelete,
         FilesystemOperation_RestoreRevision,

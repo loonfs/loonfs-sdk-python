@@ -4,73 +4,35 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .deleted_object_counts import DeletedObjectCounts
 from .namespace_id import NamespaceId
+from .released_checkpoint_counts import ReleasedCheckpointCounts
 from .retained_candidates import RetainedCandidates
 
 
 class GcResponse(UniversalBaseModel):
     """
     Result of one mark-and-sweep garbage-collection pass.
+
+    Deletion counts are grouped by object family. Checkpoint releases and
+    retained candidates are grouped by reason.
     """
 
-    budget_exhausted: typing.Optional[bool] = pydantic.Field(default=None)
+    budget_exhausted: bool = pydantic.Field()
     """
-    True when the pass stopped because `max_objects` ran out before it
-    finished. Whatever it did before that is reported here and stands;
-    rerun with the returned cursor, or with a larger budget, to
-    continue. A budget too small for the namespace's own roots stops a
-    pass before it decides anything at all, which is what this says and
-    an empty report on its own does not.
+    True when the pass reached `max_objects` before it finished. Use
+    `next_cursor` to continue or run again with a larger limit.
     """
 
-    content_reclamation_deferred: typing.Optional[bool] = pydantic.Field(default=None)
+    content_reclamation_deferred: bool = pydantic.Field()
     """
-    True when the pass skipped completed-content reclamation because
-    what it needs — the namespace's live roots, then the reference
-    collection over them — did not fit in `max_objects`. Nothing was
-    ever decided from a partial collection; a later pass with room for
-    the whole scan reclaims what this one left behind. A pass that had
-    room for the roots swept every other candidate normally around the
-    skip, and one that did not also reports `budget_exhausted`.
+    True when `max_objects` was too small to build the complete reference
+    set required for completed-content reclamation.
     """
 
-    degraded_retention: bool = pydantic.Field()
+    deleted: DeletedObjectCounts = pydantic.Field()
     """
-    True when ambiguous roots suppressed manifest/table deletion.
-    """
-
-    deleted_checkpoint_records: int = pydantic.Field()
-    """
-    Released checkpoint records deleted after their grace window.
-    """
-
-    deleted_content_objects: typing.Optional[int] = pydantic.Field(default=None)
-    """
-    Content objects reclaimed because their upload session completed,
-    aged past the derived reclamation grace, and nothing the namespace
-    can reach references them. The upload half's cleanup of abandoned
-    sessions is not counted here: it deletes unconditionally, whether or
-    not the session ever wrote anything.
-    """
-
-    deleted_manifests: int = pydantic.Field()
-    """
-    Unreferenced manifests deleted.
-    """
-
-    deleted_metadata_tables: int = pydantic.Field()
-    """
-    Unreferenced metadata tables deleted.
-    """
-
-    deleted_upload_sessions: typing.Optional[int] = pydantic.Field(default=None)
-    """
-    Upload-session control objects deleted after the reap window.
-    """
-
-    deleted_wal_segments: int = pydantic.Field()
-    """
-    Unreferenced WAL segments deleted.
+    Objects the pass deleted, split by object family.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -80,56 +42,38 @@ class GcResponse(UniversalBaseModel):
 
     next_cursor: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Opaque resume token when more candidates remain. Resuming rebuilds
-    every safety proof; the token carries enumeration position only and
-    is valid only against the same namespace.
+    Opaque resume token when more candidates remain. It is valid only for
+    the same namespace.
     """
 
     next_reclamation_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The soonest instant still ahead of this pass at which something it
-    retained becomes reclaimable: an open session's lease plus the grace
-    window, an aborted session's grace, or a completed session's derived
-    content-reclamation grace. A scheduler reads this to decide when to
-    come back, so a namespace needs no other side channel to have its
-    reclamation happen.
-    
-    It reports what this pass saw and nothing more. A pass that stopped
-    on `next_cursor` examined only part of the keyspace, and candidates
-    that age out under a plain grace window on their object timestamps
-    carry no deadline here at all, so absence is never a claim that
-    nothing is owed.
+    Earliest known time when a retained upload session may become
+    reclaimable. This covers open-session leases and grace periods for
+    aborted or completed sessions. It only reflects candidates inspected
+    by this pass, so absence does not mean no future work remains.
     """
 
-    released_expired_checkpoints: typing.Optional[int] = pydantic.Field(default=None)
+    released_checkpoints: ReleasedCheckpointCounts = pydantic.Field()
     """
-    Checkpoint records released because their expiry passed, or because
-    they sit on a terminally deleted namespace.
-    """
-
-    released_fork_checkpoints: int = pydantic.Field()
-    """
-    Fork-owned checkpoint records released because their target namespace
-    is provably gone.
+    Checkpoint records the pass released, split by the reason each one
+    was released.
     """
 
-    released_missing_basis_checkpoints: typing.Optional[int] = pydantic.Field(default=None)
+    retained: RetainedCandidates = pydantic.Field()
     """
-    Active checkpoint records released because their basis manifest is
-    verifiably gone.
-    """
-
-    retained: typing.Optional[RetainedCandidates] = pydantic.Field(default=None)
-    """
-    The same total, split by the decision that spared each candidate.
-    The total above stays because it is what every existing consumer
-    reads; this says why.
+    `retained_candidates` grouped by reason.
     """
 
     retained_candidates: int = pydantic.Field()
     """
     Candidates retained at delete time (grace window, missing
     timestamps, or reachable from the fresh root set).
+    """
+
+    retention_degraded: bool = pydantic.Field()
+    """
+    True when ambiguous roots suppressed manifest/segment deletion.
     """
 
     if IS_PYDANTIC_V2:

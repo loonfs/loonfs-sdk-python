@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
-from .manifest_id import ManifestId
+from .manifest_no import ManifestNo
 from .namespace_id import NamespaceId
 
 
@@ -14,7 +14,7 @@ class NamespaceDiagnostics(UniversalBaseModel):
     Namespace state and storage details used by maintenance.
     """
 
-    current_manifest_id: typing.Optional[ManifestId] = pydantic.Field(default=None)
+    current_manifest_no: typing.Optional[ManifestNo] = pydantic.Field(default=None)
     """
     Current manifest pointer recorded by the head.
     """
@@ -22,6 +22,16 @@ class NamespaceDiagnostics(UniversalBaseModel):
     head_seq: ChangeSeq = pydantic.Field()
     """
     Current visible namespace sequence.
+    """
+
+    live_checkpoints: int = pydantic.Field()
+    """
+    Number of active user checkpoints, including expired records awaiting collection.
+    """
+
+    live_snapshots: int = pydantic.Field()
+    """
+    Number of snapshots that had not expired when diagnostics began.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

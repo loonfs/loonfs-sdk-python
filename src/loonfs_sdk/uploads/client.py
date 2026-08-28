@@ -10,7 +10,7 @@ from ..types.complete_upload_request import CompleteUploadRequest
 from ..types.sign_upload_parts_response import SignUploadPartsResponse
 from ..types.upload_content_response import UploadContentResponse
 from ..types.upload_part_checksum_claim import UploadPartChecksumClaim
-from ..types.upload_session_response import UploadSessionResponse
+from ..types.upload_session import UploadSession
 from .raw_client import AsyncRawUploadsClient, RawUploadsClient
 
 # this is used as the default value for optional parameters
@@ -32,7 +32,7 @@ class UploadsClient:
         """
         return self._raw_client
 
-    def begin_upload(
+    def create_upload(
         self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> BeginUploadResponse:
         """
@@ -61,17 +61,17 @@ class UploadsClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.uploads.begin_upload(
+        client.uploads.create_upload(
             namespace_id="namespace_id",
             request=BeginUploadRequest_ServiceProxied(),
         )
         """
-        _response = self._raw_client.begin_upload(namespace_id, request=request, request_options=request_options)
+        _response = self._raw_client.create_upload(namespace_id, request=request, request_options=request_options)
         return _response.data
 
-    def get_upload_status(
+    def get_upload(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> UploadSessionResponse:
+    ) -> UploadSession:
         """
         Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 
@@ -88,7 +88,7 @@ class UploadsClient:
 
         Returns
         -------
-        UploadSessionResponse
+        UploadSession
             Upload session state
 
         Examples
@@ -99,17 +99,17 @@ class UploadsClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.uploads.get_upload_status(
+        client.uploads.get_upload(
             namespace_id="namespace_id",
             upload_id="upload_id",
         )
         """
-        _response = self._raw_client.get_upload_status(namespace_id, upload_id, request_options=request_options)
+        _response = self._raw_client.get_upload(namespace_id, upload_id, request_options=request_options)
         return _response.data
 
     def abort_upload(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> UploadSessionResponse:
+    ) -> UploadSession:
         """
         Ends an upload session without selecting content and deletes the object it was writing. Repeating it succeeds; a session that already completed cannot be aborted.
 
@@ -126,7 +126,7 @@ class UploadsClient:
 
         Returns
         -------
-        UploadSessionResponse
+        UploadSession
             Upload aborted
 
         Examples
@@ -152,7 +152,7 @@ class UploadsClient:
         *,
         request: CompleteUploadRequest,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> UploadSessionResponse:
+    ) -> UploadSession:
         """
         Completes an upload. The request mode must match the mode used to start the session. Direct uploads include a content claim; multipart also includes completed parts.
 
@@ -171,7 +171,7 @@ class UploadsClient:
 
         Returns
         -------
-        UploadSessionResponse
+        UploadSession
             Upload completed
 
         Examples
@@ -193,7 +193,7 @@ class UploadsClient:
         )
         return _response.data
 
-    def upload_content(
+    def put_upload_content(
         self,
         namespace_id: str,
         upload_id: str,
@@ -222,7 +222,7 @@ class UploadsClient:
         UploadContentResponse
             Upload content accepted
         """
-        _response = self._raw_client.upload_content(
+        _response = self._raw_client.put_upload_content(
             namespace_id, upload_id, request=request, request_options=request_options
         )
         return _response.data
@@ -301,7 +301,7 @@ class AsyncUploadsClient:
         """
         return self._raw_client
 
-    async def begin_upload(
+    async def create_upload(
         self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> BeginUploadResponse:
         """
@@ -335,7 +335,7 @@ class AsyncUploadsClient:
 
 
         async def main() -> None:
-            await client.uploads.begin_upload(
+            await client.uploads.create_upload(
                 namespace_id="namespace_id",
                 request=BeginUploadRequest_ServiceProxied(),
             )
@@ -343,12 +343,12 @@ class AsyncUploadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.begin_upload(namespace_id, request=request, request_options=request_options)
+        _response = await self._raw_client.create_upload(namespace_id, request=request, request_options=request_options)
         return _response.data
 
-    async def get_upload_status(
+    async def get_upload(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> UploadSessionResponse:
+    ) -> UploadSession:
         """
         Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 
@@ -365,7 +365,7 @@ class AsyncUploadsClient:
 
         Returns
         -------
-        UploadSessionResponse
+        UploadSession
             Upload session state
 
         Examples
@@ -381,7 +381,7 @@ class AsyncUploadsClient:
 
 
         async def main() -> None:
-            await client.uploads.get_upload_status(
+            await client.uploads.get_upload(
                 namespace_id="namespace_id",
                 upload_id="upload_id",
             )
@@ -389,12 +389,12 @@ class AsyncUploadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_upload_status(namespace_id, upload_id, request_options=request_options)
+        _response = await self._raw_client.get_upload(namespace_id, upload_id, request_options=request_options)
         return _response.data
 
     async def abort_upload(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> UploadSessionResponse:
+    ) -> UploadSession:
         """
         Ends an upload session without selecting content and deletes the object it was writing. Repeating it succeeds; a session that already completed cannot be aborted.
 
@@ -411,7 +411,7 @@ class AsyncUploadsClient:
 
         Returns
         -------
-        UploadSessionResponse
+        UploadSession
             Upload aborted
 
         Examples
@@ -445,7 +445,7 @@ class AsyncUploadsClient:
         *,
         request: CompleteUploadRequest,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> UploadSessionResponse:
+    ) -> UploadSession:
         """
         Completes an upload. The request mode must match the mode used to start the session. Direct uploads include a content claim; multipart also includes completed parts.
 
@@ -464,7 +464,7 @@ class AsyncUploadsClient:
 
         Returns
         -------
-        UploadSessionResponse
+        UploadSession
             Upload completed
 
         Examples
@@ -494,7 +494,7 @@ class AsyncUploadsClient:
         )
         return _response.data
 
-    async def upload_content(
+    async def put_upload_content(
         self,
         namespace_id: str,
         upload_id: str,
@@ -523,7 +523,7 @@ class AsyncUploadsClient:
         UploadContentResponse
             Upload content accepted
         """
-        _response = await self._raw_client.upload_content(
+        _response = await self._raw_client.put_upload_content(
             namespace_id, upload_id, request=request, request_options=request_options
         )
         return _response.data

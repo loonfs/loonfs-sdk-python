@@ -4,7 +4,6 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .direct_multipart_upload_options import DirectMultipartUploadOptions
 
 
 class BeginUploadDirectMultipart(UniversalBaseModel):
@@ -12,9 +11,10 @@ class BeginUploadDirectMultipart(UniversalBaseModel):
     Write the object in parts through presigned part uploads.
     """
 
-    multipart: typing.Optional[DirectMultipartUploadOptions] = pydantic.Field(default=None)
+    part_size_bytes: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Part size options. The server uses its default when omitted.
+    Byte length of every part except the last. The server uses its
+    default when this is omitted.
     """
 
     if IS_PYDANTIC_V2:

@@ -8,90 +8,69 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RetainedCandidates(UniversalBaseModel):
     """
-    Why a pass kept what it kept: `retained_candidates` split by the
-    decision that spared each candidate.
+    Candidates inspected but not deleted by one GC pass.
 
-    The reasons are a closed set — one per place the sweep decides against
-    deleting — so every field is always reported, and a zero is the answer
-    that nothing was kept for that reason. The counts sum to
-    `retained_candidates`.
+    Every field is present, including zero counts. The fields sum to
+    `retained_candidates` in [`GcResponse`].
 
-    Retention is a decision per candidate examined, not per object in the
-    namespace: one object examined by two passes is counted by each.
+    An object inspected by multiple passes is counted once per pass.
     """
 
     checkpoint_not_releasable: int = pydantic.Field()
     """
-    A checkpoint record this pass could have advanced but could not
-    prove ready: a lost compare-and-swap, an unreadable record, a fork
-    target not provably gone, a released record still inside its grace
-    window, or an active pin that is simply doing its job. The pins
-    themselves are listed by
-    `GET /v0/admin/namespaces/{ns}/checkpoints`.
+    Checkpoint records that could not be safely released or deleted.
     """
 
     content_scan_deferred: int = pydantic.Field()
     """
-    A completed session whose content reclamation was skipped because
-    the reference scan did not fit in `max_objects`
-    (`content_reclamation_deferred` is set too).
+    Completed sessions skipped because the reference scan exceeded
+    `max_objects`. The response also sets `content_reclamation_deferred`.
     """
 
     degraded_roots: int = pydantic.Field()
     """
-    Root resolution failed somewhere in this pass, so manifest and table
-    deletion was suppressed wholesale (`degraded_retention` is set too).
-    """
-
-    grace_window: int = pydantic.Field()
-    """
-    Unreachable, but younger than the grace window by the object's own
-    provider timestamp. A later pass deletes it.
+    Candidates kept because root resolution failed. The response also
+    sets `retention_degraded`.
     """
 
     no_provider_timestamp: int = pydantic.Field()
     """
-    Unreachable, and the provider reported no last-modified time at all,
-    so the object's age is unknown and it is treated as young.
+    Unreachable candidates with no provider timestamp. Their age is
+    unknown, so the pass keeps them.
     """
 
     no_reference_manifest: int = pydantic.Field()
     """
-    Unreachable, but this namespace published no manifest old enough to
-    say what it referenced when the grace window opened, so nothing
-    proves the object was already unreferenced then. A reader that pinned
-    its anchor inside the window may still be reading it, and the pass
-    keeps it until a manifest ages past the window.
+    Unreachable candidates that cannot be checked against a manifest old
+    enough to cover the grace window.
     """
 
     referenced: int = pydantic.Field()
     """
-    Selected as unreachable, then found reachable by the re-verification
-    that runs immediately before every deletion. A candidate the pass
-    already knew was reachable is never examined at all, so this counts
-    the namespace moving underneath the pass rather than the size of its
-    live set.
+    Candidates found reachable during the final check before deletion.
     """
 
     unrecognized_key: int = pydantic.Field()
     """
-    A key under a swept family that this collector does not recognize as
-    one of its own. Never deleted, whatever its age.
+    Unrecognized keys in a family scanned by GC. These keys are never
+    deleted.
     """
 
     upload_session_undecided: int = pydantic.Field()
     """
-    An upload session held over for a reason no clock resolves: a lost
-    compare-and-swap, a record that vanished mid-pass, or a reference
-    set this pass could not establish. Only a later pass answers it.
+    Upload sessions kept because the pass could not determine whether
+    they were safe to delete.
     """
 
     upload_session_window: int = pydantic.Field()
     """
-    An upload session waiting out a window a clock resolves: an open
-    session's lease plus the grace, an aborted session's grace, or a
-    completed session's derived content-reclamation grace.
-    `next_reclamation_at_ms` reports the soonest of these.
+    Upload sessions still protected by a lease or grace window.
+    """
+
+    within_grace_window: int = pydantic.Field()
+    """
+    Unreachable, but younger than the grace window by the object's own
+    provider timestamp. A later pass deletes it.
     """
 
     if IS_PYDANTIC_V2:

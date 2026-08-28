@@ -4,6 +4,7 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.capability_document import CapabilityDocument
 from .raw_client import AsyncRawSystemClient, RawSystemClient
 
 
@@ -22,7 +23,7 @@ class SystemClient:
         """
         return self._raw_client
 
-    def health(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
+    def get_health(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
         """
         Returns `ok` when the server is running and can accept requests.
 
@@ -44,9 +45,9 @@ class SystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.system.health()
+        client.system.get_health()
         """
-        _response = self._raw_client.health(request_options=request_options)
+        _response = self._raw_client.get_health(request_options=request_options)
         return _response.data
 
     def get_metrics(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
@@ -76,7 +77,7 @@ class SystemClient:
         _response = self._raw_client.get_metrics(request_options=request_options)
         return _response.data
 
-    def readiness(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
+    def get_readiness(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
         """
         Returns `ready` while the server admits new work. Once shutdown begins and publisher admission closes, answers 503 `shutting_down` so load balancers can drain the instance. `/health` stays the liveness probe: it only reports that the process is up.
 
@@ -98,9 +99,36 @@ class SystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.system.readiness()
+        client.system.get_readiness()
         """
-        _response = self._raw_client.readiness(request_options=request_options)
+        _response = self._raw_client.get_readiness(request_options=request_options)
+        return _response.data
+
+    def get_capabilities(self, *, request_options: typing.Optional[RequestOptions] = None) -> CapabilityDocument:
+        """
+        Returns a summary of supported features and limits.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CapabilityDocument
+            Capability document
+
+        Examples
+        --------
+        from loonfs_sdk import LoonFS
+
+        client = LoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.system.get_capabilities()
+        """
+        _response = self._raw_client.get_capabilities(request_options=request_options)
         return _response.data
 
 
@@ -119,7 +147,7 @@ class AsyncSystemClient:
         """
         return self._raw_client
 
-    async def health(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
+    async def get_health(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
         """
         Returns `ok` when the server is running and can accept requests.
 
@@ -146,12 +174,12 @@ class AsyncSystemClient:
 
 
         async def main() -> None:
-            await client.system.health()
+            await client.system.get_health()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.health(request_options=request_options)
+        _response = await self._raw_client.get_health(request_options=request_options)
         return _response.data
 
     async def get_metrics(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
@@ -189,7 +217,7 @@ class AsyncSystemClient:
         _response = await self._raw_client.get_metrics(request_options=request_options)
         return _response.data
 
-    async def readiness(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
+    async def get_readiness(self, *, request_options: typing.Optional[RequestOptions] = None) -> str:
         """
         Returns `ready` while the server admits new work. Once shutdown begins and publisher admission closes, answers 503 `shutting_down` so load balancers can drain the instance. `/health` stays the liveness probe: it only reports that the process is up.
 
@@ -216,10 +244,45 @@ class AsyncSystemClient:
 
 
         async def main() -> None:
-            await client.system.readiness()
+            await client.system.get_readiness()
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.readiness(request_options=request_options)
+        _response = await self._raw_client.get_readiness(request_options=request_options)
+        return _response.data
+
+    async def get_capabilities(self, *, request_options: typing.Optional[RequestOptions] = None) -> CapabilityDocument:
+        """
+        Returns a summary of supported features and limits.
+
+        Parameters
+        ----------
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CapabilityDocument
+            Capability document
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs_sdk import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.system.get_capabilities()
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.get_capabilities(request_options=request_options)
         return _response.data

@@ -6,8 +6,11 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.change_seq import ChangeSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
+from ..types.list_snapshots_response import ListSnapshotsResponse
 from ..types.namespace import Namespace
 from ..types.namespace_id import NamespaceId
+from ..types.release_snapshot_response import ReleaseSnapshotResponse
+from ..types.snapshot_summary import SnapshotSummary
 from .raw_client import AsyncRawNamespacesClient, RawNamespacesClient
 
 # this is used as the default value for optional parameters
@@ -180,6 +183,184 @@ class NamespacesClient:
         _response = self._raw_client.fork_namespace(
             namespace_id, new_namespace_id=new_namespace_id, request_options=request_options
         )
+        return _response.data
+
+    def list_snapshots(
+        self,
+        namespace_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListSnapshotsResponse:
+        """
+        Lists live snapshots in snapshot-id order. Released and expired snapshots are omitted.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        limit : typing.Optional[int]
+            Maximum page size
+
+        cursor : typing.Optional[str]
+            Opaque snapshot-list page cursor
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListSnapshotsResponse
+            Live snapshots
+
+        Examples
+        --------
+        from loonfs_sdk import LoonFS
+
+        client = LoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.list_snapshots(
+            namespace_id="namespace_id",
+        )
+        """
+        _response = self._raw_client.list_snapshots(
+            namespace_id, limit=limit, cursor=cursor, request_options=request_options
+        )
+        return _response.data
+
+    def create_snapshot(
+        self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
+    ) -> SnapshotSummary:
+        """
+        Creates a snapshot of the current namespace state. Every call creates a new snapshot.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        name : str
+            A label that does not need to be unique.
+
+        ttl_ms : int
+            Snapshot lifetime from the current server time, in milliseconds.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SnapshotSummary
+            Snapshot created
+
+        Examples
+        --------
+        from loonfs_sdk import LoonFS
+
+        client = LoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.create_snapshot(
+            namespace_id="namespace_id",
+            name="name",
+            ttl_ms=1000000,
+        )
+        """
+        _response = self._raw_client.create_snapshot(
+            namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options
+        )
+        return _response.data
+
+    def extend_snapshot(
+        self,
+        namespace_id: str,
+        snapshot_id: str,
+        *,
+        ttl_ms: int,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SnapshotSummary:
+        """
+        Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        ttl_ms : int
+            Requested lifetime from the server's current time, in milliseconds.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SnapshotSummary
+            Snapshot extended
+
+        Examples
+        --------
+        from loonfs_sdk import LoonFS
+
+        client = LoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.extend_snapshot(
+            namespace_id="namespace_id",
+            snapshot_id="snapshot_id",
+            ttl_ms=1000000,
+        )
+        """
+        _response = self._raw_client.extend_snapshot(
+            namespace_id, snapshot_id, ttl_ms=ttl_ms, request_options=request_options
+        )
+        return _response.data
+
+    def release_snapshot(
+        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> ReleaseSnapshotResponse:
+        """
+        Releases a snapshot by id. Repeated releases succeed.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ReleaseSnapshotResponse
+            Snapshot release accepted
+
+        Examples
+        --------
+        from loonfs_sdk import LoonFS
+
+        client = LoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.release_snapshot(
+            namespace_id="namespace_id",
+            snapshot_id="snapshot_id",
+        )
+        """
+        _response = self._raw_client.release_snapshot(namespace_id, snapshot_id, request_options=request_options)
         return _response.data
 
 
@@ -383,4 +564,214 @@ class AsyncNamespacesClient:
         _response = await self._raw_client.fork_namespace(
             namespace_id, new_namespace_id=new_namespace_id, request_options=request_options
         )
+        return _response.data
+
+    async def list_snapshots(
+        self,
+        namespace_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListSnapshotsResponse:
+        """
+        Lists live snapshots in snapshot-id order. Released and expired snapshots are omitted.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        limit : typing.Optional[int]
+            Maximum page size
+
+        cursor : typing.Optional[str]
+            Opaque snapshot-list page cursor
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListSnapshotsResponse
+            Live snapshots
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs_sdk import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.list_snapshots(
+                namespace_id="namespace_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_snapshots(
+            namespace_id, limit=limit, cursor=cursor, request_options=request_options
+        )
+        return _response.data
+
+    async def create_snapshot(
+        self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
+    ) -> SnapshotSummary:
+        """
+        Creates a snapshot of the current namespace state. Every call creates a new snapshot.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        name : str
+            A label that does not need to be unique.
+
+        ttl_ms : int
+            Snapshot lifetime from the current server time, in milliseconds.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SnapshotSummary
+            Snapshot created
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs_sdk import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.create_snapshot(
+                namespace_id="namespace_id",
+                name="name",
+                ttl_ms=1000000,
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_snapshot(
+            namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options
+        )
+        return _response.data
+
+    async def extend_snapshot(
+        self,
+        namespace_id: str,
+        snapshot_id: str,
+        *,
+        ttl_ms: int,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> SnapshotSummary:
+        """
+        Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        ttl_ms : int
+            Requested lifetime from the server's current time, in milliseconds.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        SnapshotSummary
+            Snapshot extended
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs_sdk import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.extend_snapshot(
+                namespace_id="namespace_id",
+                snapshot_id="snapshot_id",
+                ttl_ms=1000000,
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.extend_snapshot(
+            namespace_id, snapshot_id, ttl_ms=ttl_ms, request_options=request_options
+        )
+        return _response.data
+
+    async def release_snapshot(
+        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> ReleaseSnapshotResponse:
+        """
+        Releases a snapshot by id. Repeated releases succeed.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ReleaseSnapshotResponse
+            Snapshot release accepted
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs_sdk import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.release_snapshot(
+                namespace_id="namespace_id",
+                snapshot_id="snapshot_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.release_snapshot(namespace_id, snapshot_id, request_options=request_options)
         return _response.data

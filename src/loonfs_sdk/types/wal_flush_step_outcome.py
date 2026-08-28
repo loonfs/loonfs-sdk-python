@@ -8,7 +8,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
-from .manifest_id import ManifestId
+from .manifest_no import ManifestNo
 
 
 class WalFlushStepOutcome_NotNeeded(UniversalBaseModel):
@@ -46,14 +46,14 @@ class WalFlushStepOutcome_Flushed(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class WalFlushStepOutcome_Superseded(UniversalBaseModel):
+class WalFlushStepOutcome_AlreadyPublished(UniversalBaseModel):
     """
     What the WAL-flush part of a maintenance step did.
     """
 
-    outcome: typing.Literal["superseded"] = "superseded"
+    outcome: typing.Literal["already_published"] = "already_published"
     attempted_seq: ChangeSeq
-    current_manifest_id: ManifestId
+    current_manifest_no: ManifestNo
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -65,12 +65,12 @@ class WalFlushStepOutcome_Superseded(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class WalFlushStepOutcome_RaceLost(UniversalBaseModel):
+class WalFlushStepOutcome_RetriesExhausted(UniversalBaseModel):
     """
     What the WAL-flush part of a maintenance step did.
     """
 
-    outcome: typing.Literal["race_lost"] = "race_lost"
+    outcome: typing.Literal["retries_exhausted"] = "retries_exhausted"
     observed_head_seq: ChangeSeq
 
     if IS_PYDANTIC_V2:
@@ -87,8 +87,8 @@ WalFlushStepOutcome = typing_extensions.Annotated[
     typing.Union[
         WalFlushStepOutcome_NotNeeded,
         WalFlushStepOutcome_Flushed,
-        WalFlushStepOutcome_Superseded,
-        WalFlushStepOutcome_RaceLost,
+        WalFlushStepOutcome_AlreadyPublished,
+        WalFlushStepOutcome_RetriesExhausted,
     ],
     pydantic.Field(discriminator="outcome"),
 ]

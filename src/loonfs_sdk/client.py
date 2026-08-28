@@ -7,9 +7,6 @@ import typing
 import httpx
 from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.logging import LogConfig, Logger
-from .core.request_options import RequestOptions
-from .raw_client import AsyncRawLoonFS, RawLoonFS
-from .types.capability_document import CapabilityDocument
 
 if typing.TYPE_CHECKING:
     from .admin.client import AdminClient, AsyncAdminClient
@@ -96,52 +93,13 @@ class LoonFS:
             max_stream_reconnection_attempts=max_stream_reconnection_attempts,
             logging=logging,
         )
-        self._raw_client = RawLoonFS(client_wrapper=self._client_wrapper)
         self._system: typing.Optional[SystemClient] = None
         self._admin: typing.Optional[AdminClient] = None
         self._namespaces: typing.Optional[NamespacesClient] = None
         self._filesystem: typing.Optional[FilesystemClient] = None
-        self._inodes: typing.Optional[InodesClient] = None
         self._query: typing.Optional[QueryClient] = None
+        self._inodes: typing.Optional[InodesClient] = None
         self._uploads: typing.Optional[UploadsClient] = None
-
-    @property
-    def with_raw_response(self) -> RawLoonFS:
-        """
-        Retrieves a raw implementation of this client that returns raw responses.
-
-        Returns
-        -------
-        RawLoonFS
-        """
-        return self._raw_client
-
-    def capabilities(self, *, request_options: typing.Optional[RequestOptions] = None) -> CapabilityDocument:
-        """
-        Returns a summary of supported features and limits.
-
-        Parameters
-        ----------
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CapabilityDocument
-            Capability document
-
-        Examples
-        --------
-        from loonfs_sdk import LoonFS
-
-        client = LoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-        client.capabilities()
-        """
-        _response = self._raw_client.capabilities(request_options=request_options)
-        return _response.data
 
     @property
     def system(self):
@@ -176,20 +134,20 @@ class LoonFS:
         return self._filesystem
 
     @property
-    def inodes(self):
-        if self._inodes is None:
-            from .inodes.client import InodesClient  # noqa: E402
-
-            self._inodes = InodesClient(client_wrapper=self._client_wrapper)
-        return self._inodes
-
-    @property
     def query(self):
         if self._query is None:
             from .query.client import QueryClient  # noqa: E402
 
             self._query = QueryClient(client_wrapper=self._client_wrapper)
         return self._query
+
+    @property
+    def inodes(self):
+        if self._inodes is None:
+            from .inodes.client import InodesClient  # noqa: E402
+
+            self._inodes = InodesClient(client_wrapper=self._client_wrapper)
+        return self._inodes
 
     @property
     def uploads(self):
@@ -296,60 +254,13 @@ class AsyncLoonFS:
             max_stream_reconnection_attempts=max_stream_reconnection_attempts,
             logging=logging,
         )
-        self._raw_client = AsyncRawLoonFS(client_wrapper=self._client_wrapper)
         self._system: typing.Optional[AsyncSystemClient] = None
         self._admin: typing.Optional[AsyncAdminClient] = None
         self._namespaces: typing.Optional[AsyncNamespacesClient] = None
         self._filesystem: typing.Optional[AsyncFilesystemClient] = None
-        self._inodes: typing.Optional[AsyncInodesClient] = None
         self._query: typing.Optional[AsyncQueryClient] = None
+        self._inodes: typing.Optional[AsyncInodesClient] = None
         self._uploads: typing.Optional[AsyncUploadsClient] = None
-
-    @property
-    def with_raw_response(self) -> AsyncRawLoonFS:
-        """
-        Retrieves a raw implementation of this client that returns raw responses.
-
-        Returns
-        -------
-        AsyncRawLoonFS
-        """
-        return self._raw_client
-
-    async def capabilities(self, *, request_options: typing.Optional[RequestOptions] = None) -> CapabilityDocument:
-        """
-        Returns a summary of supported features and limits.
-
-        Parameters
-        ----------
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CapabilityDocument
-            Capability document
-
-        Examples
-        --------
-        import asyncio
-
-        from loonfs_sdk import AsyncLoonFS
-
-        client = AsyncLoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-
-
-        async def main() -> None:
-            await client.capabilities()
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.capabilities(request_options=request_options)
-        return _response.data
 
     @property
     def system(self):
@@ -384,20 +295,20 @@ class AsyncLoonFS:
         return self._filesystem
 
     @property
-    def inodes(self):
-        if self._inodes is None:
-            from .inodes.client import AsyncInodesClient  # noqa: E402
-
-            self._inodes = AsyncInodesClient(client_wrapper=self._client_wrapper)
-        return self._inodes
-
-    @property
     def query(self):
         if self._query is None:
             from .query.client import AsyncQueryClient  # noqa: E402
 
             self._query = AsyncQueryClient(client_wrapper=self._client_wrapper)
         return self._query
+
+    @property
+    def inodes(self):
+        if self._inodes is None:
+            from .inodes.client import AsyncInodesClient  # noqa: E402
+
+            self._inodes = AsyncInodesClient(client_wrapper=self._client_wrapper)
+        return self._inodes
 
     @property
     def uploads(self):

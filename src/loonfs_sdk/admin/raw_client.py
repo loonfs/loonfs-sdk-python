@@ -13,19 +13,18 @@ from ..core.request_options import RequestOptions
 from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
-from ..errors.forbidden_error import ForbiddenError
 from ..errors.gone_error import GoneError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
-from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
+from ..types.advance_retention_request import AdvanceRetentionRequest
 from ..types.api_error import ApiError as types_api_error_ApiError
-from ..types.create_checkpoint_response import CreateCheckpointResponse
+from ..types.checkpoint import Checkpoint
 from ..types.gc_request import GcRequest
 from ..types.grep_gc_response import GrepGcResponse
-from ..types.grep_index_status_response import GrepIndexStatusResponse
+from ..types.grep_index import GrepIndex
 from ..types.list_checkpoints_response import ListCheckpointsResponse
 from ..types.maintenance_step_response import MaintenanceStepResponse
 from ..types.metadata_maintenance_request import MetadataMaintenanceRequest
@@ -125,8 +124,8 @@ class RawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -156,7 +155,7 @@ class RawAdminClient:
         name: str,
         ttl_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[CreateCheckpointResponse]:
+    ) -> HttpResponse[Checkpoint]:
         """
         Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance/admin operation, not a file mutation.
 
@@ -178,8 +177,8 @@ class RawAdminClient:
 
         Returns
         -------
-        HttpResponse[CreateCheckpointResponse]
-            Namespace envelope containing the created checkpoint
+        HttpResponse[Checkpoint]
+            The created checkpoint
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/admin/namespaces/{encode_path_param(namespace_id)}/checkpoints",
@@ -197,9 +196,9 @@ class RawAdminClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    CreateCheckpointResponse,
+                    Checkpoint,
                     parse_obj_as(
-                        type_=CreateCheckpointResponse,  # type: ignore
+                        type_=Checkpoint,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -237,17 +236,6 @@ class RawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -263,9 +251,9 @@ class RawAdminClient:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        typing.Any,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -353,8 +341,8 @@ class RawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -444,17 +432,6 @@ class RawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -462,6 +439,17 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -479,9 +467,9 @@ class RawAdminClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def get_grep_index_status(
+    def get_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GrepIndexStatusResponse]:
+    ) -> HttpResponse[GrepIndex]:
         """
         Returns whether the namespace's grep index is `disabled`, `backfilling`, or `active`, including build progress when available. A namespace that has never enabled the index is `disabled`. This operation requires a deployment that maintains grep indexes and does not change the index.
 
@@ -495,7 +483,7 @@ class RawAdminClient:
 
         Returns
         -------
-        HttpResponse[GrepIndexStatusResponse]
+        HttpResponse[GrepIndex]
             Grep index status and build progress
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -506,13 +494,24 @@ class RawAdminClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GrepIndexStatusResponse,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=GrepIndexStatusResponse,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 401:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
@@ -520,28 +519,6 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -564,6 +541,17 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -583,7 +571,7 @@ class RawAdminClient:
 
     def disable_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GrepIndexStatusResponse]:
+    ) -> HttpResponse[GrepIndex]:
         """
         Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
@@ -597,7 +585,7 @@ class RawAdminClient:
 
         Returns
         -------
-        HttpResponse[GrepIndexStatusResponse]
+        HttpResponse[GrepIndex]
             Grep root disabled or already disabled
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -608,15 +596,15 @@ class RawAdminClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GrepIndexStatusResponse,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=GrepIndexStatusResponse,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 401:
-                raise UnauthorizedError(
+            if _response.status_code == 400:
+                raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -626,8 +614,8 @@ class RawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 403:
-                raise ForbiddenError(
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -644,17 +632,6 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -688,6 +665,17 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -707,7 +695,7 @@ class RawAdminClient:
 
     def enable_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[GrepIndexStatusResponse]:
+    ) -> HttpResponse[GrepIndex]:
         """
         Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
@@ -721,7 +709,7 @@ class RawAdminClient:
 
         Returns
         -------
-        HttpResponse[GrepIndexStatusResponse]
+        HttpResponse[GrepIndex]
             Grep root enabled or already enabled
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -732,15 +720,15 @@ class RawAdminClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GrepIndexStatusResponse,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=GrepIndexStatusResponse,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 401:
-                raise UnauthorizedError(
+            if _response.status_code == 400:
+                raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -750,8 +738,8 @@ class RawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 403:
-                raise ForbiddenError(
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -768,17 +756,6 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -812,6 +789,17 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -907,17 +895,6 @@ class RawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 500:
                 raise InternalServerError(
                     headers=dict(_response.headers),
@@ -940,6 +917,17 @@ class RawAdminClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -953,34 +941,34 @@ class RawAdminClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def maintenance_step(
+    def run_maintenance(
         self,
         namespace_id: str,
         *,
-        advance_retention: typing.Optional[bool] = OMIT,
         gc: typing.Optional[GcRequest] = OMIT,
-        metadata: typing.Optional[MetadataMaintenanceRequest] = OMIT,
+        metadata_maintenance: typing.Optional[MetadataMaintenanceRequest] = OMIT,
+        retention: typing.Optional[AdvanceRetentionRequest] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[MaintenanceStepResponse]:
         """
-        Runs one bounded maintenance step. The body selects the actions by naming them: `metadata` folds the WAL tail once it reaches the threshold and merges one bounded reorganization unit, `advance_retention: true` advances the retention floor, and `gc` runs one bounded garbage-collection pass. Selected actions run in that order, each reports separately, and an absent report means the body did not select that action. A body that selects nothing is rejected. Nothing surrenders replay history or sweeps objects unless the body asked for it. A deleted namespace accepts a step that selects `gc` alone, which is how its reclaimable state is collected; any other selection is refused. Step-driven GC defaults to 1024 candidates and returns its cursor for a later step rather than looping internally. Losing the root race is an outcome, not an error.
+        Runs one bounded maintenance step. Include `metadata_maintenance`, `retention`, or `gc` to select actions. Each selector is an options object, and an empty object uses server defaults. Actions run in that order, and only selected actions appear in the response. At least one action is required. A deleted namespace accepts only `gc`. GC processes up to 1024 candidates by default and returns a cursor when more work remains. A lost root update race is reported as an outcome.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        advance_retention : typing.Optional[bool]
-            Advance the retention floor to the flushed manifest head. Nothing
-            surrenders replay history unless this is true.
-
         gc : typing.Optional[GcRequest]
-            Run one bounded mark-and-sweep garbage-collection pass. Nothing
-            sweeps unless this is present.
+            Run one bounded mark-and-sweep garbage-collection pass. Omit this
+            field to skip garbage collection.
 
-        metadata : typing.Optional[MetadataMaintenanceRequest]
-            Flush the visible WAL tail into metadata tables, then run one bounded
+        metadata_maintenance : typing.Optional[MetadataMaintenanceRequest]
+            Flush the visible WAL tail into metadata segments, then run one bounded
             reorganization step.
+
+        retention : typing.Optional[AdvanceRetentionRequest]
+            Advance the retention floor to the flushed manifest head. Include this
+            field to select the action.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -991,14 +979,14 @@ class RawAdminClient:
             Maintenance step completed
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/maintenance/step",
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/maintenance/run",
             method="POST",
             json={
-                "advance_retention": advance_retention,
                 "gc": convert_and_respect_annotation_metadata(object_=gc, annotation=GcRequest, direction="write"),
-                "metadata": convert_and_respect_annotation_metadata(
-                    object_=metadata, annotation=MetadataMaintenanceRequest, direction="write"
+                "metadata_maintenance": convert_and_respect_annotation_metadata(
+                    object_=metadata_maintenance, annotation=MetadataMaintenanceRequest, direction="write"
                 ),
+                "retention": retention,
             },
             headers={
                 "content-type": "application/json",
@@ -1056,6 +1044,17 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1126,6 +1125,17 @@ class RawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1230,8 +1240,8 @@ class AsyncRawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -1261,7 +1271,7 @@ class AsyncRawAdminClient:
         name: str,
         ttl_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[CreateCheckpointResponse]:
+    ) -> AsyncHttpResponse[Checkpoint]:
         """
         Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance/admin operation, not a file mutation.
 
@@ -1283,8 +1293,8 @@ class AsyncRawAdminClient:
 
         Returns
         -------
-        AsyncHttpResponse[CreateCheckpointResponse]
-            Namespace envelope containing the created checkpoint
+        AsyncHttpResponse[Checkpoint]
+            The created checkpoint
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/admin/namespaces/{encode_path_param(namespace_id)}/checkpoints",
@@ -1302,9 +1312,9 @@ class AsyncRawAdminClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    CreateCheckpointResponse,
+                    Checkpoint,
                     parse_obj_as(
-                        type_=CreateCheckpointResponse,  # type: ignore
+                        type_=Checkpoint,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1342,17 +1352,6 @@ class AsyncRawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -1368,9 +1367,9 @@ class AsyncRawAdminClient:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        typing.Any,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1458,8 +1457,8 @@ class AsyncRawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
@@ -1549,17 +1548,6 @@ class AsyncRawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -1567,6 +1555,17 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1584,9 +1583,9 @@ class AsyncRawAdminClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def get_grep_index_status(
+    async def get_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GrepIndexStatusResponse]:
+    ) -> AsyncHttpResponse[GrepIndex]:
         """
         Returns whether the namespace's grep index is `disabled`, `backfilling`, or `active`, including build progress when available. A namespace that has never enabled the index is `disabled`. This operation requires a deployment that maintains grep indexes and does not change the index.
 
@@ -1600,7 +1599,7 @@ class AsyncRawAdminClient:
 
         Returns
         -------
-        AsyncHttpResponse[GrepIndexStatusResponse]
+        AsyncHttpResponse[GrepIndex]
             Grep index status and build progress
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1611,13 +1610,24 @@ class AsyncRawAdminClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GrepIndexStatusResponse,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=GrepIndexStatusResponse,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 401:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
@@ -1625,28 +1635,6 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1669,6 +1657,17 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1688,7 +1687,7 @@ class AsyncRawAdminClient:
 
     async def disable_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GrepIndexStatusResponse]:
+    ) -> AsyncHttpResponse[GrepIndex]:
         """
         Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
@@ -1702,7 +1701,7 @@ class AsyncRawAdminClient:
 
         Returns
         -------
-        AsyncHttpResponse[GrepIndexStatusResponse]
+        AsyncHttpResponse[GrepIndex]
             Grep root disabled or already disabled
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1713,15 +1712,15 @@ class AsyncRawAdminClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GrepIndexStatusResponse,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=GrepIndexStatusResponse,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 401:
-                raise UnauthorizedError(
+            if _response.status_code == 400:
+                raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -1731,8 +1730,8 @@ class AsyncRawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 403:
-                raise ForbiddenError(
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -1749,17 +1748,6 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1793,6 +1781,17 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1812,7 +1811,7 @@ class AsyncRawAdminClient:
 
     async def enable_grep_index(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[GrepIndexStatusResponse]:
+    ) -> AsyncHttpResponse[GrepIndex]:
         """
         Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
@@ -1826,7 +1825,7 @@ class AsyncRawAdminClient:
 
         Returns
         -------
-        AsyncHttpResponse[GrepIndexStatusResponse]
+        AsyncHttpResponse[GrepIndex]
             Grep root enabled or already enabled
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1837,15 +1836,15 @@ class AsyncRawAdminClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GrepIndexStatusResponse,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=GrepIndexStatusResponse,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 401:
-                raise UnauthorizedError(
+            if _response.status_code == 400:
+                raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -1855,8 +1854,8 @@ class AsyncRawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 403:
-                raise ForbiddenError(
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -1873,17 +1872,6 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1917,6 +1905,17 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -2012,17 +2011,6 @@ class AsyncRawAdminClient:
                         ),
                     ),
                 )
-            if _response.status_code == 403:
-                raise ForbiddenError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 500:
                 raise InternalServerError(
                     headers=dict(_response.headers),
@@ -2045,6 +2033,17 @@ class AsyncRawAdminClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -2058,34 +2057,34 @@ class AsyncRawAdminClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def maintenance_step(
+    async def run_maintenance(
         self,
         namespace_id: str,
         *,
-        advance_retention: typing.Optional[bool] = OMIT,
         gc: typing.Optional[GcRequest] = OMIT,
-        metadata: typing.Optional[MetadataMaintenanceRequest] = OMIT,
+        metadata_maintenance: typing.Optional[MetadataMaintenanceRequest] = OMIT,
+        retention: typing.Optional[AdvanceRetentionRequest] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[MaintenanceStepResponse]:
         """
-        Runs one bounded maintenance step. The body selects the actions by naming them: `metadata` folds the WAL tail once it reaches the threshold and merges one bounded reorganization unit, `advance_retention: true` advances the retention floor, and `gc` runs one bounded garbage-collection pass. Selected actions run in that order, each reports separately, and an absent report means the body did not select that action. A body that selects nothing is rejected. Nothing surrenders replay history or sweeps objects unless the body asked for it. A deleted namespace accepts a step that selects `gc` alone, which is how its reclaimable state is collected; any other selection is refused. Step-driven GC defaults to 1024 candidates and returns its cursor for a later step rather than looping internally. Losing the root race is an outcome, not an error.
+        Runs one bounded maintenance step. Include `metadata_maintenance`, `retention`, or `gc` to select actions. Each selector is an options object, and an empty object uses server defaults. Actions run in that order, and only selected actions appear in the response. At least one action is required. A deleted namespace accepts only `gc`. GC processes up to 1024 candidates by default and returns a cursor when more work remains. A lost root update race is reported as an outcome.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        advance_retention : typing.Optional[bool]
-            Advance the retention floor to the flushed manifest head. Nothing
-            surrenders replay history unless this is true.
-
         gc : typing.Optional[GcRequest]
-            Run one bounded mark-and-sweep garbage-collection pass. Nothing
-            sweeps unless this is present.
+            Run one bounded mark-and-sweep garbage-collection pass. Omit this
+            field to skip garbage collection.
 
-        metadata : typing.Optional[MetadataMaintenanceRequest]
-            Flush the visible WAL tail into metadata tables, then run one bounded
+        metadata_maintenance : typing.Optional[MetadataMaintenanceRequest]
+            Flush the visible WAL tail into metadata segments, then run one bounded
             reorganization step.
+
+        retention : typing.Optional[AdvanceRetentionRequest]
+            Advance the retention floor to the flushed manifest head. Include this
+            field to select the action.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -2096,14 +2095,14 @@ class AsyncRawAdminClient:
             Maintenance step completed
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/maintenance/step",
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/maintenance/run",
             method="POST",
             json={
-                "advance_retention": advance_retention,
                 "gc": convert_and_respect_annotation_metadata(object_=gc, annotation=GcRequest, direction="write"),
-                "metadata": convert_and_respect_annotation_metadata(
-                    object_=metadata, annotation=MetadataMaintenanceRequest, direction="write"
+                "metadata_maintenance": convert_and_respect_annotation_metadata(
+                    object_=metadata_maintenance, annotation=MetadataMaintenanceRequest, direction="write"
                 ),
+                "retention": retention,
             },
             headers={
                 "content-type": "application/json",
@@ -2161,6 +2160,17 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -2231,6 +2241,17 @@ class AsyncRawAdminClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

@@ -10,7 +10,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
 from .content_ref import ContentRef
-from .deleted_direntry import DeletedDirentry
+from .directory_binding import DirectoryBinding
 from .display_name import DisplayName
 from .revision_no import RevisionNo
 
@@ -30,6 +30,7 @@ class FilesystemChange_DirectoryCreated(UniversalBaseModel):
     """
 
     kind: typing.Literal["directory_created"] = "directory_created"
+    binding_generation: str
     display_name: DisplayName
     inode_id: str
     parent_inode_id: str
@@ -59,6 +60,7 @@ class FilesystemChange_FileCreated(UniversalBaseModel):
     """
 
     kind: typing.Literal["file_created"] = "file_created"
+    binding_generation: str
     content_ref: ContentRef
     display_name: DisplayName
     inode_id: str
@@ -119,6 +121,7 @@ class FilesystemChange_Moved(UniversalBaseModel):
     """
 
     kind: typing.Literal["moved"] = "moved"
+    binding_generation: str
     from_display_name: DisplayName
     from_parent_inode_id: str
     inode_id: str
@@ -150,7 +153,7 @@ class FilesystemChange_Deleted(UniversalBaseModel):
     """
 
     kind: typing.Literal["deleted"] = "deleted"
-    deleted_direntry: typing.Optional[DeletedDirentry] = None
+    deleted_binding: typing.Optional[DirectoryBinding] = None
     inode_id: str
 
     if IS_PYDANTIC_V2:
@@ -178,6 +181,7 @@ class FilesystemChange_Undeleted(UniversalBaseModel):
     """
 
     kind: typing.Literal["undeleted"] = "undeleted"
+    binding_generation: str
     display_name: DisplayName
     inode_id: str
     parent_inode_id: str

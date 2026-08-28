@@ -14,6 +14,11 @@ class FilesystemChangeFileCreated(UniversalBaseModel):
     A file and its first revision were created.
     """
 
+    binding_generation: str = pydantic.Field()
+    """
+    Opaque identifier for the binding created by this event.
+    """
+
     content_ref: ContentRef = pydantic.Field()
     """
     Content of the first revision.
