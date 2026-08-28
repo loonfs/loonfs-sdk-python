@@ -25,7 +25,7 @@ class MaintenanceStepResponse(UniversalBaseModel):
     What the collection pass reclaimed.
     """
 
-    metadata: typing.Optional[MetadataMaintenanceResponse] = pydantic.Field(default=None)
+    metadata_maintenance: typing.Optional[MetadataMaintenanceResponse] = pydantic.Field(default=None)
     """
     What the metadata-upkeep action did.
     """

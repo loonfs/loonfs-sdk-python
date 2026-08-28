@@ -17,14 +17,14 @@ from ..errors.content_too_large_error import ContentTooLargeError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
-from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.api_error import ApiError as types_api_error_ApiError
-from ..types.authoritative_path_entry import AuthoritativePathEntry
 from ..types.begin_download_by_inode_request import BeginDownloadByInodeRequest
 from ..types.begin_download_by_inode_response import BeginDownloadByInodeResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
+from ..types.list_inode_children_response import ListInodeChildrenResponse
+from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
 from pydantic import ValidationError
 
@@ -36,14 +36,14 @@ class RawInodesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def stat_inode(
+    def get_inode(
         self,
         namespace_id: str,
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[AuthoritativePathEntry]:
+    ) -> HttpResponse[PathEntry]:
         """
         Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
 
@@ -63,7 +63,7 @@ class RawInodesClient:
 
         Returns
         -------
-        HttpResponse[AuthoritativePathEntry]
+        HttpResponse[PathEntry]
             Authoritative current inode entry
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -77,9 +77,9 @@ class RawInodesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AuthoritativePathEntry,
+                    PathEntry,
                     parse_obj_as(
-                        type_=AuthoritativePathEntry,  # type: ignore
+                        type_=PathEntry,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -117,13 +117,139 @@ class RawInodesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    def list_inode_children(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        include_attributes: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ListInodeChildrenResponse]:
+        """
+        Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            Directory inode ID
+
+        limit : typing.Optional[int]
+            Maximum page size
+
+        cursor : typing.Optional[str]
+            Opaque directory page cursor
+
+        include_attributes : typing.Optional[bool]
+            Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ListInodeChildrenResponse]
+            One page of directory children
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/children",
+            method="GET",
+            params={
+                "limit": limit,
+                "cursor": cursor,
+                "include_attributes": include_attributes,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ListInodeChildrenResponse,
+                    parse_obj_as(
+                        type_=ListInodeChildrenResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -135,6 +261,17 @@ class RawInodesClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -238,17 +375,6 @@ class RawInodesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 409:
                 raise ConflictError(
                     headers=dict(_response.headers),
@@ -267,6 +393,17 @@ class RawInodesClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -399,9 +536,9 @@ class RawInodesClient:
                         raise ServiceUnavailableError(
                             headers=dict(_response.headers),
                             body=typing.cast(
-                                types_api_error_ApiError,
+                                typing.Any,
                                 parse_obj_as(
-                                    type_=types_api_error_ApiError,  # type: ignore
+                                    type_=typing.Any,  # type: ignore
                                     object_=_response.json(),
                                 ),
                             ),
@@ -424,7 +561,7 @@ class RawInodesClient:
 
             yield _stream()
 
-    def begin_download_by_inode(
+    def create_download_by_inode(
         self,
         namespace_id: str,
         inode_id: str,
@@ -510,17 +647,6 @@ class RawInodesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 409:
                 raise ConflictError(
                     headers=dict(_response.headers),
@@ -554,6 +680,17 @@ class RawInodesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             _response_json = _response.json()
         except JSONDecodeError:
             raise core_api_error_ApiError(
@@ -572,14 +709,14 @@ class AsyncRawInodesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def stat_inode(
+    async def get_inode(
         self,
         namespace_id: str,
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[AuthoritativePathEntry]:
+    ) -> AsyncHttpResponse[PathEntry]:
         """
         Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
 
@@ -599,7 +736,7 @@ class AsyncRawInodesClient:
 
         Returns
         -------
-        AsyncHttpResponse[AuthoritativePathEntry]
+        AsyncHttpResponse[PathEntry]
             Authoritative current inode entry
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -613,9 +750,9 @@ class AsyncRawInodesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    AuthoritativePathEntry,
+                    PathEntry,
                     parse_obj_as(
-                        type_=AuthoritativePathEntry,  # type: ignore
+                        type_=PathEntry,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -653,13 +790,139 @@ class AsyncRawInodesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    async def list_inode_children(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        include_attributes: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[ListInodeChildrenResponse]:
+        """
+        Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            Directory inode ID
+
+        limit : typing.Optional[int]
+            Maximum page size
+
+        cursor : typing.Optional[str]
+            Opaque directory page cursor
+
+        include_attributes : typing.Optional[bool]
+            Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[ListInodeChildrenResponse]
+            One page of directory children
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/children",
+            method="GET",
+            params={
+                "limit": limit,
+                "cursor": cursor,
+                "include_attributes": include_attributes,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ListInodeChildrenResponse,
+                    parse_obj_as(
+                        type_=ListInodeChildrenResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -671,6 +934,17 @@ class AsyncRawInodesClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -774,17 +1048,6 @@ class AsyncRawInodesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 409:
                 raise ConflictError(
                     headers=dict(_response.headers),
@@ -803,6 +1066,17 @@ class AsyncRawInodesClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -936,9 +1210,9 @@ class AsyncRawInodesClient:
                         raise ServiceUnavailableError(
                             headers=dict(_response.headers),
                             body=typing.cast(
-                                types_api_error_ApiError,
+                                typing.Any,
                                 parse_obj_as(
-                                    type_=types_api_error_ApiError,  # type: ignore
+                                    type_=typing.Any,  # type: ignore
                                     object_=_response.json(),
                                 ),
                             ),
@@ -961,7 +1235,7 @@ class AsyncRawInodesClient:
 
             yield await _stream()
 
-    async def begin_download_by_inode(
+    async def create_download_by_inode(
         self,
         namespace_id: str,
         inode_id: str,
@@ -1047,17 +1321,6 @@ class AsyncRawInodesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 409:
                 raise ConflictError(
                     headers=dict(_response.headers),
@@ -1087,6 +1350,17 @@ class AsyncRawInodesClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

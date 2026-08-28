@@ -12,6 +12,11 @@ class FilesystemChangeDirectoryCreated(UniversalBaseModel):
     A directory was created.
     """
 
+    binding_generation: str = pydantic.Field()
+    """
+    Opaque identifier for the binding created by this event.
+    """
+
     display_name: DisplayName = pydantic.Field()
     """
     User-facing spelling of the new entry.

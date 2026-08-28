@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .direct_multipart_upload import DirectMultipartUpload
+from .checksum_algorithm import ChecksumAlgorithm
 from .namespace_id import NamespaceId
 from .upload_id import UploadId
 
@@ -14,14 +14,21 @@ class BeginUploadResponseDirectMultipart(UniversalBaseModel):
     Presigned part uploads assemble the object.
     """
 
-    direct_multipart: DirectMultipartUpload = pydantic.Field()
+    checksum_algorithm: ChecksumAlgorithm = pydantic.Field()
     """
-    The geometry the client cuts its payload to.
+    Checksum algorithm for every part and for the complete payload.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
     Namespace authorized to consume the eventual staged content.
+    """
+
+    part_size_bytes: int = pydantic.Field()
+    """
+    Byte length of every part except the last. At most 10,000 parts
+    may be uploaded, so this bounds the object at 10,000 times the
+    part size.
     """
 
     upload_id: UploadId = pydantic.Field()

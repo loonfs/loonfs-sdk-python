@@ -18,23 +18,23 @@ from ..errors.content_too_large_error import ContentTooLargeError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
-from ..errors.request_timeout_error import RequestTimeoutError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.absolute_path import AbsolutePath
 from ..types.actor_ref import ActorRef
 from ..types.api_error import ApiError as types_api_error_ApiError
-from ..types.authoritative_path_entry import AuthoritativePathEntry
 from ..types.begin_download_response import BeginDownloadResponse
 from ..types.change_seq import ChangeSeq
-from ..types.changes_response import ChangesResponse
+from ..types.checkpoint_id import CheckpointId
 from ..types.commit_id import CommitId
 from ..types.commit_response import CommitResponse
 from ..types.content_token import ContentToken
 from ..types.filesystem_operation import FilesystemOperation
+from ..types.list_changes_response import ListChangesResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
 from ..types.list_trash_response import ListTrashResponse
+from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
 from pydantic import ValidationError
 
@@ -52,10 +52,11 @@ class RawFilesystemClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[ChangesResponse]:
+    ) -> HttpResponse[ListChangesResponse]:
         """
-        Returns committed changes from the write-ahead log. Callers can use this feed to keep another projection synchronized with WAL history.
+        Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
 
         Parameters
         ----------
@@ -68,12 +69,15 @@ class RawFilesystemClient:
         limit : typing.Optional[int]
             Maximum page size
 
+        snapshot_id : typing.Optional[CheckpointId]
+            End the feed at this snapshot's captured sequence
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[ChangesResponse]
+        HttpResponse[ListChangesResponse]
             Committed changes
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -82,15 +86,16 @@ class RawFilesystemClient:
             params={
                 "after_seq": after_seq,
                 "limit": limit,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ChangesResponse,
+                    ListChangesResponse,
                     parse_obj_as(
-                        type_=ChangesResponse,  # type: ignore
+                        type_=ListChangesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -128,13 +133,13 @@ class RawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        typing.Any,
+                        types_api_error_ApiError,
                         parse_obj_as(
-                            type_=typing.Any,  # type: ignore
+                            type_=types_api_error_ApiError,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -146,6 +151,17 @@ class RawFilesystemClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -163,7 +179,7 @@ class RawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def apply_commit(
+    def create_commit(
         self,
         namespace_id: str,
         *,
@@ -273,17 +289,6 @@ class RawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 409:
                 raise ConflictError(
                     headers=dict(_response.headers),
@@ -310,9 +315,9 @@ class RawFilesystemClient:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        typing.Any,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -337,10 +342,11 @@ class RawFilesystemClient:
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[HttpResponse[typing.Iterator[bytes]]]:
         """
-        Returns file bytes for the current revision at a path, or for a specific retained revision when `revision_no` is provided.
+        Returns the current file bytes, a retained revision, or the revision captured by a live snapshot.
 
         Parameters
         ----------
@@ -351,7 +357,10 @@ class RawFilesystemClient:
             Absolute file path
 
         revision_no : typing.Optional[RevisionNo]
-            Optional prior revision number
+            Optional prior revision number; cannot be combined with snapshot_id
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the file revision captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -367,6 +376,7 @@ class RawFilesystemClient:
             params={
                 "path": path,
                 "revision_no": revision_no,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         ) as _response:
@@ -438,9 +448,9 @@ class RawFilesystemClient:
                         raise ServiceUnavailableError(
                             headers=dict(_response.headers),
                             body=typing.cast(
-                                types_api_error_ApiError,
+                                typing.Any,
                                 parse_obj_as(
-                                    type_=types_api_error_ApiError,  # type: ignore
+                                    type_=typing.Any,  # type: ignore
                                     object_=_response.json(),
                                 ),
                             ),
@@ -463,11 +473,12 @@ class RawFilesystemClient:
 
             yield _stream()
 
-    def begin_download(
+    def create_download(
         self,
         namespace_id: str,
         *,
         path: AbsolutePath,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         revision_no: typing.Optional[RevisionNo] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[BeginDownloadResponse]:
@@ -481,6 +492,9 @@ class RawFilesystemClient:
 
         path : AbsolutePath
             Absolute path of the file to read.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the file revision captured by this snapshot
 
         revision_no : typing.Optional[RevisionNo]
             Revision to read, or `None` for the path's current revision.
@@ -496,6 +510,9 @@ class RawFilesystemClient:
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/downloads",
             method="POST",
+            params={
+                "snapshot_id": snapshot_id,
+            },
             json={
                 "path": path,
                 "revision_no": revision_no,
@@ -549,17 +566,6 @@ class RawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -578,6 +584,17 @@ class RawFilesystemClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -603,10 +620,11 @@ class RawFilesystemClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListPathEntriesResponse]:
         """
-        Lists a directory at the current namespace head.
+        Lists a directory from the current state or a live snapshot.
 
         Parameters
         ----------
@@ -625,6 +643,9 @@ class RawFilesystemClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the directory state captured by this snapshot
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -634,13 +655,14 @@ class RawFilesystemClient:
             Directory listing page
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/list",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/entries",
             method="GET",
             params={
                 "path": path,
                 "limit": limit,
                 "cursor": cursor,
                 "include_attributes": include_attributes,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         )
@@ -687,13 +709,124 @@ class RawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    def get_path_entry(
+        self,
+        namespace_id: str,
+        *,
+        path: str,
+        include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[PathEntry]:
+        """
+        Returns path metadata from the current state or a live snapshot.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        path : str
+            Absolute filesystem path
+
+        include_attributes : typing.Optional[bool]
+            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the path state captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[PathEntry]
+            Authoritative path entry
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/entry",
+            method="GET",
+            params={
+                "path": path,
+                "include_attributes": include_attributes,
+                "snapshot_id": snapshot_id,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    PathEntry,
+                    parse_obj_as(
+                        type_=PathEntry,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -705,6 +838,17 @@ class RawFilesystemClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -809,17 +953,6 @@ class RawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -831,119 +964,13 @@ class RawFilesystemClient:
                         ),
                     ),
                 )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
-    def stat_path(
-        self,
-        namespace_id: str,
-        *,
-        path: str,
-        include_attributes: typing.Optional[bool] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[AuthoritativePathEntry]:
-        """
-        Returns the current metadata for a path, including inode identity, kind, display name, file content metadata, and the inode's attributes.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        path : str
-            Absolute filesystem path
-
-        include_attributes : typing.Optional[bool]
-            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[AuthoritativePathEntry]
-            Authoritative path entry
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/stat",
-            method="GET",
-            params={
-                "path": path,
-                "include_attributes": include_attributes,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    AuthoritativePathEntry,
-                    parse_obj_as(
-                        type_=AuthoritativePathEntry,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1010,6 +1037,17 @@ class RawFilesystemClient:
                     ),
                 )
                 return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 401:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
@@ -1032,17 +1070,6 @@ class RawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -1050,6 +1077,17 @@ class RawFilesystemClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1078,10 +1116,11 @@ class AsyncRawFilesystemClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[ChangesResponse]:
+    ) -> AsyncHttpResponse[ListChangesResponse]:
         """
-        Returns committed changes from the write-ahead log. Callers can use this feed to keep another projection synchronized with WAL history.
+        Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
 
         Parameters
         ----------
@@ -1094,12 +1133,15 @@ class AsyncRawFilesystemClient:
         limit : typing.Optional[int]
             Maximum page size
 
+        snapshot_id : typing.Optional[CheckpointId]
+            End the feed at this snapshot's captured sequence
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[ChangesResponse]
+        AsyncHttpResponse[ListChangesResponse]
             Committed changes
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -1108,15 +1150,16 @@ class AsyncRawFilesystemClient:
             params={
                 "after_seq": after_seq,
                 "limit": limit,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ChangesResponse,
+                    ListChangesResponse,
                     parse_obj_as(
-                        type_=ChangesResponse,  # type: ignore
+                        type_=ListChangesResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1154,13 +1197,13 @@ class AsyncRawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        typing.Any,
+                        types_api_error_ApiError,
                         parse_obj_as(
-                            type_=typing.Any,  # type: ignore
+                            type_=types_api_error_ApiError,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1172,6 +1215,17 @@ class AsyncRawFilesystemClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1189,7 +1243,7 @@ class AsyncRawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def apply_commit(
+    async def create_commit(
         self,
         namespace_id: str,
         *,
@@ -1299,17 +1353,6 @@ class AsyncRawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 409:
                 raise ConflictError(
                     headers=dict(_response.headers),
@@ -1336,9 +1379,9 @@ class AsyncRawFilesystemClient:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        typing.Any,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1363,10 +1406,11 @@ class AsyncRawFilesystemClient:
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[AsyncHttpResponse[typing.AsyncIterator[bytes]]]:
         """
-        Returns file bytes for the current revision at a path, or for a specific retained revision when `revision_no` is provided.
+        Returns the current file bytes, a retained revision, or the revision captured by a live snapshot.
 
         Parameters
         ----------
@@ -1377,7 +1421,10 @@ class AsyncRawFilesystemClient:
             Absolute file path
 
         revision_no : typing.Optional[RevisionNo]
-            Optional prior revision number
+            Optional prior revision number; cannot be combined with snapshot_id
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the file revision captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -1393,6 +1440,7 @@ class AsyncRawFilesystemClient:
             params={
                 "path": path,
                 "revision_no": revision_no,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         ) as _response:
@@ -1465,9 +1513,9 @@ class AsyncRawFilesystemClient:
                         raise ServiceUnavailableError(
                             headers=dict(_response.headers),
                             body=typing.cast(
-                                types_api_error_ApiError,
+                                typing.Any,
                                 parse_obj_as(
-                                    type_=types_api_error_ApiError,  # type: ignore
+                                    type_=typing.Any,  # type: ignore
                                     object_=_response.json(),
                                 ),
                             ),
@@ -1490,11 +1538,12 @@ class AsyncRawFilesystemClient:
 
             yield await _stream()
 
-    async def begin_download(
+    async def create_download(
         self,
         namespace_id: str,
         *,
         path: AbsolutePath,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         revision_no: typing.Optional[RevisionNo] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[BeginDownloadResponse]:
@@ -1508,6 +1557,9 @@ class AsyncRawFilesystemClient:
 
         path : AbsolutePath
             Absolute path of the file to read.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the file revision captured by this snapshot
 
         revision_no : typing.Optional[RevisionNo]
             Revision to read, or `None` for the path's current revision.
@@ -1523,6 +1575,9 @@ class AsyncRawFilesystemClient:
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/downloads",
             method="POST",
+            params={
+                "snapshot_id": snapshot_id,
+            },
             json={
                 "path": path,
                 "revision_no": revision_no,
@@ -1576,17 +1631,6 @@ class AsyncRawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -1605,6 +1649,17 @@ class AsyncRawFilesystemClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1630,10 +1685,11 @@ class AsyncRawFilesystemClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListPathEntriesResponse]:
         """
-        Lists a directory at the current namespace head.
+        Lists a directory from the current state or a live snapshot.
 
         Parameters
         ----------
@@ -1652,6 +1708,9 @@ class AsyncRawFilesystemClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the directory state captured by this snapshot
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1661,13 +1720,14 @@ class AsyncRawFilesystemClient:
             Directory listing page
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/list",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/entries",
             method="GET",
             params={
                 "path": path,
                 "limit": limit,
                 "cursor": cursor,
                 "include_attributes": include_attributes,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         )
@@ -1714,13 +1774,124 @@ class AsyncRawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    async def get_path_entry(
+        self,
+        namespace_id: str,
+        *,
+        path: str,
+        include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[CheckpointId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[PathEntry]:
+        """
+        Returns path metadata from the current state or a live snapshot.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        path : str
+            Absolute filesystem path
+
+        include_attributes : typing.Optional[bool]
+            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Use the path state captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[PathEntry]
+            Authoritative path entry
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/entry",
+            method="GET",
+            params={
+                "path": path,
+                "include_attributes": include_attributes,
+                "snapshot_id": snapshot_id,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    PathEntry,
+                    parse_obj_as(
+                        type_=PathEntry,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1732,6 +1903,17 @@ class AsyncRawFilesystemClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1836,17 +2018,6 @@ class AsyncRawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -1858,119 +2029,13 @@ class AsyncRawFilesystemClient:
                         ),
                     ),
                 )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
-    async def stat_path(
-        self,
-        namespace_id: str,
-        *,
-        path: str,
-        include_attributes: typing.Optional[bool] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[AuthoritativePathEntry]:
-        """
-        Returns the current metadata for a path, including inode identity, kind, display name, file content metadata, and the inode's attributes.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        path : str
-            Absolute filesystem path
-
-        include_attributes : typing.Optional[bool]
-            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[AuthoritativePathEntry]
-            Authoritative path entry
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/stat",
-            method="GET",
-            params={
-                "path": path,
-                "include_attributes": include_attributes,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    AuthoritativePathEntry,
-                    parse_obj_as(
-                        type_=AuthoritativePathEntry,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         typing.Any,
                         parse_obj_as(
                             type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -2037,6 +2102,17 @@ class AsyncRawFilesystemClient:
                     ),
                 )
                 return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 401:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
@@ -2059,17 +2135,6 @@ class AsyncRawFilesystemClient:
                         ),
                     ),
                 )
-            if _response.status_code == 408:
-                raise RequestTimeoutError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -2077,6 +2142,17 @@ class AsyncRawFilesystemClient:
                         types_api_error_ApiError,
                         parse_obj_as(
                             type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),

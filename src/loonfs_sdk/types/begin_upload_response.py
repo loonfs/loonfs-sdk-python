@@ -7,9 +7,9 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .direct_multipart_upload import DirectMultipartUpload
-from .direct_put_upload import DirectPutUpload
+from .checksum_algorithm import ChecksumAlgorithm
 from .namespace_id import NamespaceId
+from .object_transfer_access import ObjectTransferAccess
 from .upload_id import UploadId
 
 
@@ -44,7 +44,8 @@ class BeginUploadResponse_DirectPut(UniversalBaseModel):
     """
 
     mode: typing.Literal["direct_put"] = "direct_put"
-    direct_put: DirectPutUpload
+    access: ObjectTransferAccess
+    checksum_algorithm: ChecksumAlgorithm
     namespace_id: NamespaceId
     upload_id: UploadId
 
@@ -67,8 +68,9 @@ class BeginUploadResponse_DirectMultipart(UniversalBaseModel):
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
-    direct_multipart: DirectMultipartUpload
+    checksum_algorithm: ChecksumAlgorithm
     namespace_id: NamespaceId
+    part_size_bytes: int
     upload_id: UploadId
 
     if IS_PYDANTIC_V2:

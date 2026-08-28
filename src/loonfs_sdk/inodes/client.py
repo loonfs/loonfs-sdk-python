@@ -4,10 +4,11 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.authoritative_path_entry import AuthoritativePathEntry
 from ..types.begin_download_by_inode_request import BeginDownloadByInodeRequest
 from ..types.begin_download_by_inode_response import BeginDownloadByInodeResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
+from ..types.list_inode_children_response import ListInodeChildrenResponse
+from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
 from .raw_client import AsyncRawInodesClient, RawInodesClient
 
@@ -30,14 +31,14 @@ class InodesClient:
         """
         return self._raw_client
 
-    def stat_inode(
+    def get_inode(
         self,
         namespace_id: str,
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AuthoritativePathEntry:
+    ) -> PathEntry:
         """
         Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
 
@@ -57,7 +58,7 @@ class InodesClient:
 
         Returns
         -------
-        AuthoritativePathEntry
+        PathEntry
             Authoritative current inode entry
 
         Examples
@@ -68,13 +69,74 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.stat_inode(
+        client.inodes.get_inode(
             namespace_id="namespace_id",
             inode_id="ino_123",
         )
         """
-        _response = self._raw_client.stat_inode(
+        _response = self._raw_client.get_inode(
             namespace_id, inode_id, include_attributes=include_attributes, request_options=request_options
+        )
+        return _response.data
+
+    def list_inode_children(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        include_attributes: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListInodeChildrenResponse:
+        """
+        Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            Directory inode ID
+
+        limit : typing.Optional[int]
+            Maximum page size
+
+        cursor : typing.Optional[str]
+            Opaque directory page cursor
+
+        include_attributes : typing.Optional[bool]
+            Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListInodeChildrenResponse
+            One page of directory children
+
+        Examples
+        --------
+        from loonfs_sdk import LoonFS
+
+        client = LoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.inodes.list_inode_children(
+            namespace_id="namespace_id",
+            inode_id="ino_123",
+        )
+        """
+        _response = self._raw_client.list_inode_children(
+            namespace_id,
+            inode_id,
+            limit=limit,
+            cursor=cursor,
+            include_attributes=include_attributes,
+            request_options=request_options,
         )
         return _response.data
 
@@ -179,7 +241,7 @@ class InodesClient:
         ) as r:
             yield from r.data
 
-    def begin_download_by_inode(
+    def create_download_by_inode(
         self,
         namespace_id: str,
         inode_id: str,
@@ -220,14 +282,14 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.begin_download_by_inode(
+        client.inodes.create_download_by_inode(
             namespace_id="namespace_id",
             inode_id="ino_123",
             revision_no=1000000,
             request={"key": "value"},
         )
         """
-        _response = self._raw_client.begin_download_by_inode(
+        _response = self._raw_client.create_download_by_inode(
             namespace_id, inode_id, revision_no, request=request, request_options=request_options
         )
         return _response.data
@@ -248,14 +310,14 @@ class AsyncInodesClient:
         """
         return self._raw_client
 
-    async def stat_inode(
+    async def get_inode(
         self,
         namespace_id: str,
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AuthoritativePathEntry:
+    ) -> PathEntry:
         """
         Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
 
@@ -275,7 +337,7 @@ class AsyncInodesClient:
 
         Returns
         -------
-        AuthoritativePathEntry
+        PathEntry
             Authoritative current inode entry
 
         Examples
@@ -291,7 +353,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.stat_inode(
+            await client.inodes.get_inode(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
             )
@@ -299,8 +361,77 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.stat_inode(
+        _response = await self._raw_client.get_inode(
             namespace_id, inode_id, include_attributes=include_attributes, request_options=request_options
+        )
+        return _response.data
+
+    async def list_inode_children(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        include_attributes: typing.Optional[bool] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListInodeChildrenResponse:
+        """
+        Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            Directory inode ID
+
+        limit : typing.Optional[int]
+            Maximum page size
+
+        cursor : typing.Optional[str]
+            Opaque directory page cursor
+
+        include_attributes : typing.Optional[bool]
+            Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListInodeChildrenResponse
+            One page of directory children
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs_sdk import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.inodes.list_inode_children(
+                namespace_id="namespace_id",
+                inode_id="ino_123",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list_inode_children(
+            namespace_id,
+            inode_id,
+            limit=limit,
+            cursor=cursor,
+            include_attributes=include_attributes,
+            request_options=request_options,
         )
         return _response.data
 
@@ -422,7 +553,7 @@ class AsyncInodesClient:
             async for _chunk in r.data:
                 yield _chunk
 
-    async def begin_download_by_inode(
+    async def create_download_by_inode(
         self,
         namespace_id: str,
         inode_id: str,
@@ -468,7 +599,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.begin_download_by_inode(
+            await client.inodes.create_download_by_inode(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
                 revision_no=1000000,
@@ -478,7 +609,7 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.begin_download_by_inode(
+        _response = await self._raw_client.create_download_by_inode(
             namespace_id, inode_id, revision_no, request=request, request_options=request_options
         )
         return _response.data

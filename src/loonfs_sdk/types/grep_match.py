@@ -33,7 +33,7 @@ class GrepMatch(UniversalBaseModel):
     One-based line number of the match.
     """
 
-    line_truncated: typing.Optional[bool] = pydantic.Field(default=None)
+    line_truncated: bool = pydantic.Field()
     """
     True when `line` was truncated.
     """

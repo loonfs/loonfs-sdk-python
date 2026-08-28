@@ -10,21 +10,13 @@ if typing.TYPE_CHECKING:
     from .actor_id import ActorId
     from .actor_kind import ActorKind
     from .actor_ref import ActorRef
+    from .advance_retention_request import AdvanceRetentionRequest
     from .advance_retention_response import AdvanceRetentionResponse
     from .api_error import ApiError
     from .attribute_key import AttributeKey
     from .attribute_revision_no import AttributeRevisionNo
     from .attribute_value import AttributeValue
     from .attributes import Attributes
-    from .attributes_projection import AttributesProjection
-    from .authoritative_path_entry import AuthoritativePathEntry
-    from .authoritative_path_entry_directory import AuthoritativePathEntryDirectory
-    from .authoritative_path_entry_file import AuthoritativePathEntryFile
-    from .authoritative_path_entry_kind import (
-        AuthoritativePathEntryKind,
-        AuthoritativePathEntryKind_Dir,
-        AuthoritativePathEntryKind_File,
-    )
     from .begin_download_by_inode_request import BeginDownloadByInodeRequest
     from .begin_download_by_inode_response import BeginDownloadByInodeResponse
     from .begin_download_response import BeginDownloadResponse
@@ -48,13 +40,14 @@ if typing.TYPE_CHECKING:
     from .begin_upload_service_proxied import BeginUploadServiceProxied
     from .capability_document import CapabilityDocument
     from .change_seq import ChangeSeq
-    from .changes_response import ChangesResponse
     from .checkpoint import Checkpoint
     from .checkpoint_id import CheckpointId
     from .checkpoint_owner_fork import CheckpointOwnerFork
+    from .checkpoint_owner_snapshot import CheckpointOwnerSnapshot
     from .checkpoint_owner_summary import (
         CheckpointOwnerSummary,
         CheckpointOwnerSummary_Fork,
+        CheckpointOwnerSummary_Snapshot,
         CheckpointOwnerSummary_User,
     )
     from .checkpoint_owner_user import CheckpointOwnerUser
@@ -76,14 +69,11 @@ if typing.TYPE_CHECKING:
     from .content_id import ContentId
     from .content_ref import ContentRef
     from .content_token import ContentToken
-    from .create_checkpoint_response import CreateCheckpointResponse
     from .delete_directory_behavior import DeleteDirectoryBehavior
     from .delete_namespace_response import DeleteNamespaceResponse
-    from .deleted_direntry import DeletedDirentry
+    from .deleted_object_counts import DeletedObjectCounts
     from .destination_behavior import DestinationBehavior
-    from .direct_multipart_upload import DirectMultipartUpload
-    from .direct_multipart_upload_options import DirectMultipartUploadOptions
-    from .direct_put_upload import DirectPutUpload
+    from .directory_binding import DirectoryBinding
     from .display_name import DisplayName
     from .error_details import ErrorDetails
     from .file_revision import FileRevision
@@ -108,43 +98,50 @@ if typing.TYPE_CHECKING:
         FilesystemOperation,
         FilesystemOperation_CopyPath,
         FilesystemOperation_CreateDirectory,
+        FilesystemOperation_CreateDirectoryByInode,
+        FilesystemOperation_DeleteByInode,
         FilesystemOperation_DeletePath,
+        FilesystemOperation_MoveByInode,
         FilesystemOperation_MovePath,
         FilesystemOperation_PutFile,
+        FilesystemOperation_PutFileByInode,
+        FilesystemOperation_PutFileRevisionByInode,
         FilesystemOperation_RestoreRevision,
         FilesystemOperation_Undelete,
         FilesystemOperation_UpdateAttributes,
     )
-    from .fs_op_copy_path import FsOpCopyPath
-    from .fs_op_create_directory import FsOpCreateDirectory
-    from .fs_op_delete_path import FsOpDeletePath
-    from .fs_op_move_path import FsOpMovePath
-    from .fs_op_put_file import FsOpPutFile
-    from .fs_op_restore_revision import FsOpRestoreRevision
-    from .fs_op_undelete import FsOpUndelete
-    from .fs_op_update_attributes import FsOpUpdateAttributes
+    from .filesystem_operation_copy_path import FilesystemOperationCopyPath
+    from .filesystem_operation_create_directory import FilesystemOperationCreateDirectory
+    from .filesystem_operation_create_directory_by_inode import FilesystemOperationCreateDirectoryByInode
+    from .filesystem_operation_delete_by_inode import FilesystemOperationDeleteByInode
+    from .filesystem_operation_delete_path import FilesystemOperationDeletePath
+    from .filesystem_operation_move_by_inode import FilesystemOperationMoveByInode
+    from .filesystem_operation_move_path import FilesystemOperationMovePath
+    from .filesystem_operation_put_file import FilesystemOperationPutFile
+    from .filesystem_operation_put_file_by_inode import FilesystemOperationPutFileByInode
+    from .filesystem_operation_put_file_revision_by_inode import FilesystemOperationPutFileRevisionByInode
+    from .filesystem_operation_restore_revision import FilesystemOperationRestoreRevision
+    from .filesystem_operation_undelete import FilesystemOperationUndelete
+    from .filesystem_operation_update_attributes import FilesystemOperationUpdateAttributes
     from .gc_request import GcRequest
     from .gc_response import GcResponse
     from .grep_gc_response import GrepGcResponse
-    from .grep_index_lifecycle import (
-        GrepIndexLifecycle,
-        GrepIndexLifecycle_Active,
-        GrepIndexLifecycle_Backfilling,
-        GrepIndexLifecycle_Disabled,
-    )
+    from .grep_index import GrepIndex, GrepIndex_Active, GrepIndex_Backfilling, GrepIndex_Disabled
     from .grep_index_lifecycle_active import GrepIndexLifecycleActive
     from .grep_index_lifecycle_backfilling import GrepIndexLifecycleBackfilling
     from .grep_index_lifecycle_disabled import GrepIndexLifecycleDisabled
-    from .grep_index_status_response import GrepIndexStatusResponse
     from .grep_match import GrepMatch
     from .grep_response import GrepResponse
     from .inode_kind import InodeKind
+    from .list_changes_response import ListChangesResponse
     from .list_checkpoints_response import ListCheckpointsResponse
     from .list_file_revisions_response import ListFileRevisionsResponse
+    from .list_inode_children_response import ListInodeChildrenResponse
     from .list_path_entries_response import ListPathEntriesResponse
+    from .list_snapshots_response import ListSnapshotsResponse
     from .list_trash_response import ListTrashResponse
     from .maintenance_step_response import MaintenanceStepResponse
-    from .manifest_id import ManifestId
+    from .manifest_no import ManifestNo
     from .metadata_maintenance_request import MetadataMaintenanceRequest
     from .metadata_maintenance_response import MetadataMaintenanceResponse
     from .name_key import NameKey
@@ -153,7 +150,12 @@ if typing.TYPE_CHECKING:
     from .namespace_id import NamespaceId
     from .object_transfer_access import ObjectTransferAccess, ObjectTransferAccess_PresignedUrl
     from .object_transfer_access_presigned_url import ObjectTransferAccessPresignedUrl
+    from .path_entry import PathEntry, PathEntry_Dir, PathEntry_File
+    from .path_entry_directory import PathEntryDirectory
+    from .path_entry_file import PathEntryFile
     from .release_checkpoint_response import ReleaseCheckpointResponse
+    from .release_snapshot_response import ReleaseSnapshotResponse
+    from .released_checkpoint_counts import ReleasedCheckpointCounts
     from .reorganize_step_outcome import (
         ReorganizeStepOutcome,
         ReorganizeStepOutcome_CompactionAtCapacity,
@@ -161,7 +163,7 @@ if typing.TYPE_CHECKING:
         ReorganizeStepOutcome_CompactionRunning,
         ReorganizeStepOutcome_CompactionStarted,
         ReorganizeStepOutcome_NotNeeded,
-        ReorganizeStepOutcome_Superseded,
+        ReorganizeStepOutcome_RootAdvanced,
         ReorganizeStepOutcome_UnitPublished,
     )
     from .reorganize_step_outcome_compaction_at_capacity import ReorganizeStepOutcomeCompactionAtCapacity
@@ -169,13 +171,15 @@ if typing.TYPE_CHECKING:
     from .reorganize_step_outcome_compaction_running import ReorganizeStepOutcomeCompactionRunning
     from .reorganize_step_outcome_compaction_started import ReorganizeStepOutcomeCompactionStarted
     from .reorganize_step_outcome_not_needed import ReorganizeStepOutcomeNotNeeded
-    from .reorganize_step_outcome_superseded import ReorganizeStepOutcomeSuperseded
+    from .reorganize_step_outcome_root_advanced import ReorganizeStepOutcomeRootAdvanced
     from .reorganize_step_outcome_unit_published import ReorganizeStepOutcomeUnitPublished
-    from .request_timeout_error_body import RequestTimeoutErrorBody
     from .retained_candidates import RetainedCandidates
     from .revision_no import RevisionNo
+    from .run_no import RunNo
+    from .service_unavailable_error_body import ServiceUnavailableErrorBody
     from .sign_upload_parts_response import SignUploadPartsResponse
     from .signed_upload_part import SignedUploadPart
+    from .snapshot_summary import SnapshotSummary
     from .store_probe_check_outcome import StoreProbeCheckOutcome
     from .store_probe_check_result import StoreProbeCheckResult
     from .store_probe_request import StoreProbeRequest
@@ -186,46 +190,34 @@ if typing.TYPE_CHECKING:
     from .upload_id import UploadId
     from .upload_mode import UploadMode
     from .upload_part_checksum_claim import UploadPartChecksumClaim
-    from .upload_session_response import UploadSessionResponse
-    from .upload_session_status import (
-        UploadSessionStatus,
-        UploadSessionStatus_Aborted,
-        UploadSessionStatus_Completed,
-        UploadSessionStatus_Open,
-    )
+    from .upload_session import UploadSession, UploadSession_Aborted, UploadSession_Completed, UploadSession_Open
     from .upload_session_status_aborted import UploadSessionStatusAborted
     from .upload_session_status_completed import UploadSessionStatusCompleted
     from .upload_session_status_open import UploadSessionStatusOpen
     from .wal_flush_step_outcome import (
         WalFlushStepOutcome,
+        WalFlushStepOutcome_AlreadyPublished,
         WalFlushStepOutcome_Flushed,
         WalFlushStepOutcome_NotNeeded,
-        WalFlushStepOutcome_RaceLost,
-        WalFlushStepOutcome_Superseded,
+        WalFlushStepOutcome_RetriesExhausted,
     )
+    from .wal_flush_step_outcome_already_published import WalFlushStepOutcomeAlreadyPublished
     from .wal_flush_step_outcome_flushed import WalFlushStepOutcomeFlushed
     from .wal_flush_step_outcome_not_needed import WalFlushStepOutcomeNotNeeded
-    from .wal_flush_step_outcome_race_lost import WalFlushStepOutcomeRaceLost
-    from .wal_flush_step_outcome_superseded import WalFlushStepOutcomeSuperseded
+    from .wal_flush_step_outcome_retries_exhausted import WalFlushStepOutcomeRetriesExhausted
     from .writer_epoch import WriterEpoch
 _dynamic_imports: typing.Dict[str, str] = {
     "AbsolutePath": ".absolute_path",
     "ActorId": ".actor_id",
     "ActorKind": ".actor_kind",
     "ActorRef": ".actor_ref",
+    "AdvanceRetentionRequest": ".advance_retention_request",
     "AdvanceRetentionResponse": ".advance_retention_response",
     "ApiError": ".api_error",
     "AttributeKey": ".attribute_key",
     "AttributeRevisionNo": ".attribute_revision_no",
     "AttributeValue": ".attribute_value",
     "Attributes": ".attributes",
-    "AttributesProjection": ".attributes_projection",
-    "AuthoritativePathEntry": ".authoritative_path_entry",
-    "AuthoritativePathEntryDirectory": ".authoritative_path_entry_directory",
-    "AuthoritativePathEntryFile": ".authoritative_path_entry_file",
-    "AuthoritativePathEntryKind": ".authoritative_path_entry_kind",
-    "AuthoritativePathEntryKind_Dir": ".authoritative_path_entry_kind",
-    "AuthoritativePathEntryKind_File": ".authoritative_path_entry_kind",
     "BeginDownloadByInodeRequest": ".begin_download_by_inode_request",
     "BeginDownloadByInodeResponse": ".begin_download_by_inode_response",
     "BeginDownloadResponse": ".begin_download_response",
@@ -245,12 +237,13 @@ _dynamic_imports: typing.Dict[str, str] = {
     "BeginUploadServiceProxied": ".begin_upload_service_proxied",
     "CapabilityDocument": ".capability_document",
     "ChangeSeq": ".change_seq",
-    "ChangesResponse": ".changes_response",
     "Checkpoint": ".checkpoint",
     "CheckpointId": ".checkpoint_id",
     "CheckpointOwnerFork": ".checkpoint_owner_fork",
+    "CheckpointOwnerSnapshot": ".checkpoint_owner_snapshot",
     "CheckpointOwnerSummary": ".checkpoint_owner_summary",
     "CheckpointOwnerSummary_Fork": ".checkpoint_owner_summary",
+    "CheckpointOwnerSummary_Snapshot": ".checkpoint_owner_summary",
     "CheckpointOwnerSummary_User": ".checkpoint_owner_summary",
     "CheckpointOwnerUser": ".checkpoint_owner_user",
     "Checksum": ".checksum",
@@ -269,14 +262,11 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ContentId": ".content_id",
     "ContentRef": ".content_ref",
     "ContentToken": ".content_token",
-    "CreateCheckpointResponse": ".create_checkpoint_response",
     "DeleteDirectoryBehavior": ".delete_directory_behavior",
     "DeleteNamespaceResponse": ".delete_namespace_response",
-    "DeletedDirentry": ".deleted_direntry",
+    "DeletedObjectCounts": ".deleted_object_counts",
     "DestinationBehavior": ".destination_behavior",
-    "DirectMultipartUpload": ".direct_multipart_upload",
-    "DirectMultipartUploadOptions": ".direct_multipart_upload_options",
-    "DirectPutUpload": ".direct_put_upload",
+    "DirectoryBinding": ".directory_binding",
     "DisplayName": ".display_name",
     "ErrorDetails": ".error_details",
     "FileRevision": ".file_revision",
@@ -296,42 +286,54 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemChange_Moved": ".filesystem_change",
     "FilesystemChange_Undeleted": ".filesystem_change",
     "FilesystemOperation": ".filesystem_operation",
+    "FilesystemOperationCopyPath": ".filesystem_operation_copy_path",
+    "FilesystemOperationCreateDirectory": ".filesystem_operation_create_directory",
+    "FilesystemOperationCreateDirectoryByInode": ".filesystem_operation_create_directory_by_inode",
+    "FilesystemOperationDeleteByInode": ".filesystem_operation_delete_by_inode",
+    "FilesystemOperationDeletePath": ".filesystem_operation_delete_path",
+    "FilesystemOperationMoveByInode": ".filesystem_operation_move_by_inode",
+    "FilesystemOperationMovePath": ".filesystem_operation_move_path",
+    "FilesystemOperationPutFile": ".filesystem_operation_put_file",
+    "FilesystemOperationPutFileByInode": ".filesystem_operation_put_file_by_inode",
+    "FilesystemOperationPutFileRevisionByInode": ".filesystem_operation_put_file_revision_by_inode",
+    "FilesystemOperationRestoreRevision": ".filesystem_operation_restore_revision",
+    "FilesystemOperationUndelete": ".filesystem_operation_undelete",
+    "FilesystemOperationUpdateAttributes": ".filesystem_operation_update_attributes",
     "FilesystemOperation_CopyPath": ".filesystem_operation",
     "FilesystemOperation_CreateDirectory": ".filesystem_operation",
+    "FilesystemOperation_CreateDirectoryByInode": ".filesystem_operation",
+    "FilesystemOperation_DeleteByInode": ".filesystem_operation",
     "FilesystemOperation_DeletePath": ".filesystem_operation",
+    "FilesystemOperation_MoveByInode": ".filesystem_operation",
     "FilesystemOperation_MovePath": ".filesystem_operation",
     "FilesystemOperation_PutFile": ".filesystem_operation",
+    "FilesystemOperation_PutFileByInode": ".filesystem_operation",
+    "FilesystemOperation_PutFileRevisionByInode": ".filesystem_operation",
     "FilesystemOperation_RestoreRevision": ".filesystem_operation",
     "FilesystemOperation_Undelete": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributes": ".filesystem_operation",
-    "FsOpCopyPath": ".fs_op_copy_path",
-    "FsOpCreateDirectory": ".fs_op_create_directory",
-    "FsOpDeletePath": ".fs_op_delete_path",
-    "FsOpMovePath": ".fs_op_move_path",
-    "FsOpPutFile": ".fs_op_put_file",
-    "FsOpRestoreRevision": ".fs_op_restore_revision",
-    "FsOpUndelete": ".fs_op_undelete",
-    "FsOpUpdateAttributes": ".fs_op_update_attributes",
     "GcRequest": ".gc_request",
     "GcResponse": ".gc_response",
     "GrepGcResponse": ".grep_gc_response",
-    "GrepIndexLifecycle": ".grep_index_lifecycle",
+    "GrepIndex": ".grep_index",
     "GrepIndexLifecycleActive": ".grep_index_lifecycle_active",
     "GrepIndexLifecycleBackfilling": ".grep_index_lifecycle_backfilling",
     "GrepIndexLifecycleDisabled": ".grep_index_lifecycle_disabled",
-    "GrepIndexLifecycle_Active": ".grep_index_lifecycle",
-    "GrepIndexLifecycle_Backfilling": ".grep_index_lifecycle",
-    "GrepIndexLifecycle_Disabled": ".grep_index_lifecycle",
-    "GrepIndexStatusResponse": ".grep_index_status_response",
+    "GrepIndex_Active": ".grep_index",
+    "GrepIndex_Backfilling": ".grep_index",
+    "GrepIndex_Disabled": ".grep_index",
     "GrepMatch": ".grep_match",
     "GrepResponse": ".grep_response",
     "InodeKind": ".inode_kind",
+    "ListChangesResponse": ".list_changes_response",
     "ListCheckpointsResponse": ".list_checkpoints_response",
     "ListFileRevisionsResponse": ".list_file_revisions_response",
+    "ListInodeChildrenResponse": ".list_inode_children_response",
     "ListPathEntriesResponse": ".list_path_entries_response",
+    "ListSnapshotsResponse": ".list_snapshots_response",
     "ListTrashResponse": ".list_trash_response",
     "MaintenanceStepResponse": ".maintenance_step_response",
-    "ManifestId": ".manifest_id",
+    "ManifestNo": ".manifest_no",
     "MetadataMaintenanceRequest": ".metadata_maintenance_request",
     "MetadataMaintenanceResponse": ".metadata_maintenance_response",
     "NameKey": ".name_key",
@@ -341,27 +343,36 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ObjectTransferAccess": ".object_transfer_access",
     "ObjectTransferAccessPresignedUrl": ".object_transfer_access_presigned_url",
     "ObjectTransferAccess_PresignedUrl": ".object_transfer_access",
+    "PathEntry": ".path_entry",
+    "PathEntryDirectory": ".path_entry_directory",
+    "PathEntryFile": ".path_entry_file",
+    "PathEntry_Dir": ".path_entry",
+    "PathEntry_File": ".path_entry",
     "ReleaseCheckpointResponse": ".release_checkpoint_response",
+    "ReleaseSnapshotResponse": ".release_snapshot_response",
+    "ReleasedCheckpointCounts": ".released_checkpoint_counts",
     "ReorganizeStepOutcome": ".reorganize_step_outcome",
     "ReorganizeStepOutcomeCompactionAtCapacity": ".reorganize_step_outcome_compaction_at_capacity",
     "ReorganizeStepOutcomeCompactionRequired": ".reorganize_step_outcome_compaction_required",
     "ReorganizeStepOutcomeCompactionRunning": ".reorganize_step_outcome_compaction_running",
     "ReorganizeStepOutcomeCompactionStarted": ".reorganize_step_outcome_compaction_started",
     "ReorganizeStepOutcomeNotNeeded": ".reorganize_step_outcome_not_needed",
-    "ReorganizeStepOutcomeSuperseded": ".reorganize_step_outcome_superseded",
+    "ReorganizeStepOutcomeRootAdvanced": ".reorganize_step_outcome_root_advanced",
     "ReorganizeStepOutcomeUnitPublished": ".reorganize_step_outcome_unit_published",
     "ReorganizeStepOutcome_CompactionAtCapacity": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_CompactionRequired": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_CompactionRunning": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_CompactionStarted": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_NotNeeded": ".reorganize_step_outcome",
-    "ReorganizeStepOutcome_Superseded": ".reorganize_step_outcome",
+    "ReorganizeStepOutcome_RootAdvanced": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_UnitPublished": ".reorganize_step_outcome",
-    "RequestTimeoutErrorBody": ".request_timeout_error_body",
     "RetainedCandidates": ".retained_candidates",
     "RevisionNo": ".revision_no",
+    "RunNo": ".run_no",
+    "ServiceUnavailableErrorBody": ".service_unavailable_error_body",
     "SignUploadPartsResponse": ".sign_upload_parts_response",
     "SignedUploadPart": ".signed_upload_part",
+    "SnapshotSummary": ".snapshot_summary",
     "StoreProbeCheckOutcome": ".store_probe_check_outcome",
     "StoreProbeCheckResult": ".store_probe_check_result",
     "StoreProbeRequest": ".store_probe_request",
@@ -372,23 +383,22 @@ _dynamic_imports: typing.Dict[str, str] = {
     "UploadId": ".upload_id",
     "UploadMode": ".upload_mode",
     "UploadPartChecksumClaim": ".upload_part_checksum_claim",
-    "UploadSessionResponse": ".upload_session_response",
-    "UploadSessionStatus": ".upload_session_status",
+    "UploadSession": ".upload_session",
     "UploadSessionStatusAborted": ".upload_session_status_aborted",
     "UploadSessionStatusCompleted": ".upload_session_status_completed",
     "UploadSessionStatusOpen": ".upload_session_status_open",
-    "UploadSessionStatus_Aborted": ".upload_session_status",
-    "UploadSessionStatus_Completed": ".upload_session_status",
-    "UploadSessionStatus_Open": ".upload_session_status",
+    "UploadSession_Aborted": ".upload_session",
+    "UploadSession_Completed": ".upload_session",
+    "UploadSession_Open": ".upload_session",
     "WalFlushStepOutcome": ".wal_flush_step_outcome",
+    "WalFlushStepOutcomeAlreadyPublished": ".wal_flush_step_outcome_already_published",
     "WalFlushStepOutcomeFlushed": ".wal_flush_step_outcome_flushed",
     "WalFlushStepOutcomeNotNeeded": ".wal_flush_step_outcome_not_needed",
-    "WalFlushStepOutcomeRaceLost": ".wal_flush_step_outcome_race_lost",
-    "WalFlushStepOutcomeSuperseded": ".wal_flush_step_outcome_superseded",
+    "WalFlushStepOutcomeRetriesExhausted": ".wal_flush_step_outcome_retries_exhausted",
+    "WalFlushStepOutcome_AlreadyPublished": ".wal_flush_step_outcome",
     "WalFlushStepOutcome_Flushed": ".wal_flush_step_outcome",
     "WalFlushStepOutcome_NotNeeded": ".wal_flush_step_outcome",
-    "WalFlushStepOutcome_RaceLost": ".wal_flush_step_outcome",
-    "WalFlushStepOutcome_Superseded": ".wal_flush_step_outcome",
+    "WalFlushStepOutcome_RetriesExhausted": ".wal_flush_step_outcome",
     "WriterEpoch": ".writer_epoch",
 }
 
@@ -419,19 +429,13 @@ __all__ = [
     "ActorId",
     "ActorKind",
     "ActorRef",
+    "AdvanceRetentionRequest",
     "AdvanceRetentionResponse",
     "ApiError",
     "AttributeKey",
     "AttributeRevisionNo",
     "AttributeValue",
     "Attributes",
-    "AttributesProjection",
-    "AuthoritativePathEntry",
-    "AuthoritativePathEntryDirectory",
-    "AuthoritativePathEntryFile",
-    "AuthoritativePathEntryKind",
-    "AuthoritativePathEntryKind_Dir",
-    "AuthoritativePathEntryKind_File",
     "BeginDownloadByInodeRequest",
     "BeginDownloadByInodeResponse",
     "BeginDownloadResponse",
@@ -451,12 +455,13 @@ __all__ = [
     "BeginUploadServiceProxied",
     "CapabilityDocument",
     "ChangeSeq",
-    "ChangesResponse",
     "Checkpoint",
     "CheckpointId",
     "CheckpointOwnerFork",
+    "CheckpointOwnerSnapshot",
     "CheckpointOwnerSummary",
     "CheckpointOwnerSummary_Fork",
+    "CheckpointOwnerSummary_Snapshot",
     "CheckpointOwnerSummary_User",
     "CheckpointOwnerUser",
     "Checksum",
@@ -475,14 +480,11 @@ __all__ = [
     "ContentId",
     "ContentRef",
     "ContentToken",
-    "CreateCheckpointResponse",
     "DeleteDirectoryBehavior",
     "DeleteNamespaceResponse",
-    "DeletedDirentry",
+    "DeletedObjectCounts",
     "DestinationBehavior",
-    "DirectMultipartUpload",
-    "DirectMultipartUploadOptions",
-    "DirectPutUpload",
+    "DirectoryBinding",
     "DisplayName",
     "ErrorDetails",
     "FileRevision",
@@ -502,42 +504,54 @@ __all__ = [
     "FilesystemChange_Moved",
     "FilesystemChange_Undeleted",
     "FilesystemOperation",
+    "FilesystemOperationCopyPath",
+    "FilesystemOperationCreateDirectory",
+    "FilesystemOperationCreateDirectoryByInode",
+    "FilesystemOperationDeleteByInode",
+    "FilesystemOperationDeletePath",
+    "FilesystemOperationMoveByInode",
+    "FilesystemOperationMovePath",
+    "FilesystemOperationPutFile",
+    "FilesystemOperationPutFileByInode",
+    "FilesystemOperationPutFileRevisionByInode",
+    "FilesystemOperationRestoreRevision",
+    "FilesystemOperationUndelete",
+    "FilesystemOperationUpdateAttributes",
     "FilesystemOperation_CopyPath",
     "FilesystemOperation_CreateDirectory",
+    "FilesystemOperation_CreateDirectoryByInode",
+    "FilesystemOperation_DeleteByInode",
     "FilesystemOperation_DeletePath",
+    "FilesystemOperation_MoveByInode",
     "FilesystemOperation_MovePath",
     "FilesystemOperation_PutFile",
+    "FilesystemOperation_PutFileByInode",
+    "FilesystemOperation_PutFileRevisionByInode",
     "FilesystemOperation_RestoreRevision",
     "FilesystemOperation_Undelete",
     "FilesystemOperation_UpdateAttributes",
-    "FsOpCopyPath",
-    "FsOpCreateDirectory",
-    "FsOpDeletePath",
-    "FsOpMovePath",
-    "FsOpPutFile",
-    "FsOpRestoreRevision",
-    "FsOpUndelete",
-    "FsOpUpdateAttributes",
     "GcRequest",
     "GcResponse",
     "GrepGcResponse",
-    "GrepIndexLifecycle",
+    "GrepIndex",
     "GrepIndexLifecycleActive",
     "GrepIndexLifecycleBackfilling",
     "GrepIndexLifecycleDisabled",
-    "GrepIndexLifecycle_Active",
-    "GrepIndexLifecycle_Backfilling",
-    "GrepIndexLifecycle_Disabled",
-    "GrepIndexStatusResponse",
+    "GrepIndex_Active",
+    "GrepIndex_Backfilling",
+    "GrepIndex_Disabled",
     "GrepMatch",
     "GrepResponse",
     "InodeKind",
+    "ListChangesResponse",
     "ListCheckpointsResponse",
     "ListFileRevisionsResponse",
+    "ListInodeChildrenResponse",
     "ListPathEntriesResponse",
+    "ListSnapshotsResponse",
     "ListTrashResponse",
     "MaintenanceStepResponse",
-    "ManifestId",
+    "ManifestNo",
     "MetadataMaintenanceRequest",
     "MetadataMaintenanceResponse",
     "NameKey",
@@ -547,27 +561,36 @@ __all__ = [
     "ObjectTransferAccess",
     "ObjectTransferAccessPresignedUrl",
     "ObjectTransferAccess_PresignedUrl",
+    "PathEntry",
+    "PathEntryDirectory",
+    "PathEntryFile",
+    "PathEntry_Dir",
+    "PathEntry_File",
     "ReleaseCheckpointResponse",
+    "ReleaseSnapshotResponse",
+    "ReleasedCheckpointCounts",
     "ReorganizeStepOutcome",
     "ReorganizeStepOutcomeCompactionAtCapacity",
     "ReorganizeStepOutcomeCompactionRequired",
     "ReorganizeStepOutcomeCompactionRunning",
     "ReorganizeStepOutcomeCompactionStarted",
     "ReorganizeStepOutcomeNotNeeded",
-    "ReorganizeStepOutcomeSuperseded",
+    "ReorganizeStepOutcomeRootAdvanced",
     "ReorganizeStepOutcomeUnitPublished",
     "ReorganizeStepOutcome_CompactionAtCapacity",
     "ReorganizeStepOutcome_CompactionRequired",
     "ReorganizeStepOutcome_CompactionRunning",
     "ReorganizeStepOutcome_CompactionStarted",
     "ReorganizeStepOutcome_NotNeeded",
-    "ReorganizeStepOutcome_Superseded",
+    "ReorganizeStepOutcome_RootAdvanced",
     "ReorganizeStepOutcome_UnitPublished",
-    "RequestTimeoutErrorBody",
     "RetainedCandidates",
     "RevisionNo",
+    "RunNo",
+    "ServiceUnavailableErrorBody",
     "SignUploadPartsResponse",
     "SignedUploadPart",
+    "SnapshotSummary",
     "StoreProbeCheckOutcome",
     "StoreProbeCheckResult",
     "StoreProbeRequest",
@@ -578,22 +601,21 @@ __all__ = [
     "UploadId",
     "UploadMode",
     "UploadPartChecksumClaim",
-    "UploadSessionResponse",
-    "UploadSessionStatus",
+    "UploadSession",
     "UploadSessionStatusAborted",
     "UploadSessionStatusCompleted",
     "UploadSessionStatusOpen",
-    "UploadSessionStatus_Aborted",
-    "UploadSessionStatus_Completed",
-    "UploadSessionStatus_Open",
+    "UploadSession_Aborted",
+    "UploadSession_Completed",
+    "UploadSession_Open",
     "WalFlushStepOutcome",
+    "WalFlushStepOutcomeAlreadyPublished",
     "WalFlushStepOutcomeFlushed",
     "WalFlushStepOutcomeNotNeeded",
-    "WalFlushStepOutcomeRaceLost",
-    "WalFlushStepOutcomeSuperseded",
+    "WalFlushStepOutcomeRetriesExhausted",
+    "WalFlushStepOutcome_AlreadyPublished",
     "WalFlushStepOutcome_Flushed",
     "WalFlushStepOutcome_NotNeeded",
-    "WalFlushStepOutcome_RaceLost",
-    "WalFlushStepOutcome_Superseded",
+    "WalFlushStepOutcome_RetriesExhausted",
     "WriterEpoch",
 ]

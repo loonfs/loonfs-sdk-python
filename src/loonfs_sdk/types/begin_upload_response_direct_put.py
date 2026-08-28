@@ -4,8 +4,9 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .direct_put_upload import DirectPutUpload
+from .checksum_algorithm import ChecksumAlgorithm
 from .namespace_id import NamespaceId
+from .object_transfer_access import ObjectTransferAccess
 from .upload_id import UploadId
 
 
@@ -14,9 +15,14 @@ class BeginUploadResponseDirectPut(UniversalBaseModel):
     One presigned request writes the whole object.
     """
 
-    direct_put: DirectPutUpload = pydantic.Field()
+    access: ObjectTransferAccess = pydantic.Field()
     """
-    The object this session writes, and the capability to write it.
+    Short-lived permission to write the object.
+    """
+
+    checksum_algorithm: ChecksumAlgorithm = pydantic.Field()
+    """
+    Checksum algorithm the client must use for its completion claim.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

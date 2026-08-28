@@ -9,24 +9,20 @@ if typing.TYPE_CHECKING:
     from .bad_request_error import BadRequestError
     from .conflict_error import ConflictError
     from .content_too_large_error import ContentTooLargeError
-    from .forbidden_error import ForbiddenError
     from .gone_error import GoneError
     from .internal_server_error import InternalServerError
     from .not_found_error import NotFoundError
     from .not_implemented_error import NotImplementedError
-    from .request_timeout_error import RequestTimeoutError
     from .service_unavailable_error import ServiceUnavailableError
     from .unauthorized_error import UnauthorizedError
 _dynamic_imports: typing.Dict[str, str] = {
     "BadRequestError": ".bad_request_error",
     "ConflictError": ".conflict_error",
     "ContentTooLargeError": ".content_too_large_error",
-    "ForbiddenError": ".forbidden_error",
     "GoneError": ".gone_error",
     "InternalServerError": ".internal_server_error",
     "NotFoundError": ".not_found_error",
     "NotImplementedError": ".not_implemented_error",
-    "RequestTimeoutError": ".request_timeout_error",
     "ServiceUnavailableError": ".service_unavailable_error",
     "UnauthorizedError": ".unauthorized_error",
 }
@@ -57,12 +53,10 @@ __all__ = [
     "BadRequestError",
     "ConflictError",
     "ContentTooLargeError",
-    "ForbiddenError",
     "GoneError",
     "InternalServerError",
     "NotFoundError",
     "NotImplementedError",
-    "RequestTimeoutError",
     "ServiceUnavailableError",
     "UnauthorizedError",
 ]

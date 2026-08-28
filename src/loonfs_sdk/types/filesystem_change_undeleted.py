@@ -12,6 +12,11 @@ class FilesystemChangeUndeleted(UniversalBaseModel):
     A deleted inode was recovered and re-bound.
     """
 
+    binding_generation: str = pydantic.Field()
+    """
+    Opaque identifier for the binding created by this event.
+    """
+
     display_name: DisplayName = pydantic.Field()
     """
     Spelling of the recovered binding.

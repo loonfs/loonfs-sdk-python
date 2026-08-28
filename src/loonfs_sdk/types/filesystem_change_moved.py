@@ -12,6 +12,11 @@ class FilesystemChangeMoved(UniversalBaseModel):
     An inode moved to a new parent directory or name.
     """
 
+    binding_generation: str = pydantic.Field()
+    """
+    Opaque identifier for the binding created by this event.
+    """
+
     from_display_name: DisplayName = pydantic.Field()
     """
     Spelling of the old binding.

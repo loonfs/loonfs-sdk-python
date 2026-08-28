@@ -12,12 +12,7 @@ from .namespace_id import NamespaceId
 
 class CheckpointOwnerSummary_User(UniversalBaseModel):
     """
-    Who a checkpoint record answers to, as the record durably records it.
-
-    The two owners have different releases, so a listing that names the
-    owner also says which records the release endpoint will act on: a user
-    pin is released by id, and a fork lease is released by deleting the
-    target namespace it protects.
+    The owner of a checkpoint record.
     """
 
     kind: typing.Literal["user"] = "user"
@@ -35,12 +30,7 @@ class CheckpointOwnerSummary_User(UniversalBaseModel):
 
 class CheckpointOwnerSummary_Fork(UniversalBaseModel):
     """
-    Who a checkpoint record answers to, as the record durably records it.
-
-    The two owners have different releases, so a listing that names the
-    owner also says which records the release endpoint will act on: a user
-    pin is released by id, and a fork lease is released by deleting the
-    target namespace it protects.
+    The owner of a checkpoint record.
     """
 
     kind: typing.Literal["fork"] = "fork"
@@ -56,6 +46,26 @@ class CheckpointOwnerSummary_Fork(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class CheckpointOwnerSummary_Snapshot(UniversalBaseModel):
+    """
+    The owner of a checkpoint record.
+    """
+
+    kind: typing.Literal["snapshot"] = "snapshot"
+    expires_at_ms: int
+    name: str
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 CheckpointOwnerSummary = typing_extensions.Annotated[
-    typing.Union[CheckpointOwnerSummary_User, CheckpointOwnerSummary_Fork], pydantic.Field(discriminator="kind")
+    typing.Union[CheckpointOwnerSummary_User, CheckpointOwnerSummary_Fork, CheckpointOwnerSummary_Snapshot],
+    pydantic.Field(discriminator="kind"),
 ]
