@@ -4,7 +4,7 @@
   "generatorVersion": "5.28.0",
   "generatorConfig": {
     "client_class_name": "LoonFS",
-    "package_name": "loonfs_sdk"
+    "package_name": "loonfs"
   },
   "originGitCommit": "1ee76ef6c5e6c70a795255d12772aacf2cd87a48",
   "originGitCommitIsDirty": true,

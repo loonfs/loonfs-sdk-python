@@ -54,7 +54,7 @@ class LoonFS:
 
     Examples
     --------
-    from loonfs_sdk import LoonFS
+    from loonfs import LoonFS
 
     client = LoonFS(
         token="YOUR_TOKEN",
@@ -215,7 +215,7 @@ class AsyncLoonFS:
 
     Examples
     --------
-    from loonfs_sdk import AsyncLoonFS
+    from loonfs import AsyncLoonFS
 
     client = AsyncLoonFS(
         token="YOUR_TOKEN",
