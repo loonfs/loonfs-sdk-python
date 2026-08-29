@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "loonfs-sdk"
+name = "loonfs"
 version = "0.1.0"
 description = "Python client for the LoonFS HTTP API"
 readme = "README.md"
@@ -26,8 +26,8 @@ Issues = "https://github.com/loonfs/loonfs/issues"
 Repository = "https://github.com/loonfs/loonfs-sdk-python"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/loonfs_sdk"]
+packages = ["src/loonfs"]
 exclude = [
-    "src/loonfs_sdk/.fern",
-    "src/loonfs_sdk/tests",
+    "src/loonfs/.fern",
+    "src/loonfs/tests",
 ]
