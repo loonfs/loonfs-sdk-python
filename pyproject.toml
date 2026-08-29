@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "loonfs"
-version = "0.1.0"
-description = "Python client for the LoonFS HTTP API"
+version = "0.1.1"
+description = "Python SDK for LoonFS server and proxy applications"
 readme = "README.md"
 license = "Apache-2.0"
 license-files = ["LICENSE"]

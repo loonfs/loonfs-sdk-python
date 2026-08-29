@@ -55,7 +55,7 @@ class UploadsClient:
 
         Examples
         --------
-        from loonfs import BeginUploadRequest_ServiceProxied, LoonFS
+        from loonfs.server import BeginUploadRequest_ServiceProxied, LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -93,7 +93,7 @@ class UploadsClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs.server import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -131,7 +131,7 @@ class UploadsClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs.server import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -176,7 +176,7 @@ class UploadsClient:
 
         Examples
         --------
-        from loonfs import CompleteUploadRequest_ServiceProxied, LoonFS
+        from loonfs.server import CompleteUploadRequest_ServiceProxied, LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -260,7 +260,7 @@ class UploadsClient:
 
         Examples
         --------
-        from loonfs import Checksum, LoonFS, UploadPartChecksumClaim
+        from loonfs.server import Checksum, LoonFS, UploadPartChecksumClaim
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -326,7 +326,7 @@ class AsyncUploadsClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS, BeginUploadRequest_ServiceProxied
+        from loonfs.server import AsyncLoonFS, BeginUploadRequest_ServiceProxied
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -372,7 +372,7 @@ class AsyncUploadsClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -418,7 +418,7 @@ class AsyncUploadsClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -471,7 +471,7 @@ class AsyncUploadsClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS, CompleteUploadRequest_ServiceProxied
+        from loonfs.server import AsyncLoonFS, CompleteUploadRequest_ServiceProxied
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -563,7 +563,7 @@ class AsyncUploadsClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS, Checksum, UploadPartChecksumClaim
+        from loonfs.server import AsyncLoonFS, Checksum, UploadPartChecksumClaim
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",

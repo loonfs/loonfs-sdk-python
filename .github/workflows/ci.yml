@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: pip install -e ".[aiohttp]" pytest
-      - run: python -c "from loonfs import LoonFS, AsyncLoonFS"
+      - run: python -c "from loonfs.server import LoonFS, AsyncLoonFS"
+      - run: python -c "import loonfs; assert not hasattr(loonfs, 'LoonFS')"
       - run: python -m pytest src/loonfs/tests -q
       - run: python -c "import loonfs.proxy, loonfs.transfers"
