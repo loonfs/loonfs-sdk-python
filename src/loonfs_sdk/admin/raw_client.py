@@ -180,6 +180,9 @@ class RawAdminClient:
         HttpResponse[Checkpoint]
             The created checkpoint
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             f"v0/admin/namespaces/{encode_path_param(namespace_id)}/checkpoints",
             method="POST",
@@ -190,7 +193,7 @@ class RawAdminClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -850,6 +853,9 @@ class RawAdminClient:
         HttpResponse[GrepGcResponse]
             Namespace grep garbage collection completed
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index/gc",
             method="POST",
@@ -860,7 +866,7 @@ class RawAdminClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -978,6 +984,9 @@ class RawAdminClient:
         HttpResponse[MaintenanceStepResponse]
             Maintenance step completed
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             f"v0/admin/namespaces/{encode_path_param(namespace_id)}/maintenance/run",
             method="POST",
@@ -991,7 +1000,7 @@ class RawAdminClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -1090,11 +1099,14 @@ class RawAdminClient:
         HttpResponse[StoreProbeResponse]
             Probe completed; per-check outcomes are in the body
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             "v0/admin/store/probe",
             method="POST",
             json=request,
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -1296,6 +1308,9 @@ class AsyncRawAdminClient:
         AsyncHttpResponse[Checkpoint]
             The created checkpoint
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/admin/namespaces/{encode_path_param(namespace_id)}/checkpoints",
             method="POST",
@@ -1306,7 +1321,7 @@ class AsyncRawAdminClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -1966,6 +1981,9 @@ class AsyncRawAdminClient:
         AsyncHttpResponse[GrepGcResponse]
             Namespace grep garbage collection completed
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index/gc",
             method="POST",
@@ -1976,7 +1994,7 @@ class AsyncRawAdminClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -2094,6 +2112,9 @@ class AsyncRawAdminClient:
         AsyncHttpResponse[MaintenanceStepResponse]
             Maintenance step completed
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/admin/namespaces/{encode_path_param(namespace_id)}/maintenance/run",
             method="POST",
@@ -2107,7 +2128,7 @@ class AsyncRawAdminClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -2206,11 +2227,14 @@ class AsyncRawAdminClient:
         AsyncHttpResponse[StoreProbeResponse]
             Probe completed; per-check outcomes are in the body
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             "v0/admin/store/probe",
             method="POST",
             json=request,
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:

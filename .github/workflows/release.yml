@@ -1,0 +1,46 @@
+name: Publish package
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing vX.Y.Z tag to publish
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install build twine
+      - name: Verify release version
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          version="${RELEASE_TAG#v}"
+          python - "$version" <<'PY'
+          import pathlib
+          import sys
+          import tomllib
+
+          actual = tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"]
+          expected = sys.argv[1]
+          if actual != expected:
+              raise SystemExit(f"pyproject.toml has {actual}; expected {expected}")
+          PY
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - uses: pypa/gh-action-pypi-publish@release/v1

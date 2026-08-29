@@ -53,6 +53,9 @@ class RawNamespacesClient:
         HttpResponse[Namespace]
             Namespace created
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             "v0/namespaces",
             method="POST",
@@ -62,7 +65,7 @@ class RawNamespacesClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -271,13 +274,16 @@ class RawNamespacesClient:
         HttpResponse[DeleteNamespaceResponse]
             Namespace deleted
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}",
             method="DELETE",
             params={
                 "expected_head_seq": expected_head_seq,
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -394,6 +400,9 @@ class RawNamespacesClient:
         HttpResponse[Namespace]
             Namespace forked
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/forks",
             method="POST",
@@ -403,7 +412,7 @@ class RawNamespacesClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -626,6 +635,9 @@ class RawNamespacesClient:
         HttpResponse[SnapshotSummary]
             Snapshot created
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots",
             method="POST",
@@ -636,7 +648,7 @@ class RawNamespacesClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -955,6 +967,9 @@ class AsyncRawNamespacesClient:
         AsyncHttpResponse[Namespace]
             Namespace created
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             "v0/namespaces",
             method="POST",
@@ -964,7 +979,7 @@ class AsyncRawNamespacesClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -1173,13 +1188,16 @@ class AsyncRawNamespacesClient:
         AsyncHttpResponse[DeleteNamespaceResponse]
             Namespace deleted
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}",
             method="DELETE",
             params={
                 "expected_head_seq": expected_head_seq,
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1296,6 +1314,9 @@ class AsyncRawNamespacesClient:
         AsyncHttpResponse[Namespace]
             Namespace forked
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/forks",
             method="POST",
@@ -1305,7 +1326,7 @@ class AsyncRawNamespacesClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
@@ -1528,6 +1549,9 @@ class AsyncRawNamespacesClient:
         AsyncHttpResponse[SnapshotSummary]
             Snapshot created
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots",
             method="POST",
@@ -1538,7 +1562,7 @@ class AsyncRawNamespacesClient:
             headers={
                 "content-type": "application/json",
             },
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
             omit=OMIT,
         )
         try:
