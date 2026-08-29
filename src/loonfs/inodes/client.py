@@ -63,7 +63,7 @@ class InodesClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs.server import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -119,7 +119,7 @@ class InodesClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs.server import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -176,7 +176,7 @@ class InodesClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs.server import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -224,7 +224,7 @@ class InodesClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs.server import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -276,7 +276,7 @@ class InodesClient:
 
         Examples
         --------
-        from loonfs import LoonFS
+        from loonfs.server import LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -344,7 +344,7 @@ class AsyncInodesClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -408,7 +408,7 @@ class AsyncInodesClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -473,7 +473,7 @@ class AsyncInodesClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -529,7 +529,7 @@ class AsyncInodesClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -590,7 +590,7 @@ class AsyncInodesClient:
         --------
         import asyncio
 
-        from loonfs import AsyncLoonFS
+        from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",

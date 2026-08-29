@@ -27,7 +27,7 @@ Returns `ok` when the server is running and can accept requests.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -89,7 +89,7 @@ Returns this process's metrics in Prometheus text exposition format 0.0.4. Unlik
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -151,7 +151,7 @@ Returns `ready` while the server admits new work. Once shutdown begins and publi
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -213,7 +213,7 @@ Returns a summary of supported features and limits.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -276,7 +276,7 @@ Lists one page of active checkpoints in checkpoint-id order. Expired checkpoints
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -364,7 +364,7 @@ Creates a named, user-owned checkpoint record pinning the current namespace view
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -459,7 +459,7 @@ Releases a user-owned checkpoint pin by id. Idempotent: releasing an already-rel
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -540,7 +540,7 @@ Returns namespace state together with the current manifest and visible WAL tail.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -612,7 +612,7 @@ Returns whether the namespace's grep index is `disabled`, `backfilling`, or `act
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -684,7 +684,7 @@ Disables the namespace's grep root and clears its segment references with one du
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -756,7 +756,7 @@ Enables the namespace's grep root and asks this deployment's maintenance runner 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -828,7 +828,7 @@ Runs one explicit garbage-collection pass over only this namespace's grep-owned 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -923,7 +923,7 @@ Runs one bounded maintenance step. Include `metadata_maintenance`, `retention`, 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1028,7 +1028,7 @@ Proves the configured object store honours the create-if-absent, compare-and-swa
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1103,7 +1103,7 @@ Creates a new empty namespace.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1175,7 +1175,7 @@ Returns the current head and retention state for a namespace.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1247,7 +1247,7 @@ Marks a namespace as deleted.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1327,7 +1327,7 @@ Creates a new namespace as a fork from the source namespace's current durable vi
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1408,7 +1408,7 @@ Lists live snapshots in snapshot-id order. Released and expired snapshots are om
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1496,7 +1496,7 @@ Creates a snapshot of the current namespace state. Every call creates a new snap
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1586,7 +1586,7 @@ Extends a live snapshot without passing its lifetime limit. Repeating the reques
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1676,7 +1676,7 @@ Releases a snapshot by id. Repeated releases succeed.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1758,7 +1758,7 @@ Returns committed changes after a sequence. A snapshot limits the feed to its ca
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -1856,7 +1856,7 @@ Applies one commit: an ordered, non-empty list of path operations that commit to
 <dd>
 
 ```python
-from loonfs import LoonFS, ActorRef, FilesystemOperation_CreateDirectory
+from loonfs.server import LoonFS, ActorRef, FilesystemOperation_CreateDirectory
 
 client = LoonFS(
     token="<token>",
@@ -1989,7 +1989,7 @@ Returns the current file bytes, a retained revision, or the revision captured by
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2086,7 +2086,7 @@ Authorizes one direct read of a file's content object and returns a short-lived 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2184,7 +2184,7 @@ Lists a directory from the current state or a live snapshot.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2298,7 +2298,7 @@ Returns path metadata from the current state or a live snapshot.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2396,7 +2396,7 @@ Resolves the current path to a file inode and returns revisions for that file. I
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2493,7 +2493,7 @@ Returns the namespace's recoverable deletions, oldest deletion first. Entries ne
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2582,7 +2582,7 @@ Searches file content with a regular expression, accelerated by the namespace's 
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2712,7 +2712,7 @@ Returns the current path entry for a visible inode. Unknown or hidden inodes ans
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2801,7 +2801,7 @@ Lists one page of a directory's children addressed by parent inode ID, in canoni
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -2906,7 +2906,7 @@ Returns retained revisions for a file inode without requiring a current path.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -3003,7 +3003,7 @@ Reads and verifies one retained file revision by inode ID and revision number.
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -3093,7 +3093,7 @@ Authorizes a direct read of one retained inode revision. The request body is `{}
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -3195,7 +3195,7 @@ Starts an upload session for content that may later be attached to a file. Servi
 <dd>
 
 ```python
-from loonfs import LoonFS, BeginUploadRequest_ServiceProxied
+from loonfs.server import LoonFS, BeginUploadRequest_ServiceProxied
 
 client = LoonFS(
     token="<token>",
@@ -3276,7 +3276,7 @@ Returns an upload session. A completed session includes a new content token so t
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -3357,7 +3357,7 @@ Ends an upload session without selecting content and deletes the object it was w
 <dd>
 
 ```python
-from loonfs import LoonFS
+from loonfs.server import LoonFS
 
 client = LoonFS(
     token="<token>",
@@ -3438,7 +3438,7 @@ Completes an upload. The request mode must match the mode used to start the sess
 <dd>
 
 ```python
-from loonfs import LoonFS, CompleteUploadRequest_ServiceProxied
+from loonfs.server import LoonFS, CompleteUploadRequest_ServiceProxied
 
 client = LoonFS(
     token="<token>",
@@ -3606,7 +3606,7 @@ Returns one short-lived, checksum-bound upload capability per requested part of 
 <dd>
 
 ```python
-from loonfs import LoonFS, UploadPartChecksumClaim, Checksum
+from loonfs.server import LoonFS, UploadPartChecksumClaim, Checksum
 
 client = LoonFS(
     token="<token>",
