@@ -381,8 +381,6 @@ class HttpClient:
         _timeout = (
             request_options.get("timeout")
             if request_options is not None and request_options.get("timeout") is not None
-            else request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
         timeout = _timeout if _timeout is not None else httpx.USE_CLIENT_DEFAULT
@@ -550,8 +548,6 @@ class HttpClient:
         _timeout = (
             request_options.get("timeout")
             if request_options is not None and request_options.get("timeout") is not None
-            else request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
         timeout = _timeout if _timeout is not None else httpx.USE_CLIENT_DEFAULT
@@ -688,8 +684,6 @@ class AsyncHttpClient:
         _timeout = (
             request_options.get("timeout")
             if request_options is not None and request_options.get("timeout") is not None
-            else request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
         timeout = _timeout if _timeout is not None else httpx.USE_CLIENT_DEFAULT
@@ -860,8 +854,6 @@ class AsyncHttpClient:
         _timeout = (
             request_options.get("timeout")
             if request_options is not None and request_options.get("timeout") is not None
-            else request_options.get("timeout_in_seconds")
-            if request_options is not None and request_options.get("timeout_in_seconds") is not None
             else self.base_timeout()
         )
         timeout = _timeout if _timeout is not None else httpx.USE_CLIENT_DEFAULT
