@@ -17,162 +17,64 @@ from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.api_error import ApiError as types_api_error_ApiError
-from ..types.change_seq import ChangeSeq
-from ..types.delete_namespace_response import DeleteNamespaceResponse
-from ..types.namespace import Namespace
-from ..types.namespace_id import NamespaceId
+from ..types.list_snapshots_response import ListSnapshotsResponse
+from ..types.release_snapshot_response import ReleaseSnapshotResponse
+from ..types.snapshot_summary import SnapshotSummary
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class RawNamespacesClient:
+class RawSnapshotsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def create(
-        self, *, namespace_id: NamespaceId, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Namespace]:
+    def list(
+        self,
+        namespace_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ListSnapshotsResponse]:
         """
-        Creates a new empty namespace.
-
-        Parameters
-        ----------
-        namespace_id : NamespaceId
-            Durable namespace id to create.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[Namespace]
-            Namespace created
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = self._client_wrapper.httpx_client.request(
-            "v0/namespaces",
-            method="POST",
-            json={
-                "namespace_id": namespace_id,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=_request_options_with_retries_disabled,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Namespace,
-                    parse_obj_as(
-                        type_=Namespace,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
-    def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Namespace]:
-        """
-        Returns the current head and retention state for a namespace.
+        Lists live snapshots in snapshot-id order. Released and expired snapshots are omitted.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
+        limit : typing.Optional[int]
+            Maximum page size
+
+        cursor : typing.Optional[str]
+            Opaque snapshot-list page cursor
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Namespace]
-            Namespace
+        HttpResponse[ListSnapshotsResponse]
+            Live snapshots
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots",
             method="GET",
+            params={
+                "limit": limit,
+                "cursor": cursor,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    ListSnapshotsResponse,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=ListSnapshotsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -210,17 +112,6 @@ class RawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -245,166 +136,40 @@ class RawNamespacesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def delete(
-        self,
-        namespace_id: str,
-        *,
-        expected_head_seq: typing.Optional[ChangeSeq] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[DeleteNamespaceResponse]:
+    def create(
+        self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[SnapshotSummary]:
         """
-        Marks a namespace as deleted.
+        Creates a snapshot of the current namespace state. Every call creates a new snapshot.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        expected_head_seq : typing.Optional[ChangeSeq]
-            Delete only if the namespace head is still at this sequence
+        name : str
+            A label that does not need to be unique.
+
+        ttl_ms : int
+            Snapshot lifetime from the current server time, in milliseconds.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteNamespaceResponse]
-            Namespace deleted
+        HttpResponse[SnapshotSummary]
+            Snapshot created
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
             {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
         )
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}",
-            method="DELETE",
-            params={
-                "expected_head_seq": expected_head_seq,
-            },
-            request_options=_request_options_with_retries_disabled,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DeleteNamespaceResponse,
-                    parse_obj_as(
-                        type_=DeleteNamespaceResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
-    def fork(
-        self,
-        namespace_id: str,
-        *,
-        new_namespace_id: NamespaceId,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Namespace]:
-        """
-        Creates a new namespace as a fork from the source namespace's current durable view.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Source namespace id
-
-        new_namespace_id : NamespaceId
-            Durable namespace id for the fork target.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[Namespace]
-            Namespace forked
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/forks",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots",
             method="POST",
             json={
-                "new_namespace_id": new_namespace_id,
+                "name": name,
+                "ttl_ms": ttl_ms,
             },
             headers={
                 "content-type": "application/json",
@@ -415,9 +180,9 @@ class RawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    SnapshotSummary,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=SnapshotSummary,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -501,153 +266,259 @@ class RawNamespacesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
+    def extend(
+        self,
+        namespace_id: str,
+        snapshot_id: str,
+        *,
+        ttl_ms: int,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[SnapshotSummary]:
+        """
+        Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
 
-class AsyncRawNamespacesClient:
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        ttl_ms : int
+            Requested lifetime from the server's current time, in milliseconds.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[SnapshotSummary]
+            Snapshot extended
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}/extend",
+            method="POST",
+            json={
+                "ttl_ms": ttl_ms,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    SnapshotSummary,
+                    parse_obj_as(
+                        type_=SnapshotSummary,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    def release(
+        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[ReleaseSnapshotResponse]:
+        """
+        Releases a snapshot by id. Repeated releases succeed.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ReleaseSnapshotResponse]
+            Snapshot release accepted
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}/release",
+            method="POST",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ReleaseSnapshotResponse,
+                    parse_obj_as(
+                        type_=ReleaseSnapshotResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+
+class AsyncRawSnapshotsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def create(
-        self, *, namespace_id: NamespaceId, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Namespace]:
+    async def list(
+        self,
+        namespace_id: str,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[ListSnapshotsResponse]:
         """
-        Creates a new empty namespace.
-
-        Parameters
-        ----------
-        namespace_id : NamespaceId
-            Durable namespace id to create.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[Namespace]
-            Namespace created
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = await self._client_wrapper.httpx_client.request(
-            "v0/namespaces",
-            method="POST",
-            json={
-                "namespace_id": namespace_id,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=_request_options_with_retries_disabled,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Namespace,
-                    parse_obj_as(
-                        type_=Namespace,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
-    async def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Namespace]:
-        """
-        Returns the current head and retention state for a namespace.
+        Lists live snapshots in snapshot-id order. Released and expired snapshots are omitted.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
+        limit : typing.Optional[int]
+            Maximum page size
+
+        cursor : typing.Optional[str]
+            Opaque snapshot-list page cursor
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Namespace]
-            Namespace
+        AsyncHttpResponse[ListSnapshotsResponse]
+            Live snapshots
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots",
             method="GET",
+            params={
+                "limit": limit,
+                "cursor": cursor,
+            },
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    ListSnapshotsResponse,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=ListSnapshotsResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -685,17 +556,6 @@ class AsyncRawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -720,166 +580,40 @@ class AsyncRawNamespacesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def delete(
-        self,
-        namespace_id: str,
-        *,
-        expected_head_seq: typing.Optional[ChangeSeq] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[DeleteNamespaceResponse]:
+    async def create(
+        self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[SnapshotSummary]:
         """
-        Marks a namespace as deleted.
+        Creates a snapshot of the current namespace state. Every call creates a new snapshot.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        expected_head_seq : typing.Optional[ChangeSeq]
-            Delete only if the namespace head is still at this sequence
+        name : str
+            A label that does not need to be unique.
+
+        ttl_ms : int
+            Snapshot lifetime from the current server time, in milliseconds.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteNamespaceResponse]
-            Namespace deleted
+        AsyncHttpResponse[SnapshotSummary]
+            Snapshot created
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
             {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
         )
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}",
-            method="DELETE",
-            params={
-                "expected_head_seq": expected_head_seq,
-            },
-            request_options=_request_options_with_retries_disabled,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DeleteNamespaceResponse,
-                    parse_obj_as(
-                        type_=DeleteNamespaceResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
-    async def fork(
-        self,
-        namespace_id: str,
-        *,
-        new_namespace_id: NamespaceId,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Namespace]:
-        """
-        Creates a new namespace as a fork from the source namespace's current durable view.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Source namespace id
-
-        new_namespace_id : NamespaceId
-            Durable namespace id for the fork target.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[Namespace]
-            Namespace forked
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/forks",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots",
             method="POST",
             json={
-                "new_namespace_id": new_namespace_id,
+                "name": name,
+                "ttl_ms": ttl_ms,
             },
             headers={
                 "content-type": "application/json",
@@ -890,9 +624,9 @@ class AsyncRawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    SnapshotSummary,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=SnapshotSummary,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -943,6 +677,209 @@ class AsyncRawNamespacesClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    async def extend(
+        self,
+        namespace_id: str,
+        snapshot_id: str,
+        *,
+        ttl_ms: int,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[SnapshotSummary]:
+        """
+        Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        ttl_ms : int
+            Requested lifetime from the server's current time, in milliseconds.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[SnapshotSummary]
+            Snapshot extended
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}/extend",
+            method="POST",
+            json={
+                "ttl_ms": ttl_ms,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    SnapshotSummary,
+                    parse_obj_as(
+                        type_=SnapshotSummary,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    async def release(
+        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[ReleaseSnapshotResponse]:
+        """
+        Releases a snapshot by id. Repeated releases succeed.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[ReleaseSnapshotResponse]
+            Snapshot release accepted
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}/release",
+            method="POST",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ReleaseSnapshotResponse,
+                    parse_obj_as(
+                        type_=ReleaseSnapshotResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,

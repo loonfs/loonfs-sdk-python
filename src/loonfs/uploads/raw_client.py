@@ -37,7 +37,7 @@ class RawUploadsClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def create_upload(
+    def create(
         self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[BeginUploadResponse]:
         """
@@ -173,7 +173,7 @@ class RawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def get_upload(
+    def retrieve(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadSession]:
         """
@@ -278,7 +278,7 @@ class RawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def abort_upload(
+    def abort(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadSession]:
         """
@@ -394,7 +394,7 @@ class RawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def complete_upload(
+    def complete(
         self,
         namespace_id: str,
         upload_id: str,
@@ -535,7 +535,7 @@ class RawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def put_upload_content(
+    def put_content(
         self,
         namespace_id: str,
         upload_id: str,
@@ -674,7 +674,7 @@ class RawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def sign_upload_parts(
+    def sign_parts(
         self,
         namespace_id: str,
         upload_id: str,
@@ -835,7 +835,7 @@ class AsyncRawUploadsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def create_upload(
+    async def create(
         self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[BeginUploadResponse]:
         """
@@ -971,7 +971,7 @@ class AsyncRawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def get_upload(
+    async def retrieve(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadSession]:
         """
@@ -1076,7 +1076,7 @@ class AsyncRawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def abort_upload(
+    async def abort(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadSession]:
         """
@@ -1192,7 +1192,7 @@ class AsyncRawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def complete_upload(
+    async def complete(
         self,
         namespace_id: str,
         upload_id: str,
@@ -1333,7 +1333,7 @@ class AsyncRawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def put_upload_content(
+    async def put_content(
         self,
         namespace_id: str,
         upload_id: str,
@@ -1472,7 +1472,7 @@ class AsyncRawUploadsClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def sign_upload_parts(
+    async def sign_parts(
         self,
         namespace_id: str,
         upload_id: str,

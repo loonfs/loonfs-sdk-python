@@ -212,9 +212,10 @@ if typing.TYPE_CHECKING:
         ServiceUnavailableError,
         UnauthorizedError,
     )
-    from . import admin, filesystem, inodes, namespaces, query, system, uploads
+    from . import admin, capabilities, changes, commits, files, inodes, namespaces, snapshots, trash, uploads
     from ._default_clients import DefaultAioHttpClient, DefaultAsyncHttpxClient
-    from .client import AsyncLoonFS, LoonFS
+    from .client import AsyncLoonFS
+    from .transfers import LoonFS
 _dynamic_imports: typing.Dict[str, str] = {
     "AbsolutePath": ".types",
     "ActorId": ".types",
@@ -349,7 +350,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ListPathEntriesResponse": ".types",
     "ListSnapshotsResponse": ".types",
     "ListTrashResponse": ".types",
-    "LoonFS": ".client",
+    "LoonFS": ".transfers",
     "MaintenanceStepResponse": ".types",
     "ManifestNo": ".types",
     "MetadataMaintenanceRequest": ".types",
@@ -423,11 +424,14 @@ _dynamic_imports: typing.Dict[str, str] = {
     "WalFlushStepOutcome_RetriesExhausted": ".types",
     "WriterEpoch": ".types",
     "admin": ".admin",
-    "filesystem": ".filesystem",
+    "capabilities": ".capabilities",
+    "changes": ".changes",
+    "commits": ".commits",
+    "files": ".files",
     "inodes": ".inodes",
     "namespaces": ".namespaces",
-    "query": ".query",
-    "system": ".system",
+    "snapshots": ".snapshots",
+    "trash": ".trash",
     "uploads": ".uploads",
 }
 
@@ -661,10 +665,13 @@ __all__ = [
     "WalFlushStepOutcome_RetriesExhausted",
     "WriterEpoch",
     "admin",
-    "filesystem",
+    "capabilities",
+    "changes",
+    "commits",
+    "files",
     "inodes",
     "namespaces",
-    "query",
-    "system",
+    "snapshots",
+    "trash",
     "uploads",
 ]

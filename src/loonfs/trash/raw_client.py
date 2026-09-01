@@ -12,79 +12,52 @@ from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..errors.bad_request_error import BadRequestError
 from ..errors.gone_error import GoneError
-from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
-from ..errors.not_implemented_error import NotImplementedError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.api_error import ApiError as types_api_error_ApiError
-from ..types.grep_response import GrepResponse
+from ..types.list_trash_response import ListTrashResponse
 from pydantic import ValidationError
 
 
-class RawQueryClient:
+class RawTrashClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def grep(
+    def list(
         self,
         namespace_id: str,
         *,
-        pattern: str,
-        case_insensitive: typing.Optional[bool] = None,
-        path_prefix: typing.Optional[str] = None,
-        allow_scan: typing.Optional[bool] = None,
-        allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[GrepResponse]:
+    ) -> HttpResponse[ListTrashResponse]:
         """
-        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
+        Returns the namespace's recoverable deletions, oldest deletion first. Entries never age out at the retention floor; each carries the inode id and deletion sequence undelete needs, plus the deleted name when the delete recorded one.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        pattern : str
-            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
-
-        case_insensitive : typing.Optional[bool]
-            Match case-insensitively (`true` or `false`). Defaults to `false`.
-
-        path_prefix : typing.Optional[str]
-            Complete absolute path used to restrict matches.
-
-        allow_scan : typing.Optional[bool]
-            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
-
-        allow_stale : typing.Optional[bool]
-            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
-
         limit : typing.Optional[int]
-            Maximum matches per page
+            Maximum page size
 
         cursor : typing.Optional[str]
-            Opaque grep page cursor
+            Opaque trash page cursor
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[GrepResponse]
-            One page of matches
+        HttpResponse[ListTrashResponse]
+            Recoverable deletions
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/grep",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/trash",
             method="GET",
             params={
-                "pattern": pattern,
-                "case_insensitive": case_insensitive,
-                "path_prefix": path_prefix,
-                "allow_scan": allow_scan,
-                "allow_stale": allow_stale,
                 "limit": limit,
                 "cursor": cursor,
             },
@@ -93,9 +66,9 @@ class RawQueryClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GrepResponse,
+                    ListTrashResponse,
                     parse_obj_as(
-                        type_=GrepResponse,  # type: ignore
+                        type_=ListTrashResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -144,28 +117,6 @@ class RawQueryClient:
                         ),
                     ),
                 )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 501:
-                raise NotImplementedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -191,69 +142,44 @@ class RawQueryClient:
         )
 
 
-class AsyncRawQueryClient:
+class AsyncRawTrashClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def grep(
+    async def list(
         self,
         namespace_id: str,
         *,
-        pattern: str,
-        case_insensitive: typing.Optional[bool] = None,
-        path_prefix: typing.Optional[str] = None,
-        allow_scan: typing.Optional[bool] = None,
-        allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[GrepResponse]:
+    ) -> AsyncHttpResponse[ListTrashResponse]:
         """
-        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
+        Returns the namespace's recoverable deletions, oldest deletion first. Entries never age out at the retention floor; each carries the inode id and deletion sequence undelete needs, plus the deleted name when the delete recorded one.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        pattern : str
-            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
-
-        case_insensitive : typing.Optional[bool]
-            Match case-insensitively (`true` or `false`). Defaults to `false`.
-
-        path_prefix : typing.Optional[str]
-            Complete absolute path used to restrict matches.
-
-        allow_scan : typing.Optional[bool]
-            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
-
-        allow_stale : typing.Optional[bool]
-            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
-
         limit : typing.Optional[int]
-            Maximum matches per page
+            Maximum page size
 
         cursor : typing.Optional[str]
-            Opaque grep page cursor
+            Opaque trash page cursor
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[GrepResponse]
-            One page of matches
+        AsyncHttpResponse[ListTrashResponse]
+            Recoverable deletions
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/grep",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/trash",
             method="GET",
             params={
-                "pattern": pattern,
-                "case_insensitive": case_insensitive,
-                "path_prefix": path_prefix,
-                "allow_scan": allow_scan,
-                "allow_stale": allow_stale,
                 "limit": limit,
                 "cursor": cursor,
             },
@@ -262,9 +188,9 @@ class AsyncRawQueryClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    GrepResponse,
+                    ListTrashResponse,
                     parse_obj_as(
-                        type_=GrepResponse,  # type: ignore
+                        type_=ListTrashResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -304,28 +230,6 @@ class AsyncRawQueryClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 500:
-                raise InternalServerError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 501:
-                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,

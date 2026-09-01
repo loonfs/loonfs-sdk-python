@@ -54,6 +54,11 @@ class ErrorDetails(UniversalBaseModel):
     that still means to delete it retries against.
     """
 
+    actual_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Stable inode ID within a namespace
+    """
+
     actual_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
     Revision that is actually current; absent when the inode has none.
@@ -101,6 +106,11 @@ class ErrorDetails(UniversalBaseModel):
     """
     Head sequence a namespace delete required the namespace to still be
     at.
+    """
+
+    expected_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Stable inode ID within a namespace
     """
 
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)

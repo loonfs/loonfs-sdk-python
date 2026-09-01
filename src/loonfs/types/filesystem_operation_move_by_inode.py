@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .destination_behavior import DestinationBehavior
 from .display_name import DisplayName
+from .revision_no import RevisionNo
 
 
 class FilesystemOperationMoveByInode(UniversalBaseModel):
@@ -21,6 +22,16 @@ class FilesystemOperationMoveByInode(UniversalBaseModel):
     expected_binding_generation: str = pydantic.Field()
     """
     Binding generation required for the move.
+    """
+
+    expected_destination_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Stable inode ID within a namespace
+    """
+
+    expected_destination_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
+    """
+    With `replace` behavior and an inode guard, the request requires this content revision.
     """
 
     inode_id: str = pydantic.Field()

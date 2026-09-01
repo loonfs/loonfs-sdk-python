@@ -3,151 +3,38 @@
 import typing
 from json.decoder import JSONDecodeError
 
-from ..core.api_error import ApiError as core_api_error_ApiError
-from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
-from ..core.http_response import AsyncHttpResponse, HttpResponse
-from ..core.jsonable_encoder import encode_path_param
-from ..core.parse_error import ParsingError
-from ..core.pydantic_utilities import parse_obj_as
-from ..core.request_options import RequestOptions
-from ..errors.bad_request_error import BadRequestError
-from ..errors.conflict_error import ConflictError
-from ..errors.gone_error import GoneError
-from ..errors.not_found_error import NotFoundError
-from ..errors.service_unavailable_error import ServiceUnavailableError
-from ..errors.unauthorized_error import UnauthorizedError
-from ..types.api_error import ApiError as types_api_error_ApiError
-from ..types.change_seq import ChangeSeq
-from ..types.delete_namespace_response import DeleteNamespaceResponse
-from ..types.namespace import Namespace
-from ..types.namespace_id import NamespaceId
+from ...core.api_error import ApiError as core_api_error_ApiError
+from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
+from ...core.http_response import AsyncHttpResponse, HttpResponse
+from ...core.jsonable_encoder import encode_path_param
+from ...core.parse_error import ParsingError
+from ...core.pydantic_utilities import parse_obj_as
+from ...core.request_options import RequestOptions
+from ...errors.bad_request_error import BadRequestError
+from ...errors.conflict_error import ConflictError
+from ...errors.internal_server_error import InternalServerError
+from ...errors.not_found_error import NotFoundError
+from ...errors.not_implemented_error import NotImplementedError
+from ...errors.service_unavailable_error import ServiceUnavailableError
+from ...errors.unauthorized_error import UnauthorizedError
+from ...types.api_error import ApiError as types_api_error_ApiError
+from ...types.grep_gc_response import GrepGcResponse
+from ...types.grep_index import GrepIndex
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class RawNamespacesClient:
+class RawGrepIndexClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def create(
-        self, *, namespace_id: NamespaceId, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Namespace]:
-        """
-        Creates a new empty namespace.
-
-        Parameters
-        ----------
-        namespace_id : NamespaceId
-            Durable namespace id to create.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[Namespace]
-            Namespace created
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = self._client_wrapper.httpx_client.request(
-            "v0/namespaces",
-            method="POST",
-            json={
-                "namespace_id": namespace_id,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=_request_options_with_retries_disabled,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Namespace,
-                    parse_obj_as(
-                        type_=Namespace,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
     def retrieve(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Namespace]:
+    ) -> HttpResponse[GrepIndex]:
         """
-        Returns the current head and retention state for a namespace.
+        Returns whether the namespace's grep index is `disabled`, `backfilling`, or `active`, including build progress when available. A namespace that has never enabled the index is `disabled`. This operation requires a deployment that maintains grep indexes and does not change the index.
 
         Parameters
         ----------
@@ -159,20 +46,20 @@ class RawNamespacesClient:
 
         Returns
         -------
-        HttpResponse[Namespace]
-            Namespace
+        HttpResponse[GrepIndex]
+            Grep index status and build progress
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}",
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -199,8 +86,8 @@ class RawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 404:
-                raise NotFoundError(
+            if _response.status_code == 500:
+                raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -210,8 +97,8 @@ class RawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 410:
-                raise GoneError(
+            if _response.status_code == 501:
+                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -245,49 +132,36 @@ class RawNamespacesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def delete(
-        self,
-        namespace_id: str,
-        *,
-        expected_head_seq: typing.Optional[ChangeSeq] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[DeleteNamespaceResponse]:
+    def disable(
+        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[GrepIndex]:
         """
-        Marks a namespace as deleted.
+        Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        expected_head_seq : typing.Optional[ChangeSeq]
-            Delete only if the namespace head is still at this sequence
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[DeleteNamespaceResponse]
-            Namespace deleted
+        HttpResponse[GrepIndex]
+            Grep root disabled or already disabled
         """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}",
-            method="DELETE",
-            params={
-                "expected_head_seq": expected_head_seq,
-            },
-            request_options=_request_options_with_retries_disabled,
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index/disable",
+            method="POST",
+            request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteNamespaceResponse,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=DeleteNamespaceResponse,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -336,8 +210,19 @@ class RawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 410:
-                raise GoneError(
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -371,40 +256,172 @@ class RawNamespacesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def fork(
-        self,
-        namespace_id: str,
-        *,
-        new_namespace_id: NamespaceId,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Namespace]:
+    def enable(
+        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[GrepIndex]:
         """
-        Creates a new namespace as a fork from the source namespace's current durable view.
+        Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
         namespace_id : str
-            Source namespace id
-
-        new_namespace_id : NamespaceId
-            Durable namespace id for the fork target.
+            Namespace id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[Namespace]
-            Namespace forked
+        HttpResponse[GrepIndex]
+            Grep root enabled or already enabled
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index/enable",
+            method="POST",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    GrepIndex,
+                    parse_obj_as(
+                        type_=GrepIndex,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    def gc(
+        self,
+        namespace_id: str,
+        *,
+        cursor: typing.Optional[str] = OMIT,
+        max_objects: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[GrepGcResponse]:
+        """
+        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped; no grep garbage collection runs implicitly. `max_objects` bounds the reads the pass spends and returns a `next_cursor` when keys remain; resuming re-reads liveness and the grep root, so a cursor only skips enumeration. Requires this deployment to maintain the grep index.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        cursor : typing.Optional[str]
+            Opaque resume token returned as `next_cursor` by an earlier pass
+            against the same namespace.
+
+        max_objects : typing.Optional[int]
+            Reads this pass may spend before returning with a `next_cursor`.
+            Omit to take the same per-pass default the runtime's own collection
+            takes.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[GrepGcResponse]
+            Namespace grep garbage collection completed
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
             {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
         )
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/forks",
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index/gc",
             method="POST",
             json={
-                "new_namespace_id": new_namespace_id,
+                "cursor": cursor,
+                "max_objects": max_objects,
             },
             headers={
                 "content-type": "application/json",
@@ -415,9 +432,9 @@ class RawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    GrepGcResponse,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=GrepGcResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -444,8 +461,8 @@ class RawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 404:
-                raise NotFoundError(
+            if _response.status_code == 500:
+                raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -455,19 +472,8 @@ class RawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
+            if _response.status_code == 501:
+                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -502,127 +508,15 @@ class RawNamespacesClient:
         )
 
 
-class AsyncRawNamespacesClient:
+class AsyncRawGrepIndexClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def create(
-        self, *, namespace_id: NamespaceId, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Namespace]:
-        """
-        Creates a new empty namespace.
-
-        Parameters
-        ----------
-        namespace_id : NamespaceId
-            Durable namespace id to create.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[Namespace]
-            Namespace created
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = await self._client_wrapper.httpx_client.request(
-            "v0/namespaces",
-            method="POST",
-            json={
-                "namespace_id": namespace_id,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=_request_options_with_retries_disabled,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Namespace,
-                    parse_obj_as(
-                        type_=Namespace,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
     async def retrieve(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Namespace]:
+    ) -> AsyncHttpResponse[GrepIndex]:
         """
-        Returns the current head and retention state for a namespace.
+        Returns whether the namespace's grep index is `disabled`, `backfilling`, or `active`, including build progress when available. A namespace that has never enabled the index is `disabled`. This operation requires a deployment that maintains grep indexes and does not change the index.
 
         Parameters
         ----------
@@ -634,20 +528,20 @@ class AsyncRawNamespacesClient:
 
         Returns
         -------
-        AsyncHttpResponse[Namespace]
-            Namespace
+        AsyncHttpResponse[GrepIndex]
+            Grep index status and build progress
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}",
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index",
             method="GET",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -674,8 +568,8 @@ class AsyncRawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 404:
-                raise NotFoundError(
+            if _response.status_code == 500:
+                raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -685,8 +579,8 @@ class AsyncRawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 410:
-                raise GoneError(
+            if _response.status_code == 501:
+                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -720,49 +614,36 @@ class AsyncRawNamespacesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def delete(
-        self,
-        namespace_id: str,
-        *,
-        expected_head_seq: typing.Optional[ChangeSeq] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[DeleteNamespaceResponse]:
+    async def disable(
+        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[GrepIndex]:
         """
-        Marks a namespace as deleted.
+        Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        expected_head_seq : typing.Optional[ChangeSeq]
-            Delete only if the namespace head is still at this sequence
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[DeleteNamespaceResponse]
-            Namespace deleted
+        AsyncHttpResponse[GrepIndex]
+            Grep root disabled or already disabled
         """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}",
-            method="DELETE",
-            params={
-                "expected_head_seq": expected_head_seq,
-            },
-            request_options=_request_options_with_retries_disabled,
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index/disable",
+            method="POST",
+            request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DeleteNamespaceResponse,
+                    GrepIndex,
                     parse_obj_as(
-                        type_=DeleteNamespaceResponse,  # type: ignore
+                        type_=GrepIndex,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -811,8 +692,19 @@ class AsyncRawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 410:
-                raise GoneError(
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -846,40 +738,172 @@ class AsyncRawNamespacesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def fork(
-        self,
-        namespace_id: str,
-        *,
-        new_namespace_id: NamespaceId,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Namespace]:
+    async def enable(
+        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[GrepIndex]:
         """
-        Creates a new namespace as a fork from the source namespace's current durable view.
+        Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
         namespace_id : str
-            Source namespace id
-
-        new_namespace_id : NamespaceId
-            Durable namespace id for the fork target.
+            Namespace id
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[Namespace]
-            Namespace forked
+        AsyncHttpResponse[GrepIndex]
+            Grep root enabled or already enabled
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index/enable",
+            method="POST",
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    GrepIndex,
+                    parse_obj_as(
+                        type_=GrepIndex,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise core_api_error_ApiError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+            )
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise core_api_error_ApiError(
+            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
+        )
+
+    async def gc(
+        self,
+        namespace_id: str,
+        *,
+        cursor: typing.Optional[str] = OMIT,
+        max_objects: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[GrepGcResponse]:
+        """
+        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped; no grep garbage collection runs implicitly. `max_objects` bounds the reads the pass spends and returns a `next_cursor` when keys remain; resuming re-reads liveness and the grep root, so a cursor only skips enumeration. Requires this deployment to maintain the grep index.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        cursor : typing.Optional[str]
+            Opaque resume token returned as `next_cursor` by an earlier pass
+            against the same namespace.
+
+        max_objects : typing.Optional[int]
+            Reads this pass may spend before returning with a `next_cursor`.
+            Omit to take the same per-pass default the runtime's own collection
+            takes.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[GrepGcResponse]
+            Namespace grep garbage collection completed
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
             {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
         )
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/forks",
+            f"v0/admin/namespaces/{encode_path_param(namespace_id)}/grep/index/gc",
             method="POST",
             json={
-                "new_namespace_id": new_namespace_id,
+                "cursor": cursor,
+                "max_objects": max_objects,
             },
             headers={
                 "content-type": "application/json",
@@ -890,9 +914,9 @@ class AsyncRawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    GrepGcResponse,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=GrepGcResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -919,8 +943,8 @@ class AsyncRawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 404:
-                raise NotFoundError(
+            if _response.status_code == 500:
+                raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,
@@ -930,19 +954,8 @@ class AsyncRawNamespacesClient:
                         ),
                     ),
                 )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
+            if _response.status_code == 501:
+                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,

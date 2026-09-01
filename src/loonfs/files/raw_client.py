@@ -11,29 +11,21 @@ from ..core.jsonable_encoder import encode_path_param
 from ..core.parse_error import ParsingError
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
-from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
-from ..errors.conflict_error import ConflictError
 from ..errors.content_too_large_error import ContentTooLargeError
 from ..errors.gone_error import GoneError
+from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.absolute_path import AbsolutePath
-from ..types.actor_ref import ActorRef
 from ..types.api_error import ApiError as types_api_error_ApiError
 from ..types.begin_download_response import BeginDownloadResponse
-from ..types.change_seq import ChangeSeq
 from ..types.checkpoint_id import CheckpointId
-from ..types.commit_id import CommitId
-from ..types.commit_response import CommitResponse
-from ..types.content_token import ContentToken
-from ..types.filesystem_operation import FilesystemOperation
-from ..types.list_changes_response import ListChangesResponse
+from ..types.grep_response import GrepResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
-from ..types.list_trash_response import ListTrashResponse
 from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
 from pydantic import ValidationError
@@ -42,301 +34,12 @@ from pydantic import ValidationError
 OMIT = typing.cast(typing.Any, ...)
 
 
-class RawFilesystemClient:
+class RawFilesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def list_changes(
-        self,
-        namespace_id: str,
-        *,
-        after_seq: ChangeSeq,
-        limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[ListChangesResponse]:
-        """
-        Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        after_seq : ChangeSeq
-            Return committed changes after this sequence
-
-        limit : typing.Optional[int]
-            Maximum page size
-
-        snapshot_id : typing.Optional[CheckpointId]
-            End the feed at this snapshot's captured sequence
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[ListChangesResponse]
-            Committed changes
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/changes",
-            method="GET",
-            params={
-                "after_seq": after_seq,
-                "limit": limit,
-                "snapshot_id": snapshot_id,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    ListChangesResponse,
-                    parse_obj_as(
-                        type_=ListChangesResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
-    def create_commit(
-        self,
-        namespace_id: str,
-        *,
-        actor: ActorRef,
-        commit_id: CommitId,
-        operations: typing.Sequence[FilesystemOperation],
-        content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
-        message: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[CommitResponse]:
-        """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        actor : ActorRef
-            Actor responsible for the commit, as supplied by the application.
-
-        commit_id : CommitId
-            Caller-supplied idempotency key for the whole request.
-
-        operations : typing.Sequence[FilesystemOperation]
-            Ordered operations to apply. Must be non-empty; they commit all
-            together or not at all.
-
-        content_tokens : typing.Optional[typing.Sequence[ContentToken]]
-            Proofs for any new external content refs introduced by this request.
-            One proof covers every operation that names its content ref.
-
-        message : typing.Optional[str]
-            Caller annotation recorded on the commit and reported by the change
-            feed. Part of the commit's identity: reusing `commit_id` with a
-            different message is a `commit_id_reuse_conflict`, exactly as it is
-            for an explicit commit.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[CommitResponse]
-            Commit applied
-        """
-        _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/commits",
-            method="POST",
-            json={
-                "actor": convert_and_respect_annotation_metadata(object_=actor, annotation=ActorRef, direction="write"),
-                "commit_id": commit_id,
-                "content_tokens": convert_and_respect_annotation_metadata(
-                    object_=content_tokens, annotation=typing.Sequence[ContentToken], direction="write"
-                ),
-                "message": message,
-                "operations": convert_and_respect_annotation_metadata(
-                    object_=operations, annotation=typing.Sequence[FilesystemOperation], direction="write"
-                ),
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    CommitResponse,
-                    parse_obj_as(
-                        type_=CommitResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
     @contextlib.contextmanager
-    def get_file_bytes(
+    def content(
         self,
         namespace_id: str,
         *,
@@ -612,7 +315,7 @@ class RawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def list_path_entries(
+    def list(
         self,
         namespace_id: str,
         *,
@@ -744,7 +447,7 @@ class RawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def get_path_entry(
+    def retrieve(
         self,
         namespace_id: str,
         *,
@@ -866,7 +569,7 @@ class RawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def list_file_revisions(
+    def list_revisions(
         self,
         namespace_id: str,
         *,
@@ -988,40 +691,65 @@ class RawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def list_trash(
+    def grep(
         self,
         namespace_id: str,
         *,
+        pattern: str,
+        case_insensitive: typing.Optional[bool] = None,
+        path_prefix: typing.Optional[str] = None,
+        allow_scan: typing.Optional[bool] = None,
+        allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[ListTrashResponse]:
+    ) -> HttpResponse[GrepResponse]:
         """
-        Returns the namespace's recoverable deletions, oldest deletion first. Entries never age out at the retention floor; each carries the inode id and deletion sequence undelete needs, plus the deleted name when the delete recorded one.
+        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
+        pattern : str
+            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
+
+        case_insensitive : typing.Optional[bool]
+            Match case-insensitively (`true` or `false`). Defaults to `false`.
+
+        path_prefix : typing.Optional[str]
+            Complete absolute path used to restrict matches.
+
+        allow_scan : typing.Optional[bool]
+            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+
+        allow_stale : typing.Optional[bool]
+            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
+
         limit : typing.Optional[int]
-            Maximum page size
+            Maximum matches per page
 
         cursor : typing.Optional[str]
-            Opaque trash page cursor
+            Opaque grep page cursor
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[ListTrashResponse]
-            Recoverable deletions
+        HttpResponse[GrepResponse]
+            One page of matches
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/trash",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/grep",
             method="GET",
             params={
+                "pattern": pattern,
+                "case_insensitive": case_insensitive,
+                "path_prefix": path_prefix,
+                "allow_scan": allow_scan,
+                "allow_stale": allow_stale,
                 "limit": limit,
                 "cursor": cursor,
             },
@@ -1030,9 +758,9 @@ class RawFilesystemClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ListTrashResponse,
+                    GrepResponse,
                     parse_obj_as(
-                        type_=ListTrashResponse,  # type: ignore
+                        type_=GrepResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -1081,6 +809,28 @@ class RawFilesystemClient:
                         ),
                     ),
                 )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -1106,301 +856,12 @@ class RawFilesystemClient:
         )
 
 
-class AsyncRawFilesystemClient:
+class AsyncRawFilesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def list_changes(
-        self,
-        namespace_id: str,
-        *,
-        after_seq: ChangeSeq,
-        limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[ListChangesResponse]:
-        """
-        Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        after_seq : ChangeSeq
-            Return committed changes after this sequence
-
-        limit : typing.Optional[int]
-            Maximum page size
-
-        snapshot_id : typing.Optional[CheckpointId]
-            End the feed at this snapshot's captured sequence
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[ListChangesResponse]
-            Committed changes
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/changes",
-            method="GET",
-            params={
-                "after_seq": after_seq,
-                "limit": limit,
-                "snapshot_id": snapshot_id,
-            },
-            request_options=request_options,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    ListChangesResponse,
-                    parse_obj_as(
-                        type_=ListChangesResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
-    async def create_commit(
-        self,
-        namespace_id: str,
-        *,
-        actor: ActorRef,
-        commit_id: CommitId,
-        operations: typing.Sequence[FilesystemOperation],
-        content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
-        message: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[CommitResponse]:
-        """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        actor : ActorRef
-            Actor responsible for the commit, as supplied by the application.
-
-        commit_id : CommitId
-            Caller-supplied idempotency key for the whole request.
-
-        operations : typing.Sequence[FilesystemOperation]
-            Ordered operations to apply. Must be non-empty; they commit all
-            together or not at all.
-
-        content_tokens : typing.Optional[typing.Sequence[ContentToken]]
-            Proofs for any new external content refs introduced by this request.
-            One proof covers every operation that names its content ref.
-
-        message : typing.Optional[str]
-            Caller annotation recorded on the commit and reported by the change
-            feed. Part of the commit's identity: reusing `commit_id` with a
-            different message is a `commit_id_reuse_conflict`, exactly as it is
-            for an explicit commit.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[CommitResponse]
-            Commit applied
-        """
-        _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/commits",
-            method="POST",
-            json={
-                "actor": convert_and_respect_annotation_metadata(object_=actor, annotation=ActorRef, direction="write"),
-                "commit_id": commit_id,
-                "content_tokens": convert_and_respect_annotation_metadata(
-                    object_=content_tokens, annotation=typing.Sequence[ContentToken], direction="write"
-                ),
-                "message": message,
-                "operations": convert_and_respect_annotation_metadata(
-                    object_=operations, annotation=typing.Sequence[FilesystemOperation], direction="write"
-                ),
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=request_options,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    CommitResponse,
-                    parse_obj_as(
-                        type_=CommitResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        types_api_error_ApiError,
-                        parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
-
     @contextlib.asynccontextmanager
-    async def get_file_bytes(
+    async def content(
         self,
         namespace_id: str,
         *,
@@ -1677,7 +1138,7 @@ class AsyncRawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def list_path_entries(
+    async def list(
         self,
         namespace_id: str,
         *,
@@ -1809,7 +1270,7 @@ class AsyncRawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def get_path_entry(
+    async def retrieve(
         self,
         namespace_id: str,
         *,
@@ -1931,7 +1392,7 @@ class AsyncRawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def list_file_revisions(
+    async def list_revisions(
         self,
         namespace_id: str,
         *,
@@ -2053,40 +1514,65 @@ class AsyncRawFilesystemClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def list_trash(
+    async def grep(
         self,
         namespace_id: str,
         *,
+        pattern: str,
+        case_insensitive: typing.Optional[bool] = None,
+        path_prefix: typing.Optional[str] = None,
+        allow_scan: typing.Optional[bool] = None,
+        allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[ListTrashResponse]:
+    ) -> AsyncHttpResponse[GrepResponse]:
         """
-        Returns the namespace's recoverable deletions, oldest deletion first. Entries never age out at the retention floor; each carries the inode id and deletion sequence undelete needs, plus the deleted name when the delete recorded one.
+        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
+        pattern : str
+            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
+
+        case_insensitive : typing.Optional[bool]
+            Match case-insensitively (`true` or `false`). Defaults to `false`.
+
+        path_prefix : typing.Optional[str]
+            Complete absolute path used to restrict matches.
+
+        allow_scan : typing.Optional[bool]
+            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+
+        allow_stale : typing.Optional[bool]
+            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
+
         limit : typing.Optional[int]
-            Maximum page size
+            Maximum matches per page
 
         cursor : typing.Optional[str]
-            Opaque trash page cursor
+            Opaque grep page cursor
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[ListTrashResponse]
-            Recoverable deletions
+        AsyncHttpResponse[GrepResponse]
+            One page of matches
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/trash",
+            f"v0/namespaces/{encode_path_param(namespace_id)}/grep",
             method="GET",
             params={
+                "pattern": pattern,
+                "case_insensitive": case_insensitive,
+                "path_prefix": path_prefix,
+                "allow_scan": allow_scan,
+                "allow_stale": allow_stale,
                 "limit": limit,
                 "cursor": cursor,
             },
@@ -2095,9 +1581,9 @@ class AsyncRawFilesystemClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ListTrashResponse,
+                    GrepResponse,
                     parse_obj_as(
-                        type_=ListTrashResponse,  # type: ignore
+                        type_=GrepResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -2137,6 +1623,28 @@ class AsyncRawFilesystemClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 500:
+                raise InternalServerError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        types_api_error_ApiError,
+                        parse_obj_as(
+                            type_=types_api_error_ApiError,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         types_api_error_ApiError,

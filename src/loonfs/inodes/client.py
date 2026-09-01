@@ -31,7 +31,7 @@ class InodesClient:
         """
         return self._raw_client
 
-    def get_inode(
+    def retrieve(
         self,
         namespace_id: str,
         inode_id: str,
@@ -69,17 +69,17 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.get_inode(
+        client.inodes.retrieve(
             namespace_id="namespace_id",
             inode_id="ino_123",
         )
         """
-        _response = self._raw_client.get_inode(
+        _response = self._raw_client.retrieve(
             namespace_id, inode_id, include_attributes=include_attributes, request_options=request_options
         )
         return _response.data
 
-    def list_inode_children(
+    def list_children(
         self,
         namespace_id: str,
         inode_id: str,
@@ -125,12 +125,12 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.list_inode_children(
+        client.inodes.list_children(
             namespace_id="namespace_id",
             inode_id="ino_123",
         )
         """
-        _response = self._raw_client.list_inode_children(
+        _response = self._raw_client.list_children(
             namespace_id,
             inode_id,
             limit=limit,
@@ -140,7 +140,7 @@ class InodesClient:
         )
         return _response.data
 
-    def list_file_revisions_by_inode(
+    def list_revisions(
         self,
         namespace_id: str,
         inode_id: str,
@@ -182,17 +182,17 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.list_file_revisions_by_inode(
+        client.inodes.list_revisions(
             namespace_id="namespace_id",
             inode_id="ino_123",
         )
         """
-        _response = self._raw_client.list_file_revisions_by_inode(
+        _response = self._raw_client.list_revisions(
             namespace_id, inode_id, limit=limit, cursor=cursor, request_options=request_options
         )
         return _response.data
 
-    def get_file_revision_bytes_by_inode(
+    def content(
         self,
         namespace_id: str,
         inode_id: str,
@@ -230,18 +230,16 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.get_file_revision_bytes_by_inode(
+        client.inodes.content(
             namespace_id="namespace_id",
             inode_id="inode_id",
             revision_no=1000000,
         )
         """
-        with self._raw_client.get_file_revision_bytes_by_inode(
-            namespace_id, inode_id, revision_no, request_options=request_options
-        ) as r:
+        with self._raw_client.content(namespace_id, inode_id, revision_no, request_options=request_options) as r:
             yield from r.data
 
-    def create_download_by_inode(
+    def create_download(
         self,
         namespace_id: str,
         inode_id: str,
@@ -282,14 +280,14 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.create_download_by_inode(
+        client.inodes.create_download(
             namespace_id="namespace_id",
             inode_id="ino_123",
             revision_no=1000000,
             request={"key": "value"},
         )
         """
-        _response = self._raw_client.create_download_by_inode(
+        _response = self._raw_client.create_download(
             namespace_id, inode_id, revision_no, request=request, request_options=request_options
         )
         return _response.data
@@ -310,7 +308,7 @@ class AsyncInodesClient:
         """
         return self._raw_client
 
-    async def get_inode(
+    async def retrieve(
         self,
         namespace_id: str,
         inode_id: str,
@@ -353,7 +351,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.get_inode(
+            await client.inodes.retrieve(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
             )
@@ -361,12 +359,12 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_inode(
+        _response = await self._raw_client.retrieve(
             namespace_id, inode_id, include_attributes=include_attributes, request_options=request_options
         )
         return _response.data
 
-    async def list_inode_children(
+    async def list_children(
         self,
         namespace_id: str,
         inode_id: str,
@@ -417,7 +415,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.list_inode_children(
+            await client.inodes.list_children(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
             )
@@ -425,7 +423,7 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_inode_children(
+        _response = await self._raw_client.list_children(
             namespace_id,
             inode_id,
             limit=limit,
@@ -435,7 +433,7 @@ class AsyncInodesClient:
         )
         return _response.data
 
-    async def list_file_revisions_by_inode(
+    async def list_revisions(
         self,
         namespace_id: str,
         inode_id: str,
@@ -482,7 +480,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.list_file_revisions_by_inode(
+            await client.inodes.list_revisions(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
             )
@@ -490,12 +488,12 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_file_revisions_by_inode(
+        _response = await self._raw_client.list_revisions(
             namespace_id, inode_id, limit=limit, cursor=cursor, request_options=request_options
         )
         return _response.data
 
-    async def get_file_revision_bytes_by_inode(
+    async def content(
         self,
         namespace_id: str,
         inode_id: str,
@@ -538,7 +536,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.get_file_revision_bytes_by_inode(
+            await client.inodes.content(
                 namespace_id="namespace_id",
                 inode_id="inode_id",
                 revision_no=1000000,
@@ -547,13 +545,11 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        async with self._raw_client.get_file_revision_bytes_by_inode(
-            namespace_id, inode_id, revision_no, request_options=request_options
-        ) as r:
+        async with self._raw_client.content(namespace_id, inode_id, revision_no, request_options=request_options) as r:
             async for _chunk in r.data:
                 yield _chunk
 
-    async def create_download_by_inode(
+    async def create_download(
         self,
         namespace_id: str,
         inode_id: str,
@@ -599,7 +595,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.create_download_by_inode(
+            await client.inodes.create_download(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
                 revision_no=1000000,
@@ -609,7 +605,7 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_download_by_inode(
+        _response = await self._raw_client.create_download(
             namespace_id, inode_id, revision_no, request=request, request_options=request_options
         )
         return _response.data

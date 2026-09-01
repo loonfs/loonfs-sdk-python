@@ -1,16 +1,19 @@
 """Synchronous, in-memory file transfer orchestration.
 
-Streaming and resume are follow-ups. AsyncLoonFS support is a follow-up.
+Streaming and resume are follow-ups. The async client does not have these
+methods yet.
 """
 
 from __future__ import annotations
 
 import hashlib
+import typing
 from dataclasses import dataclass
 
 import httpx
 
-from .client import LoonFS
+from .client import LoonFS as _GeneratedLoonFS
+from .files.client import FilesClient as _GeneratedFilesClient
 from .types import (
     ActorRef,
     BeginUploadRequest_DirectMultipart,
@@ -30,9 +33,6 @@ from .types import (
     UploadPartChecksumClaim,
     UploadSession,
 )
-
-__all__ = ["GetFileResult", "PutFileResult", "get_file", "put_file"]
-
 
 _MULTIPART_MIN_BYTES = 8 * 1024 * 1024
 _DIRECT_GET_FEATURE = "core.downloads.direct_get"
@@ -59,7 +59,7 @@ _CRC32C_TABLE = _crc_table(0x82F63B78, _CRC32C_MASK)
 
 
 @dataclass(frozen=True)
-class PutFileResult:
+class FileUploadResult:
     """The identity and sequence of the commit that stored the file."""
 
     namespace_id: str
@@ -68,7 +68,7 @@ class PutFileResult:
 
 
 @dataclass(frozen=True)
-class GetFileResult:
+class FileDownloadResult:
     """Downloaded bytes and the immutable revision facts from its grant."""
 
     content: bytes
@@ -84,115 +84,146 @@ class _StagedContent:
     content_token: str | None
 
 
-def put_file(
-    client: LoonFS,
-    *,
-    namespace_id: str,
-    path: str,
-    content: bytes,
-    actor: ActorRef,
-    commit_id: str,
-    message: str | None = None,
-    behavior: DestinationBehavior | None = None,
-    expected_revision_no: RevisionNo | None = None,
-    http_client: httpx.Client | None = None,
-) -> PutFileResult:
-    """Upload in-memory bytes, complete the upload, and commit the file."""
+class FilesClient(_GeneratedFilesClient):
+    """The files group plus whole-file transfers."""
 
-    begin = _create_upload(client, namespace_id, content)
-    if http_client is None:
-        with httpx.Client() as transfer_client:
+    def __init__(self, *, client_wrapper, root: "LoonFS") -> None:
+        super().__init__(client_wrapper=client_wrapper)
+        self._root = root
+
+    def upload(
+        self,
+        namespace_id: str,
+        *,
+        path: str,
+        content: bytes,
+        actor: ActorRef,
+        commit_id: str,
+        message: str | None = None,
+        behavior: DestinationBehavior | None = None,
+        expected_inode_id: str | None = None,
+        expected_revision_no: RevisionNo | None = None,
+        http_client: httpx.Client | None = None,
+    ) -> FileUploadResult:
+        """Upload in-memory bytes, complete the upload, and commit the file."""
+
+        begin = _create_upload(self._root, namespace_id, content)
+        if http_client is None:
+            with httpx.Client() as transfer_client:
+                staged = _stage_upload(
+                    self._root, transfer_client, namespace_id, begin, content
+                )
+        else:
             staged = _stage_upload(
-                client, transfer_client, namespace_id, begin, content
+                self._root, http_client, namespace_id, begin, content
             )
-    else:
-        staged = _stage_upload(client, http_client, namespace_id, begin, content)
 
-    operation_arguments = {"path": path, "content_ref": staged.content_ref}
-    if behavior is not None:
-        operation_arguments["behavior"] = behavior
-    if expected_revision_no is not None:
-        operation_arguments["expected_revision_no"] = expected_revision_no
-    operation = FilesystemOperation_PutFile(**operation_arguments)
-    commit_arguments = {
-        "actor": actor,
-        "commit_id": commit_id,
-        "operations": [operation],
-        "content_tokens": [staged.content_token]
-        if staged.content_token is not None
-        else [],
-    }
-    if message is not None:
-        commit_arguments["message"] = message
-    committed = client.filesystem.create_commit(namespace_id, **commit_arguments)
-    return PutFileResult(
-        namespace_id=committed.namespace_id,
-        commit_id=committed.commit_id,
-        committed_seq=committed.committed_seq,
-    )
-
-
-def get_file(
-    client: LoonFS,
-    *,
-    namespace_id: str,
-    path: str,
-    revision_no: RevisionNo | None = None,
-    http_client: httpx.Client | None = None,
-) -> GetFileResult:
-    """Download one file revision into memory and verify its checksum."""
-
-    capabilities = client.system.get_capabilities()
-    if not capabilities.features.get(_DIRECT_GET_FEATURE, False):
-        return _get_file_proxied(
-            client, namespace_id=namespace_id, path=path, revision_no=revision_no
+        operation_arguments = {"path": path, "content_ref": staged.content_ref}
+        if behavior is not None:
+            operation_arguments["behavior"] = behavior
+        if expected_inode_id is not None:
+            operation_arguments["expected_inode_id"] = expected_inode_id
+        if expected_revision_no is not None:
+            operation_arguments["expected_revision_no"] = expected_revision_no
+        operation = FilesystemOperation_PutFile(**operation_arguments)
+        commit_arguments = {
+            "actor": actor,
+            "commit_id": commit_id,
+            "operations": [operation],
+            "content_tokens": [staged.content_token]
+            if staged.content_token is not None
+            else [],
+        }
+        if message is not None:
+            commit_arguments["message"] = message
+        committed = self._root.commits.create(namespace_id, **commit_arguments)
+        return FileUploadResult(
+            namespace_id=committed.namespace_id,
+            commit_id=committed.commit_id,
+            committed_seq=committed.committed_seq,
         )
-    if revision_no is None:
-        grant = client.filesystem.create_download(namespace_id, path=path)
-    else:
-        grant = client.filesystem.create_download(
-            namespace_id,
-            path=path,
-            revision_no=revision_no,
+
+    def download(
+        self,
+        namespace_id: str,
+        *,
+        path: str,
+        revision_no: RevisionNo | None = None,
+        http_client: httpx.Client | None = None,
+    ) -> FileDownloadResult:
+        """Download one file revision into memory and verify its checksum."""
+
+        capabilities = self._root.capabilities.retrieve()
+        if not capabilities.features.get(_DIRECT_GET_FEATURE, False):
+            return _get_file_proxied(
+                self._root,
+                namespace_id=namespace_id,
+                path=path,
+                revision_no=revision_no,
+            )
+        if revision_no is None:
+            grant = self.create_download(namespace_id, path=path)
+        else:
+            grant = self.create_download(
+                namespace_id,
+                path=path,
+                revision_no=revision_no,
+            )
+        if http_client is None:
+            with httpx.Client() as transfer_client:
+                response = _send_presigned(transfer_client, grant.access, "GET")
+        else:
+            response = _send_presigned(http_client, grant.access, "GET")
+        content = response.content
+        if len(content) != grant.content_ref.size_bytes:
+            raise RuntimeError(
+                f"download returned {len(content)} bytes, expected {grant.content_ref.size_bytes}"
+            )
+        if (
+            _checksum(grant.content_ref.checksum.algorithm, content)
+            != grant.content_ref.checksum
+        ):
+            raise RuntimeError("download checksum did not match its content reference")
+        return FileDownloadResult(
+            content=content,
+            namespace_id=grant.namespace_id,
+            path=grant.path,
+            revision_no=grant.revision_no,
+            content_ref=grant.content_ref,
         )
-    if http_client is None:
-        with httpx.Client() as transfer_client:
-            response = _send_presigned(transfer_client, grant.access, "GET")
-    else:
-        response = _send_presigned(http_client, grant.access, "GET")
-    content = response.content
-    if len(content) != grant.content_ref.size_bytes:
-        raise RuntimeError(
-            f"download returned {len(content)} bytes, expected {grant.content_ref.size_bytes}"
-        )
-    if (
-        _checksum(grant.content_ref.checksum.algorithm, content)
-        != grant.content_ref.checksum
-    ):
-        raise RuntimeError("download checksum did not match its content reference")
-    return GetFileResult(
-        content=content,
-        namespace_id=grant.namespace_id,
-        path=grant.path,
-        revision_no=grant.revision_no,
-        content_ref=grant.content_ref,
-    )
+
+
+class LoonFS(_GeneratedLoonFS):
+    """The generated client with ``files.upload`` and ``files.download``."""
+
+    _transfer_files: typing.Optional[FilesClient] = None
+
+    @property
+    def files(self) -> FilesClient:
+        if self._transfer_files is None:
+            self._transfer_files = FilesClient(
+                client_wrapper=self._client_wrapper, root=self
+            )
+        return self._transfer_files
+
+
+__all__ = ["FileDownloadResult", "FileUploadResult", "FilesClient", "LoonFS"]
 
 
 def _get_file_proxied(
-    client: LoonFS,
+    client: _GeneratedLoonFS,
     *,
     namespace_id: str,
     path: str,
     revision_no: RevisionNo | None,
-) -> GetFileResult:
+) -> FileDownloadResult:
     """Read through LoonFS when direct reads are unavailable.
 
     Load the content reference first, then request the exact revision so the
     reference and returned bytes describe the same file version.
     """
     if revision_no is None:
-        entry = client.filesystem.get_path_entry(namespace_id, path=path)
+        entry = client.files.retrieve(namespace_id, path=path)
         if entry.inode_kind != "file":
             raise RuntimeError(f"path {path!r} is a {entry.inode_kind}, not a file")
         claim = entry.content_ref
@@ -201,7 +232,7 @@ def _get_file_proxied(
         claim = None
         cursor = None
         while True:
-            page = client.filesystem.list_file_revisions(
+            page = client.files.list_revisions(
                 namespace_id, path=path, cursor=cursor
             )
             for revision in page.revisions:
@@ -214,7 +245,7 @@ def _get_file_proxied(
         if claim is None:
             raise RuntimeError(f"revision {revision_no} not found for {path!r}")
     content = b"".join(
-        client.filesystem.get_file_bytes(namespace_id, path=path, revision_no=revision_no)
+        client.files.content(namespace_id, path=path, revision_no=revision_no)
     )
     if len(content) != claim.size_bytes:
         raise RuntimeError(
@@ -222,7 +253,7 @@ def _get_file_proxied(
         )
     if _checksum(claim.checksum.algorithm, content) != claim.checksum:
         raise RuntimeError("proxied read checksum did not match its content reference")
-    return GetFileResult(
+    return FileDownloadResult(
         content=content,
         namespace_id=namespace_id,
         path=path,
@@ -231,8 +262,8 @@ def _get_file_proxied(
     )
 
 
-def _create_upload(client: LoonFS, namespace_id: str, content: bytes):
-    capabilities = client.system.get_capabilities()
+def _create_upload(client: _GeneratedLoonFS, namespace_id: str, content: bytes):
+    capabilities = client.capabilities.retrieve()
     features = capabilities.features or {}
     limits = capabilities.limits or {}
     size_bytes = len(content)
@@ -258,11 +289,11 @@ def _create_upload(client: LoonFS, namespace_id: str, content: bytes):
                 f"{size_bytes} bytes exceed the advertised proxy and direct PUT limits, "
                 "and direct multipart is unavailable"
             )
-    return client.uploads.create_upload(namespace_id, request=request)
+    return client.uploads.create(namespace_id, request=request)
 
 
 def _stage_upload(
-    client: LoonFS,
+    client: _GeneratedLoonFS,
     transfer_client: httpx.Client,
     namespace_id: str,
     begin,
@@ -270,8 +301,8 @@ def _stage_upload(
 ) -> _StagedContent:
     if begin.mode == "service_proxied":
         try:
-            client.uploads.put_upload_content(namespace_id, begin.upload_id, request=content)
-            completion = client.uploads.complete_upload(
+            client.uploads.put_content(namespace_id, begin.upload_id, request=content)
+            completion = client.uploads.complete(
                 namespace_id,
                 begin.upload_id,
                 request=CompleteUploadRequest_ServiceProxied(),
@@ -291,7 +322,7 @@ def _stage_upload(
         except Exception:
             _abort_quietly(client, namespace_id, begin.upload_id)
             raise
-        completion = client.uploads.complete_upload(
+        completion = client.uploads.complete(
             namespace_id,
             begin.upload_id,
             request=CompleteUploadRequest_DirectPut(
@@ -316,7 +347,7 @@ def _stage_upload(
 
 
 def _stage_multipart(
-    client: LoonFS,
+    client: _GeneratedLoonFS,
     transfer_client: httpx.Client,
     namespace_id: str,
     upload_id: str,
@@ -338,7 +369,7 @@ def _stage_multipart(
         for index, part in enumerate(parts, start=1)
     ]
     try:
-        signed = client.uploads.sign_upload_parts(
+        signed = client.uploads.sign_parts(
             namespace_id,
             upload_id,
             parts=claims,
@@ -372,7 +403,7 @@ def _stage_multipart(
     except Exception:
         _abort_quietly(client, namespace_id, upload_id)
         raise
-    completion = client.uploads.complete_upload(
+    completion = client.uploads.complete(
         namespace_id,
         upload_id,
         request=CompleteUploadRequest_DirectMultipart(
@@ -420,9 +451,11 @@ def _completed_content(response: UploadSession) -> _StagedContent:
     )
 
 
-def _abort_quietly(client: LoonFS, namespace_id: str, upload_id: str) -> None:
+def _abort_quietly(
+    client: _GeneratedLoonFS, namespace_id: str, upload_id: str
+) -> None:
     try:
-        client.uploads.abort_upload(namespace_id, upload_id)
+        client.uploads.abort(namespace_id, upload_id)
     except Exception:
         pass
 

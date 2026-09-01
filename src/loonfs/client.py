@@ -10,11 +10,14 @@ from .core.logging import LogConfig, Logger
 
 if typing.TYPE_CHECKING:
     from .admin.client import AdminClient, AsyncAdminClient
-    from .filesystem.client import AsyncFilesystemClient, FilesystemClient
+    from .capabilities.client import AsyncCapabilitiesClient, CapabilitiesClient
+    from .changes.client import AsyncChangesClient, ChangesClient
+    from .commits.client import AsyncCommitsClient, CommitsClient
+    from .files.client import AsyncFilesClient, FilesClient
     from .inodes.client import AsyncInodesClient, InodesClient
     from .namespaces.client import AsyncNamespacesClient, NamespacesClient
-    from .query.client import AsyncQueryClient, QueryClient
-    from .system.client import AsyncSystemClient, SystemClient
+    from .snapshots.client import AsyncSnapshotsClient, SnapshotsClient
+    from .trash.client import AsyncTrashClient, TrashClient
     from .uploads.client import AsyncUploadsClient, UploadsClient
 
 
@@ -93,29 +96,24 @@ class LoonFS:
             max_stream_reconnection_attempts=max_stream_reconnection_attempts,
             logging=logging,
         )
-        self._system: typing.Optional[SystemClient] = None
-        self._admin: typing.Optional[AdminClient] = None
+        self._capabilities: typing.Optional[CapabilitiesClient] = None
         self._namespaces: typing.Optional[NamespacesClient] = None
-        self._filesystem: typing.Optional[FilesystemClient] = None
-        self._query: typing.Optional[QueryClient] = None
+        self._changes: typing.Optional[ChangesClient] = None
+        self._commits: typing.Optional[CommitsClient] = None
+        self._files: typing.Optional[FilesClient] = None
+        self._trash: typing.Optional[TrashClient] = None
         self._inodes: typing.Optional[InodesClient] = None
+        self._snapshots: typing.Optional[SnapshotsClient] = None
         self._uploads: typing.Optional[UploadsClient] = None
+        self._admin: typing.Optional[AdminClient] = None
 
     @property
-    def system(self):
-        if self._system is None:
-            from .system.client import SystemClient  # noqa: E402
+    def capabilities(self):
+        if self._capabilities is None:
+            from .capabilities.client import CapabilitiesClient  # noqa: E402
 
-            self._system = SystemClient(client_wrapper=self._client_wrapper)
-        return self._system
-
-    @property
-    def admin(self):
-        if self._admin is None:
-            from .admin.client import AdminClient  # noqa: E402
-
-            self._admin = AdminClient(client_wrapper=self._client_wrapper)
-        return self._admin
+            self._capabilities = CapabilitiesClient(client_wrapper=self._client_wrapper)
+        return self._capabilities
 
     @property
     def namespaces(self):
@@ -126,20 +124,36 @@ class LoonFS:
         return self._namespaces
 
     @property
-    def filesystem(self):
-        if self._filesystem is None:
-            from .filesystem.client import FilesystemClient  # noqa: E402
+    def changes(self):
+        if self._changes is None:
+            from .changes.client import ChangesClient  # noqa: E402
 
-            self._filesystem = FilesystemClient(client_wrapper=self._client_wrapper)
-        return self._filesystem
+            self._changes = ChangesClient(client_wrapper=self._client_wrapper)
+        return self._changes
 
     @property
-    def query(self):
-        if self._query is None:
-            from .query.client import QueryClient  # noqa: E402
+    def commits(self):
+        if self._commits is None:
+            from .commits.client import CommitsClient  # noqa: E402
 
-            self._query = QueryClient(client_wrapper=self._client_wrapper)
-        return self._query
+            self._commits = CommitsClient(client_wrapper=self._client_wrapper)
+        return self._commits
+
+    @property
+    def files(self):
+        if self._files is None:
+            from .files.client import FilesClient  # noqa: E402
+
+            self._files = FilesClient(client_wrapper=self._client_wrapper)
+        return self._files
+
+    @property
+    def trash(self):
+        if self._trash is None:
+            from .trash.client import TrashClient  # noqa: E402
+
+            self._trash = TrashClient(client_wrapper=self._client_wrapper)
+        return self._trash
 
     @property
     def inodes(self):
@@ -150,12 +164,28 @@ class LoonFS:
         return self._inodes
 
     @property
+    def snapshots(self):
+        if self._snapshots is None:
+            from .snapshots.client import SnapshotsClient  # noqa: E402
+
+            self._snapshots = SnapshotsClient(client_wrapper=self._client_wrapper)
+        return self._snapshots
+
+    @property
     def uploads(self):
         if self._uploads is None:
             from .uploads.client import UploadsClient  # noqa: E402
 
             self._uploads = UploadsClient(client_wrapper=self._client_wrapper)
         return self._uploads
+
+    @property
+    def admin(self):
+        if self._admin is None:
+            from .admin.client import AdminClient  # noqa: E402
+
+            self._admin = AdminClient(client_wrapper=self._client_wrapper)
+        return self._admin
 
 
 def _make_default_async_client(
@@ -254,29 +284,24 @@ class AsyncLoonFS:
             max_stream_reconnection_attempts=max_stream_reconnection_attempts,
             logging=logging,
         )
-        self._system: typing.Optional[AsyncSystemClient] = None
-        self._admin: typing.Optional[AsyncAdminClient] = None
+        self._capabilities: typing.Optional[AsyncCapabilitiesClient] = None
         self._namespaces: typing.Optional[AsyncNamespacesClient] = None
-        self._filesystem: typing.Optional[AsyncFilesystemClient] = None
-        self._query: typing.Optional[AsyncQueryClient] = None
+        self._changes: typing.Optional[AsyncChangesClient] = None
+        self._commits: typing.Optional[AsyncCommitsClient] = None
+        self._files: typing.Optional[AsyncFilesClient] = None
+        self._trash: typing.Optional[AsyncTrashClient] = None
         self._inodes: typing.Optional[AsyncInodesClient] = None
+        self._snapshots: typing.Optional[AsyncSnapshotsClient] = None
         self._uploads: typing.Optional[AsyncUploadsClient] = None
+        self._admin: typing.Optional[AsyncAdminClient] = None
 
     @property
-    def system(self):
-        if self._system is None:
-            from .system.client import AsyncSystemClient  # noqa: E402
+    def capabilities(self):
+        if self._capabilities is None:
+            from .capabilities.client import AsyncCapabilitiesClient  # noqa: E402
 
-            self._system = AsyncSystemClient(client_wrapper=self._client_wrapper)
-        return self._system
-
-    @property
-    def admin(self):
-        if self._admin is None:
-            from .admin.client import AsyncAdminClient  # noqa: E402
-
-            self._admin = AsyncAdminClient(client_wrapper=self._client_wrapper)
-        return self._admin
+            self._capabilities = AsyncCapabilitiesClient(client_wrapper=self._client_wrapper)
+        return self._capabilities
 
     @property
     def namespaces(self):
@@ -287,20 +312,36 @@ class AsyncLoonFS:
         return self._namespaces
 
     @property
-    def filesystem(self):
-        if self._filesystem is None:
-            from .filesystem.client import AsyncFilesystemClient  # noqa: E402
+    def changes(self):
+        if self._changes is None:
+            from .changes.client import AsyncChangesClient  # noqa: E402
 
-            self._filesystem = AsyncFilesystemClient(client_wrapper=self._client_wrapper)
-        return self._filesystem
+            self._changes = AsyncChangesClient(client_wrapper=self._client_wrapper)
+        return self._changes
 
     @property
-    def query(self):
-        if self._query is None:
-            from .query.client import AsyncQueryClient  # noqa: E402
+    def commits(self):
+        if self._commits is None:
+            from .commits.client import AsyncCommitsClient  # noqa: E402
 
-            self._query = AsyncQueryClient(client_wrapper=self._client_wrapper)
-        return self._query
+            self._commits = AsyncCommitsClient(client_wrapper=self._client_wrapper)
+        return self._commits
+
+    @property
+    def files(self):
+        if self._files is None:
+            from .files.client import AsyncFilesClient  # noqa: E402
+
+            self._files = AsyncFilesClient(client_wrapper=self._client_wrapper)
+        return self._files
+
+    @property
+    def trash(self):
+        if self._trash is None:
+            from .trash.client import AsyncTrashClient  # noqa: E402
+
+            self._trash = AsyncTrashClient(client_wrapper=self._client_wrapper)
+        return self._trash
 
     @property
     def inodes(self):
@@ -311,9 +352,25 @@ class AsyncLoonFS:
         return self._inodes
 
     @property
+    def snapshots(self):
+        if self._snapshots is None:
+            from .snapshots.client import AsyncSnapshotsClient  # noqa: E402
+
+            self._snapshots = AsyncSnapshotsClient(client_wrapper=self._client_wrapper)
+        return self._snapshots
+
+    @property
     def uploads(self):
         if self._uploads is None:
             from .uploads.client import AsyncUploadsClient  # noqa: E402
 
             self._uploads = AsyncUploadsClient(client_wrapper=self._client_wrapper)
         return self._uploads
+
+    @property
+    def admin(self):
+        if self._admin is None:
+            from .admin.client import AsyncAdminClient  # noqa: E402
+
+            self._admin = AsyncAdminClient(client_wrapper=self._client_wrapper)
+        return self._admin
