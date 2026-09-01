@@ -36,7 +36,7 @@ class RawInodesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    def get_inode(
+    def retrieve(
         self,
         namespace_id: str,
         inode_id: str,
@@ -152,7 +152,7 @@ class RawInodesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def list_inode_children(
+    def list_children(
         self,
         namespace_id: str,
         inode_id: str,
@@ -289,7 +289,7 @@ class RawInodesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    def list_file_revisions_by_inode(
+    def list_revisions(
         self,
         namespace_id: str,
         inode_id: str,
@@ -422,7 +422,7 @@ class RawInodesClient:
         )
 
     @contextlib.contextmanager
-    def get_file_revision_bytes_by_inode(
+    def content(
         self,
         namespace_id: str,
         inode_id: str,
@@ -561,7 +561,7 @@ class RawInodesClient:
 
             yield _stream()
 
-    def create_download_by_inode(
+    def create_download(
         self,
         namespace_id: str,
         inode_id: str,
@@ -709,7 +709,7 @@ class AsyncRawInodesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
-    async def get_inode(
+    async def retrieve(
         self,
         namespace_id: str,
         inode_id: str,
@@ -825,7 +825,7 @@ class AsyncRawInodesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def list_inode_children(
+    async def list_children(
         self,
         namespace_id: str,
         inode_id: str,
@@ -962,7 +962,7 @@ class AsyncRawInodesClient:
             status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
         )
 
-    async def list_file_revisions_by_inode(
+    async def list_revisions(
         self,
         namespace_id: str,
         inode_id: str,
@@ -1095,7 +1095,7 @@ class AsyncRawInodesClient:
         )
 
     @contextlib.asynccontextmanager
-    async def get_file_revision_bytes_by_inode(
+    async def content(
         self,
         namespace_id: str,
         inode_id: str,
@@ -1235,7 +1235,7 @@ class AsyncRawInodesClient:
 
             yield await _stream()
 
-    async def create_download_by_inode(
+    async def create_download(
         self,
         namespace_id: str,
         inode_id: str,

@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .destination_behavior import DestinationBehavior
+from .revision_no import RevisionNo
 
 
 class FilesystemOperationMovePath(UniversalBaseModel):
@@ -16,6 +17,16 @@ class FilesystemOperationMovePath(UniversalBaseModel):
     behavior: typing.Optional[DestinationBehavior] = pydantic.Field(default=None)
     """
     Whether an existing destination file may be replaced.
+    """
+
+    expected_destination_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Stable inode ID within a namespace
+    """
+
+    expected_destination_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
+    """
+    With `replace` behavior and an inode guard, the request requires this content revision.
     """
 
     from_path: AbsolutePath = pydantic.Field()

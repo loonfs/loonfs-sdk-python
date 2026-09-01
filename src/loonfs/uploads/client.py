@@ -32,7 +32,7 @@ class UploadsClient:
         """
         return self._raw_client
 
-    def create_upload(
+    def create(
         self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> BeginUploadResponse:
         """
@@ -61,15 +61,15 @@ class UploadsClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.uploads.create_upload(
+        client.uploads.create(
             namespace_id="namespace_id",
             request=BeginUploadRequest_ServiceProxied(),
         )
         """
-        _response = self._raw_client.create_upload(namespace_id, request=request, request_options=request_options)
+        _response = self._raw_client.create(namespace_id, request=request, request_options=request_options)
         return _response.data
 
-    def get_upload(
+    def retrieve(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
@@ -99,15 +99,15 @@ class UploadsClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.uploads.get_upload(
+        client.uploads.retrieve(
             namespace_id="namespace_id",
             upload_id="upload_id",
         )
         """
-        _response = self._raw_client.get_upload(namespace_id, upload_id, request_options=request_options)
+        _response = self._raw_client.retrieve(namespace_id, upload_id, request_options=request_options)
         return _response.data
 
-    def abort_upload(
+    def abort(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
@@ -137,15 +137,15 @@ class UploadsClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.uploads.abort_upload(
+        client.uploads.abort(
             namespace_id="namespace_id",
             upload_id="upload_id",
         )
         """
-        _response = self._raw_client.abort_upload(namespace_id, upload_id, request_options=request_options)
+        _response = self._raw_client.abort(namespace_id, upload_id, request_options=request_options)
         return _response.data
 
-    def complete_upload(
+    def complete(
         self,
         namespace_id: str,
         upload_id: str,
@@ -182,18 +182,16 @@ class UploadsClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.uploads.complete_upload(
+        client.uploads.complete(
             namespace_id="namespace_id",
             upload_id="upload_id",
             request=CompleteUploadRequest_ServiceProxied(),
         )
         """
-        _response = self._raw_client.complete_upload(
-            namespace_id, upload_id, request=request, request_options=request_options
-        )
+        _response = self._raw_client.complete(namespace_id, upload_id, request=request, request_options=request_options)
         return _response.data
 
-    def put_upload_content(
+    def put_content(
         self,
         namespace_id: str,
         upload_id: str,
@@ -222,12 +220,12 @@ class UploadsClient:
         UploadContentResponse
             Upload content accepted
         """
-        _response = self._raw_client.put_upload_content(
+        _response = self._raw_client.put_content(
             namespace_id, upload_id, request=request, request_options=request_options
         )
         return _response.data
 
-    def sign_upload_parts(
+    def sign_parts(
         self,
         namespace_id: str,
         upload_id: str,
@@ -266,7 +264,7 @@ class UploadsClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.uploads.sign_upload_parts(
+        client.uploads.sign_parts(
             namespace_id="namespace_id",
             upload_id="upload_id",
             parts=[
@@ -280,9 +278,7 @@ class UploadsClient:
             ],
         )
         """
-        _response = self._raw_client.sign_upload_parts(
-            namespace_id, upload_id, parts=parts, request_options=request_options
-        )
+        _response = self._raw_client.sign_parts(namespace_id, upload_id, parts=parts, request_options=request_options)
         return _response.data
 
 
@@ -301,7 +297,7 @@ class AsyncUploadsClient:
         """
         return self._raw_client
 
-    async def create_upload(
+    async def create(
         self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> BeginUploadResponse:
         """
@@ -335,7 +331,7 @@ class AsyncUploadsClient:
 
 
         async def main() -> None:
-            await client.uploads.create_upload(
+            await client.uploads.create(
                 namespace_id="namespace_id",
                 request=BeginUploadRequest_ServiceProxied(),
             )
@@ -343,10 +339,10 @@ class AsyncUploadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_upload(namespace_id, request=request, request_options=request_options)
+        _response = await self._raw_client.create(namespace_id, request=request, request_options=request_options)
         return _response.data
 
-    async def get_upload(
+    async def retrieve(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
@@ -381,7 +377,7 @@ class AsyncUploadsClient:
 
 
         async def main() -> None:
-            await client.uploads.get_upload(
+            await client.uploads.retrieve(
                 namespace_id="namespace_id",
                 upload_id="upload_id",
             )
@@ -389,10 +385,10 @@ class AsyncUploadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_upload(namespace_id, upload_id, request_options=request_options)
+        _response = await self._raw_client.retrieve(namespace_id, upload_id, request_options=request_options)
         return _response.data
 
-    async def abort_upload(
+    async def abort(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
@@ -427,7 +423,7 @@ class AsyncUploadsClient:
 
 
         async def main() -> None:
-            await client.uploads.abort_upload(
+            await client.uploads.abort(
                 namespace_id="namespace_id",
                 upload_id="upload_id",
             )
@@ -435,10 +431,10 @@ class AsyncUploadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.abort_upload(namespace_id, upload_id, request_options=request_options)
+        _response = await self._raw_client.abort(namespace_id, upload_id, request_options=request_options)
         return _response.data
 
-    async def complete_upload(
+    async def complete(
         self,
         namespace_id: str,
         upload_id: str,
@@ -480,7 +476,7 @@ class AsyncUploadsClient:
 
 
         async def main() -> None:
-            await client.uploads.complete_upload(
+            await client.uploads.complete(
                 namespace_id="namespace_id",
                 upload_id="upload_id",
                 request=CompleteUploadRequest_ServiceProxied(),
@@ -489,12 +485,12 @@ class AsyncUploadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.complete_upload(
+        _response = await self._raw_client.complete(
             namespace_id, upload_id, request=request, request_options=request_options
         )
         return _response.data
 
-    async def put_upload_content(
+    async def put_content(
         self,
         namespace_id: str,
         upload_id: str,
@@ -523,12 +519,12 @@ class AsyncUploadsClient:
         UploadContentResponse
             Upload content accepted
         """
-        _response = await self._raw_client.put_upload_content(
+        _response = await self._raw_client.put_content(
             namespace_id, upload_id, request=request, request_options=request_options
         )
         return _response.data
 
-    async def sign_upload_parts(
+    async def sign_parts(
         self,
         namespace_id: str,
         upload_id: str,
@@ -572,7 +568,7 @@ class AsyncUploadsClient:
 
 
         async def main() -> None:
-            await client.uploads.sign_upload_parts(
+            await client.uploads.sign_parts(
                 namespace_id="namespace_id",
                 upload_id="upload_id",
                 parts=[
@@ -589,7 +585,7 @@ class AsyncUploadsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.sign_upload_parts(
+        _response = await self._raw_client.sign_parts(
             namespace_id, upload_id, parts=parts, request_options=request_options
         )
         return _response.data

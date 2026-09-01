@@ -25,12 +25,14 @@ class FilesystemOperationPutFile(UniversalBaseModel):
     Immutable bytes that must be covered by a valid preparation proof.
     """
 
+    expected_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Stable inode ID within a namespace
+    """
+
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    When set (with `replace` behavior), the put applies only while
-    the file's current revision is still this one; a raced write
-    fails the request instead of silently stacking on it, and a
-    missing file answers `path_not_found`.
+    With `replace` behavior and an inode guard, the request requires this content revision.
     """
 
     path: AbsolutePath = pydantic.Field()

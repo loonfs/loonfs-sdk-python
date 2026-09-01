@@ -5,175 +5,35 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.absolute_path import AbsolutePath
-from ..types.actor_ref import ActorRef
 from ..types.begin_download_response import BeginDownloadResponse
-from ..types.change_seq import ChangeSeq
 from ..types.checkpoint_id import CheckpointId
-from ..types.commit_id import CommitId
-from ..types.commit_response import CommitResponse
-from ..types.content_token import ContentToken
-from ..types.filesystem_operation import FilesystemOperation
-from ..types.list_changes_response import ListChangesResponse
+from ..types.grep_response import GrepResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
-from ..types.list_trash_response import ListTrashResponse
 from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
-from .raw_client import AsyncRawFilesystemClient, RawFilesystemClient
+from .raw_client import AsyncRawFilesClient, RawFilesClient
 
 # this is used as the default value for optional parameters
 OMIT = typing.cast(typing.Any, ...)
 
 
-class FilesystemClient:
+class FilesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
-        self._raw_client = RawFilesystemClient(client_wrapper=client_wrapper)
+        self._raw_client = RawFilesClient(client_wrapper=client_wrapper)
 
     @property
-    def with_raw_response(self) -> RawFilesystemClient:
+    def with_raw_response(self) -> RawFilesClient:
         """
         Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        RawFilesystemClient
+        RawFilesClient
         """
         return self._raw_client
 
-    def list_changes(
-        self,
-        namespace_id: str,
-        *,
-        after_seq: ChangeSeq,
-        limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListChangesResponse:
-        """
-        Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        after_seq : ChangeSeq
-            Return committed changes after this sequence
-
-        limit : typing.Optional[int]
-            Maximum page size
-
-        snapshot_id : typing.Optional[CheckpointId]
-            End the feed at this snapshot's captured sequence
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ListChangesResponse
-            Committed changes
-
-        Examples
-        --------
-        from loonfs.server import LoonFS
-
-        client = LoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-        client.filesystem.list_changes(
-            namespace_id="namespace_id",
-            after_seq=1000000,
-            snapshot_id="chk_00000000000000000000000000000002",
-        )
-        """
-        _response = self._raw_client.list_changes(
-            namespace_id, after_seq=after_seq, limit=limit, snapshot_id=snapshot_id, request_options=request_options
-        )
-        return _response.data
-
-    def create_commit(
-        self,
-        namespace_id: str,
-        *,
-        actor: ActorRef,
-        commit_id: CommitId,
-        operations: typing.Sequence[FilesystemOperation],
-        content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
-        message: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> CommitResponse:
-        """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        actor : ActorRef
-            Actor responsible for the commit, as supplied by the application.
-
-        commit_id : CommitId
-            Caller-supplied idempotency key for the whole request.
-
-        operations : typing.Sequence[FilesystemOperation]
-            Ordered operations to apply. Must be non-empty; they commit all
-            together or not at all.
-
-        content_tokens : typing.Optional[typing.Sequence[ContentToken]]
-            Proofs for any new external content refs introduced by this request.
-            One proof covers every operation that names its content ref.
-
-        message : typing.Optional[str]
-            Caller annotation recorded on the commit and reported by the change
-            feed. Part of the commit's identity: reusing `commit_id` with a
-            different message is a `commit_id_reuse_conflict`, exactly as it is
-            for an explicit commit.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CommitResponse
-            Commit applied
-
-        Examples
-        --------
-        from loonfs.server import ActorRef, FilesystemOperation_CreateDirectory, LoonFS
-
-        client = LoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-        client.filesystem.create_commit(
-            namespace_id="namespace_id",
-            actor=ActorRef(
-                id="usr_8f3c",
-                kind="user",
-            ),
-            commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
-            operations=[
-                FilesystemOperation_CreateDirectory(
-                    path="/docs/report.txt",
-                )
-            ],
-        )
-        """
-        _response = self._raw_client.create_commit(
-            namespace_id,
-            actor=actor,
-            commit_id=commit_id,
-            operations=operations,
-            content_tokens=content_tokens,
-            message=message,
-            request_options=request_options,
-        )
-        return _response.data
-
-    def get_file_bytes(
+    def content(
         self,
         namespace_id: str,
         *,
@@ -215,12 +75,12 @@ class FilesystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.filesystem.get_file_bytes(
+        client.files.content(
             namespace_id="namespace_id",
             path="path",
         )
         """
-        with self._raw_client.get_file_bytes(
+        with self._raw_client.content(
             namespace_id, path=path, revision_no=revision_no, snapshot_id=snapshot_id, request_options=request_options
         ) as r:
             yield from r.data
@@ -267,7 +127,7 @@ class FilesystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.filesystem.create_download(
+        client.files.create_download(
             namespace_id="namespace_id",
             snapshot_id="chk_00000000000000000000000000000002",
             path="/docs/report.txt",
@@ -278,7 +138,7 @@ class FilesystemClient:
         )
         return _response.data
 
-    def list_path_entries(
+    def list(
         self,
         namespace_id: str,
         *,
@@ -328,13 +188,13 @@ class FilesystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.filesystem.list_path_entries(
+        client.files.list(
             namespace_id="namespace_id",
             path="path",
             snapshot_id="chk_00000000000000000000000000000002",
         )
         """
-        _response = self._raw_client.list_path_entries(
+        _response = self._raw_client.list(
             namespace_id,
             path=path,
             limit=limit,
@@ -345,7 +205,7 @@ class FilesystemClient:
         )
         return _response.data
 
-    def get_path_entry(
+    def retrieve(
         self,
         namespace_id: str,
         *,
@@ -387,13 +247,13 @@ class FilesystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.filesystem.get_path_entry(
+        client.files.retrieve(
             namespace_id="namespace_id",
             path="path",
             snapshot_id="chk_00000000000000000000000000000002",
         )
         """
-        _response = self._raw_client.get_path_entry(
+        _response = self._raw_client.retrieve(
             namespace_id,
             path=path,
             include_attributes=include_attributes,
@@ -402,7 +262,7 @@ class FilesystemClient:
         )
         return _response.data
 
-    def list_file_revisions(
+    def list_revisions(
         self,
         namespace_id: str,
         *,
@@ -444,45 +304,65 @@ class FilesystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.filesystem.list_file_revisions(
+        client.files.list_revisions(
             namespace_id="namespace_id",
             path="path",
         )
         """
-        _response = self._raw_client.list_file_revisions(
+        _response = self._raw_client.list_revisions(
             namespace_id, path=path, limit=limit, cursor=cursor, request_options=request_options
         )
         return _response.data
 
-    def list_trash(
+    def grep(
         self,
         namespace_id: str,
         *,
+        pattern: str,
+        case_insensitive: typing.Optional[bool] = None,
+        path_prefix: typing.Optional[str] = None,
+        allow_scan: typing.Optional[bool] = None,
+        allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListTrashResponse:
+    ) -> GrepResponse:
         """
-        Returns the namespace's recoverable deletions, oldest deletion first. Entries never age out at the retention floor; each carries the inode id and deletion sequence undelete needs, plus the deleted name when the delete recorded one.
+        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
+        pattern : str
+            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
+
+        case_insensitive : typing.Optional[bool]
+            Match case-insensitively (`true` or `false`). Defaults to `false`.
+
+        path_prefix : typing.Optional[str]
+            Complete absolute path used to restrict matches.
+
+        allow_scan : typing.Optional[bool]
+            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+
+        allow_stale : typing.Optional[bool]
+            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
+
         limit : typing.Optional[int]
-            Maximum page size
+            Maximum matches per page
 
         cursor : typing.Optional[str]
-            Opaque trash page cursor
+            Opaque grep page cursor
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        ListTrashResponse
-            Recoverable deletions
+        GrepResponse
+            One page of matches
 
         Examples
         --------
@@ -492,185 +372,41 @@ class FilesystemClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.filesystem.list_trash(
+        client.files.grep(
             namespace_id="namespace_id",
+            pattern="pattern",
         )
         """
-        _response = self._raw_client.list_trash(
-            namespace_id, limit=limit, cursor=cursor, request_options=request_options
+        _response = self._raw_client.grep(
+            namespace_id,
+            pattern=pattern,
+            case_insensitive=case_insensitive,
+            path_prefix=path_prefix,
+            allow_scan=allow_scan,
+            allow_stale=allow_stale,
+            limit=limit,
+            cursor=cursor,
+            request_options=request_options,
         )
         return _response.data
 
 
-class AsyncFilesystemClient:
+class AsyncFilesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
-        self._raw_client = AsyncRawFilesystemClient(client_wrapper=client_wrapper)
+        self._raw_client = AsyncRawFilesClient(client_wrapper=client_wrapper)
 
     @property
-    def with_raw_response(self) -> AsyncRawFilesystemClient:
+    def with_raw_response(self) -> AsyncRawFilesClient:
         """
         Retrieves a raw implementation of this client that returns raw responses.
 
         Returns
         -------
-        AsyncRawFilesystemClient
+        AsyncRawFilesClient
         """
         return self._raw_client
 
-    async def list_changes(
-        self,
-        namespace_id: str,
-        *,
-        after_seq: ChangeSeq,
-        limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListChangesResponse:
-        """
-        Returns committed changes after a sequence. A snapshot limits the feed to its captured sequence.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        after_seq : ChangeSeq
-            Return committed changes after this sequence
-
-        limit : typing.Optional[int]
-            Maximum page size
-
-        snapshot_id : typing.Optional[CheckpointId]
-            End the feed at this snapshot's captured sequence
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ListChangesResponse
-            Committed changes
-
-        Examples
-        --------
-        import asyncio
-
-        from loonfs.server import AsyncLoonFS
-
-        client = AsyncLoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-
-
-        async def main() -> None:
-            await client.filesystem.list_changes(
-                namespace_id="namespace_id",
-                after_seq=1000000,
-                snapshot_id="chk_00000000000000000000000000000002",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.list_changes(
-            namespace_id, after_seq=after_seq, limit=limit, snapshot_id=snapshot_id, request_options=request_options
-        )
-        return _response.data
-
-    async def create_commit(
-        self,
-        namespace_id: str,
-        *,
-        actor: ActorRef,
-        commit_id: CommitId,
-        operations: typing.Sequence[FilesystemOperation],
-        content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
-        message: typing.Optional[str] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> CommitResponse:
-        """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        actor : ActorRef
-            Actor responsible for the commit, as supplied by the application.
-
-        commit_id : CommitId
-            Caller-supplied idempotency key for the whole request.
-
-        operations : typing.Sequence[FilesystemOperation]
-            Ordered operations to apply. Must be non-empty; they commit all
-            together or not at all.
-
-        content_tokens : typing.Optional[typing.Sequence[ContentToken]]
-            Proofs for any new external content refs introduced by this request.
-            One proof covers every operation that names its content ref.
-
-        message : typing.Optional[str]
-            Caller annotation recorded on the commit and reported by the change
-            feed. Part of the commit's identity: reusing `commit_id` with a
-            different message is a `commit_id_reuse_conflict`, exactly as it is
-            for an explicit commit.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        CommitResponse
-            Commit applied
-
-        Examples
-        --------
-        import asyncio
-
-        from loonfs.server import (
-            ActorRef,
-            AsyncLoonFS,
-            FilesystemOperation_CreateDirectory,
-        )
-
-        client = AsyncLoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-
-
-        async def main() -> None:
-            await client.filesystem.create_commit(
-                namespace_id="namespace_id",
-                actor=ActorRef(
-                    id="usr_8f3c",
-                    kind="user",
-                ),
-                commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
-                operations=[
-                    FilesystemOperation_CreateDirectory(
-                        path="/docs/report.txt",
-                    )
-                ],
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.create_commit(
-            namespace_id,
-            actor=actor,
-            commit_id=commit_id,
-            operations=operations,
-            content_tokens=content_tokens,
-            message=message,
-            request_options=request_options,
-        )
-        return _response.data
-
-    async def get_file_bytes(
+    async def content(
         self,
         namespace_id: str,
         *,
@@ -717,7 +453,7 @@ class AsyncFilesystemClient:
 
 
         async def main() -> None:
-            await client.filesystem.get_file_bytes(
+            await client.files.content(
                 namespace_id="namespace_id",
                 path="path",
             )
@@ -725,7 +461,7 @@ class AsyncFilesystemClient:
 
         asyncio.run(main())
         """
-        async with self._raw_client.get_file_bytes(
+        async with self._raw_client.content(
             namespace_id, path=path, revision_no=revision_no, snapshot_id=snapshot_id, request_options=request_options
         ) as r:
             async for _chunk in r.data:
@@ -778,7 +514,7 @@ class AsyncFilesystemClient:
 
 
         async def main() -> None:
-            await client.filesystem.create_download(
+            await client.files.create_download(
                 namespace_id="namespace_id",
                 snapshot_id="chk_00000000000000000000000000000002",
                 path="/docs/report.txt",
@@ -792,7 +528,7 @@ class AsyncFilesystemClient:
         )
         return _response.data
 
-    async def list_path_entries(
+    async def list(
         self,
         namespace_id: str,
         *,
@@ -847,7 +583,7 @@ class AsyncFilesystemClient:
 
 
         async def main() -> None:
-            await client.filesystem.list_path_entries(
+            await client.files.list(
                 namespace_id="namespace_id",
                 path="path",
                 snapshot_id="chk_00000000000000000000000000000002",
@@ -856,7 +592,7 @@ class AsyncFilesystemClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_path_entries(
+        _response = await self._raw_client.list(
             namespace_id,
             path=path,
             limit=limit,
@@ -867,7 +603,7 @@ class AsyncFilesystemClient:
         )
         return _response.data
 
-    async def get_path_entry(
+    async def retrieve(
         self,
         namespace_id: str,
         *,
@@ -914,7 +650,7 @@ class AsyncFilesystemClient:
 
 
         async def main() -> None:
-            await client.filesystem.get_path_entry(
+            await client.files.retrieve(
                 namespace_id="namespace_id",
                 path="path",
                 snapshot_id="chk_00000000000000000000000000000002",
@@ -923,7 +659,7 @@ class AsyncFilesystemClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.get_path_entry(
+        _response = await self._raw_client.retrieve(
             namespace_id,
             path=path,
             include_attributes=include_attributes,
@@ -932,7 +668,7 @@ class AsyncFilesystemClient:
         )
         return _response.data
 
-    async def list_file_revisions(
+    async def list_revisions(
         self,
         namespace_id: str,
         *,
@@ -979,7 +715,7 @@ class AsyncFilesystemClient:
 
 
         async def main() -> None:
-            await client.filesystem.list_file_revisions(
+            await client.files.list_revisions(
                 namespace_id="namespace_id",
                 path="path",
             )
@@ -987,40 +723,60 @@ class AsyncFilesystemClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_file_revisions(
+        _response = await self._raw_client.list_revisions(
             namespace_id, path=path, limit=limit, cursor=cursor, request_options=request_options
         )
         return _response.data
 
-    async def list_trash(
+    async def grep(
         self,
         namespace_id: str,
         *,
+        pattern: str,
+        case_insensitive: typing.Optional[bool] = None,
+        path_prefix: typing.Optional[str] = None,
+        allow_scan: typing.Optional[bool] = None,
+        allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> ListTrashResponse:
+    ) -> GrepResponse:
         """
-        Returns the namespace's recoverable deletions, oldest deletion first. Entries never age out at the retention floor; each carries the inode id and deletion sequence undelete needs, plus the deleted name when the delete recorded one.
+        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
+        pattern : str
+            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
+
+        case_insensitive : typing.Optional[bool]
+            Match case-insensitively (`true` or `false`). Defaults to `false`.
+
+        path_prefix : typing.Optional[str]
+            Complete absolute path used to restrict matches.
+
+        allow_scan : typing.Optional[bool]
+            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+
+        allow_stale : typing.Optional[bool]
+            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
+
         limit : typing.Optional[int]
-            Maximum page size
+            Maximum matches per page
 
         cursor : typing.Optional[str]
-            Opaque trash page cursor
+            Opaque grep page cursor
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        ListTrashResponse
-            Recoverable deletions
+        GrepResponse
+            One page of matches
 
         Examples
         --------
@@ -1035,14 +791,23 @@ class AsyncFilesystemClient:
 
 
         async def main() -> None:
-            await client.filesystem.list_trash(
+            await client.files.grep(
                 namespace_id="namespace_id",
+                pattern="pattern",
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.list_trash(
-            namespace_id, limit=limit, cursor=cursor, request_options=request_options
+        _response = await self._raw_client.grep(
+            namespace_id,
+            pattern=pattern,
+            case_insensitive=case_insensitive,
+            path_prefix=path_prefix,
+            allow_scan=allow_scan,
+            allow_stale=allow_stale,
+            limit=limit,
+            cursor=cursor,
+            request_options=request_options,
         )
         return _response.data

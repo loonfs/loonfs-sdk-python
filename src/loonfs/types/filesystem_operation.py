@@ -75,6 +75,7 @@ class FilesystemOperation_PutFile(UniversalBaseModel):
     kind: typing.Literal["put_file"] = "put_file"
     behavior: typing.Optional[DestinationBehavior] = None
     content_ref: ContentRef
+    expected_inode_id: typing.Optional[str] = None
     expected_revision_no: typing.Optional[RevisionNo] = None
     path: AbsolutePath
 
@@ -190,6 +191,8 @@ class FilesystemOperation_MovePath(UniversalBaseModel):
 
     kind: typing.Literal["move_path"] = "move_path"
     behavior: typing.Optional[DestinationBehavior] = None
+    expected_destination_inode_id: typing.Optional[str] = None
+    expected_destination_revision_no: typing.Optional[RevisionNo] = None
     from_path: AbsolutePath
     to_path: AbsolutePath
 
@@ -214,6 +217,8 @@ class FilesystemOperation_MoveByInode(UniversalBaseModel):
     kind: typing.Literal["move_by_inode"] = "move_by_inode"
     behavior: typing.Optional[DestinationBehavior] = None
     expected_binding_generation: str
+    expected_destination_inode_id: typing.Optional[str] = None
+    expected_destination_revision_no: typing.Optional[RevisionNo] = None
     inode_id: str
     to_display_name: DisplayName
     to_parent_inode_id: str
@@ -238,6 +243,8 @@ class FilesystemOperation_CopyPath(UniversalBaseModel):
 
     kind: typing.Literal["copy_path"] = "copy_path"
     behavior: typing.Optional[DestinationBehavior] = None
+    expected_destination_inode_id: typing.Optional[str] = None
+    expected_destination_revision_no: typing.Optional[RevisionNo] = None
     from_path: AbsolutePath
     to_path: AbsolutePath
 

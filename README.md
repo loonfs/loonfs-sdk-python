@@ -23,11 +23,10 @@ client = LoonFS(
     token=os.environ["LOONFS_AUTH_TOKEN"],
 )
 
-capabilities = client.system.get_capabilities()
+capabilities = client.capabilities.retrieve()
 ```
 
-`AsyncLoonFS` provides the same API for async applications. Upload and download
-helpers are available from `loonfs.transfers`.
+`client.files.upload` and `client.files.download` transfer whole files in memory. `AsyncLoonFS` provides the same generated API for async applications; it does not have the transfer methods yet.
 
 ## Proxy
 
