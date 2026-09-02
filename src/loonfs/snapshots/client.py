@@ -6,7 +6,7 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.list_snapshots_response import ListSnapshotsResponse
 from ..types.release_snapshot_response import ReleaseSnapshotResponse
-from ..types.snapshot_summary import SnapshotSummary
+from ..types.snapshot import Snapshot
 from .raw_client import AsyncRawSnapshotsClient, RawSnapshotsClient
 
 # this is used as the default value for optional parameters
@@ -75,7 +75,7 @@ class SnapshotsClient:
 
     def create(
         self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
-    ) -> SnapshotSummary:
+    ) -> Snapshot:
         """
         Creates a snapshot of the current namespace state. Every call creates a new snapshot.
 
@@ -95,7 +95,7 @@ class SnapshotsClient:
 
         Returns
         -------
-        SnapshotSummary
+        Snapshot
             Snapshot created
 
         Examples
@@ -122,7 +122,7 @@ class SnapshotsClient:
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SnapshotSummary:
+    ) -> Snapshot:
         """
         Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
 
@@ -142,7 +142,7 @@ class SnapshotsClient:
 
         Returns
         -------
-        SnapshotSummary
+        Snapshot
             Snapshot extended
 
         Examples
@@ -273,7 +273,7 @@ class AsyncSnapshotsClient:
 
     async def create(
         self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
-    ) -> SnapshotSummary:
+    ) -> Snapshot:
         """
         Creates a snapshot of the current namespace state. Every call creates a new snapshot.
 
@@ -293,7 +293,7 @@ class AsyncSnapshotsClient:
 
         Returns
         -------
-        SnapshotSummary
+        Snapshot
             Snapshot created
 
         Examples
@@ -330,7 +330,7 @@ class AsyncSnapshotsClient:
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> SnapshotSummary:
+    ) -> Snapshot:
         """
         Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
 
@@ -350,7 +350,7 @@ class AsyncSnapshotsClient:
 
         Returns
         -------
-        SnapshotSummary
+        Snapshot
             Snapshot extended
 
         Examples

@@ -1896,7 +1896,7 @@ client.snapshots.list(
 </dl>
 </details>
 
-<details><summary><code>client.snapshots.<a href="src/loonfs/snapshots/client.py">create</a>(...) -> SnapshotSummary</code></summary>
+<details><summary><code>client.snapshots.<a href="src/loonfs/snapshots/client.py">create</a>(...) -> Snapshot</code></summary>
 <dl>
 <dd>
 
@@ -1986,7 +1986,7 @@ client.snapshots.create(
 </dl>
 </details>
 
-<details><summary><code>client.snapshots.<a href="src/loonfs/snapshots/client.py">extend</a>(...) -> SnapshotSummary</code></summary>
+<details><summary><code>client.snapshots.<a href="src/loonfs/snapshots/client.py">extend</a>(...) -> Snapshot</code></summary>
 <dl>
 <dd>
 
@@ -2428,7 +2428,7 @@ Completes an upload. The request mode must match the mode used to start the sess
 <dd>
 
 ```python
-from loonfs.server import LoonFS, CompleteUploadRequest_ServiceProxied
+from loonfs.server import LoonFS, UploadCompletion_ServiceProxied
 
 client = LoonFS(
     token="<token>",
@@ -2438,7 +2438,7 @@ client = LoonFS(
 client.uploads.complete(
     namespace_id="namespace_id",
     upload_id="upload_id",
-    request=CompleteUploadRequest_ServiceProxied(),
+    request=UploadCompletion_ServiceProxied(),
 )
 
 ```
@@ -2471,7 +2471,7 @@ client.uploads.complete(
 <dl>
 <dd>
 
-**request:** `CompleteUploadRequest` 
+**request:** `UploadCompletion` 
     
 </dd>
 </dl>

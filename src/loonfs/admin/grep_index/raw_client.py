@@ -3,7 +3,7 @@
 import typing
 from json.decoder import JSONDecodeError
 
-from ...core.api_error import ApiError as core_api_error_ApiError
+from ...core.api_error import ApiError
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.http_response import AsyncHttpResponse, HttpResponse
 from ...core.jsonable_encoder import encode_path_param
@@ -17,7 +17,7 @@ from ...errors.not_found_error import NotFoundError
 from ...errors.not_implemented_error import NotImplementedError
 from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
-from ...types.api_error import ApiError as types_api_error_ApiError
+from ...types.error_response import ErrorResponse
 from ...types.grep_gc_response import GrepGcResponse
 from ...types.grep_index import GrepIndex
 from pydantic import ValidationError
@@ -68,9 +68,9 @@ class RawGrepIndexClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -79,9 +79,9 @@ class RawGrepIndexClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -90,9 +90,9 @@ class RawGrepIndexClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -101,9 +101,9 @@ class RawGrepIndexClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -121,16 +121,12 @@ class RawGrepIndexClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def disable(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -170,9 +166,9 @@ class RawGrepIndexClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -181,9 +177,9 @@ class RawGrepIndexClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -192,9 +188,9 @@ class RawGrepIndexClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -203,9 +199,9 @@ class RawGrepIndexClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -214,9 +210,9 @@ class RawGrepIndexClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -225,9 +221,9 @@ class RawGrepIndexClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -245,16 +241,12 @@ class RawGrepIndexClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def enable(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -294,9 +286,9 @@ class RawGrepIndexClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -305,9 +297,9 @@ class RawGrepIndexClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -316,9 +308,9 @@ class RawGrepIndexClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -327,9 +319,9 @@ class RawGrepIndexClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -338,9 +330,9 @@ class RawGrepIndexClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -349,9 +341,9 @@ class RawGrepIndexClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -369,16 +361,12 @@ class RawGrepIndexClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def gc(
         self,
@@ -443,9 +431,9 @@ class RawGrepIndexClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -454,9 +442,9 @@ class RawGrepIndexClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -465,9 +453,9 @@ class RawGrepIndexClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -476,9 +464,9 @@ class RawGrepIndexClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -496,16 +484,12 @@ class RawGrepIndexClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
 class AsyncRawGrepIndexClient:
@@ -550,9 +534,9 @@ class AsyncRawGrepIndexClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -561,9 +545,9 @@ class AsyncRawGrepIndexClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -572,9 +556,9 @@ class AsyncRawGrepIndexClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -583,9 +567,9 @@ class AsyncRawGrepIndexClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -603,16 +587,12 @@ class AsyncRawGrepIndexClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def disable(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -652,9 +632,9 @@ class AsyncRawGrepIndexClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -663,9 +643,9 @@ class AsyncRawGrepIndexClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -674,9 +654,9 @@ class AsyncRawGrepIndexClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -685,9 +665,9 @@ class AsyncRawGrepIndexClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -696,9 +676,9 @@ class AsyncRawGrepIndexClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -707,9 +687,9 @@ class AsyncRawGrepIndexClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -727,16 +707,12 @@ class AsyncRawGrepIndexClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def enable(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -776,9 +752,9 @@ class AsyncRawGrepIndexClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -787,9 +763,9 @@ class AsyncRawGrepIndexClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -798,9 +774,9 @@ class AsyncRawGrepIndexClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -809,9 +785,9 @@ class AsyncRawGrepIndexClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -820,9 +796,9 @@ class AsyncRawGrepIndexClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -831,9 +807,9 @@ class AsyncRawGrepIndexClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -851,16 +827,12 @@ class AsyncRawGrepIndexClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def gc(
         self,
@@ -925,9 +897,9 @@ class AsyncRawGrepIndexClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -936,9 +908,9 @@ class AsyncRawGrepIndexClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -947,9 +919,9 @@ class AsyncRawGrepIndexClient:
                 raise InternalServerError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -958,9 +930,9 @@ class AsyncRawGrepIndexClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -978,13 +950,9 @@ class AsyncRawGrepIndexClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)

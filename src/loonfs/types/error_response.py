@@ -7,7 +7,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .error_details import ErrorDetails
 
 
-class ApiError(UniversalBaseModel):
+class ErrorResponse(UniversalBaseModel):
     """
     HTTP error body used by LoonFS APIs.
     """

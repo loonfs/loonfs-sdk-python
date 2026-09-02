@@ -3,7 +3,7 @@
 import typing
 from json.decoder import JSONDecodeError
 
-from ..core.api_error import ApiError as core_api_error_ApiError
+from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import encode_path_param
@@ -16,10 +16,10 @@ from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
-from ..types.api_error import ApiError as types_api_error_ApiError
+from ..types.error_response import ErrorResponse
 from ..types.list_snapshots_response import ListSnapshotsResponse
 from ..types.release_snapshot_response import ReleaseSnapshotResponse
-from ..types.snapshot_summary import SnapshotSummary
+from ..types.snapshot import Snapshot
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -83,9 +83,9 @@ class RawSnapshotsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -94,9 +94,9 @@ class RawSnapshotsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -105,9 +105,9 @@ class RawSnapshotsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -125,20 +125,16 @@ class RawSnapshotsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def create(
         self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[SnapshotSummary]:
+    ) -> HttpResponse[Snapshot]:
         """
         Creates a snapshot of the current namespace state. Every call creates a new snapshot.
 
@@ -158,7 +154,7 @@ class RawSnapshotsClient:
 
         Returns
         -------
-        HttpResponse[SnapshotSummary]
+        HttpResponse[Snapshot]
             Snapshot created
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -180,9 +176,9 @@ class RawSnapshotsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SnapshotSummary,
+                    Snapshot,
                     parse_obj_as(
-                        type_=SnapshotSummary,  # type: ignore
+                        type_=Snapshot,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -191,9 +187,9 @@ class RawSnapshotsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -202,9 +198,9 @@ class RawSnapshotsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -213,9 +209,9 @@ class RawSnapshotsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -224,9 +220,9 @@ class RawSnapshotsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -235,9 +231,9 @@ class RawSnapshotsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -255,16 +251,12 @@ class RawSnapshotsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def extend(
         self,
@@ -273,7 +265,7 @@ class RawSnapshotsClient:
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[SnapshotSummary]:
+    ) -> HttpResponse[Snapshot]:
         """
         Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
 
@@ -293,7 +285,7 @@ class RawSnapshotsClient:
 
         Returns
         -------
-        HttpResponse[SnapshotSummary]
+        HttpResponse[Snapshot]
             Snapshot extended
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -311,9 +303,9 @@ class RawSnapshotsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SnapshotSummary,
+                    Snapshot,
                     parse_obj_as(
-                        type_=SnapshotSummary,  # type: ignore
+                        type_=Snapshot,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -322,9 +314,9 @@ class RawSnapshotsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -333,9 +325,9 @@ class RawSnapshotsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -344,9 +336,9 @@ class RawSnapshotsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -355,9 +347,9 @@ class RawSnapshotsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -375,16 +367,12 @@ class RawSnapshotsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def release(
         self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -427,9 +415,9 @@ class RawSnapshotsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -438,9 +426,9 @@ class RawSnapshotsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -458,16 +446,12 @@ class RawSnapshotsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
 class AsyncRawSnapshotsClient:
@@ -527,9 +511,9 @@ class AsyncRawSnapshotsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -538,9 +522,9 @@ class AsyncRawSnapshotsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -549,9 +533,9 @@ class AsyncRawSnapshotsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -569,20 +553,16 @@ class AsyncRawSnapshotsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def create(
         self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[SnapshotSummary]:
+    ) -> AsyncHttpResponse[Snapshot]:
         """
         Creates a snapshot of the current namespace state. Every call creates a new snapshot.
 
@@ -602,7 +582,7 @@ class AsyncRawSnapshotsClient:
 
         Returns
         -------
-        AsyncHttpResponse[SnapshotSummary]
+        AsyncHttpResponse[Snapshot]
             Snapshot created
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -624,9 +604,9 @@ class AsyncRawSnapshotsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SnapshotSummary,
+                    Snapshot,
                     parse_obj_as(
-                        type_=SnapshotSummary,  # type: ignore
+                        type_=Snapshot,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -635,9 +615,9 @@ class AsyncRawSnapshotsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -646,9 +626,9 @@ class AsyncRawSnapshotsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -657,9 +637,9 @@ class AsyncRawSnapshotsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -668,9 +648,9 @@ class AsyncRawSnapshotsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -679,9 +659,9 @@ class AsyncRawSnapshotsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -699,16 +679,12 @@ class AsyncRawSnapshotsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def extend(
         self,
@@ -717,7 +693,7 @@ class AsyncRawSnapshotsClient:
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[SnapshotSummary]:
+    ) -> AsyncHttpResponse[Snapshot]:
         """
         Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
 
@@ -737,7 +713,7 @@ class AsyncRawSnapshotsClient:
 
         Returns
         -------
-        AsyncHttpResponse[SnapshotSummary]
+        AsyncHttpResponse[Snapshot]
             Snapshot extended
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -755,9 +731,9 @@ class AsyncRawSnapshotsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    SnapshotSummary,
+                    Snapshot,
                     parse_obj_as(
-                        type_=SnapshotSummary,  # type: ignore
+                        type_=Snapshot,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -766,9 +742,9 @@ class AsyncRawSnapshotsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -777,9 +753,9 @@ class AsyncRawSnapshotsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -788,9 +764,9 @@ class AsyncRawSnapshotsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -799,9 +775,9 @@ class AsyncRawSnapshotsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -819,16 +795,12 @@ class AsyncRawSnapshotsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def release(
         self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -871,9 +843,9 @@ class AsyncRawSnapshotsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -882,9 +854,9 @@ class AsyncRawSnapshotsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -902,13 +874,9 @@ class AsyncRawSnapshotsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)

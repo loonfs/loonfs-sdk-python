@@ -3,7 +3,7 @@
 import typing
 from json.decoder import JSONDecodeError
 
-from ..core.api_error import ApiError as core_api_error_ApiError
+from ..core.api_error import ApiError
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.http_response import AsyncHttpResponse, HttpResponse
 from ..core.jsonable_encoder import encode_path_param
@@ -19,11 +19,11 @@ from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
-from ..types.api_error import ApiError as types_api_error_ApiError
 from ..types.begin_upload_request import BeginUploadRequest
 from ..types.begin_upload_response import BeginUploadResponse
-from ..types.complete_upload_request import CompleteUploadRequest
+from ..types.error_response import ErrorResponse
 from ..types.sign_upload_parts_response import SignUploadPartsResponse
+from ..types.upload_completion import UploadCompletion
 from ..types.upload_content_response import UploadContentResponse
 from ..types.upload_part_checksum_claim import UploadPartChecksumClaim
 from ..types.upload_session import UploadSession
@@ -87,9 +87,9 @@ class RawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -98,9 +98,9 @@ class RawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -109,9 +109,9 @@ class RawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -120,9 +120,9 @@ class RawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -131,9 +131,9 @@ class RawUploadsClient:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -142,9 +142,9 @@ class RawUploadsClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -162,16 +162,12 @@ class RawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def retrieve(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -214,9 +210,9 @@ class RawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -225,9 +221,9 @@ class RawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -236,9 +232,9 @@ class RawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -247,9 +243,9 @@ class RawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -267,16 +263,12 @@ class RawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def abort(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -319,9 +311,9 @@ class RawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -330,9 +322,9 @@ class RawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -341,9 +333,9 @@ class RawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -352,9 +344,9 @@ class RawUploadsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -363,9 +355,9 @@ class RawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -383,23 +375,19 @@ class RawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def complete(
         self,
         namespace_id: str,
         upload_id: str,
         *,
-        request: CompleteUploadRequest,
+        request: UploadCompletion,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[UploadSession]:
         """
@@ -413,7 +401,7 @@ class RawUploadsClient:
         upload_id : str
             Upload session id
 
-        request : CompleteUploadRequest
+        request : UploadCompletion
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -427,7 +415,7 @@ class RawUploadsClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/uploads/{encode_path_param(upload_id)}/complete",
             method="POST",
             json=convert_and_respect_annotation_metadata(
-                object_=request, annotation=CompleteUploadRequest, direction="write"
+                object_=request, annotation=UploadCompletion, direction="write"
             ),
             headers={
                 "content-type": "application/json",
@@ -449,9 +437,9 @@ class RawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -460,9 +448,9 @@ class RawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -471,9 +459,9 @@ class RawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -482,9 +470,9 @@ class RawUploadsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -493,9 +481,9 @@ class RawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -504,9 +492,9 @@ class RawUploadsClient:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -524,16 +512,12 @@ class RawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def put_content(
         self,
@@ -588,9 +572,9 @@ class RawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -599,9 +583,9 @@ class RawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -610,9 +594,9 @@ class RawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -621,9 +605,9 @@ class RawUploadsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -632,9 +616,9 @@ class RawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -643,9 +627,9 @@ class RawUploadsClient:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -663,16 +647,12 @@ class RawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def sign_parts(
         self,
@@ -733,9 +713,9 @@ class RawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -744,9 +724,9 @@ class RawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -755,9 +735,9 @@ class RawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -766,9 +746,9 @@ class RawUploadsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -777,9 +757,9 @@ class RawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -788,9 +768,9 @@ class RawUploadsClient:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -799,9 +779,9 @@ class RawUploadsClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -819,16 +799,12 @@ class RawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
 class AsyncRawUploadsClient:
@@ -885,9 +861,9 @@ class AsyncRawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -896,9 +872,9 @@ class AsyncRawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -907,9 +883,9 @@ class AsyncRawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -918,9 +894,9 @@ class AsyncRawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -929,9 +905,9 @@ class AsyncRawUploadsClient:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -940,9 +916,9 @@ class AsyncRawUploadsClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -960,16 +936,12 @@ class AsyncRawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def retrieve(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -1012,9 +984,9 @@ class AsyncRawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1023,9 +995,9 @@ class AsyncRawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1034,9 +1006,9 @@ class AsyncRawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1045,9 +1017,9 @@ class AsyncRawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1065,16 +1037,12 @@ class AsyncRawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def abort(
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
@@ -1117,9 +1085,9 @@ class AsyncRawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1128,9 +1096,9 @@ class AsyncRawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1139,9 +1107,9 @@ class AsyncRawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1150,9 +1118,9 @@ class AsyncRawUploadsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1161,9 +1129,9 @@ class AsyncRawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1181,23 +1149,19 @@ class AsyncRawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def complete(
         self,
         namespace_id: str,
         upload_id: str,
         *,
-        request: CompleteUploadRequest,
+        request: UploadCompletion,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[UploadSession]:
         """
@@ -1211,7 +1175,7 @@ class AsyncRawUploadsClient:
         upload_id : str
             Upload session id
 
-        request : CompleteUploadRequest
+        request : UploadCompletion
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1225,7 +1189,7 @@ class AsyncRawUploadsClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/uploads/{encode_path_param(upload_id)}/complete",
             method="POST",
             json=convert_and_respect_annotation_metadata(
-                object_=request, annotation=CompleteUploadRequest, direction="write"
+                object_=request, annotation=UploadCompletion, direction="write"
             ),
             headers={
                 "content-type": "application/json",
@@ -1247,9 +1211,9 @@ class AsyncRawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1258,9 +1222,9 @@ class AsyncRawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1269,9 +1233,9 @@ class AsyncRawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1280,9 +1244,9 @@ class AsyncRawUploadsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1291,9 +1255,9 @@ class AsyncRawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1302,9 +1266,9 @@ class AsyncRawUploadsClient:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1322,16 +1286,12 @@ class AsyncRawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def put_content(
         self,
@@ -1386,9 +1346,9 @@ class AsyncRawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1397,9 +1357,9 @@ class AsyncRawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1408,9 +1368,9 @@ class AsyncRawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1419,9 +1379,9 @@ class AsyncRawUploadsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1430,9 +1390,9 @@ class AsyncRawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1441,9 +1401,9 @@ class AsyncRawUploadsClient:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1461,16 +1421,12 @@ class AsyncRawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def sign_parts(
         self,
@@ -1531,9 +1487,9 @@ class AsyncRawUploadsClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1542,9 +1498,9 @@ class AsyncRawUploadsClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1553,9 +1509,9 @@ class AsyncRawUploadsClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1564,9 +1520,9 @@ class AsyncRawUploadsClient:
                 raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1575,9 +1531,9 @@ class AsyncRawUploadsClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1586,9 +1542,9 @@ class AsyncRawUploadsClient:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1597,9 +1553,9 @@ class AsyncRawUploadsClient:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -1617,13 +1573,9 @@ class AsyncRawUploadsClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)

@@ -3,7 +3,7 @@
 import typing
 from json.decoder import JSONDecodeError
 
-from ...core.api_error import ApiError as core_api_error_ApiError
+from ...core.api_error import ApiError
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.http_response import AsyncHttpResponse, HttpResponse
 from ...core.jsonable_encoder import encode_path_param
@@ -17,7 +17,7 @@ from ...errors.not_found_error import NotFoundError
 from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.advance_retention_request import AdvanceRetentionRequest
-from ...types.api_error import ApiError as types_api_error_ApiError
+from ...types.error_response import ErrorResponse
 from ...types.gc_request import GcRequest
 from ...types.maintenance_step_response import MaintenanceStepResponse
 from ...types.metadata_maintenance_request import MetadataMaintenanceRequest
@@ -101,9 +101,9 @@ class RawMaintenanceClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -112,9 +112,9 @@ class RawMaintenanceClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -123,9 +123,9 @@ class RawMaintenanceClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -134,9 +134,9 @@ class RawMaintenanceClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -154,16 +154,12 @@ class RawMaintenanceClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
 
 class AsyncRawMaintenanceClient:
@@ -240,9 +236,9 @@ class AsyncRawMaintenanceClient:
                 raise BadRequestError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -251,9 +247,9 @@ class AsyncRawMaintenanceClient:
                 raise UnauthorizedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -262,9 +258,9 @@ class AsyncRawMaintenanceClient:
                 raise NotFoundError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -273,9 +269,9 @@ class AsyncRawMaintenanceClient:
                 raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
-                        types_api_error_ApiError,
+                        ErrorResponse,
                         parse_obj_as(
-                            type_=types_api_error_ApiError,  # type: ignore
+                            type_=ErrorResponse,  # type: ignore
                             object_=_response.json(),
                         ),
                     ),
@@ -293,13 +289,9 @@ class AsyncRawMaintenanceClient:
                 )
             _response_json = _response.json()
         except JSONDecodeError:
-            raise core_api_error_ApiError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
-            )
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
         except ValidationError as e:
             raise ParsingError(
                 status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
             )
-        raise core_api_error_ApiError(
-            status_code=_response.status_code, headers=dict(_response.headers), body=_response_json
-        )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
