@@ -11,7 +11,7 @@ from .completed_upload_part import CompletedUploadPart
 from .upload_content_claim import UploadContentClaim
 
 
-class CompleteUploadRequest_ServiceProxied(UniversalBaseModel):
+class UploadCompletion_ServiceProxied(UniversalBaseModel):
     """
     Request to complete an upload session.
 
@@ -31,7 +31,7 @@ class CompleteUploadRequest_ServiceProxied(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class CompleteUploadRequest_DirectPut(UniversalBaseModel):
+class UploadCompletion_DirectPut(UniversalBaseModel):
     """
     Request to complete an upload session.
 
@@ -52,7 +52,7 @@ class CompleteUploadRequest_DirectPut(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class CompleteUploadRequest_DirectMultipart(UniversalBaseModel):
+class UploadCompletion_DirectMultipart(UniversalBaseModel):
     """
     Request to complete an upload session.
 
@@ -74,9 +74,7 @@ class CompleteUploadRequest_DirectMultipart(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-CompleteUploadRequest = typing_extensions.Annotated[
-    typing.Union[
-        CompleteUploadRequest_ServiceProxied, CompleteUploadRequest_DirectPut, CompleteUploadRequest_DirectMultipart
-    ],
+UploadCompletion = typing_extensions.Annotated[
+    typing.Union[UploadCompletion_ServiceProxied, UploadCompletion_DirectPut, UploadCompletion_DirectMultipart],
     pydantic.Field(discriminator="mode"),
 ]

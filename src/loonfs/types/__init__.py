@@ -12,7 +12,6 @@ if typing.TYPE_CHECKING:
     from .actor_ref import ActorRef
     from .advance_retention_request import AdvanceRetentionRequest
     from .advance_retention_response import AdvanceRetentionResponse
-    from .api_error import ApiError
     from .attribute_key import AttributeKey
     from .attribute_revision_no import AttributeRevisionNo
     from .attribute_value import AttributeValue
@@ -58,12 +57,6 @@ if typing.TYPE_CHECKING:
     from .committed_change import CommittedChange
     from .complete_upload_direct_multipart import CompleteUploadDirectMultipart
     from .complete_upload_direct_put import CompleteUploadDirectPut
-    from .complete_upload_request import (
-        CompleteUploadRequest,
-        CompleteUploadRequest_DirectMultipart,
-        CompleteUploadRequest_DirectPut,
-        CompleteUploadRequest_ServiceProxied,
-    )
     from .complete_upload_service_proxied import CompleteUploadServiceProxied
     from .completed_upload_part import CompletedUploadPart
     from .content_id import ContentId
@@ -76,6 +69,7 @@ if typing.TYPE_CHECKING:
     from .directory_binding import DirectoryBinding
     from .display_name import DisplayName
     from .error_details import ErrorDetails
+    from .error_response import ErrorResponse
     from .file_revision import FileRevision
     from .filesystem_change import (
         FilesystemChange,
@@ -179,12 +173,18 @@ if typing.TYPE_CHECKING:
     from .service_unavailable_error_body import ServiceUnavailableErrorBody
     from .sign_upload_parts_response import SignUploadPartsResponse
     from .signed_upload_part import SignedUploadPart
-    from .snapshot_summary import SnapshotSummary
+    from .snapshot import Snapshot
     from .store_probe_check_outcome import StoreProbeCheckOutcome
     from .store_probe_check_result import StoreProbeCheckResult
     from .store_probe_request import StoreProbeRequest
     from .store_probe_response import StoreProbeResponse
     from .trash_entry import TrashEntry
+    from .upload_completion import (
+        UploadCompletion,
+        UploadCompletion_DirectMultipart,
+        UploadCompletion_DirectPut,
+        UploadCompletion_ServiceProxied,
+    )
     from .upload_content_claim import UploadContentClaim
     from .upload_content_response import UploadContentResponse
     from .upload_id import UploadId
@@ -213,7 +213,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ActorRef": ".actor_ref",
     "AdvanceRetentionRequest": ".advance_retention_request",
     "AdvanceRetentionResponse": ".advance_retention_response",
-    "ApiError": ".api_error",
     "AttributeKey": ".attribute_key",
     "AttributeRevisionNo": ".attribute_revision_no",
     "AttributeValue": ".attribute_value",
@@ -253,10 +252,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CommittedChange": ".committed_change",
     "CompleteUploadDirectMultipart": ".complete_upload_direct_multipart",
     "CompleteUploadDirectPut": ".complete_upload_direct_put",
-    "CompleteUploadRequest": ".complete_upload_request",
-    "CompleteUploadRequest_DirectMultipart": ".complete_upload_request",
-    "CompleteUploadRequest_DirectPut": ".complete_upload_request",
-    "CompleteUploadRequest_ServiceProxied": ".complete_upload_request",
     "CompleteUploadServiceProxied": ".complete_upload_service_proxied",
     "CompletedUploadPart": ".completed_upload_part",
     "ContentId": ".content_id",
@@ -269,6 +264,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DirectoryBinding": ".directory_binding",
     "DisplayName": ".display_name",
     "ErrorDetails": ".error_details",
+    "ErrorResponse": ".error_response",
     "FileRevision": ".file_revision",
     "FilesystemChange": ".filesystem_change",
     "FilesystemChangeAttributesChanged": ".filesystem_change_attributes_changed",
@@ -372,12 +368,16 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ServiceUnavailableErrorBody": ".service_unavailable_error_body",
     "SignUploadPartsResponse": ".sign_upload_parts_response",
     "SignedUploadPart": ".signed_upload_part",
-    "SnapshotSummary": ".snapshot_summary",
+    "Snapshot": ".snapshot",
     "StoreProbeCheckOutcome": ".store_probe_check_outcome",
     "StoreProbeCheckResult": ".store_probe_check_result",
     "StoreProbeRequest": ".store_probe_request",
     "StoreProbeResponse": ".store_probe_response",
     "TrashEntry": ".trash_entry",
+    "UploadCompletion": ".upload_completion",
+    "UploadCompletion_DirectMultipart": ".upload_completion",
+    "UploadCompletion_DirectPut": ".upload_completion",
+    "UploadCompletion_ServiceProxied": ".upload_completion",
     "UploadContentClaim": ".upload_content_claim",
     "UploadContentResponse": ".upload_content_response",
     "UploadId": ".upload_id",
@@ -431,7 +431,6 @@ __all__ = [
     "ActorRef",
     "AdvanceRetentionRequest",
     "AdvanceRetentionResponse",
-    "ApiError",
     "AttributeKey",
     "AttributeRevisionNo",
     "AttributeValue",
@@ -471,10 +470,6 @@ __all__ = [
     "CommittedChange",
     "CompleteUploadDirectMultipart",
     "CompleteUploadDirectPut",
-    "CompleteUploadRequest",
-    "CompleteUploadRequest_DirectMultipart",
-    "CompleteUploadRequest_DirectPut",
-    "CompleteUploadRequest_ServiceProxied",
     "CompleteUploadServiceProxied",
     "CompletedUploadPart",
     "ContentId",
@@ -487,6 +482,7 @@ __all__ = [
     "DirectoryBinding",
     "DisplayName",
     "ErrorDetails",
+    "ErrorResponse",
     "FileRevision",
     "FilesystemChange",
     "FilesystemChangeAttributesChanged",
@@ -590,12 +586,16 @@ __all__ = [
     "ServiceUnavailableErrorBody",
     "SignUploadPartsResponse",
     "SignedUploadPart",
-    "SnapshotSummary",
+    "Snapshot",
     "StoreProbeCheckOutcome",
     "StoreProbeCheckResult",
     "StoreProbeRequest",
     "StoreProbeResponse",
     "TrashEntry",
+    "UploadCompletion",
+    "UploadCompletion_DirectMultipart",
+    "UploadCompletion_DirectPut",
+    "UploadCompletion_ServiceProxied",
     "UploadContentClaim",
     "UploadContentResponse",
     "UploadId",

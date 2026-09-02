@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .namespace_id import NamespaceId
-from .snapshot_summary import SnapshotSummary
+from .snapshot import Snapshot
 
 
 class ListSnapshotsResponse(UniversalBaseModel):
@@ -23,7 +23,7 @@ class ListSnapshotsResponse(UniversalBaseModel):
     Opaque cursor for the next page.
     """
 
-    snapshots: typing.List[SnapshotSummary] = pydantic.Field()
+    snapshots: typing.List[Snapshot] = pydantic.Field()
     """
     Live snapshot records in ascending snapshot-id order.
     """

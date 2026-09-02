@@ -1,6 +1,6 @@
 # Releasing
 
-SDK v0.1.x targets LoonFS API v0.3.x.
+SDK v0.2.x targets LoonFS API v0.3.x.
 
 Before the first release, add a PyPI Trusted Publisher to the existing `loonfs`
 project for:

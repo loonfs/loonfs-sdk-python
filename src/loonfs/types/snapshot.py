@@ -9,7 +9,7 @@ from .checkpoint_id import CheckpointId
 from .namespace_id import NamespaceId
 
 
-class SnapshotSummary(UniversalBaseModel):
+class Snapshot(UniversalBaseModel):
     """
     A live snapshot.
     """

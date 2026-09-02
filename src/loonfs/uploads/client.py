@@ -6,8 +6,8 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.begin_upload_request import BeginUploadRequest
 from ..types.begin_upload_response import BeginUploadResponse
-from ..types.complete_upload_request import CompleteUploadRequest
 from ..types.sign_upload_parts_response import SignUploadPartsResponse
+from ..types.upload_completion import UploadCompletion
 from ..types.upload_content_response import UploadContentResponse
 from ..types.upload_part_checksum_claim import UploadPartChecksumClaim
 from ..types.upload_session import UploadSession
@@ -150,7 +150,7 @@ class UploadsClient:
         namespace_id: str,
         upload_id: str,
         *,
-        request: CompleteUploadRequest,
+        request: UploadCompletion,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UploadSession:
         """
@@ -164,7 +164,7 @@ class UploadsClient:
         upload_id : str
             Upload session id
 
-        request : CompleteUploadRequest
+        request : UploadCompletion
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -176,7 +176,7 @@ class UploadsClient:
 
         Examples
         --------
-        from loonfs.server import CompleteUploadRequest_ServiceProxied, LoonFS
+        from loonfs.server import LoonFS, UploadCompletion_ServiceProxied
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -185,7 +185,7 @@ class UploadsClient:
         client.uploads.complete(
             namespace_id="namespace_id",
             upload_id="upload_id",
-            request=CompleteUploadRequest_ServiceProxied(),
+            request=UploadCompletion_ServiceProxied(),
         )
         """
         _response = self._raw_client.complete(namespace_id, upload_id, request=request, request_options=request_options)
@@ -439,7 +439,7 @@ class AsyncUploadsClient:
         namespace_id: str,
         upload_id: str,
         *,
-        request: CompleteUploadRequest,
+        request: UploadCompletion,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UploadSession:
         """
@@ -453,7 +453,7 @@ class AsyncUploadsClient:
         upload_id : str
             Upload session id
 
-        request : CompleteUploadRequest
+        request : UploadCompletion
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -467,7 +467,7 @@ class AsyncUploadsClient:
         --------
         import asyncio
 
-        from loonfs.server import AsyncLoonFS, CompleteUploadRequest_ServiceProxied
+        from loonfs.server import AsyncLoonFS, UploadCompletion_ServiceProxied
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -479,7 +479,7 @@ class AsyncUploadsClient:
             await client.uploads.complete(
                 namespace_id="namespace_id",
                 upload_id="upload_id",
-                request=CompleteUploadRequest_ServiceProxied(),
+                request=UploadCompletion_ServiceProxied(),
             )
 
 
