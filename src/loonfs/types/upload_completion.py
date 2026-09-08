@@ -11,53 +11,9 @@ from .completed_upload_part import CompletedUploadPart
 from .upload_content_claim import UploadContentClaim
 
 
-class UploadCompletion_ServiceProxied(UniversalBaseModel):
-    """
-    Request to complete an upload session.
-
-    `mode` must match the mode used to start the session. Direct uploads
-    include the expected content details. Multipart also includes its parts.
-    """
-
-    mode: typing.Literal["service_proxied"] = "service_proxied"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class UploadCompletion_DirectPut(UniversalBaseModel):
-    """
-    Request to complete an upload session.
-
-    `mode` must match the mode used to start the session. Direct uploads
-    include the expected content details. Multipart also includes its parts.
-    """
-
-    mode: typing.Literal["direct_put"] = "direct_put"
-    content: UploadContentClaim
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class UploadCompletion_DirectMultipart(UniversalBaseModel):
     """
-    Request to complete an upload session.
-
-    `mode` must match the mode used to start the session. Direct uploads
-    include the expected content details. Multipart also includes its parts.
+    A request to complete an upload session using the mode that started it.
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
@@ -74,7 +30,42 @@ class UploadCompletion_DirectMultipart(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class UploadCompletion_DirectPut(UniversalBaseModel):
+    """
+    A request to complete an upload session using the mode that started it.
+    """
+
+    mode: typing.Literal["direct_put"] = "direct_put"
+    content: UploadContentClaim
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class UploadCompletion_ServiceProxied(UniversalBaseModel):
+    """
+    A request to complete an upload session using the mode that started it.
+    """
+
+    mode: typing.Literal["service_proxied"] = "service_proxied"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 UploadCompletion = typing_extensions.Annotated[
-    typing.Union[UploadCompletion_ServiceProxied, UploadCompletion_DirectPut, UploadCompletion_DirectMultipart],
+    typing.Union[UploadCompletion_DirectMultipart, UploadCompletion_DirectPut, UploadCompletion_ServiceProxied],
     pydantic.Field(discriminator="mode"),
 ]

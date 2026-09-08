@@ -674,8 +674,7 @@ class RawUploadsClient:
             Upload session id
 
         parts : typing.Sequence[UploadPartChecksumClaim]
-            Parts to authorize and the checksum for each part. Requesting a part
-            again replaces the previous upload for that part number.
+            The parts to authorize; repeated part numbers replace their previous uploads.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1448,8 +1447,7 @@ class AsyncRawUploadsClient:
             Upload session id
 
         parts : typing.Sequence[UploadPartChecksumClaim]
-            Parts to authorize and the checksum for each part. Requesting a part
-            again replaces the previous upload for that part number.
+            The parts to authorize; repeated part numbers replace their previous uploads.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

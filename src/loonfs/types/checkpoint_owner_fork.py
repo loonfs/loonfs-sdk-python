@@ -9,13 +9,12 @@ from .namespace_id import NamespaceId
 
 class CheckpointOwnerFork(UniversalBaseModel):
     """
-    A fork target keeping its source basis alive for the length of one
-    fork attempt.
+    A fork target retaining its source basis for one fork attempt.
     """
 
     target_namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace whose continued existence keeps this pin standing.
+    The target namespace whose existence retains this checkpoint.
     """
 
     if IS_PYDANTIC_V2:

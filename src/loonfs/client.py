@@ -9,12 +9,12 @@ from .core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .core.logging import LogConfig, Logger
 
 if typing.TYPE_CHECKING:
-    from .admin.client import AdminClient, AsyncAdminClient
     from .capabilities.client import AsyncCapabilitiesClient, CapabilitiesClient
     from .changes.client import AsyncChangesClient, ChangesClient
     from .commits.client import AsyncCommitsClient, CommitsClient
     from .files.client import AsyncFilesClient, FilesClient
     from .inodes.client import AsyncInodesClient, InodesClient
+    from .maintenance.client import AsyncMaintenanceClient, MaintenanceClient
     from .namespaces.client import AsyncNamespacesClient, NamespacesClient
     from .snapshots.client import AsyncSnapshotsClient, SnapshotsClient
     from .trash.client import AsyncTrashClient, TrashClient
@@ -95,7 +95,7 @@ class LoonFS:
         self._inodes: typing.Optional[InodesClient] = None
         self._snapshots: typing.Optional[SnapshotsClient] = None
         self._uploads: typing.Optional[UploadsClient] = None
-        self._admin: typing.Optional[AdminClient] = None
+        self._maintenance: typing.Optional[MaintenanceClient] = None
 
     @property
     def capabilities(self):
@@ -170,12 +170,12 @@ class LoonFS:
         return self._uploads
 
     @property
-    def admin(self):
-        if self._admin is None:
-            from .admin.client import AdminClient  # noqa: E402
+    def maintenance(self):
+        if self._maintenance is None:
+            from .maintenance.client import MaintenanceClient  # noqa: E402
 
-            self._admin = AdminClient(client_wrapper=self._client_wrapper)
-        return self._admin
+            self._maintenance = MaintenanceClient(client_wrapper=self._client_wrapper)
+        return self._maintenance
 
 
 def _make_default_async_client(
@@ -273,7 +273,7 @@ class AsyncLoonFS:
         self._inodes: typing.Optional[AsyncInodesClient] = None
         self._snapshots: typing.Optional[AsyncSnapshotsClient] = None
         self._uploads: typing.Optional[AsyncUploadsClient] = None
-        self._admin: typing.Optional[AsyncAdminClient] = None
+        self._maintenance: typing.Optional[AsyncMaintenanceClient] = None
 
     @property
     def capabilities(self):
@@ -348,9 +348,9 @@ class AsyncLoonFS:
         return self._uploads
 
     @property
-    def admin(self):
-        if self._admin is None:
-            from .admin.client import AsyncAdminClient  # noqa: E402
+    def maintenance(self):
+        if self._maintenance is None:
+            from .maintenance.client import AsyncMaintenanceClient  # noqa: E402
 
-            self._admin = AsyncAdminClient(client_wrapper=self._client_wrapper)
-        return self._admin
+            self._maintenance = AsyncMaintenanceClient(client_wrapper=self._client_wrapper)
+        return self._maintenance

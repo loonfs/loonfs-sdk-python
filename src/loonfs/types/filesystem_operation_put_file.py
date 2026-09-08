@@ -7,6 +7,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .content_ref import ContentRef
 from .destination_behavior import DestinationBehavior
+from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
@@ -25,9 +26,9 @@ class FilesystemOperationPutFile(UniversalBaseModel):
     Immutable bytes that must be covered by a valid preparation proof.
     """
 
-    expected_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
+    With `replace` behavior, the request requires the path to contain this inode.
     """
 
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)

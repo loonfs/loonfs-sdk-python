@@ -4,7 +4,9 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .binding_generation import BindingGeneration
 from .display_name import DisplayName
+from .inode_id import InodeId
 
 
 class FilesystemChangeDirectoryCreated(UniversalBaseModel):
@@ -12,7 +14,7 @@ class FilesystemChangeDirectoryCreated(UniversalBaseModel):
     A directory was created.
     """
 
-    binding_generation: str = pydantic.Field()
+    binding_generation: BindingGeneration = pydantic.Field()
     """
     Opaque identifier for the binding created by this event.
     """
@@ -22,14 +24,14 @@ class FilesystemChangeDirectoryCreated(UniversalBaseModel):
     User-facing spelling of the new entry.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Newly allocated namespace-scoped inode identity.
     """
 
-    parent_inode_id: str = pydantic.Field()
+    parent_inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Directory the new entry was bound under.
     """
 
     if IS_PYDANTIC_V2:

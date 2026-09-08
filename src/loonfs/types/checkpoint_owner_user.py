@@ -13,8 +13,7 @@ class CheckpointOwnerUser(UniversalBaseModel):
 
     name: str = pydantic.Field()
     """
-    The label the creator recorded. Not a key: several records may
-    carry one label over different bases.
+    The non-unique label recorded by the creator.
     """
 
     if IS_PYDANTIC_V2:

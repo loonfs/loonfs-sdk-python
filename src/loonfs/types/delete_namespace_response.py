@@ -15,8 +15,7 @@ class DeleteNamespaceResponse(UniversalBaseModel):
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    The head's last committed sequence; the delete linearized
-    immediately after it, so this is where history ended.
+    The final committed sequence before the namespace was deleted.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

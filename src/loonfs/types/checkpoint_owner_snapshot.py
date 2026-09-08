@@ -11,11 +11,6 @@ class CheckpointOwnerSnapshot(UniversalBaseModel):
     An application-created read view.
     """
 
-    expires_at_ms: int = pydantic.Field()
-    """
-    When the snapshot lease expires, in Unix milliseconds.
-    """
-
     name: str = pydantic.Field()
     """
     A label that does not need to be unique.

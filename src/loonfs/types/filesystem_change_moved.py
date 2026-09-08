@@ -4,7 +4,9 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .binding_generation import BindingGeneration
 from .display_name import DisplayName
+from .inode_id import InodeId
 
 
 class FilesystemChangeMoved(UniversalBaseModel):
@@ -12,7 +14,7 @@ class FilesystemChangeMoved(UniversalBaseModel):
     An inode moved to a new parent directory or name.
     """
 
-    binding_generation: str = pydantic.Field()
+    binding_generation: BindingGeneration = pydantic.Field()
     """
     Opaque identifier for the binding created by this event.
     """
@@ -22,14 +24,14 @@ class FilesystemChangeMoved(UniversalBaseModel):
     Spelling of the old binding.
     """
 
-    from_parent_inode_id: str = pydantic.Field()
+    from_parent_inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Directory that held the old binding.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Inode whose binding changed.
     """
 
     to_display_name: DisplayName = pydantic.Field()
@@ -37,9 +39,9 @@ class FilesystemChangeMoved(UniversalBaseModel):
     Spelling of the new binding.
     """
 
-    to_parent_inode_id: str = pydantic.Field()
+    to_parent_inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Directory holding the new binding.
     """
 
     if IS_PYDANTIC_V2:

@@ -5,6 +5,7 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.change_seq import ChangeSeq
+from ..types.checkpoint_id import CheckpointId
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.namespace import Namespace
 from ..types.namespace_id import NamespaceId
@@ -143,10 +144,11 @@ class NamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
+        snapshot_id: typing.Optional[CheckpointId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Namespace:
         """
-        Creates a new namespace as a fork from the source namespace's current durable view.
+        Creates a new namespace from the source current head or a live snapshot.
 
         Parameters
         ----------
@@ -155,6 +157,9 @@ class NamespacesClient:
 
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -178,7 +183,7 @@ class NamespacesClient:
         )
         """
         _response = self._raw_client.fork(
-            namespace_id, new_namespace_id=new_namespace_id, request_options=request_options
+            namespace_id, new_namespace_id=new_namespace_id, snapshot_id=snapshot_id, request_options=request_options
         )
         return _response.data
 
@@ -338,10 +343,11 @@ class AsyncNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
+        snapshot_id: typing.Optional[CheckpointId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Namespace:
         """
-        Creates a new namespace as a fork from the source namespace's current durable view.
+        Creates a new namespace from the source current head or a live snapshot.
 
         Parameters
         ----------
@@ -350,6 +356,9 @@ class AsyncNamespacesClient:
 
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -381,6 +390,6 @@ class AsyncNamespacesClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.fork(
-            namespace_id, new_namespace_id=new_namespace_id, request_options=request_options
+            namespace_id, new_namespace_id=new_namespace_id, snapshot_id=snapshot_id, request_options=request_options
         )
         return _response.data

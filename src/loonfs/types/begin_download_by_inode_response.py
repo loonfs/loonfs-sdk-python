@@ -5,6 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .content_ref import ContentRef
+from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .object_transfer_access import ObjectTransferAccess
 from .revision_no import RevisionNo
@@ -25,9 +26,9 @@ class BeginDownloadByInodeResponse(UniversalBaseModel):
     Content identity, size, and checksum.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    File inode being read.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

@@ -5,26 +5,19 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
+from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .path_entry import PathEntry
 
 
 class ListInodeChildrenResponse(UniversalBaseModel):
     """
-    One directory listing addressed by parent inode, and the namespace head
-    it was answered at.
-
-    The envelope names the parent by its stable inode identity rather than a
-    path, so a page and its resumption always describe the same directory
-    even when the parent is concurrently renamed or moved.
+    One directory listing addressed by parent inode and the namespace head used to read it.
     """
 
     entries: typing.List[PathEntry] = pydantic.Field()
     """
-    Directory entries for this page.
-    
-    Entries are returned in canonical name-key order. Higher-level display
-    surfaces may sort entries separately for presentation.
+    The directory entries in canonical name-key order.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
@@ -42,9 +35,9 @@ class ListInodeChildrenResponse(UniversalBaseModel):
     Cursor for the next page, if more entries remain.
     """
 
-    parent_inode_id: str = pydantic.Field()
+    parent_inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Directory inode whose children were returned.
     """
 
     if IS_PYDANTIC_V2:

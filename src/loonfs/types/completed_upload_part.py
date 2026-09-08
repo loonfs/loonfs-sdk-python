@@ -9,11 +9,7 @@ from .checksum import Checksum
 
 class CompletedUploadPart(UniversalBaseModel):
     """
-    One uploaded part, as the client observed the provider accept it.
-
-    The server keeps no durable record of any part. Part bookkeeping is the
-    client's, exactly as it is in the provider's own multipart API, and this
-    is where the client hands it back.
+    One uploaded part accepted by the object-store provider.
     """
 
     checksum: Checksum = pydantic.Field()

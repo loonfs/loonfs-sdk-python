@@ -7,30 +7,25 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .attribute_revision_no import AttributeRevisionNo
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
+from .inode_id import InodeId
 from .revision_no import RevisionNo
 from .writer_epoch import WriterEpoch
+from .writer_id import WriterId
 
 
 class ErrorDetails(UniversalBaseModel):
     """
-    Optional machine-readable details for an [`ApiError`].
-
-    Clients make retry decisions from the error code and use these fields for
-    relevant identifiers such as commit ids, writer epochs, and revisions.
-    Fields may be absent and clients must ignore fields they do not use.
+    Optional machine-readable identifiers and state for an [`ApiError`].
     """
 
     active_acquired_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Unix milliseconds at which the current epoch's acquirer took it, when
-    the head recorded one. Writer ids are process labels, so two runs on
-    one machine can share one; the stamp is what tells them apart.
+    The Unix-millisecond time when the current writer acquired its epoch, when available.
     """
 
-    active_writer: typing.Optional[str] = pydantic.Field(default=None)
+    active_writer: typing.Optional[WriterId] = pydantic.Field(default=None)
     """
-    Writer id recorded by the current epoch's acquirer, when the head
-    recorded one.
+    The writer ID recorded for the current epoch, when available.
     """
 
     active_writer_epoch: typing.Optional[WriterEpoch] = pydantic.Field(default=None)
@@ -50,13 +45,12 @@ class ErrorDetails(UniversalBaseModel):
 
     actual_head_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Head sequence the namespace was actually at, which is what a caller
-    that still means to delete it retries against.
+    The actual namespace head sequence.
     """
 
-    actual_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    actual_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
+    The path actually contained this inode.
     """
 
     actual_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
@@ -69,6 +63,11 @@ class ErrorDetails(UniversalBaseModel):
     Change-feed cursor the request asked to resume after.
     """
 
+    assertion_index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Zero-based position of the failed request assertion.
+    """
+
     commit_id: typing.Optional[CommitId] = pydantic.Field(default=None)
     """
     Idempotency key of the commit the error concerns.
@@ -76,20 +75,12 @@ class ErrorDetails(UniversalBaseModel):
 
     committed_fingerprint: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Semantic identity of the mutation that already landed under that
-    commit id, from the same receipt as `committed_seq` and present
-    exactly when it is. A retry recomputes this value from the request it
-    just made — see
-    [`put_retry_fingerprint`](crate::put_retry_fingerprint) — and equality
-    is what proves the two are the same request.
+    The fingerprint of the mutation that landed under `commit_id`, present with `committed_seq`.
     """
 
     committed_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Sequence at which that commit id already landed. Present when the
-    failure was decided against a durable commit receipt, which is what
-    holds the sequence; absent when nothing has committed under the id
-    yet and two live requests are simply claiming it at once.
+    The sequence where this commit ID already landed, when recorded by a durable receipt.
     """
 
     expected_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
@@ -104,13 +95,12 @@ class ErrorDetails(UniversalBaseModel):
 
     expected_head_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Head sequence a namespace delete required the namespace to still be
-    at.
+    The head sequence required by the request.
     """
 
-    expected_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
+    The request expected the path to contain this inode.
     """
 
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
@@ -123,16 +113,19 @@ class ErrorDetails(UniversalBaseModel):
     Epoch the failing writer session held when it was displaced.
     """
 
-    inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
+    Inode the failed precondition or operation targeted.
+    """
+
+    max_writer_sessions: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Maximum writer sessions admitted by the node.
     """
 
     operation_index: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Position, in the request's operation list, of the operation that
-    failed. A commit applies all of its operations or none of them, so
-    this names the one that stopped the whole request.
+    The index of the failed operation in the request.
     """
 
     retention_floor_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)

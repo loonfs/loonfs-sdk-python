@@ -8,6 +8,7 @@ from .actor_ref import ActorRef
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .content_ref import ContentRef
+from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
@@ -23,8 +24,7 @@ class FileRevision(UniversalBaseModel):
 
     committed_at_ms: int = pydantic.Field()
     """
-    Wall-clock stamp of the commit that created this revision, in Unix
-    milliseconds. Observational: `committed_seq` is the order.
+    The commit time in Unix milliseconds; `committed_seq` defines commit order.
     """
 
     committed_by: ActorRef = pydantic.Field()
@@ -42,9 +42,9 @@ class FileRevision(UniversalBaseModel):
     Content stored for this revision.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    File inode that owns this revision.
     """
 
     revision_no: RevisionNo = pydantic.Field()

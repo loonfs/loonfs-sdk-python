@@ -11,22 +11,20 @@ from .absolute_path import AbsolutePath
 from .actor_ref import ActorRef
 from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
+from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .content_ref import ContentRef
 from .display_name import DisplayName
+from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .revision_no import RevisionNo
 
 
 class PathEntry_Dir(UniversalBaseModel):
     """
-    Metadata for one path returned by stat and directory-listing operations.
+    Metadata for one path returned by stat and directory listings.
 
-    File entries include the current revision and content details. Directory
-    entries do not. Attribute fields are included only when requested and are
-    serialized at the top level of the entry. Callers can pass
-    `attributes_revision_no` as `expected_attributes_revision_no` when updating
-    attributes.
+    Attribute fields are included only when requested.
     """
 
     inode_kind: typing.Literal["dir"] = "dir"
@@ -34,14 +32,14 @@ class PathEntry_Dir(UniversalBaseModel):
     attributes_revision_no: typing.Optional[AttributeRevisionNo] = None
     attributes_updated_at_ms: typing.Optional[int] = None
     attributes_updated_by: typing.Optional[ActorRef] = None
-    binding_generation: typing.Optional[str] = None
+    binding_generation: typing.Optional[BindingGeneration] = None
     created_at_ms: int
     created_by: ActorRef
     display_name: typing.Optional[DisplayName] = None
     head_seq: ChangeSeq
-    inode_id: str
+    inode_id: InodeId
     namespace_id: NamespaceId
-    parent_inode_id: typing.Optional[str] = None
+    parent_inode_id: typing.Optional[InodeId] = None
     path: AbsolutePath
 
     if IS_PYDANTIC_V2:
@@ -56,34 +54,30 @@ class PathEntry_Dir(UniversalBaseModel):
 
 class PathEntry_File(UniversalBaseModel):
     """
-    Metadata for one path returned by stat and directory-listing operations.
+    Metadata for one path returned by stat and directory listings.
 
-    File entries include the current revision and content details. Directory
-    entries do not. Attribute fields are included only when requested and are
-    serialized at the top level of the entry. Callers can pass
-    `attributes_revision_no` as `expected_attributes_revision_no` when updating
-    attributes.
+    Attribute fields are included only when requested.
     """
 
     inode_kind: typing.Literal["file"] = "file"
-    content_ref: ContentRef
-    revision_committed_at_ms: int
-    revision_committed_by: ActorRef
-    revision_no: RevisionNo
-    size_bytes: int
     attributes: typing.Optional[Attributes] = None
     attributes_revision_no: typing.Optional[AttributeRevisionNo] = None
     attributes_updated_at_ms: typing.Optional[int] = None
     attributes_updated_by: typing.Optional[ActorRef] = None
-    binding_generation: typing.Optional[str] = None
+    binding_generation: typing.Optional[BindingGeneration] = None
+    content_ref: ContentRef
     created_at_ms: int
     created_by: ActorRef
     display_name: typing.Optional[DisplayName] = None
     head_seq: ChangeSeq
-    inode_id: str
+    inode_id: InodeId
     namespace_id: NamespaceId
-    parent_inode_id: typing.Optional[str] = None
+    parent_inode_id: typing.Optional[InodeId] = None
     path: AbsolutePath
+    revision_committed_at_ms: int
+    revision_committed_by: ActorRef
+    revision_no: RevisionNo
+    size_bytes: int
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

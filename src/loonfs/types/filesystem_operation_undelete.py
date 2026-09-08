@@ -6,14 +6,12 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .change_seq import ChangeSeq
+from .inode_id import InodeId
 
 
 class FilesystemOperationUndelete(UniversalBaseModel):
     """
-    Restore a deleted file or subtree.
-
-    `inode_id` and `deletion_seq` identify one exact deletion. A stale
-    sequence returns `not_deleted` and cannot undo a later deletion.
+    Restore the deletion identified by `inode_id` and `deletion_seq`.
     """
 
     deletion_seq: ChangeSeq = pydantic.Field()
@@ -21,19 +19,14 @@ class FilesystemOperationUndelete(UniversalBaseModel):
     Observed deletion sequence, which prevents cancelling a newer tombstone generation.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Deleted inode to make reachable again.
     """
 
     path: typing.Optional[AbsolutePath] = pydantic.Field(default=None)
     """
-    Optional destination for the restored inode.
-    
-    When absent, the inode is rebound to the parent and name recorded by the
-    deletion. Parent identity, rather than an old path string, keeps this
-    correct after ancestor renames. An explicit path is required when the
-    deletion recorded no binding.
+    The restore destination, or `None` to use the recorded binding.
     """
 
     if IS_PYDANTIC_V2:

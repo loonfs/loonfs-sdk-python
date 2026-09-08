@@ -9,7 +9,7 @@ from .namespace_id import NamespaceId
 
 class GrepGcResponse(UniversalBaseModel):
     """
-    Result of one explicit grep-index garbage-collection pass (admin plane).
+    Result of one explicit grep index garbage-collection pass (maintenance API group).
     """
 
     deleted_other_objects: int = pydantic.Field()

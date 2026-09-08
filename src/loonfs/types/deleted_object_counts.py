@@ -8,8 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class DeletedObjectCounts(UniversalBaseModel):
     """
-    Objects deleted by one GC pass, grouped by object family. Every field is
-    present, including zero counts.
+    Object counts deleted by one garbage-collection pass, grouped by family.
     """
 
     checkpoint_records: int = pydantic.Field()
@@ -19,9 +18,7 @@ class DeletedObjectCounts(UniversalBaseModel):
 
     content_objects: int = pydantic.Field()
     """
-    Content objects deleted after their completed upload session passed
-    the reclamation grace period and no reachable data referenced them.
-    Cleanup of abandoned sessions is not counted here.
+    Content reclaimed through completed upload sessions.
     """
 
     manifests: int = pydantic.Field()
@@ -32,6 +29,11 @@ class DeletedObjectCounts(UniversalBaseModel):
     metadata_segments: int = pydantic.Field()
     """
     Unreferenced metadata segments deleted.
+    """
+
+    retired_content_objects: int = pydantic.Field()
+    """
+    Successful deletion attempts under a retired namespace owner prefix.
     """
 
     upload_sessions: int = pydantic.Field()

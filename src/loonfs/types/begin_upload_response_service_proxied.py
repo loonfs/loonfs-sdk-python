@@ -20,8 +20,7 @@ class BeginUploadResponseServiceProxied(UniversalBaseModel):
 
     upload_id: UploadId = pydantic.Field()
     """
-    Durable session identity used by subsequent append and completion
-    calls.
+    The session identity used by later append and completion calls.
     """
 
     if IS_PYDANTIC_V2:

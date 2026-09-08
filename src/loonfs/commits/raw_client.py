@@ -18,6 +18,7 @@ from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.actor_ref import ActorRef
+from ..types.commit_assertion import CommitAssertion
 from ..types.commit_id import CommitId
 from ..types.commit_response import CommitResponse
 from ..types.content_token import ContentToken
@@ -40,12 +41,13 @@ class RawCommitsClient:
         actor: ActorRef,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
+        assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CommitResponse]:
         """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request assertions check the pre-state after receipt resolution and before operations; a failed assertion names its position in `details.assertion_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
         Parameters
         ----------
@@ -59,18 +61,16 @@ class RawCommitsClient:
             Caller-supplied idempotency key for the whole request.
 
         operations : typing.Sequence[FilesystemOperation]
-            Ordered operations to apply. Must be non-empty; they commit all
-            together or not at all.
+            The non-empty ordered operations to commit atomically.
+
+        assertions : typing.Optional[typing.Sequence[CommitAssertion]]
+            Ordered admission conditions evaluated before any operations.
 
         content_tokens : typing.Optional[typing.Sequence[ContentToken]]
-            Proofs for any new external content refs introduced by this request.
-            One proof covers every operation that names its content ref.
+            The proofs for new external content references in this request.
 
         message : typing.Optional[str]
-            Caller annotation recorded on the commit and reported by the change
-            feed. Part of the commit's identity: reusing `commit_id` with a
-            different message is a `commit_id_reuse_conflict`, exactly as it is
-            for an explicit commit.
+            The caller annotation that forms part of the commit identity.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -85,6 +85,9 @@ class RawCommitsClient:
             method="POST",
             json={
                 "actor": convert_and_respect_annotation_metadata(object_=actor, annotation=ActorRef, direction="write"),
+                "assertions": convert_and_respect_annotation_metadata(
+                    object_=assertions, annotation=typing.Sequence[CommitAssertion], direction="write"
+                ),
                 "commit_id": commit_id,
                 "content_tokens": convert_and_respect_annotation_metadata(
                     object_=content_tokens, annotation=typing.Sequence[ContentToken], direction="write"
@@ -197,12 +200,13 @@ class AsyncRawCommitsClient:
         actor: ActorRef,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
+        assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CommitResponse]:
         """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request assertions check the pre-state after receipt resolution and before operations; a failed assertion names its position in `details.assertion_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
         Parameters
         ----------
@@ -216,18 +220,16 @@ class AsyncRawCommitsClient:
             Caller-supplied idempotency key for the whole request.
 
         operations : typing.Sequence[FilesystemOperation]
-            Ordered operations to apply. Must be non-empty; they commit all
-            together or not at all.
+            The non-empty ordered operations to commit atomically.
+
+        assertions : typing.Optional[typing.Sequence[CommitAssertion]]
+            Ordered admission conditions evaluated before any operations.
 
         content_tokens : typing.Optional[typing.Sequence[ContentToken]]
-            Proofs for any new external content refs introduced by this request.
-            One proof covers every operation that names its content ref.
+            The proofs for new external content references in this request.
 
         message : typing.Optional[str]
-            Caller annotation recorded on the commit and reported by the change
-            feed. Part of the commit's identity: reusing `commit_id` with a
-            different message is a `commit_id_reuse_conflict`, exactly as it is
-            for an explicit commit.
+            The caller annotation that forms part of the commit identity.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -242,6 +244,9 @@ class AsyncRawCommitsClient:
             method="POST",
             json={
                 "actor": convert_and_respect_annotation_metadata(object_=actor, annotation=ActorRef, direction="write"),
+                "assertions": convert_and_respect_annotation_metadata(
+                    object_=assertions, annotation=typing.Sequence[CommitAssertion], direction="write"
+                ),
                 "commit_id": commit_id,
                 "content_tokens": convert_and_respect_annotation_metadata(
                     object_=content_tokens, annotation=typing.Sequence[ContentToken], direction="write"

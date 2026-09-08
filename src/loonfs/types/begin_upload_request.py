@@ -9,53 +9,9 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class BeginUploadRequest_ServiceProxied(UniversalBaseModel):
-    """
-    Request to start an upload session, tagged by transport mode.
-
-    Each variant contains only fields valid for that transport, so invalid
-    combinations are rejected during decoding. The `mode` field is required.
-    """
-
-    mode: typing.Literal["service_proxied"] = "service_proxied"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class BeginUploadRequest_DirectPut(UniversalBaseModel):
-    """
-    Request to start an upload session, tagged by transport mode.
-
-    Each variant contains only fields valid for that transport, so invalid
-    combinations are rejected during decoding. The `mode` field is required.
-    """
-
-    mode: typing.Literal["direct_put"] = "direct_put"
-    size_bytes: typing.Optional[int] = None
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class BeginUploadRequest_DirectMultipart(UniversalBaseModel):
     """
-    Request to start an upload session, tagged by transport mode.
-
-    Each variant contains only fields valid for that transport, so invalid
-    combinations are rejected during decoding. The `mode` field is required.
+    A request to start an upload session for one required transport mode.
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
@@ -71,7 +27,42 @@ class BeginUploadRequest_DirectMultipart(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class BeginUploadRequest_DirectPut(UniversalBaseModel):
+    """
+    A request to start an upload session for one required transport mode.
+    """
+
+    mode: typing.Literal["direct_put"] = "direct_put"
+    size_bytes: typing.Optional[int] = None
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class BeginUploadRequest_ServiceProxied(UniversalBaseModel):
+    """
+    A request to start an upload session for one required transport mode.
+    """
+
+    mode: typing.Literal["service_proxied"] = "service_proxied"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 BeginUploadRequest = typing_extensions.Annotated[
-    typing.Union[BeginUploadRequest_ServiceProxied, BeginUploadRequest_DirectPut, BeginUploadRequest_DirectMultipart],
+    typing.Union[BeginUploadRequest_DirectMultipart, BeginUploadRequest_DirectPut, BeginUploadRequest_ServiceProxied],
     pydantic.Field(discriminator="mode"),
 ]

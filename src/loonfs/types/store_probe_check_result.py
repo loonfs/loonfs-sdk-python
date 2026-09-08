@@ -14,8 +14,7 @@ class StoreProbeCheckResult(UniversalBaseModel):
 
     message: typing.Optional[str] = pydantic.Field(default=None)
     """
-    What was expected and what happened instead. Present only on
-    `failed`.
+    The expected and actual behavior for a failed check.
     """
 
     name: str = pydantic.Field()

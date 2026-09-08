@@ -10,24 +10,6 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .namespace_id import NamespaceId
 
 
-class CheckpointOwnerSummary_User(UniversalBaseModel):
-    """
-    The owner of a checkpoint record.
-    """
-
-    kind: typing.Literal["user"] = "user"
-    name: str
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class CheckpointOwnerSummary_Fork(UniversalBaseModel):
     """
     The owner of a checkpoint record.
@@ -52,7 +34,24 @@ class CheckpointOwnerSummary_Snapshot(UniversalBaseModel):
     """
 
     kind: typing.Literal["snapshot"] = "snapshot"
-    expires_at_ms: int
+    name: str
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class CheckpointOwnerSummary_User(UniversalBaseModel):
+    """
+    The owner of a checkpoint record.
+    """
+
+    kind: typing.Literal["user"] = "user"
     name: str
 
     if IS_PYDANTIC_V2:
@@ -66,6 +65,6 @@ class CheckpointOwnerSummary_Snapshot(UniversalBaseModel):
 
 
 CheckpointOwnerSummary = typing_extensions.Annotated[
-    typing.Union[CheckpointOwnerSummary_User, CheckpointOwnerSummary_Fork, CheckpointOwnerSummary_Snapshot],
+    typing.Union[CheckpointOwnerSummary_Fork, CheckpointOwnerSummary_Snapshot, CheckpointOwnerSummary_User],
     pydantic.Field(discriminator="kind"),
 ]

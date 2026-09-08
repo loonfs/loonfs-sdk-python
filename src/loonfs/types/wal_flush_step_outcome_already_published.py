@@ -10,8 +10,7 @@ from .manifest_no import ManifestNo
 
 class WalFlushStepOutcomeAlreadyPublished(UniversalBaseModel):
     """
-    The step did not update the root because it already referenced a
-    different manifest.
+    The step did not update a root that already referenced another manifest.
     """
 
     attempted_seq: ChangeSeq = pydantic.Field()

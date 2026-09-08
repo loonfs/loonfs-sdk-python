@@ -5,13 +5,13 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .content_ref import ContentRef
+from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
 class FilesystemChangeContentChanged(UniversalBaseModel):
     """
-    A file received a new current revision — a put over an existing
-    file, or a revision restore (one durable fact for both).
+    A file received a new current revision from a put or revision restore.
     """
 
     content_ref: ContentRef = pydantic.Field()
@@ -19,9 +19,9 @@ class FilesystemChangeContentChanged(UniversalBaseModel):
     Immutable content published by the revision.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    File inode whose history advanced.
     """
 
     revision_no: RevisionNo = pydantic.Field()

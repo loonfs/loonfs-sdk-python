@@ -7,14 +7,12 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .actor_ref import ActorRef
 from .change_seq import ChangeSeq
 from .directory_binding import DirectoryBinding
+from .inode_id import InodeId
 
 
 class TrashEntry(UniversalBaseModel):
     """
-    One deletion that can still be restored.
-
-    `inode_id` and `deletion_seq` are sufficient to restore it. The removed
-    directory binding is included when available.
+    One recoverable deletion and its removed directory binding.
     """
 
     deleted_at_ms: int = pydantic.Field()
@@ -22,9 +20,9 @@ class TrashEntry(UniversalBaseModel):
     Time of the deletion, in Unix milliseconds.
     """
 
-    deleted_binding: typing.Optional[DirectoryBinding] = pydantic.Field(default=None)
+    deleted_binding: DirectoryBinding = pydantic.Field()
     """
-    Directory binding removed by the deletion, when available.
+    Directory binding removed by the deletion.
     """
 
     deleted_by: ActorRef = pydantic.Field()
@@ -37,9 +35,9 @@ class TrashEntry(UniversalBaseModel):
     Commit sequence that identifies this deletion.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Inode hidden by the deletion.
     """
 
     if IS_PYDANTIC_V2:

@@ -21,17 +21,12 @@ class GrepResponse(UniversalBaseModel):
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    Sequence this page was evaluated at. Pages are evaluated against
-    the namespace head at page time; the cursor is an ordering resume,
-    not a snapshot pin.
+    The namespace head sequence used to evaluate this page.
     """
 
     matches: typing.List[GrepMatch] = pydantic.Field()
     """
-    Matches in ascending `(inode_id, byte_offset)` order. A page may
-    return fewer matches than its limit and still carry a cursor: the
-    per-page verified-candidate budget bounds how much content one
-    request reads, whatever the plan's false-positive rate.
+    The matches in ascending `(inode_id, byte_offset)` order.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -46,8 +41,7 @@ class GrepResponse(UniversalBaseModel):
 
     tail_scanned: bool = pydantic.Field()
     """
-    True when revisions after `built_through_seq` were scanned
-    exhaustively; false only when `allow_stale` skipped them.
+    Whether revisions after `built_through_seq` were scanned exhaustively.
     """
 
     if IS_PYDANTIC_V2:

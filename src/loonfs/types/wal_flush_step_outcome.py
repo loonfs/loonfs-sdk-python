@@ -11,44 +11,9 @@ from .change_seq import ChangeSeq
 from .manifest_no import ManifestNo
 
 
-class WalFlushStepOutcome_NotNeeded(UniversalBaseModel):
-    """
-    What the WAL-flush part of a maintenance step did.
-    """
-
-    outcome: typing.Literal["not_needed"] = "not_needed"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class WalFlushStepOutcome_Flushed(UniversalBaseModel):
-    """
-    What the WAL-flush part of a maintenance step did.
-    """
-
-    outcome: typing.Literal["flushed"] = "flushed"
-    manifest_head_seq: ChangeSeq
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class WalFlushStepOutcome_AlreadyPublished(UniversalBaseModel):
     """
-    What the WAL-flush part of a maintenance step did.
+    What the WAL-flush part of a maintenance pass did.
     """
 
     outcome: typing.Literal["already_published"] = "already_published"
@@ -65,9 +30,44 @@ class WalFlushStepOutcome_AlreadyPublished(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class WalFlushStepOutcome_Flushed(UniversalBaseModel):
+    """
+    What the WAL-flush part of a maintenance pass did.
+    """
+
+    outcome: typing.Literal["flushed"] = "flushed"
+    manifest_head_seq: ChangeSeq
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class WalFlushStepOutcome_NotNeeded(UniversalBaseModel):
+    """
+    What the WAL-flush part of a maintenance pass did.
+    """
+
+    outcome: typing.Literal["not_needed"] = "not_needed"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class WalFlushStepOutcome_RetriesExhausted(UniversalBaseModel):
     """
-    What the WAL-flush part of a maintenance step did.
+    What the WAL-flush part of a maintenance pass did.
     """
 
     outcome: typing.Literal["retries_exhausted"] = "retries_exhausted"
@@ -85,9 +85,9 @@ class WalFlushStepOutcome_RetriesExhausted(UniversalBaseModel):
 
 WalFlushStepOutcome = typing_extensions.Annotated[
     typing.Union[
-        WalFlushStepOutcome_NotNeeded,
-        WalFlushStepOutcome_Flushed,
         WalFlushStepOutcome_AlreadyPublished,
+        WalFlushStepOutcome_Flushed,
+        WalFlushStepOutcome_NotNeeded,
         WalFlushStepOutcome_RetriesExhausted,
     ],
     pydantic.Field(discriminator="outcome"),

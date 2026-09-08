@@ -22,8 +22,7 @@ class CommittedChange(UniversalBaseModel):
 
     committed_at_ms: int = pydantic.Field()
     """
-    Wall-clock stamp of the commit, in Unix milliseconds.
-    Observational: `committed_seq` is the order.
+    The commit time in Unix milliseconds; `committed_seq` defines commit order.
     """
 
     committed_by: ActorRef = pydantic.Field()
@@ -38,9 +37,7 @@ class CommittedChange(UniversalBaseModel):
 
     events: typing.List[FilesystemChange] = pydantic.Field()
     """
-    Semantic filesystem events for this commit, in the order the commit
-    applied them. One request operation may produce more than one event
-    (see [`FilesystemChange`]).
+    The filesystem events for this commit in commit order.
     """
 
     message: typing.Optional[str] = pydantic.Field(default=None)

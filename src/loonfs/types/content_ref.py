@@ -6,18 +6,15 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .checksum import Checksum
 from .content_id import ContentId
+from .content_ref_kind import ContentRefKind
+from .namespace_id import NamespaceId
 
 
 class ContentRef(UniversalBaseModel):
     """
-    Pointer to one immutable content object.
+    A reference to one immutable content object.
 
-    `content_id` is identity — *which* object — and the checksum is
-    evidence about its bytes. Separating the two is what lets the final
-    object key exist before the first byte is read.
-
-    A `ContentRef` is safe to publish only after the referenced bytes are
-    durable in the namespace's content store.
+    The object must be durable before the reference is published.
     """
 
     checksum: Checksum = pydantic.Field()
@@ -30,9 +27,14 @@ class ContentRef(UniversalBaseModel):
     Immutable identity of the referenced object.
     """
 
-    kind: str = pydantic.Field()
+    kind: ContentRefKind = pydantic.Field()
     """
     Content strategy used by the referenced object.
+    """
+
+    owner_namespace_id: NamespaceId = pydantic.Field()
+    """
+    Namespace that originally wrote the bytes.
     """
 
     size_bytes: int = pydantic.Field()
