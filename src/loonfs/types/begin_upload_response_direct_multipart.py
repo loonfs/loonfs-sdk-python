@@ -26,15 +26,12 @@ class BeginUploadResponseDirectMultipart(UniversalBaseModel):
 
     part_size_bytes: int = pydantic.Field()
     """
-    Byte length of every part except the last. At most 10,000 parts
-    may be uploaded, so this bounds the object at 10,000 times the
-    part size.
+    The byte length of every part except the last, with at most 10,000 parts allowed.
     """
 
     upload_id: UploadId = pydantic.Field()
     """
-    Durable session identity used by subsequent part-signing and
-    completion calls.
+    The session identity used by later part-signing and completion calls.
     """
 
     if IS_PYDANTIC_V2:

@@ -9,112 +9,9 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class ReorganizeStepOutcome_NotNeeded(UniversalBaseModel):
-    """
-    What the metadata-reorganization part of a maintenance step did.
-
-    Deliberately coarse: the run counts and byte budgets a reorganization
-    consumes are engine policy, not a wire contract.
-    """
-
-    outcome: typing.Literal["not_needed"] = "not_needed"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class ReorganizeStepOutcome_UnitPublished(UniversalBaseModel):
-    """
-    What the metadata-reorganization part of a maintenance step did.
-
-    Deliberately coarse: the run counts and byte budgets a reorganization
-    consumes are engine policy, not a wire contract.
-    """
-
-    outcome: typing.Literal["unit_published"] = "unit_published"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class ReorganizeStepOutcome_CompactionStarted(UniversalBaseModel):
-    """
-    What the metadata-reorganization part of a maintenance step did.
-
-    Deliberately coarse: the run counts and byte budgets a reorganization
-    consumes are engine policy, not a wire contract.
-    """
-
-    outcome: typing.Literal["compaction_started"] = "compaction_started"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class ReorganizeStepOutcome_CompactionRunning(UniversalBaseModel):
-    """
-    What the metadata-reorganization part of a maintenance step did.
-
-    Deliberately coarse: the run counts and byte budgets a reorganization
-    consumes are engine policy, not a wire contract.
-    """
-
-    outcome: typing.Literal["compaction_running"] = "compaction_running"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class ReorganizeStepOutcome_CompactionAtCapacity(UniversalBaseModel):
-    """
-    What the metadata-reorganization part of a maintenance step did.
-
-    Deliberately coarse: the run counts and byte budgets a reorganization
-    consumes are engine policy, not a wire contract.
-    """
-
-    outcome: typing.Literal["compaction_at_capacity"] = "compaction_at_capacity"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class ReorganizeStepOutcome_CompactionRequired(UniversalBaseModel):
     """
-    What the metadata-reorganization part of a maintenance step did.
-
-    Deliberately coarse: the run counts and byte budgets a reorganization
-    consumes are engine policy, not a wire contract.
+    The outcome of the metadata-reorganization part of a maintenance pass.
     """
 
     outcome: typing.Literal["compaction_required"] = "compaction_required"
@@ -129,12 +26,26 @@ class ReorganizeStepOutcome_CompactionRequired(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class ReorganizeStepOutcome_NotNeeded(UniversalBaseModel):
+    """
+    The outcome of the metadata-reorganization part of a maintenance pass.
+    """
+
+    outcome: typing.Literal["not_needed"] = "not_needed"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class ReorganizeStepOutcome_RootAdvanced(UniversalBaseModel):
     """
-    What the metadata-reorganization part of a maintenance step did.
-
-    Deliberately coarse: the run counts and byte budgets a reorganization
-    consumes are engine policy, not a wire contract.
+    The outcome of the metadata-reorganization part of a maintenance pass.
     """
 
     outcome: typing.Literal["root_advanced"] = "root_advanced"
@@ -149,15 +60,29 @@ class ReorganizeStepOutcome_RootAdvanced(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class ReorganizeStepOutcome_UnitPublished(UniversalBaseModel):
+    """
+    The outcome of the metadata-reorganization part of a maintenance pass.
+    """
+
+    outcome: typing.Literal["unit_published"] = "unit_published"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 ReorganizeStepOutcome = typing_extensions.Annotated[
     typing.Union[
-        ReorganizeStepOutcome_NotNeeded,
-        ReorganizeStepOutcome_UnitPublished,
-        ReorganizeStepOutcome_CompactionStarted,
-        ReorganizeStepOutcome_CompactionRunning,
-        ReorganizeStepOutcome_CompactionAtCapacity,
         ReorganizeStepOutcome_CompactionRequired,
+        ReorganizeStepOutcome_NotNeeded,
         ReorganizeStepOutcome_RootAdvanced,
+        ReorganizeStepOutcome_UnitPublished,
     ],
     pydantic.Field(discriminator="outcome"),
 ]

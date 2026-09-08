@@ -9,8 +9,7 @@ from .checksum import Checksum
 
 class UploadPartChecksumClaim(UniversalBaseModel):
     """
-    One part's checksum, supplied by the client so the server can sign it
-    into that part's upload URL.
+    One upload part number and its checksum.
     """
 
     checksum: Checksum = pydantic.Field()

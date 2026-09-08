@@ -9,8 +9,7 @@ from .change_seq import ChangeSeq
 
 class WalFlushStepOutcomeRetriesExhausted(UniversalBaseModel):
     """
-    Concurrent updates prevented every attempt from publishing. Nothing
-    was flushed, and a later step can try again.
+    Concurrent updates prevented every publication attempt.
     """
 
     observed_head_seq: ChangeSeq = pydantic.Field()

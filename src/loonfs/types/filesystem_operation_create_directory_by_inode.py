@@ -5,6 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .display_name import DisplayName
+from .inode_id import InodeId
 
 
 class FilesystemOperationCreateDirectoryByInode(UniversalBaseModel):
@@ -17,9 +18,9 @@ class FilesystemOperationCreateDirectoryByInode(UniversalBaseModel):
     New directory name.
     """
 
-    parent_inode_id: str = pydantic.Field()
+    parent_inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Parent directory.
     """
 
     if IS_PYDANTIC_V2:

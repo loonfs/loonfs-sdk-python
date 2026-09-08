@@ -6,14 +6,14 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
 from .checkpoint_id import CheckpointId
+from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .run_no import RunNo
 
 
 class GrepIndexLifecycleBackfilling(UniversalBaseModel):
     """
-    The initial walk over a pinned checkpoint is running. Nothing is
-    searchable yet.
+    An initial scan of a pinned checkpoint that is not yet searchable.
     """
 
     checkpoint_id: CheckpointId = pydantic.Field()
@@ -21,15 +21,9 @@ class GrepIndexLifecycleBackfilling(UniversalBaseModel):
     Checkpoint pinning the state being walked.
     """
 
-    cursor_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    cursor_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
-    """
-
-    target_seq: ChangeSeq = pydantic.Field()
-    """
-    Namespace sequence the pinned checkpoint captured. Reaching it
-    is what completes the backfill.
+    The inode after which the scan resumes, or `None` before the first page.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -45,6 +39,11 @@ class GrepIndexLifecycleBackfilling(UniversalBaseModel):
     reorganize_pending: bool = pydantic.Field()
     """
     True while a partitioned segment reorganization is in progress.
+    """
+
+    target_seq: ChangeSeq = pydantic.Field()
+    """
+    The namespace sequence that completes the backfill when reached.
     """
 
     if IS_PYDANTIC_V2:

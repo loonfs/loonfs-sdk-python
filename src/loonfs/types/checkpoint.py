@@ -13,7 +13,7 @@ from .namespace_id import NamespaceId
 
 class Checkpoint(UniversalBaseModel):
     """
-    One checkpoint resource, reported from what its durable record carries.
+    One checkpoint resource described by its durable record.
     """
 
     checkpoint_id: CheckpointId = pydantic.Field()
@@ -33,11 +33,7 @@ class Checkpoint(UniversalBaseModel):
 
     expires_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    When garbage collection may release the record without being asked,
-    in Unix milliseconds. Absent means the pin holds until it is
-    released. An instant already in the past is a record whose expiry
-    has passed and which no collection pass has reached yet: it is still
-    a root, so it is still listed.
+    The automatic release time in Unix milliseconds, or `None` until an explicit release.
     """
 
     manifest_no: ManifestNo = pydantic.Field()

@@ -15,8 +15,7 @@ class ListCheckpointsResponse(UniversalBaseModel):
 
     checkpoints: typing.List[Checkpoint] = pydantic.Field()
     """
-    Active records in ascending checkpoint-id order. Released records are
-    omitted even if garbage collection has not deleted them yet.
+    The active records in ascending checkpoint ID order.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

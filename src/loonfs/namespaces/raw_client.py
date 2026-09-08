@@ -17,6 +17,7 @@ from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.change_seq import ChangeSeq
+from ..types.checkpoint_id import CheckpointId
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.error_response import ErrorResponse
 from ..types.namespace import Namespace
@@ -364,10 +365,11 @@ class RawNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
+        snapshot_id: typing.Optional[CheckpointId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Namespace]:
         """
-        Creates a new namespace as a fork from the source namespace's current durable view.
+        Creates a new namespace from the source current head or a live snapshot.
 
         Parameters
         ----------
@@ -376,6 +378,9 @@ class RawNamespacesClient:
 
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -393,6 +398,7 @@ class RawNamespacesClient:
             method="POST",
             json={
                 "new_namespace_id": new_namespace_id,
+                "snapshot_id": snapshot_id,
             },
             headers={
                 "content-type": "application/json",
@@ -823,10 +829,11 @@ class AsyncRawNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
+        snapshot_id: typing.Optional[CheckpointId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Namespace]:
         """
-        Creates a new namespace as a fork from the source namespace's current durable view.
+        Creates a new namespace from the source current head or a live snapshot.
 
         Parameters
         ----------
@@ -835,6 +842,9 @@ class AsyncRawNamespacesClient:
 
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
+
+        snapshot_id : typing.Optional[CheckpointId]
+            Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -852,6 +862,7 @@ class AsyncRawNamespacesClient:
             method="POST",
             json={
                 "new_namespace_id": new_namespace_id,
+                "snapshot_id": snapshot_id,
             },
             headers={
                 "content-type": "application/json",

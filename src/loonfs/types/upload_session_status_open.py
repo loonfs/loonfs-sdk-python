@@ -16,8 +16,7 @@ class UploadSessionStatusOpen(UniversalBaseModel):
 
     expires_at_ms: int = pydantic.Field()
     """
-    Unix-millisecond instant after which the session is abandoned and
-    may be aborted by server-side cleanup.
+    The Unix-millisecond time after which cleanup may abort the session.
     """
 
     mode: UploadMode = pydantic.Field()

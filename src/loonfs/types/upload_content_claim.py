@@ -9,10 +9,7 @@ from .checksum import Checksum
 
 class UploadContentClaim(UniversalBaseModel):
     """
-    Size and checksum reported by the client for a complete payload.
-
-    Direct uploads provide this at completion. The server verifies it against
-    the object stored by the provider.
+    The size and checksum reported for a complete direct-upload payload.
     """
 
     checksum: Checksum = pydantic.Field()

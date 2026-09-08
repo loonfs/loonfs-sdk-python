@@ -8,9 +8,11 @@ from .absolute_path import AbsolutePath
 from .actor_ref import ActorRef
 from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
+from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .content_ref import ContentRef
 from .display_name import DisplayName
+from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .revision_no import RevisionNo
 
@@ -20,41 +22,10 @@ class PathEntryFile(UniversalBaseModel):
     A file and its current revision summary.
     """
 
-    content_ref: ContentRef = pydantic.Field()
-    """
-    Current content reference.
-    """
-
-    revision_committed_at_ms: int = pydantic.Field()
-    """
-    Time of the current revision, in Unix milliseconds. Revision
-    sequences determine order.
-    """
-
-    revision_committed_by: ActorRef = pydantic.Field()
-    """
-    Actor responsible for the current revision.
-    """
-
-    revision_no: RevisionNo = pydantic.Field()
-    """
-    Current file revision number.
-    """
-
-    size_bytes: int = pydantic.Field()
-    """
-    Current file size in bytes.
-    
-    This remains explicit even though `content_ref` also carries the
-    length because callers sort directory listings by this field.
-    """
-
     attributes: typing.Optional[Attributes] = pydantic.Field(default=None)
     """
-    The complete attribute map at `attributes_revision_no`.
-    
-    An inode that has never had attributes written is at revision 0 with
-    an empty map.
+    The complete attribute map at `attributes_revision_no`, including an empty map
+    for the initial state.
     """
 
     attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
@@ -64,25 +35,29 @@ class PathEntryFile(UniversalBaseModel):
 
     attributes_updated_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Time of the latest attribute update, in Unix milliseconds. This is
-    `None` for the initial empty state at revision 0.
+    The latest attribute update time in Unix milliseconds, or `None` for the
+    initial empty state.
     """
 
     attributes_updated_by: typing.Optional[ActorRef] = pydantic.Field(default=None)
     """
-    Actor responsible for the latest attribute update. This is `None` for
-    the initial empty state at revision 0.
+    The actor responsible for the latest attribute update, or `None` for the
+    initial empty state.
     """
 
-    binding_generation: typing.Optional[str] = pydantic.Field(default=None)
+    binding_generation: typing.Optional[BindingGeneration] = pydantic.Field(default=None)
     """
-    Opaque identifier for this entry's current parent/name binding. Absent for the namespace root.
+    The opaque ID for the current parent and name binding, or `None` for the namespace root.
+    """
+
+    content_ref: ContentRef = pydantic.Field()
+    """
+    Current content reference.
     """
 
     created_at_ms: int = pydantic.Field()
     """
-    Time the inode was created, in Unix milliseconds. Sequence numbers
-    determine order.
+    The inode creation time in Unix milliseconds.
     """
 
     created_by: ActorRef = pydantic.Field()
@@ -100,9 +75,9 @@ class PathEntryFile(UniversalBaseModel):
     Namespace head sequence this answer was read from.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Stable inode identity for this item.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -110,14 +85,34 @@ class PathEntryFile(UniversalBaseModel):
     Namespace that was read.
     """
 
-    parent_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    parent_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
+    Parent directory inode, or `None` for the root.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
     Absolute path as rendered from stored display names.
+    """
+
+    revision_committed_at_ms: int = pydantic.Field()
+    """
+    The current revision time in Unix milliseconds.
+    """
+
+    revision_committed_by: ActorRef = pydantic.Field()
+    """
+    Actor responsible for the current revision.
+    """
+
+    revision_no: RevisionNo = pydantic.Field()
+    """
+    Current file revision number.
+    """
+
+    size_bytes: int = pydantic.Field()
+    """
+    The current file size in bytes.
     """
 
     if IS_PYDANTIC_V2:

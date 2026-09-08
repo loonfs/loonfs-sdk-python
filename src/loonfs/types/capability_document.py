@@ -8,33 +8,22 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CapabilityDocument(UniversalBaseModel):
     """
-    A deployment's self-description (API spec, "Capability discovery").
+    The API groups, features, and limits advertised by a deployment.
+    """
 
-    A remote client fetches this from `GET /v0/capabilities` and caches it; an
-    embedded engine exposes the same document as a constant. SDK gating logic
-    is therefore identical for both backends: check [`supports`] or
-    [`has_profile`], and treat a `not_supported` error as authoritative when
-    the two disagree.
-
-    [`supports`]: CapabilityDocument::supports
-    [`has_profile`]: CapabilityDocument::has_profile
+    api_groups: typing.List[str] = pydantic.Field()
+    """
+    The advertised `group/version` API groups, each with every required operation implemented.
     """
 
     features: typing.Optional[typing.Dict[str, bool]] = pydantic.Field(default=None)
     """
-    Named features and whether this deployment supports them. An absent
-    key means unsupported.
+    The named features supported by this deployment, with absent keys treated as unsupported.
     """
 
     limits: typing.Optional[typing.Dict[str, int]] = pydantic.Field(default=None)
     """
     Advisory numeric limits clients may use to pre-validate requests.
-    """
-
-    profiles: typing.List[str] = pydantic.Field()
-    """
-    Advertised profiles, each `plane/version`. All-or-nothing: every
-    required op of an advertised profile is implemented.
     """
 
     protocol_version: str = pydantic.Field()

@@ -19,7 +19,7 @@ class ContentToken(UniversalBaseModel):
 
     token: str = pydantic.Field()
     """
-    Opaque, server-signed token. Clients must not parse it.
+    The opaque server-signed token that clients must not parse.
     """
 
     if IS_PYDANTIC_V2:

@@ -5,6 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .display_name import DisplayName
+from .inode_id import InodeId
 from .name_key import NameKey
 
 
@@ -23,9 +24,9 @@ class DirectoryBinding(UniversalBaseModel):
     Name used to look up the entry.
     """
 
-    parent_inode_id: str = pydantic.Field()
+    parent_inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Parent directory containing the entry.
     """
 
     if IS_PYDANTIC_V2:

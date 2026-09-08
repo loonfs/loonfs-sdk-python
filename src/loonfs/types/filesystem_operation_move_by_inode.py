@@ -4,8 +4,10 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .binding_generation import BindingGeneration
 from .destination_behavior import DestinationBehavior
 from .display_name import DisplayName
+from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
@@ -19,24 +21,24 @@ class FilesystemOperationMoveByInode(UniversalBaseModel):
     Whether an existing destination file may be replaced.
     """
 
-    expected_binding_generation: str = pydantic.Field()
+    expected_binding_generation: BindingGeneration = pydantic.Field()
     """
     Binding generation required for the move.
     """
 
-    expected_destination_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    expected_destination_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
+    With `replace` behavior, the destination inode required by the request.
     """
 
     expected_destination_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    With `replace` behavior and an inode guard, the request requires this content revision.
+    With `replace` behavior and an inode guard, the required content revision.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Inode to move.
     """
 
     to_display_name: DisplayName = pydantic.Field()
@@ -44,9 +46,9 @@ class FilesystemOperationMoveByInode(UniversalBaseModel):
     New name.
     """
 
-    to_parent_inode_id: str = pydantic.Field()
+    to_parent_inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Destination directory.
     """
 
     if IS_PYDANTIC_V2:

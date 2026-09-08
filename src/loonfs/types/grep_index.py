@@ -9,14 +9,59 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
 from .checkpoint_id import CheckpointId
+from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .run_no import RunNo
 
 
+class GrepIndex_Active(UniversalBaseModel):
+    """
+    The maintenance status of a namespace's grep index.
+    """
+
+    status: typing.Literal["active"] = "active"
+    built_through_seq: ChangeSeq
+    namespace_id: NamespaceId
+    next_event_index: typing.Optional[int] = None
+    next_run_no: RunNo
+    reorganize_pending: bool
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class GrepIndex_Backfilling(UniversalBaseModel):
+    """
+    The maintenance status of a namespace's grep index.
+    """
+
+    status: typing.Literal["backfilling"] = "backfilling"
+    checkpoint_id: CheckpointId
+    cursor_inode_id: typing.Optional[InodeId] = None
+    namespace_id: NamespaceId
+    next_run_no: RunNo
+    reorganize_pending: bool
+    target_seq: ChangeSeq
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class GrepIndex_Disabled(UniversalBaseModel):
     """
-    The namespace's grep-index lifecycle and its cheap bookkeeping (admin
-    plane).
+    The maintenance status of a namespace's grep index.
     """
 
     status: typing.Literal["disabled"] = "disabled"
@@ -34,53 +79,6 @@ class GrepIndex_Disabled(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class GrepIndex_Backfilling(UniversalBaseModel):
-    """
-    The namespace's grep-index lifecycle and its cheap bookkeeping (admin
-    plane).
-    """
-
-    status: typing.Literal["backfilling"] = "backfilling"
-    checkpoint_id: CheckpointId
-    cursor_inode_id: typing.Optional[str] = None
-    target_seq: ChangeSeq
-    namespace_id: NamespaceId
-    next_run_no: RunNo
-    reorganize_pending: bool
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class GrepIndex_Active(UniversalBaseModel):
-    """
-    The namespace's grep-index lifecycle and its cheap bookkeeping (admin
-    plane).
-    """
-
-    status: typing.Literal["active"] = "active"
-    built_through_seq: ChangeSeq
-    next_event_index: typing.Optional[int] = None
-    namespace_id: NamespaceId
-    next_run_no: RunNo
-    reorganize_pending: bool
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 GrepIndex = typing_extensions.Annotated[
-    typing.Union[GrepIndex_Disabled, GrepIndex_Backfilling, GrepIndex_Active], pydantic.Field(discriminator="status")
+    typing.Union[GrepIndex_Active, GrepIndex_Backfilling, GrepIndex_Disabled], pydantic.Field(discriminator="status")
 ]

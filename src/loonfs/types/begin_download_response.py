@@ -13,18 +13,9 @@ from .revision_no import RevisionNo
 
 class BeginDownloadResponse(UniversalBaseModel):
     """
-    A short-lived capability to read one file's content object, plus
-    everything the reader needs to check what arrives.
+    A presigned URL for one content object.
 
-    The raw object key is deliberately not here, exactly as it is not in a
-    `direct_put` grant: a client learns a URL that expires, not an address it
-    can revisit.
-
-    The grant names one immutable content object, so it does not go stale
-    when the path moves on. A commit that replaces the file writes a new
-    object and leaves this one alone; what the capability reads is what the
-    requested revision held when the grant was issued, and the reference
-    says which bytes those are.
+    The URL expires at `access.expires_at_ms`; later path changes do not change the object.
     """
 
     access: ObjectTransferAccess = pydantic.Field()
@@ -34,10 +25,7 @@ class BeginDownloadResponse(UniversalBaseModel):
 
     content_ref: ContentRef = pydantic.Field()
     """
-    Identity, byte length, and checksum evidence for the object the
-    capability reads. A reader checks the bytes it receives against
-    `size_bytes` and recomputes `checksum.algorithm` over the complete
-    payload.
+    The identity, byte length, and checksum of the object to download.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

@@ -10,8 +10,6 @@ if typing.TYPE_CHECKING:
     from .actor_id import ActorId
     from .actor_kind import ActorKind
     from .actor_ref import ActorRef
-    from .advance_retention_request import AdvanceRetentionRequest
-    from .advance_retention_response import AdvanceRetentionResponse
     from .attribute_key import AttributeKey
     from .attribute_revision_no import AttributeRevisionNo
     from .attribute_value import AttributeValue
@@ -37,6 +35,7 @@ if typing.TYPE_CHECKING:
     from .begin_upload_response_direct_put import BeginUploadResponseDirectPut
     from .begin_upload_response_service_proxied import BeginUploadResponseServiceProxied
     from .begin_upload_service_proxied import BeginUploadServiceProxied
+    from .binding_generation import BindingGeneration
     from .capability_document import CapabilityDocument
     from .change_seq import ChangeSeq
     from .checkpoint import Checkpoint
@@ -52,6 +51,17 @@ if typing.TYPE_CHECKING:
     from .checkpoint_owner_user import CheckpointOwnerUser
     from .checksum import Checksum
     from .checksum_algorithm import ChecksumAlgorithm
+    from .commit_assertion import (
+        CommitAssertion,
+        CommitAssertion_Attributes,
+        CommitAssertion_Binding,
+        CommitAssertion_FileRevision,
+        CommitAssertion_NamespaceHead,
+    )
+    from .commit_assertion_attributes import CommitAssertionAttributes
+    from .commit_assertion_binding import CommitAssertionBinding
+    from .commit_assertion_file_revision import CommitAssertionFileRevision
+    from .commit_assertion_namespace_head import CommitAssertionNamespaceHead
     from .commit_id import CommitId
     from .commit_response import CommitResponse
     from .committed_change import CommittedChange
@@ -61,6 +71,7 @@ if typing.TYPE_CHECKING:
     from .completed_upload_part import CompletedUploadPart
     from .content_id import ContentId
     from .content_ref import ContentRef
+    from .content_ref_kind import ContentRefKind
     from .content_token import ContentToken
     from .delete_directory_behavior import DeleteDirectoryBehavior
     from .delete_namespace_response import DeleteNamespaceResponse
@@ -117,8 +128,6 @@ if typing.TYPE_CHECKING:
     from .filesystem_operation_restore_revision import FilesystemOperationRestoreRevision
     from .filesystem_operation_undelete import FilesystemOperationUndelete
     from .filesystem_operation_update_attributes import FilesystemOperationUpdateAttributes
-    from .gc_request import GcRequest
-    from .gc_response import GcResponse
     from .grep_gc_response import GrepGcResponse
     from .grep_index import GrepIndex, GrepIndex_Active, GrepIndex_Backfilling, GrepIndex_Disabled
     from .grep_index_lifecycle_active import GrepIndexLifecycleActive
@@ -126,6 +135,7 @@ if typing.TYPE_CHECKING:
     from .grep_index_lifecycle_disabled import GrepIndexLifecycleDisabled
     from .grep_match import GrepMatch
     from .grep_response import GrepResponse
+    from .inode_id import InodeId
     from .inode_kind import InodeKind
     from .list_changes_response import ListChangesResponse
     from .list_checkpoints_response import ListCheckpointsResponse
@@ -134,10 +144,24 @@ if typing.TYPE_CHECKING:
     from .list_path_entries_response import ListPathEntriesResponse
     from .list_snapshots_response import ListSnapshotsResponse
     from .list_trash_response import ListTrashResponse
-    from .maintenance_step_response import MaintenanceStepResponse
     from .manifest_no import ManifestNo
-    from .metadata_maintenance_request import MetadataMaintenanceRequest
-    from .metadata_maintenance_response import MetadataMaintenanceResponse
+    from .metadata_compaction_outcome import (
+        MetadataCompactionOutcome,
+        MetadataCompactionOutcome_Abandoned,
+        MetadataCompactionOutcome_BoundedMergePublished,
+        MetadataCompactionOutcome_Cancelled,
+        MetadataCompactionOutcome_Fenced,
+        MetadataCompactionOutcome_NotNeeded,
+        MetadataCompactionOutcome_Published,
+        MetadataCompactionOutcome_Superseded,
+    )
+    from .metadata_compaction_outcome_abandoned import MetadataCompactionOutcomeAbandoned
+    from .metadata_compaction_outcome_bounded_merge_published import MetadataCompactionOutcomeBoundedMergePublished
+    from .metadata_compaction_outcome_cancelled import MetadataCompactionOutcomeCancelled
+    from .metadata_compaction_outcome_fenced import MetadataCompactionOutcomeFenced
+    from .metadata_compaction_outcome_not_needed import MetadataCompactionOutcomeNotNeeded
+    from .metadata_compaction_outcome_published import MetadataCompactionOutcomePublished
+    from .metadata_compaction_outcome_superseded import MetadataCompactionOutcomeSuperseded
     from .name_key import NameKey
     from .namespace import Namespace
     from .namespace_diagnostics import NamespaceDiagnostics
@@ -152,23 +176,39 @@ if typing.TYPE_CHECKING:
     from .released_checkpoint_counts import ReleasedCheckpointCounts
     from .reorganize_step_outcome import (
         ReorganizeStepOutcome,
-        ReorganizeStepOutcome_CompactionAtCapacity,
         ReorganizeStepOutcome_CompactionRequired,
-        ReorganizeStepOutcome_CompactionRunning,
-        ReorganizeStepOutcome_CompactionStarted,
         ReorganizeStepOutcome_NotNeeded,
         ReorganizeStepOutcome_RootAdvanced,
         ReorganizeStepOutcome_UnitPublished,
     )
-    from .reorganize_step_outcome_compaction_at_capacity import ReorganizeStepOutcomeCompactionAtCapacity
     from .reorganize_step_outcome_compaction_required import ReorganizeStepOutcomeCompactionRequired
-    from .reorganize_step_outcome_compaction_running import ReorganizeStepOutcomeCompactionRunning
-    from .reorganize_step_outcome_compaction_started import ReorganizeStepOutcomeCompactionStarted
     from .reorganize_step_outcome_not_needed import ReorganizeStepOutcomeNotNeeded
     from .reorganize_step_outcome_root_advanced import ReorganizeStepOutcomeRootAdvanced
     from .reorganize_step_outcome_unit_published import ReorganizeStepOutcomeUnitPublished
     from .retained_candidates import RetainedCandidates
     from .revision_no import RevisionNo
+    from .run_maintenance_request import (
+        RunMaintenanceRequest,
+        RunMaintenanceRequest_Gc,
+        RunMaintenanceRequest_Metadata,
+        RunMaintenanceRequest_MetadataCompaction,
+        RunMaintenanceRequest_Retention,
+    )
+    from .run_maintenance_request_gc import RunMaintenanceRequestGc
+    from .run_maintenance_request_metadata import RunMaintenanceRequestMetadata
+    from .run_maintenance_request_metadata_compaction import RunMaintenanceRequestMetadataCompaction
+    from .run_maintenance_request_retention import RunMaintenanceRequestRetention
+    from .run_maintenance_response import (
+        RunMaintenanceResponse,
+        RunMaintenanceResponse_Gc,
+        RunMaintenanceResponse_Metadata,
+        RunMaintenanceResponse_MetadataCompaction,
+        RunMaintenanceResponse_Retention,
+    )
+    from .run_maintenance_response_gc import RunMaintenanceResponseGc
+    from .run_maintenance_response_metadata import RunMaintenanceResponseMetadata
+    from .run_maintenance_response_metadata_compaction import RunMaintenanceResponseMetadataCompaction
+    from .run_maintenance_response_retention import RunMaintenanceResponseRetention
     from .run_no import RunNo
     from .service_unavailable_error_body import ServiceUnavailableErrorBody
     from .sign_upload_parts_response import SignUploadPartsResponse
@@ -206,13 +246,12 @@ if typing.TYPE_CHECKING:
     from .wal_flush_step_outcome_not_needed import WalFlushStepOutcomeNotNeeded
     from .wal_flush_step_outcome_retries_exhausted import WalFlushStepOutcomeRetriesExhausted
     from .writer_epoch import WriterEpoch
+    from .writer_id import WriterId
 _dynamic_imports: typing.Dict[str, str] = {
     "AbsolutePath": ".absolute_path",
     "ActorId": ".actor_id",
     "ActorKind": ".actor_kind",
     "ActorRef": ".actor_ref",
-    "AdvanceRetentionRequest": ".advance_retention_request",
-    "AdvanceRetentionResponse": ".advance_retention_response",
     "AttributeKey": ".attribute_key",
     "AttributeRevisionNo": ".attribute_revision_no",
     "AttributeValue": ".attribute_value",
@@ -234,6 +273,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "BeginUploadResponse_DirectPut": ".begin_upload_response",
     "BeginUploadResponse_ServiceProxied": ".begin_upload_response",
     "BeginUploadServiceProxied": ".begin_upload_service_proxied",
+    "BindingGeneration": ".binding_generation",
     "CapabilityDocument": ".capability_document",
     "ChangeSeq": ".change_seq",
     "Checkpoint": ".checkpoint",
@@ -247,6 +287,15 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CheckpointOwnerUser": ".checkpoint_owner_user",
     "Checksum": ".checksum",
     "ChecksumAlgorithm": ".checksum_algorithm",
+    "CommitAssertion": ".commit_assertion",
+    "CommitAssertionAttributes": ".commit_assertion_attributes",
+    "CommitAssertionBinding": ".commit_assertion_binding",
+    "CommitAssertionFileRevision": ".commit_assertion_file_revision",
+    "CommitAssertionNamespaceHead": ".commit_assertion_namespace_head",
+    "CommitAssertion_Attributes": ".commit_assertion",
+    "CommitAssertion_Binding": ".commit_assertion",
+    "CommitAssertion_FileRevision": ".commit_assertion",
+    "CommitAssertion_NamespaceHead": ".commit_assertion",
     "CommitId": ".commit_id",
     "CommitResponse": ".commit_response",
     "CommittedChange": ".committed_change",
@@ -256,6 +305,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CompletedUploadPart": ".completed_upload_part",
     "ContentId": ".content_id",
     "ContentRef": ".content_ref",
+    "ContentRefKind": ".content_ref_kind",
     "ContentToken": ".content_token",
     "DeleteDirectoryBehavior": ".delete_directory_behavior",
     "DeleteNamespaceResponse": ".delete_namespace_response",
@@ -308,8 +358,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperation_RestoreRevision": ".filesystem_operation",
     "FilesystemOperation_Undelete": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributes": ".filesystem_operation",
-    "GcRequest": ".gc_request",
-    "GcResponse": ".gc_response",
     "GrepGcResponse": ".grep_gc_response",
     "GrepIndex": ".grep_index",
     "GrepIndexLifecycleActive": ".grep_index_lifecycle_active",
@@ -320,6 +368,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "GrepIndex_Disabled": ".grep_index",
     "GrepMatch": ".grep_match",
     "GrepResponse": ".grep_response",
+    "InodeId": ".inode_id",
     "InodeKind": ".inode_kind",
     "ListChangesResponse": ".list_changes_response",
     "ListCheckpointsResponse": ".list_checkpoints_response",
@@ -328,10 +377,22 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ListPathEntriesResponse": ".list_path_entries_response",
     "ListSnapshotsResponse": ".list_snapshots_response",
     "ListTrashResponse": ".list_trash_response",
-    "MaintenanceStepResponse": ".maintenance_step_response",
     "ManifestNo": ".manifest_no",
-    "MetadataMaintenanceRequest": ".metadata_maintenance_request",
-    "MetadataMaintenanceResponse": ".metadata_maintenance_response",
+    "MetadataCompactionOutcome": ".metadata_compaction_outcome",
+    "MetadataCompactionOutcomeAbandoned": ".metadata_compaction_outcome_abandoned",
+    "MetadataCompactionOutcomeBoundedMergePublished": ".metadata_compaction_outcome_bounded_merge_published",
+    "MetadataCompactionOutcomeCancelled": ".metadata_compaction_outcome_cancelled",
+    "MetadataCompactionOutcomeFenced": ".metadata_compaction_outcome_fenced",
+    "MetadataCompactionOutcomeNotNeeded": ".metadata_compaction_outcome_not_needed",
+    "MetadataCompactionOutcomePublished": ".metadata_compaction_outcome_published",
+    "MetadataCompactionOutcomeSuperseded": ".metadata_compaction_outcome_superseded",
+    "MetadataCompactionOutcome_Abandoned": ".metadata_compaction_outcome",
+    "MetadataCompactionOutcome_BoundedMergePublished": ".metadata_compaction_outcome",
+    "MetadataCompactionOutcome_Cancelled": ".metadata_compaction_outcome",
+    "MetadataCompactionOutcome_Fenced": ".metadata_compaction_outcome",
+    "MetadataCompactionOutcome_NotNeeded": ".metadata_compaction_outcome",
+    "MetadataCompactionOutcome_Published": ".metadata_compaction_outcome",
+    "MetadataCompactionOutcome_Superseded": ".metadata_compaction_outcome",
     "NameKey": ".name_key",
     "Namespace": ".namespace",
     "NamespaceDiagnostics": ".namespace_diagnostics",
@@ -348,22 +409,34 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ReleaseSnapshotResponse": ".release_snapshot_response",
     "ReleasedCheckpointCounts": ".released_checkpoint_counts",
     "ReorganizeStepOutcome": ".reorganize_step_outcome",
-    "ReorganizeStepOutcomeCompactionAtCapacity": ".reorganize_step_outcome_compaction_at_capacity",
     "ReorganizeStepOutcomeCompactionRequired": ".reorganize_step_outcome_compaction_required",
-    "ReorganizeStepOutcomeCompactionRunning": ".reorganize_step_outcome_compaction_running",
-    "ReorganizeStepOutcomeCompactionStarted": ".reorganize_step_outcome_compaction_started",
     "ReorganizeStepOutcomeNotNeeded": ".reorganize_step_outcome_not_needed",
     "ReorganizeStepOutcomeRootAdvanced": ".reorganize_step_outcome_root_advanced",
     "ReorganizeStepOutcomeUnitPublished": ".reorganize_step_outcome_unit_published",
-    "ReorganizeStepOutcome_CompactionAtCapacity": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_CompactionRequired": ".reorganize_step_outcome",
-    "ReorganizeStepOutcome_CompactionRunning": ".reorganize_step_outcome",
-    "ReorganizeStepOutcome_CompactionStarted": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_NotNeeded": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_RootAdvanced": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_UnitPublished": ".reorganize_step_outcome",
     "RetainedCandidates": ".retained_candidates",
     "RevisionNo": ".revision_no",
+    "RunMaintenanceRequest": ".run_maintenance_request",
+    "RunMaintenanceRequestGc": ".run_maintenance_request_gc",
+    "RunMaintenanceRequestMetadata": ".run_maintenance_request_metadata",
+    "RunMaintenanceRequestMetadataCompaction": ".run_maintenance_request_metadata_compaction",
+    "RunMaintenanceRequestRetention": ".run_maintenance_request_retention",
+    "RunMaintenanceRequest_Gc": ".run_maintenance_request",
+    "RunMaintenanceRequest_Metadata": ".run_maintenance_request",
+    "RunMaintenanceRequest_MetadataCompaction": ".run_maintenance_request",
+    "RunMaintenanceRequest_Retention": ".run_maintenance_request",
+    "RunMaintenanceResponse": ".run_maintenance_response",
+    "RunMaintenanceResponseGc": ".run_maintenance_response_gc",
+    "RunMaintenanceResponseMetadata": ".run_maintenance_response_metadata",
+    "RunMaintenanceResponseMetadataCompaction": ".run_maintenance_response_metadata_compaction",
+    "RunMaintenanceResponseRetention": ".run_maintenance_response_retention",
+    "RunMaintenanceResponse_Gc": ".run_maintenance_response",
+    "RunMaintenanceResponse_Metadata": ".run_maintenance_response",
+    "RunMaintenanceResponse_MetadataCompaction": ".run_maintenance_response",
+    "RunMaintenanceResponse_Retention": ".run_maintenance_response",
     "RunNo": ".run_no",
     "ServiceUnavailableErrorBody": ".service_unavailable_error_body",
     "SignUploadPartsResponse": ".sign_upload_parts_response",
@@ -400,6 +473,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "WalFlushStepOutcome_NotNeeded": ".wal_flush_step_outcome",
     "WalFlushStepOutcome_RetriesExhausted": ".wal_flush_step_outcome",
     "WriterEpoch": ".writer_epoch",
+    "WriterId": ".writer_id",
 }
 
 
@@ -429,8 +503,6 @@ __all__ = [
     "ActorId",
     "ActorKind",
     "ActorRef",
-    "AdvanceRetentionRequest",
-    "AdvanceRetentionResponse",
     "AttributeKey",
     "AttributeRevisionNo",
     "AttributeValue",
@@ -452,6 +524,7 @@ __all__ = [
     "BeginUploadResponse_DirectPut",
     "BeginUploadResponse_ServiceProxied",
     "BeginUploadServiceProxied",
+    "BindingGeneration",
     "CapabilityDocument",
     "ChangeSeq",
     "Checkpoint",
@@ -465,6 +538,15 @@ __all__ = [
     "CheckpointOwnerUser",
     "Checksum",
     "ChecksumAlgorithm",
+    "CommitAssertion",
+    "CommitAssertionAttributes",
+    "CommitAssertionBinding",
+    "CommitAssertionFileRevision",
+    "CommitAssertionNamespaceHead",
+    "CommitAssertion_Attributes",
+    "CommitAssertion_Binding",
+    "CommitAssertion_FileRevision",
+    "CommitAssertion_NamespaceHead",
     "CommitId",
     "CommitResponse",
     "CommittedChange",
@@ -474,6 +556,7 @@ __all__ = [
     "CompletedUploadPart",
     "ContentId",
     "ContentRef",
+    "ContentRefKind",
     "ContentToken",
     "DeleteDirectoryBehavior",
     "DeleteNamespaceResponse",
@@ -526,8 +609,6 @@ __all__ = [
     "FilesystemOperation_RestoreRevision",
     "FilesystemOperation_Undelete",
     "FilesystemOperation_UpdateAttributes",
-    "GcRequest",
-    "GcResponse",
     "GrepGcResponse",
     "GrepIndex",
     "GrepIndexLifecycleActive",
@@ -538,6 +619,7 @@ __all__ = [
     "GrepIndex_Disabled",
     "GrepMatch",
     "GrepResponse",
+    "InodeId",
     "InodeKind",
     "ListChangesResponse",
     "ListCheckpointsResponse",
@@ -546,10 +628,22 @@ __all__ = [
     "ListPathEntriesResponse",
     "ListSnapshotsResponse",
     "ListTrashResponse",
-    "MaintenanceStepResponse",
     "ManifestNo",
-    "MetadataMaintenanceRequest",
-    "MetadataMaintenanceResponse",
+    "MetadataCompactionOutcome",
+    "MetadataCompactionOutcomeAbandoned",
+    "MetadataCompactionOutcomeBoundedMergePublished",
+    "MetadataCompactionOutcomeCancelled",
+    "MetadataCompactionOutcomeFenced",
+    "MetadataCompactionOutcomeNotNeeded",
+    "MetadataCompactionOutcomePublished",
+    "MetadataCompactionOutcomeSuperseded",
+    "MetadataCompactionOutcome_Abandoned",
+    "MetadataCompactionOutcome_BoundedMergePublished",
+    "MetadataCompactionOutcome_Cancelled",
+    "MetadataCompactionOutcome_Fenced",
+    "MetadataCompactionOutcome_NotNeeded",
+    "MetadataCompactionOutcome_Published",
+    "MetadataCompactionOutcome_Superseded",
     "NameKey",
     "Namespace",
     "NamespaceDiagnostics",
@@ -566,22 +660,34 @@ __all__ = [
     "ReleaseSnapshotResponse",
     "ReleasedCheckpointCounts",
     "ReorganizeStepOutcome",
-    "ReorganizeStepOutcomeCompactionAtCapacity",
     "ReorganizeStepOutcomeCompactionRequired",
-    "ReorganizeStepOutcomeCompactionRunning",
-    "ReorganizeStepOutcomeCompactionStarted",
     "ReorganizeStepOutcomeNotNeeded",
     "ReorganizeStepOutcomeRootAdvanced",
     "ReorganizeStepOutcomeUnitPublished",
-    "ReorganizeStepOutcome_CompactionAtCapacity",
     "ReorganizeStepOutcome_CompactionRequired",
-    "ReorganizeStepOutcome_CompactionRunning",
-    "ReorganizeStepOutcome_CompactionStarted",
     "ReorganizeStepOutcome_NotNeeded",
     "ReorganizeStepOutcome_RootAdvanced",
     "ReorganizeStepOutcome_UnitPublished",
     "RetainedCandidates",
     "RevisionNo",
+    "RunMaintenanceRequest",
+    "RunMaintenanceRequestGc",
+    "RunMaintenanceRequestMetadata",
+    "RunMaintenanceRequestMetadataCompaction",
+    "RunMaintenanceRequestRetention",
+    "RunMaintenanceRequest_Gc",
+    "RunMaintenanceRequest_Metadata",
+    "RunMaintenanceRequest_MetadataCompaction",
+    "RunMaintenanceRequest_Retention",
+    "RunMaintenanceResponse",
+    "RunMaintenanceResponseGc",
+    "RunMaintenanceResponseMetadata",
+    "RunMaintenanceResponseMetadataCompaction",
+    "RunMaintenanceResponseRetention",
+    "RunMaintenanceResponse_Gc",
+    "RunMaintenanceResponse_Metadata",
+    "RunMaintenanceResponse_MetadataCompaction",
+    "RunMaintenanceResponse_Retention",
     "RunNo",
     "ServiceUnavailableErrorBody",
     "SignUploadPartsResponse",
@@ -618,4 +724,5 @@ __all__ = [
     "WalFlushStepOutcome_NotNeeded",
     "WalFlushStepOutcome_RetriesExhausted",
     "WriterEpoch",
+    "WriterId",
 ]

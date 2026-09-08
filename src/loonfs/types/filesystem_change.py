@@ -9,63 +9,25 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
+from .binding_generation import BindingGeneration
 from .content_ref import ContentRef
 from .directory_binding import DirectoryBinding
 from .display_name import DisplayName
+from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
-class FilesystemChange_DirectoryCreated(UniversalBaseModel):
+class FilesystemChange_AttributesChanged(UniversalBaseModel):
     """
-    One semantic filesystem change inside a commit.
+    One filesystem change within a commit.
 
-    A commit's events are the operations it applied, in the order it applied
-    them. One request operation can apply several: creating missing parent
-    directories, or replacing a file by moving over it, each produce an event
-    per directory created or file replaced. So a request with three
-    operations may report more than three events, and the events stay in
-    request order. Events name inodes and their parent-directory bindings
-    rather than full paths; a consumer that needs paths can stat the inode or
-    maintain its own binding projection from this feed.
+    One request operation can produce multiple changes.
     """
 
-    kind: typing.Literal["directory_created"] = "directory_created"
-    binding_generation: str
-    display_name: DisplayName
-    inode_id: str
-    parent_inode_id: str
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class FilesystemChange_FileCreated(UniversalBaseModel):
-    """
-    One semantic filesystem change inside a commit.
-
-    A commit's events are the operations it applied, in the order it applied
-    them. One request operation can apply several: creating missing parent
-    directories, or replacing a file by moving over it, each produce an event
-    per directory created or file replaced. So a request with three
-    operations may report more than three events, and the events stay in
-    request order. Events name inodes and their parent-directory bindings
-    rather than full paths; a consumer that needs paths can stat the inode or
-    maintain its own binding projection from this feed.
-    """
-
-    kind: typing.Literal["file_created"] = "file_created"
-    binding_generation: str
-    content_ref: ContentRef
-    display_name: DisplayName
-    inode_id: str
-    parent_inode_id: str
-    revision_no: RevisionNo
+    kind: typing.Literal["attributes_changed"] = "attributes_changed"
+    attributes: Attributes
+    attributes_revision_no: AttributeRevisionNo
+    inode_id: InodeId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -79,21 +41,83 @@ class FilesystemChange_FileCreated(UniversalBaseModel):
 
 class FilesystemChange_ContentChanged(UniversalBaseModel):
     """
-    One semantic filesystem change inside a commit.
+    One filesystem change within a commit.
 
-    A commit's events are the operations it applied, in the order it applied
-    them. One request operation can apply several: creating missing parent
-    directories, or replacing a file by moving over it, each produce an event
-    per directory created or file replaced. So a request with three
-    operations may report more than three events, and the events stay in
-    request order. Events name inodes and their parent-directory bindings
-    rather than full paths; a consumer that needs paths can stat the inode or
-    maintain its own binding projection from this feed.
+    One request operation can produce multiple changes.
     """
 
     kind: typing.Literal["content_changed"] = "content_changed"
     content_ref: ContentRef
-    inode_id: str
+    inode_id: InodeId
+    revision_no: RevisionNo
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class FilesystemChange_Deleted(UniversalBaseModel):
+    """
+    One filesystem change within a commit.
+
+    One request operation can produce multiple changes.
+    """
+
+    kind: typing.Literal["deleted"] = "deleted"
+    deleted_binding: DirectoryBinding
+    inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class FilesystemChange_DirectoryCreated(UniversalBaseModel):
+    """
+    One filesystem change within a commit.
+
+    One request operation can produce multiple changes.
+    """
+
+    kind: typing.Literal["directory_created"] = "directory_created"
+    binding_generation: BindingGeneration
+    display_name: DisplayName
+    inode_id: InodeId
+    parent_inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class FilesystemChange_FileCreated(UniversalBaseModel):
+    """
+    One filesystem change within a commit.
+
+    One request operation can produce multiple changes.
+    """
+
+    kind: typing.Literal["file_created"] = "file_created"
+    binding_generation: BindingGeneration
+    content_ref: ContentRef
+    display_name: DisplayName
+    inode_id: InodeId
+    parent_inode_id: InodeId
     revision_no: RevisionNo
 
     if IS_PYDANTIC_V2:
@@ -108,53 +132,18 @@ class FilesystemChange_ContentChanged(UniversalBaseModel):
 
 class FilesystemChange_Moved(UniversalBaseModel):
     """
-    One semantic filesystem change inside a commit.
+    One filesystem change within a commit.
 
-    A commit's events are the operations it applied, in the order it applied
-    them. One request operation can apply several: creating missing parent
-    directories, or replacing a file by moving over it, each produce an event
-    per directory created or file replaced. So a request with three
-    operations may report more than three events, and the events stay in
-    request order. Events name inodes and their parent-directory bindings
-    rather than full paths; a consumer that needs paths can stat the inode or
-    maintain its own binding projection from this feed.
+    One request operation can produce multiple changes.
     """
 
     kind: typing.Literal["moved"] = "moved"
-    binding_generation: str
+    binding_generation: BindingGeneration
     from_display_name: DisplayName
-    from_parent_inode_id: str
-    inode_id: str
+    from_parent_inode_id: InodeId
+    inode_id: InodeId
     to_display_name: DisplayName
-    to_parent_inode_id: str
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class FilesystemChange_Deleted(UniversalBaseModel):
-    """
-    One semantic filesystem change inside a commit.
-
-    A commit's events are the operations it applied, in the order it applied
-    them. One request operation can apply several: creating missing parent
-    directories, or replacing a file by moving over it, each produce an event
-    per directory created or file replaced. So a request with three
-    operations may report more than three events, and the events stay in
-    request order. Events name inodes and their parent-directory bindings
-    rather than full paths; a consumer that needs paths can stat the inode or
-    maintain its own binding projection from this feed.
-    """
-
-    kind: typing.Literal["deleted"] = "deleted"
-    deleted_binding: typing.Optional[DirectoryBinding] = None
-    inode_id: str
+    to_parent_inode_id: InodeId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -168,52 +157,16 @@ class FilesystemChange_Deleted(UniversalBaseModel):
 
 class FilesystemChange_Undeleted(UniversalBaseModel):
     """
-    One semantic filesystem change inside a commit.
+    One filesystem change within a commit.
 
-    A commit's events are the operations it applied, in the order it applied
-    them. One request operation can apply several: creating missing parent
-    directories, or replacing a file by moving over it, each produce an event
-    per directory created or file replaced. So a request with three
-    operations may report more than three events, and the events stay in
-    request order. Events name inodes and their parent-directory bindings
-    rather than full paths; a consumer that needs paths can stat the inode or
-    maintain its own binding projection from this feed.
+    One request operation can produce multiple changes.
     """
 
     kind: typing.Literal["undeleted"] = "undeleted"
-    binding_generation: str
+    binding_generation: BindingGeneration
     display_name: DisplayName
-    inode_id: str
-    parent_inode_id: str
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class FilesystemChange_AttributesChanged(UniversalBaseModel):
-    """
-    One semantic filesystem change inside a commit.
-
-    A commit's events are the operations it applied, in the order it applied
-    them. One request operation can apply several: creating missing parent
-    directories, or replacing a file by moving over it, each produce an event
-    per directory created or file replaced. So a request with three
-    operations may report more than three events, and the events stay in
-    request order. Events name inodes and their parent-directory bindings
-    rather than full paths; a consumer that needs paths can stat the inode or
-    maintain its own binding projection from this feed.
-    """
-
-    kind: typing.Literal["attributes_changed"] = "attributes_changed"
-    attributes: Attributes
-    attributes_revision_no: AttributeRevisionNo
-    inode_id: str
+    inode_id: InodeId
+    parent_inode_id: InodeId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -227,13 +180,13 @@ class FilesystemChange_AttributesChanged(UniversalBaseModel):
 
 FilesystemChange = typing_extensions.Annotated[
     typing.Union[
+        FilesystemChange_AttributesChanged,
+        FilesystemChange_ContentChanged,
+        FilesystemChange_Deleted,
         FilesystemChange_DirectoryCreated,
         FilesystemChange_FileCreated,
-        FilesystemChange_ContentChanged,
         FilesystemChange_Moved,
-        FilesystemChange_Deleted,
         FilesystemChange_Undeleted,
-        FilesystemChange_AttributesChanged,
     ],
     pydantic.Field(discriminator="kind"),
 ]

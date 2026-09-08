@@ -299,7 +299,7 @@ client.namespaces.delete(
 <dl>
 <dd>
 
-Creates a new namespace as a fork from the source namespace's current durable view.
+Creates a new namespace from the source current head or a live snapshot.
 </dd>
 </dl>
 </dd>
@@ -349,6 +349,14 @@ client.namespaces.fork(
 <dd>
 
 **new_namespace_id:** `NamespaceId` — Durable namespace id for the fork target.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[CheckpointId]` — Fork from this live snapshot instead of the current head.
     
 </dd>
 </dl>
@@ -480,7 +488,7 @@ client.changes.list(
 <dl>
 <dd>
 
-Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request assertions check the pre-state after receipt resolution and before operations; a failed assertion names its position in `details.assertion_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 </dd>
 </dl>
 </dd>
@@ -495,7 +503,7 @@ Applies one commit: an ordered, non-empty list of path operations that commit to
 <dd>
 
 ```python
-from loonfs.server import LoonFS, ActorRef, FilesystemOperation_CreateDirectory
+from loonfs.server import LoonFS, ActorRef, FilesystemOperation_CopyPath
 
 client = LoonFS(
     token="<token>",
@@ -510,8 +518,9 @@ client.commits.create(
     ),
     commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
     operations=[
-        FilesystemOperation_CreateDirectory(
-            path="/docs/report.txt",
+        FilesystemOperation_CopyPath(
+            from_path="/docs/report.txt",
+            to_path="/docs/report.txt",
         )
     ],
 )
@@ -554,10 +563,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**operations:** `typing.List[FilesystemOperation]` 
-
-Ordered operations to apply. Must be non-empty; they commit all
-together or not at all.
+**operations:** `typing.List[FilesystemOperation]` — The non-empty ordered operations to commit atomically.
     
 </dd>
 </dl>
@@ -565,10 +571,7 @@ together or not at all.
 <dl>
 <dd>
 
-**content_tokens:** `typing.Optional[typing.List[ContentToken]]` 
-
-Proofs for any new external content refs introduced by this request.
-One proof covers every operation that names its content ref.
+**assertions:** `typing.Optional[typing.List[CommitAssertion]]` — Ordered admission conditions evaluated before any operations.
     
 </dd>
 </dl>
@@ -576,12 +579,15 @@ One proof covers every operation that names its content ref.
 <dl>
 <dd>
 
-**message:** `typing.Optional[str]` 
+**content_tokens:** `typing.Optional[typing.List[ContentToken]]` — The proofs for new external content references in this request.
+    
+</dd>
+</dl>
 
-Caller annotation recorded on the commit and reported by the change
-feed. Part of the commit's identity: reusing `commit_id` with a
-different message is a `commit_id_reuse_conflict`, exactly as it is
-for an explicit commit.
+<dl>
+<dd>
+
+**message:** `typing.Optional[str]` — The caller annotation that forms part of the commit identity.
     
 </dd>
 </dl>
@@ -2185,7 +2191,7 @@ Starts an upload session for content that may later be attached to a file. Servi
 <dd>
 
 ```python
-from loonfs.server import LoonFS, BeginUploadRequest_ServiceProxied
+from loonfs.server import LoonFS, BeginUploadRequest_DirectMultipart
 
 client = LoonFS(
     token="<token>",
@@ -2194,7 +2200,7 @@ client = LoonFS(
 
 client.uploads.create(
     namespace_id="namespace_id",
-    request=BeginUploadRequest_ServiceProxied(),
+    request=BeginUploadRequest_DirectMultipart(),
 )
 
 ```
@@ -2428,7 +2434,7 @@ Completes an upload. The request mode must match the mode used to start the sess
 <dd>
 
 ```python
-from loonfs.server import LoonFS, UploadCompletion_ServiceProxied
+from loonfs.server import LoonFS, UploadCompletion_DirectMultipart, UploadContentClaim, Checksum, CompletedUploadPart
 
 client = LoonFS(
     token="<token>",
@@ -2438,7 +2444,25 @@ client = LoonFS(
 client.uploads.complete(
     namespace_id="namespace_id",
     upload_id="upload_id",
-    request=UploadCompletion_ServiceProxied(),
+    request=UploadCompletion_DirectMultipart(
+        content=UploadContentClaim(
+            checksum=Checksum(
+                algorithm="sha256",
+                value="value",
+            ),
+            size_bytes=1000000,
+        ),
+        parts=[
+            CompletedUploadPart(
+                checksum=Checksum(
+                    algorithm="sha256",
+                    value="value",
+                ),
+                etag="etag",
+                part_number=1,
+            )
+        ],
+    ),
 )
 
 ```
@@ -2647,10 +2671,7 @@ client.uploads.sign_parts(
 <dl>
 <dd>
 
-**parts:** `typing.List[UploadPartChecksumClaim]` 
-
-Parts to authorize and the checksum for each part. Requesting a part
-again replaces the previous upload for that part number.
+**parts:** `typing.List[UploadPartChecksumClaim]` — The parts to authorize; repeated part numbers replace their previous uploads.
     
 </dd>
 </dl>
@@ -2670,8 +2691,8 @@ again replaces the previous upload for that part number.
 </dl>
 </details>
 
-## Admin Checkpoints
-<details><summary><code>client.admin.checkpoints.<a href="src/loonfs/admin/checkpoints/client.py">list</a>(...) -> ListCheckpointsResponse</code></summary>
+## Maintenance Checkpoints
+<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">list</a>(...) -> ListCheckpointsResponse</code></summary>
 <dl>
 <dd>
 
@@ -2705,7 +2726,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.checkpoints.list(
+client.maintenance.checkpoints.list(
     namespace_id="namespace_id",
 )
 
@@ -2759,7 +2780,7 @@ client.admin.checkpoints.list(
 </dl>
 </details>
 
-<details><summary><code>client.admin.checkpoints.<a href="src/loonfs/admin/checkpoints/client.py">create</a>(...) -> Checkpoint</code></summary>
+<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">create</a>(...) -> Checkpoint</code></summary>
 <dl>
 <dd>
 
@@ -2771,7 +2792,7 @@ client.admin.checkpoints.list(
 <dl>
 <dd>
 
-Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance/admin operation, not a file mutation.
+Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 </dd>
 </dl>
 </dd>
@@ -2793,7 +2814,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.checkpoints.create(
+client.maintenance.checkpoints.create(
     namespace_id="namespace_id",
     name="name",
 )
@@ -2820,10 +2841,7 @@ client.admin.checkpoints.create(
 <dl>
 <dd>
 
-**name:** `str` 
-
-Label recorded on the checkpoint record. A label, not a key: several
-records may carry the same name over different bases.
+**name:** `str` — The non-unique label recorded on the checkpoint.
     
 </dd>
 </dl>
@@ -2831,10 +2849,7 @@ records may carry the same name over different bases.
 <dl>
 <dd>
 
-**ttl_ms:** `typing.Optional[int]` 
-
-Optional lifetime; the server computes the record's expiry from its
-own clock. Absent means the pin holds until explicitly released.
+**ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds, or `None` for an explicit release only.
     
 </dd>
 </dl>
@@ -2854,7 +2869,7 @@ own clock. Absent means the pin holds until explicitly released.
 </dl>
 </details>
 
-<details><summary><code>client.admin.checkpoints.<a href="src/loonfs/admin/checkpoints/client.py">release</a>(...) -> ReleaseCheckpointResponse</code></summary>
+<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">release</a>(...) -> ReleaseCheckpointResponse</code></summary>
 <dl>
 <dd>
 
@@ -2888,7 +2903,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.checkpoints.release(
+client.maintenance.checkpoints.release(
     namespace_id="namespace_id",
     checkpoint_id="checkpoint_id",
 )
@@ -2935,8 +2950,8 @@ client.admin.checkpoints.release(
 </dl>
 </details>
 
-## Admin Diagnostics
-<details><summary><code>client.admin.diagnostics.<a href="src/loonfs/admin/diagnostics/client.py">retrieve</a>(...) -> NamespaceDiagnostics</code></summary>
+## Maintenance Diagnostics
+<details><summary><code>client.maintenance.diagnostics.<a href="src/loonfs/maintenance/diagnostics/client.py">retrieve</a>(...) -> NamespaceDiagnostics</code></summary>
 <dl>
 <dd>
 
@@ -2970,7 +2985,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.diagnostics.retrieve(
+client.maintenance.diagnostics.retrieve(
     namespace_id="namespace_id",
 )
 
@@ -3008,8 +3023,8 @@ client.admin.diagnostics.retrieve(
 </dl>
 </details>
 
-## Admin GrepIndex
-<details><summary><code>client.admin.grep_index.<a href="src/loonfs/admin/grep_index/client.py">retrieve</a>(...) -> GrepIndex</code></summary>
+## Maintenance GrepIndex
+<details><summary><code>client.maintenance.grep_index.<a href="src/loonfs/maintenance/grep_index/client.py">retrieve</a>(...) -> GrepIndex</code></summary>
 <dl>
 <dd>
 
@@ -3043,7 +3058,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.grep_index.retrieve(
+client.maintenance.grep_index.retrieve(
     namespace_id="namespace_id",
 )
 
@@ -3081,7 +3096,7 @@ client.admin.grep_index.retrieve(
 </dl>
 </details>
 
-<details><summary><code>client.admin.grep_index.<a href="src/loonfs/admin/grep_index/client.py">disable</a>(...) -> GrepIndex</code></summary>
+<details><summary><code>client.maintenance.grep_index.<a href="src/loonfs/maintenance/grep_index/client.py">disable</a>(...) -> GrepIndex</code></summary>
 <dl>
 <dd>
 
@@ -3115,7 +3130,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.grep_index.disable(
+client.maintenance.grep_index.disable(
     namespace_id="namespace_id",
 )
 
@@ -3153,7 +3168,7 @@ client.admin.grep_index.disable(
 </dl>
 </details>
 
-<details><summary><code>client.admin.grep_index.<a href="src/loonfs/admin/grep_index/client.py">enable</a>(...) -> GrepIndex</code></summary>
+<details><summary><code>client.maintenance.grep_index.<a href="src/loonfs/maintenance/grep_index/client.py">enable</a>(...) -> GrepIndex</code></summary>
 <dl>
 <dd>
 
@@ -3187,7 +3202,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.grep_index.enable(
+client.maintenance.grep_index.enable(
     namespace_id="namespace_id",
 )
 
@@ -3225,7 +3240,7 @@ client.admin.grep_index.enable(
 </dl>
 </details>
 
-<details><summary><code>client.admin.grep_index.<a href="src/loonfs/admin/grep_index/client.py">gc</a>(...) -> GrepGcResponse</code></summary>
+<details><summary><code>client.maintenance.grep_index.<a href="src/loonfs/maintenance/grep_index/client.py">gc</a>(...) -> GrepGcResponse</code></summary>
 <dl>
 <dd>
 
@@ -3259,7 +3274,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.grep_index.gc(
+client.maintenance.grep_index.gc(
     namespace_id="namespace_id",
 )
 
@@ -3285,10 +3300,7 @@ client.admin.grep_index.gc(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` 
-
-Opaque resume token returned as `next_cursor` by an earlier pass
-against the same namespace.
+**cursor:** `typing.Optional[str]` — The opaque `next_cursor` returned by an earlier pass for the same namespace.
     
 </dd>
 </dl>
@@ -3296,11 +3308,7 @@ against the same namespace.
 <dl>
 <dd>
 
-**max_objects:** `typing.Optional[int]` 
-
-Reads this pass may spend before returning with a `next_cursor`.
-Omit to take the same per-pass default the runtime's own collection
-takes.
+**max_objects:** `typing.Optional[int]` — The maximum reads for this pass, or `None` for the server default.
     
 </dd>
 </dl>
@@ -3320,8 +3328,8 @@ takes.
 </dl>
 </details>
 
-## Admin Maintenance
-<details><summary><code>client.admin.maintenance.<a href="src/loonfs/admin/maintenance/client.py">run</a>(...) -> MaintenanceStepResponse</code></summary>
+## Maintenance Runs
+<details><summary><code>client.maintenance.runs.<a href="src/loonfs/maintenance/runs/client.py">create</a>(...) -> RunMaintenanceResponse</code></summary>
 <dl>
 <dd>
 
@@ -3333,7 +3341,7 @@ takes.
 <dl>
 <dd>
 
-Runs one bounded maintenance step. Include `metadata_maintenance`, `retention`, or `gc` to select actions. Each selector is an options object, and an empty object uses server defaults. Actions run in that order, and only selected actions appear in the response. At least one action is required. A deleted namespace accepts only `gc`. GC processes up to 1024 candidates by default and returns a cursor when more work remains. A lost root update race is reported as an outcome.
+Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, or `retention`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call performs up to 1024 durable work steps unless `max_steps` says otherwise, and returns a cursor when work remains. Steps include marking, merging, and sweeping; the budget does not count object-store requests.
 </dd>
 </dl>
 </dd>
@@ -3348,15 +3356,16 @@ Runs one bounded maintenance step. Include `metadata_maintenance`, `retention`, 
 <dd>
 
 ```python
-from loonfs.server import LoonFS
+from loonfs.server import LoonFS, RunMaintenanceRequest_Gc
 
 client = LoonFS(
     token="<token>",
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.maintenance.run(
+client.maintenance.runs.create(
     namespace_id="namespace_id",
+    request=RunMaintenanceRequest_Gc(),
 )
 
 ```
@@ -3381,32 +3390,7 @@ client.admin.maintenance.run(
 <dl>
 <dd>
 
-**gc:** `typing.Optional[GcRequest]` 
-
-Run one bounded mark-and-sweep garbage-collection pass. Omit this
-field to skip garbage collection.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**metadata_maintenance:** `typing.Optional[MetadataMaintenanceRequest]` 
-
-Flush the visible WAL tail into metadata segments, then run one bounded
-reorganization step.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**retention:** `typing.Optional[AdvanceRetentionRequest]` 
-
-Advance the retention floor to the flushed manifest head. Include this
-field to select the action.
+**request:** `RunMaintenanceRequest` 
     
 </dd>
 </dl>
@@ -3426,8 +3410,8 @@ field to select the action.
 </dl>
 </details>
 
-## Admin Store
-<details><summary><code>client.admin.store.<a href="src/loonfs/admin/store/client.py">probe</a>(...) -> StoreProbeResponse</code></summary>
+## Maintenance Store
+<details><summary><code>client.maintenance.store.<a href="src/loonfs/maintenance/store/client.py">probe</a>(...) -> StoreProbeResponse</code></summary>
 <dl>
 <dd>
 
@@ -3461,7 +3445,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.admin.store.probe(
+client.maintenance.store.probe(
     request={
         "key": "value"
     },

@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
 from .file_revision import FileRevision
+from .inode_id import InodeId
 from .namespace_id import NamespaceId
 
 
@@ -19,9 +20,9 @@ class ListFileRevisionsResponse(UniversalBaseModel):
     Namespace head sequence used for the read.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    File inode whose revisions were returned.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

@@ -9,20 +9,17 @@ from .store_probe_check_result import StoreProbeCheckResult
 
 class StoreProbeResponse(UniversalBaseModel):
     """
-    What one store contract probe observed, check by check.
+    The ordered results from one store contract probe.
     """
 
     checks: typing.List[StoreProbeCheckResult] = pydantic.Field()
     """
-    Every check the run performed, in the order it performed them. A
-    failed check lives here rather than in an error: the probe answered
-    the question, and the answer is that the store is wrong.
+    The check results in execution order.
     """
 
     run_id: str = pydantic.Field()
     """
-    Label the server minted for this run. It scopes the objects the run
-    wrote, so it identifies the run in provider logs too.
+    The server-generated label for this probe run and its objects.
     """
 
     if IS_PYDANTIC_V2:

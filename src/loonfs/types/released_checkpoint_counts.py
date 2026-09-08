@@ -8,35 +8,27 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class ReleasedCheckpointCounts(UniversalBaseModel):
     """
-    Checkpoint records released by one GC pass, grouped by reason.
-
-    Releasing a record stops it from pinning data. A later pass may delete the
-    record after its grace window and count that under
-    [`DeletedObjectCounts::checkpoint_records`].
+    Checkpoint record counts released by one garbage-collection pass, grouped by reason.
     """
 
     expired: int = pydantic.Field()
     """
-    User-owned records released because their expiry passed, or because
-    they sit on a terminally deleted namespace.
+    User-owned records released after expiry or terminal namespace deletion.
     """
 
     fork: int = pydantic.Field()
     """
-    Fork-owned records released because their target namespace is
-    provably gone.
+    Fork-owned records released because their target namespaces are gone.
     """
 
     missing_basis: int = pydantic.Field()
     """
-    Active records released because their basis manifest is verifiably
-    gone.
+    Active records released because their basis manifests are gone.
     """
 
     snapshot: int = pydantic.Field()
     """
-    Snapshot-owned records released because their expiry passed, or
-    because they sit on a terminally deleted namespace.
+    Snapshot-owned records released after expiry or terminal namespace deletion.
     """
 
     if IS_PYDANTIC_V2:

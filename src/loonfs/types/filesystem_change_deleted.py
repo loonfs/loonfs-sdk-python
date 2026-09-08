@@ -5,23 +5,22 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .directory_binding import DirectoryBinding
+from .inode_id import InodeId
 
 
 class FilesystemChangeDeleted(UniversalBaseModel):
     """
-    A file or directory subtree was deleted. Use the enclosing change's
-    `committed_seq` as `deletion_seq` when restoring it.
+    A file or directory subtree was deleted.
     """
 
-    deleted_binding: typing.Optional[DirectoryBinding] = pydantic.Field(default=None)
+    deleted_binding: DirectoryBinding = pydantic.Field()
     """
-    Directory binding removed by the deletion, when the delete
-    recorded one.
+    Directory binding removed by the deletion.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Inode at the root of the deleted subtree.
     """
 
     if IS_PYDANTIC_V2:

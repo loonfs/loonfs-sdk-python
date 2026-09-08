@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
+from .inode_id import InodeId
 
 
 class FilesystemChangeAttributesChanged(UniversalBaseModel):
@@ -15,9 +16,8 @@ class FilesystemChangeAttributesChanged(UniversalBaseModel):
 
     attributes: Attributes = pydantic.Field()
     """
-    The inode's complete attribute map after the update, so a consumer
-    projects it without reading anything back. An empty map is the
-    cleared state.
+    The inode's complete attribute map after the update, including an empty map
+    when all attributes were cleared.
     """
 
     attributes_revision_no: AttributeRevisionNo = pydantic.Field()
@@ -25,9 +25,9 @@ class FilesystemChangeAttributesChanged(UniversalBaseModel):
     New attribute revision for that inode.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Inode whose attributes advanced.
     """
 
     if IS_PYDANTIC_V2:

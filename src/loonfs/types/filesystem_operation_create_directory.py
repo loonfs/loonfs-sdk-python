@@ -14,8 +14,8 @@ class FilesystemOperationCreateDirectory(UniversalBaseModel):
 
     parents: typing.Optional[bool] = pydantic.Field(default=None)
     """
-    Also create missing ancestor directories (the same auto-create
-    `put_file` performs). The final component must still be new.
+    Whether to create missing ancestor directories while requiring the final
+    component to be new.
     """
 
     path: AbsolutePath = pydantic.Field()

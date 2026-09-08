@@ -10,6 +10,7 @@ from .absolute_path import AbsolutePath
 from .attribute_key import AttributeKey
 from .attribute_revision_no import AttributeRevisionNo
 from .attribute_value import AttributeValue
+from .inode_id import InodeId
 
 
 class FilesystemOperationUpdateAttributes(UniversalBaseModel):
@@ -19,16 +20,12 @@ class FilesystemOperationUpdateAttributes(UniversalBaseModel):
 
     expected_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
     """
-    When set, the update applies only while the inode's attribute
-    revision is still this one. Absent means the update is applied
-    over whatever revision is current; either way the write carries
-    its own revision guard, so a concurrent update never merges
-    silently.
+    The attribute revision that must still be current before the update.
     """
 
-    expected_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
+    The inode that the path must still resolve to before the update.
     """
 
     path: AbsolutePath = pydantic.Field()
@@ -38,10 +35,7 @@ class FilesystemOperationUpdateAttributes(UniversalBaseModel):
 
     remove: typing.Optional[typing.List[AttributeKey]] = pydantic.Field(default=None)
     """
-    Attribute keys to remove.
-    
-    A list preserves duplicate entries so validation can report them instead
-    of silently deduplicating the request.
+    The attribute keys to remove, including duplicates that validation must reject.
     """
 
     set_: typing_extensions.Annotated[
@@ -49,13 +43,12 @@ class FilesystemOperationUpdateAttributes(UniversalBaseModel):
         FieldMetadata(alias="set"),
         pydantic.Field(
             alias="set",
-            description="Attributes to write. Each key replaces whatever the inode\ncurrently holds under it; keys the inode holds and this map does\nnot name are left alone.",
+            description="The attributes to write, replacing values for matching keys and leaving\nother keys unchanged.",
         ),
     ] = None
     """
-    Attributes to write. Each key replaces whatever the inode
-    currently holds under it; keys the inode holds and this map does
-    not name are left alone.
+    The attributes to write, replacing values for matching keys and leaving
+    other keys unchanged.
     """
 
     if IS_PYDANTIC_V2:

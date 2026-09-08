@@ -4,8 +4,5 @@ import typing
 
 StoreProbeRequest = typing.Dict[str, typing.Any]
 """
-Options for one store contract probe. Empty today; a body is still sent
-so later options do not change the shape of the request. An option this
-build does not know is rejected rather than ignored, so a caller never
-believes it selected something.
+An empty request for one store contract probe.
 """

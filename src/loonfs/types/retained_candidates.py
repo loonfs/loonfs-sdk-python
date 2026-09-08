@@ -8,12 +8,9 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RetainedCandidates(UniversalBaseModel):
     """
-    Candidates inspected but not deleted by one GC pass.
+    The candidates inspected but not deleted by one garbage-collection pass.
 
-    Every field is present, including zero counts. The fields sum to
-    `retained_candidates` in [`GcResponse`].
-
-    An object inspected by multiple passes is counted once per pass.
+    Every field is present and contributes to [`GcResponse::retained_candidates`].
     """
 
     checkpoint_not_releasable: int = pydantic.Field()
@@ -21,28 +18,19 @@ class RetainedCandidates(UniversalBaseModel):
     Checkpoint records that could not be safely released or deleted.
     """
 
-    content_scan_deferred: int = pydantic.Field()
-    """
-    Completed sessions skipped because the reference scan exceeded
-    `max_objects`. The response also sets `content_reclamation_deferred`.
-    """
-
     degraded_roots: int = pydantic.Field()
     """
-    Candidates kept because root resolution failed. The response also
-    sets `retention_degraded`.
+    Candidates retained because root resolution failed.
     """
 
     no_provider_timestamp: int = pydantic.Field()
     """
-    Unreachable candidates with no provider timestamp. Their age is
-    unknown, so the pass keeps them.
+    Unreachable candidates without provider timestamps.
     """
 
     no_reference_manifest: int = pydantic.Field()
     """
-    Unreachable candidates that cannot be checked against a manifest old
-    enough to cover the grace window.
+    Unreachable candidates without a reference manifest old enough to cover the grace window.
     """
 
     referenced: int = pydantic.Field()
@@ -52,14 +40,12 @@ class RetainedCandidates(UniversalBaseModel):
 
     unrecognized_key: int = pydantic.Field()
     """
-    Unrecognized keys in a family scanned by GC. These keys are never
-    deleted.
+    Unrecognized keys retained from object families scanned by garbage collection.
     """
 
     upload_session_undecided: int = pydantic.Field()
     """
-    Upload sessions kept because the pass could not determine whether
-    they were safe to delete.
+    Upload sessions whose deletion safety could not be determined.
     """
 
     upload_session_window: int = pydantic.Field()
@@ -69,8 +55,7 @@ class RetainedCandidates(UniversalBaseModel):
 
     within_grace_window: int = pydantic.Field()
     """
-    Unreachable, but younger than the grace window by the object's own
-    provider timestamp. A later pass deletes it.
+    Unreachable candidates younger than the grace window by their provider timestamps.
     """
 
     if IS_PYDANTIC_V2:

@@ -12,19 +12,12 @@ from .path_entry import PathEntry
 
 class ListPathEntriesResponse(UniversalBaseModel):
     """
-    One directory listing and the namespace head it was answered at.
-
-    The envelope names the listing target and head so an empty directory
-    still tells the caller which state it observed, and so the response can
-    grow without reshaping `entries`.
+    One directory listing and the namespace head used to read it.
     """
 
     entries: typing.List[PathEntry] = pydantic.Field()
     """
-    Directory entries for this page.
-    
-    Entries are returned in canonical name-key order. Higher-level display
-    surfaces may sort entries separately for presentation.
+    The directory entries in canonical name-key order.
     """
 
     head_seq: ChangeSeq = pydantic.Field()

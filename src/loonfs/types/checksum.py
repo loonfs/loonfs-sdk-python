@@ -9,9 +9,7 @@ from .checksum_algorithm import ChecksumAlgorithm
 
 class Checksum(UniversalBaseModel):
     """
-    An algorithm and its canonical lowercase-hex checksum value.
-
-    The enclosing value defines which bytes the checksum covers.
+    A checksum algorithm and its canonical lowercase hexadecimal value.
     """
 
     algorithm: ChecksumAlgorithm = pydantic.Field()
@@ -21,10 +19,7 @@ class Checksum(UniversalBaseModel):
 
     value: str = pydantic.Field()
     """
-    Lowercase hex of the raw checksum bytes.
-    
-    The algorithm is its own field, so the value carries no prefix.
-    Provider APIs that report base64 are converted at the adapter.
+    The canonical lowercase hexadecimal checksum without a prefix.
     """
 
     if IS_PYDANTIC_V2:

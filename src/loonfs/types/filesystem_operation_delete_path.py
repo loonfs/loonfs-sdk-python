@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .delete_directory_behavior import DeleteDirectoryBehavior
+from .inode_id import InodeId
 
 
 class FilesystemOperationDeletePath(UniversalBaseModel):
@@ -18,9 +19,9 @@ class FilesystemOperationDeletePath(UniversalBaseModel):
     Whether a non-empty directory may be tombstoned recursively.
     """
 
-    expected_inode_id: typing.Optional[str] = pydantic.Field(default=None)
+    expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Stable inode ID within a namespace
+    The inode that the path must still resolve to before deletion.
     """
 
     path: AbsolutePath = pydantic.Field()

@@ -6,11 +6,12 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .content_ref import ContentRef
 from .display_name import DisplayName
+from .inode_id import InodeId
 
 
 class FilesystemOperationPutFileByInode(UniversalBaseModel):
     """
-    Create a file under an existing parent inode. The name must be unused.
+    Create a file with an unused name under an existing parent inode.
     """
 
     content_ref: ContentRef = pydantic.Field()
@@ -23,9 +24,9 @@ class FilesystemOperationPutFileByInode(UniversalBaseModel):
     New file name.
     """
 
-    parent_inode_id: str = pydantic.Field()
+    parent_inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Parent directory.
     """
 
     if IS_PYDANTIC_V2:

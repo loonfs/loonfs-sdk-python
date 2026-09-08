@@ -5,6 +5,7 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.actor_ref import ActorRef
+from ..types.commit_assertion import CommitAssertion
 from ..types.commit_id import CommitId
 from ..types.commit_response import CommitResponse
 from ..types.content_token import ContentToken
@@ -37,12 +38,13 @@ class CommitsClient:
         actor: ActorRef,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
+        assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CommitResponse:
         """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request assertions check the pre-state after receipt resolution and before operations; a failed assertion names its position in `details.assertion_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
         Parameters
         ----------
@@ -56,18 +58,16 @@ class CommitsClient:
             Caller-supplied idempotency key for the whole request.
 
         operations : typing.Sequence[FilesystemOperation]
-            Ordered operations to apply. Must be non-empty; they commit all
-            together or not at all.
+            The non-empty ordered operations to commit atomically.
+
+        assertions : typing.Optional[typing.Sequence[CommitAssertion]]
+            Ordered admission conditions evaluated before any operations.
 
         content_tokens : typing.Optional[typing.Sequence[ContentToken]]
-            Proofs for any new external content refs introduced by this request.
-            One proof covers every operation that names its content ref.
+            The proofs for new external content references in this request.
 
         message : typing.Optional[str]
-            Caller annotation recorded on the commit and reported by the change
-            feed. Part of the commit's identity: reusing `commit_id` with a
-            different message is a `commit_id_reuse_conflict`, exactly as it is
-            for an explicit commit.
+            The caller annotation that forms part of the commit identity.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -79,7 +79,7 @@ class CommitsClient:
 
         Examples
         --------
-        from loonfs.server import ActorRef, FilesystemOperation_CreateDirectory, LoonFS
+        from loonfs.server import ActorRef, FilesystemOperation_CopyPath, LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -93,8 +93,9 @@ class CommitsClient:
             ),
             commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
             operations=[
-                FilesystemOperation_CreateDirectory(
-                    path="/docs/report.txt",
+                FilesystemOperation_CopyPath(
+                    from_path="/docs/report.txt",
+                    to_path="/docs/report.txt",
                 )
             ],
         )
@@ -104,6 +105,7 @@ class CommitsClient:
             actor=actor,
             commit_id=commit_id,
             operations=operations,
+            assertions=assertions,
             content_tokens=content_tokens,
             message=message,
             request_options=request_options,
@@ -133,12 +135,13 @@ class AsyncCommitsClient:
         actor: ActorRef,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
+        assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CommitResponse:
         """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request assertions check the pre-state after receipt resolution and before operations; a failed assertion names its position in `details.assertion_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
         Parameters
         ----------
@@ -152,18 +155,16 @@ class AsyncCommitsClient:
             Caller-supplied idempotency key for the whole request.
 
         operations : typing.Sequence[FilesystemOperation]
-            Ordered operations to apply. Must be non-empty; they commit all
-            together or not at all.
+            The non-empty ordered operations to commit atomically.
+
+        assertions : typing.Optional[typing.Sequence[CommitAssertion]]
+            Ordered admission conditions evaluated before any operations.
 
         content_tokens : typing.Optional[typing.Sequence[ContentToken]]
-            Proofs for any new external content refs introduced by this request.
-            One proof covers every operation that names its content ref.
+            The proofs for new external content references in this request.
 
         message : typing.Optional[str]
-            Caller annotation recorded on the commit and reported by the change
-            feed. Part of the commit's identity: reusing `commit_id` with a
-            different message is a `commit_id_reuse_conflict`, exactly as it is
-            for an explicit commit.
+            The caller annotation that forms part of the commit identity.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -177,7 +178,7 @@ class AsyncCommitsClient:
         --------
         import asyncio
 
-        from loonfs.server import ActorRef, AsyncLoonFS, FilesystemOperation_CreateDirectory
+        from loonfs.server import ActorRef, AsyncLoonFS, FilesystemOperation_CopyPath
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -194,8 +195,9 @@ class AsyncCommitsClient:
                 ),
                 commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
                 operations=[
-                    FilesystemOperation_CreateDirectory(
-                        path="/docs/report.txt",
+                    FilesystemOperation_CopyPath(
+                        from_path="/docs/report.txt",
+                        to_path="/docs/report.txt",
                     )
                 ],
             )
@@ -208,6 +210,7 @@ class AsyncCommitsClient:
             actor=actor,
             commit_id=commit_id,
             operations=operations,
+            assertions=assertions,
             content_tokens=content_tokens,
             message=message,
             request_options=request_options,

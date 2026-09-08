@@ -13,58 +13,9 @@ from .object_transfer_access import ObjectTransferAccess
 from .upload_id import UploadId
 
 
-class BeginUploadResponse_ServiceProxied(UniversalBaseModel):
-    """
-    Response to starting an upload session, tagged by transport mode.
-
-    Each variant contains only the fields needed by that transport. Unknown
-    response fields are accepted for forward compatibility.
-    """
-
-    mode: typing.Literal["service_proxied"] = "service_proxied"
-    namespace_id: NamespaceId
-    upload_id: UploadId
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class BeginUploadResponse_DirectPut(UniversalBaseModel):
-    """
-    Response to starting an upload session, tagged by transport mode.
-
-    Each variant contains only the fields needed by that transport. Unknown
-    response fields are accepted for forward compatibility.
-    """
-
-    mode: typing.Literal["direct_put"] = "direct_put"
-    access: ObjectTransferAccess
-    checksum_algorithm: ChecksumAlgorithm
-    namespace_id: NamespaceId
-    upload_id: UploadId
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class BeginUploadResponse_DirectMultipart(UniversalBaseModel):
     """
-    Response to starting an upload session, tagged by transport mode.
-
-    Each variant contains only the fields needed by that transport. Unknown
-    response fields are accepted for forward compatibility.
+    The response from starting an upload session for one transport mode.
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
@@ -83,9 +34,49 @@ class BeginUploadResponse_DirectMultipart(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class BeginUploadResponse_DirectPut(UniversalBaseModel):
+    """
+    The response from starting an upload session for one transport mode.
+    """
+
+    mode: typing.Literal["direct_put"] = "direct_put"
+    access: ObjectTransferAccess
+    checksum_algorithm: ChecksumAlgorithm
+    namespace_id: NamespaceId
+    upload_id: UploadId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class BeginUploadResponse_ServiceProxied(UniversalBaseModel):
+    """
+    The response from starting an upload session for one transport mode.
+    """
+
+    mode: typing.Literal["service_proxied"] = "service_proxied"
+    namespace_id: NamespaceId
+    upload_id: UploadId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 BeginUploadResponse = typing_extensions.Annotated[
     typing.Union[
-        BeginUploadResponse_ServiceProxied, BeginUploadResponse_DirectPut, BeginUploadResponse_DirectMultipart
+        BeginUploadResponse_DirectMultipart, BeginUploadResponse_DirectPut, BeginUploadResponse_ServiceProxied
     ],
     pydantic.Field(discriminator="mode"),
 ]

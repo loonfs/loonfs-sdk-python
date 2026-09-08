@@ -5,6 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
+from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
@@ -18,9 +19,9 @@ class GrepMatch(UniversalBaseModel):
     Byte offset of the match within the file.
     """
 
-    inode_id: str = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Stable inode ID within a namespace
+    Durable identity of the matched file.
     """
 
     line: str = pydantic.Field()

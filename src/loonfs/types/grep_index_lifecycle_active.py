@@ -11,8 +11,7 @@ from .run_no import RunNo
 
 class GrepIndexLifecycleActive(UniversalBaseModel):
     """
-    The index follows the change feed. Commits at or below the watermark
-    are searchable.
+    An index following the change feed through its searchable watermark.
     """
 
     built_through_seq: ChangeSeq = pydantic.Field()
@@ -20,15 +19,15 @@ class GrepIndexLifecycleActive(UniversalBaseModel):
     Sequence of the commit at the index cursor.
     """
 
-    next_event_index: typing.Optional[int] = pydantic.Field(default=None)
-    """
-    Offset of the next change event within `built_through_seq`, or
-    zero when the whole commit is represented.
-    """
-
     namespace_id: NamespaceId = pydantic.Field()
     """
     Namespace the status describes.
+    """
+
+    next_event_index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    The next change-event offset within `built_through_seq`, or zero when the
+    whole commit is indexed.
     """
 
     next_run_no: RunNo = pydantic.Field()

@@ -55,7 +55,7 @@ class UploadsClient:
 
         Examples
         --------
-        from loonfs.server import BeginUploadRequest_ServiceProxied, LoonFS
+        from loonfs.server import BeginUploadRequest_DirectMultipart, LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -63,7 +63,7 @@ class UploadsClient:
         )
         client.uploads.create(
             namespace_id="namespace_id",
-            request=BeginUploadRequest_ServiceProxied(),
+            request=BeginUploadRequest_DirectMultipart(),
         )
         """
         _response = self._raw_client.create(namespace_id, request=request, request_options=request_options)
@@ -176,7 +176,13 @@ class UploadsClient:
 
         Examples
         --------
-        from loonfs.server import LoonFS, UploadCompletion_ServiceProxied
+        from loonfs.server import (
+            Checksum,
+            CompletedUploadPart,
+            LoonFS,
+            UploadCompletion_DirectMultipart,
+            UploadContentClaim,
+        )
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -185,7 +191,25 @@ class UploadsClient:
         client.uploads.complete(
             namespace_id="namespace_id",
             upload_id="upload_id",
-            request=UploadCompletion_ServiceProxied(),
+            request=UploadCompletion_DirectMultipart(
+                content=UploadContentClaim(
+                    checksum=Checksum(
+                        algorithm="sha256",
+                        value="value",
+                    ),
+                    size_bytes=1000000,
+                ),
+                parts=[
+                    CompletedUploadPart(
+                        checksum=Checksum(
+                            algorithm="sha256",
+                            value="value",
+                        ),
+                        etag="etag",
+                        part_number=1,
+                    )
+                ],
+            ),
         )
         """
         _response = self._raw_client.complete(namespace_id, upload_id, request=request, request_options=request_options)
@@ -245,8 +269,7 @@ class UploadsClient:
             Upload session id
 
         parts : typing.Sequence[UploadPartChecksumClaim]
-            Parts to authorize and the checksum for each part. Requesting a part
-            again replaces the previous upload for that part number.
+            The parts to authorize; repeated part numbers replace their previous uploads.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -322,7 +345,7 @@ class AsyncUploadsClient:
         --------
         import asyncio
 
-        from loonfs.server import AsyncLoonFS, BeginUploadRequest_ServiceProxied
+        from loonfs.server import AsyncLoonFS, BeginUploadRequest_DirectMultipart
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -333,7 +356,7 @@ class AsyncUploadsClient:
         async def main() -> None:
             await client.uploads.create(
                 namespace_id="namespace_id",
-                request=BeginUploadRequest_ServiceProxied(),
+                request=BeginUploadRequest_DirectMultipart(),
             )
 
 
@@ -467,7 +490,13 @@ class AsyncUploadsClient:
         --------
         import asyncio
 
-        from loonfs.server import AsyncLoonFS, UploadCompletion_ServiceProxied
+        from loonfs.server import (
+            AsyncLoonFS,
+            Checksum,
+            CompletedUploadPart,
+            UploadCompletion_DirectMultipart,
+            UploadContentClaim,
+        )
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -479,7 +508,25 @@ class AsyncUploadsClient:
             await client.uploads.complete(
                 namespace_id="namespace_id",
                 upload_id="upload_id",
-                request=UploadCompletion_ServiceProxied(),
+                request=UploadCompletion_DirectMultipart(
+                    content=UploadContentClaim(
+                        checksum=Checksum(
+                            algorithm="sha256",
+                            value="value",
+                        ),
+                        size_bytes=1000000,
+                    ),
+                    parts=[
+                        CompletedUploadPart(
+                            checksum=Checksum(
+                                algorithm="sha256",
+                                value="value",
+                            ),
+                            etag="etag",
+                            part_number=1,
+                        )
+                    ],
+                ),
             )
 
 
@@ -544,8 +591,7 @@ class AsyncUploadsClient:
             Upload session id
 
         parts : typing.Sequence[UploadPartChecksumClaim]
-            Parts to authorize and the checksum for each part. Requesting a part
-            again replaces the previous upload for that part number.
+            The parts to authorize; repeated part numbers replace their previous uploads.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

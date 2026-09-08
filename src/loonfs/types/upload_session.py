@@ -14,13 +14,13 @@ from .upload_id import UploadId
 from .upload_mode import UploadMode
 
 
-class UploadSession_Open(UniversalBaseModel):
+class UploadSession_Aborted(UniversalBaseModel):
     """
     Current view of one upload session.
     """
 
-    status: typing.Literal["open"] = "open"
-    expires_at_ms: int
+    status: typing.Literal["aborted"] = "aborted"
+    aborted_at_ms: int
     mode: UploadMode
     namespace_id: NamespaceId
     upload_id: UploadId
@@ -58,13 +58,13 @@ class UploadSession_Completed(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class UploadSession_Aborted(UniversalBaseModel):
+class UploadSession_Open(UniversalBaseModel):
     """
     Current view of one upload session.
     """
 
-    status: typing.Literal["aborted"] = "aborted"
-    aborted_at_ms: int
+    status: typing.Literal["open"] = "open"
+    expires_at_ms: int
     mode: UploadMode
     namespace_id: NamespaceId
     upload_id: UploadId
@@ -80,6 +80,6 @@ class UploadSession_Aborted(UniversalBaseModel):
 
 
 UploadSession = typing_extensions.Annotated[
-    typing.Union[UploadSession_Open, UploadSession_Completed, UploadSession_Aborted],
+    typing.Union[UploadSession_Aborted, UploadSession_Completed, UploadSession_Open],
     pydantic.Field(discriminator="status"),
 ]
