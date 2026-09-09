@@ -33,7 +33,7 @@ class Checkpoint(UniversalBaseModel):
 
     expires_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The automatic release time in Unix milliseconds, or `None` until an explicit release.
+    Expiry in Unix milliseconds; collection waits one further grace window.
     """
 
     manifest_no: ManifestNo = pydantic.Field()

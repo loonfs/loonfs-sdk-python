@@ -13,7 +13,7 @@ class DeletedObjectCounts(UniversalBaseModel):
 
     checkpoint_records: int = pydantic.Field()
     """
-    Released checkpoint records deleted after their grace window.
+    Pin records deleted by this pass.
     """
 
     content_objects: int = pydantic.Field()

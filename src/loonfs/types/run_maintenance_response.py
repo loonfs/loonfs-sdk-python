@@ -23,17 +23,13 @@ class RunMaintenanceResponse_Gc(UniversalBaseModel):
     """
 
     kind: typing.Literal["gc"] = "gc"
-    budget_exhausted: bool
-    content_reclamation_deferred: bool
     deleted: DeletedObjectCounts
     namespace_id: NamespaceId
-    next_cursor: typing.Optional[str] = None
     next_reclamation_at_ms: typing.Optional[int] = None
     reclaim_after_ms: typing.Optional[int] = None
     released_checkpoints: ReleasedCheckpointCounts
     retained: RetainedCandidates
     retained_candidates: int
-    retention_degraded: bool
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

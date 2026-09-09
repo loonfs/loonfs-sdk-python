@@ -18,24 +18,14 @@ class RetainedCandidates(UniversalBaseModel):
     Checkpoint records that could not be safely released or deleted.
     """
 
-    degraded_roots: int = pydantic.Field()
-    """
-    Candidates retained because root resolution failed.
-    """
-
     no_provider_timestamp: int = pydantic.Field()
     """
     Unreachable candidates without provider timestamps.
     """
 
-    no_reference_manifest: int = pydantic.Field()
-    """
-    Unreachable candidates without a reference manifest old enough to cover the grace window.
-    """
-
     referenced: int = pydantic.Field()
     """
-    Candidates found reachable during the final check before deletion.
+    Candidates protected by current references or manifest discovery.
     """
 
     unrecognized_key: int = pydantic.Field()

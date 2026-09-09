@@ -18,6 +18,7 @@ from ...errors.not_implemented_error import NotImplementedError
 from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.error_response import ErrorResponse
+from ...types.grep_gc_request import GrepGcRequest
 from ...types.grep_gc_response import GrepGcResponse
 from ...types.grep_index import GrepIndex
 from pydantic import ValidationError
@@ -132,7 +133,7 @@ class RawGrepIndexClient:
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[GrepIndex]:
         """
-        Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
+        Disables the namespace's grep index by publishing the next manifest number with no segment references. Index maintenance stops when a step reads the disabled manifest. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -145,7 +146,7 @@ class RawGrepIndexClient:
         Returns
         -------
         HttpResponse[GrepIndex]
-            Grep root disabled or already disabled
+            Grep index disabled or already disabled
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/grep/index/disable",
@@ -252,7 +253,7 @@ class RawGrepIndexClient:
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[GrepIndex]:
         """
-        Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+        Enables the namespace's grep index and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -265,7 +266,7 @@ class RawGrepIndexClient:
         Returns
         -------
         HttpResponse[GrepIndex]
-            Grep root enabled or already enabled
+            Grep index enabled or already enabled
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/grep/index/enable",
@@ -369,26 +370,17 @@ class RawGrepIndexClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def gc(
-        self,
-        namespace_id: str,
-        *,
-        cursor: typing.Optional[str] = OMIT,
-        max_objects: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, namespace_id: str, *, request: GrepGcRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[GrepGcResponse]:
         """
-        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped; no grep garbage collection runs implicitly. `max_objects` bounds the reads the pass spends and returns a `next_cursor` when keys remain; resuming re-reads liveness and the grep root, so a cursor only skips enumeration. Requires this deployment to maintain the grep index.
+        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped. Every call reads durable roots and completes one pass. Unreadable or invalid roots fail before deletion. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        cursor : typing.Optional[str]
-            The opaque `next_cursor` returned by an earlier pass for the same namespace.
-
-        max_objects : typing.Optional[int]
-            The maximum reads for this pass, or `None` for the server default.
+        request : GrepGcRequest
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -404,10 +396,7 @@ class RawGrepIndexClient:
         _response = self._client_wrapper.httpx_client.request(
             f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/grep/index/gc",
             method="POST",
-            json={
-                "cursor": cursor,
-                "max_objects": max_objects,
-            },
+            json=request,
             headers={
                 "content-type": "application/json",
             },
@@ -595,7 +584,7 @@ class AsyncRawGrepIndexClient:
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[GrepIndex]:
         """
-        Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
+        Disables the namespace's grep index by publishing the next manifest number with no segment references. Index maintenance stops when a step reads the disabled manifest. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -608,7 +597,7 @@ class AsyncRawGrepIndexClient:
         Returns
         -------
         AsyncHttpResponse[GrepIndex]
-            Grep root disabled or already disabled
+            Grep index disabled or already disabled
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/grep/index/disable",
@@ -715,7 +704,7 @@ class AsyncRawGrepIndexClient:
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[GrepIndex]:
         """
-        Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+        Enables the namespace's grep index and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -728,7 +717,7 @@ class AsyncRawGrepIndexClient:
         Returns
         -------
         AsyncHttpResponse[GrepIndex]
-            Grep root enabled or already enabled
+            Grep index enabled or already enabled
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/grep/index/enable",
@@ -832,26 +821,17 @@ class AsyncRawGrepIndexClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def gc(
-        self,
-        namespace_id: str,
-        *,
-        cursor: typing.Optional[str] = OMIT,
-        max_objects: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, namespace_id: str, *, request: GrepGcRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[GrepGcResponse]:
         """
-        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped; no grep garbage collection runs implicitly. `max_objects` bounds the reads the pass spends and returns a `next_cursor` when keys remain; resuming re-reads liveness and the grep root, so a cursor only skips enumeration. Requires this deployment to maintain the grep index.
+        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped. Every call reads durable roots and completes one pass. Unreadable or invalid roots fail before deletion. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        cursor : typing.Optional[str]
-            The opaque `next_cursor` returned by an earlier pass for the same namespace.
-
-        max_objects : typing.Optional[int]
-            The maximum reads for this pass, or `None` for the server default.
+        request : GrepGcRequest
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -867,10 +847,7 @@ class AsyncRawGrepIndexClient:
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/grep/index/gc",
             method="POST",
-            json={
-                "cursor": cursor,
-                "max_objects": max_objects,
-            },
+            json=request,
             headers={
                 "content-type": "application/json",
             },

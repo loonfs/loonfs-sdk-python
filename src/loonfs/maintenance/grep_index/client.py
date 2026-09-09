@@ -4,6 +4,7 @@ import typing
 
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.request_options import RequestOptions
+from ...types.grep_gc_request import GrepGcRequest
 from ...types.grep_gc_response import GrepGcResponse
 from ...types.grep_index import GrepIndex
 from .raw_client import AsyncRawGrepIndexClient, RawGrepIndexClient
@@ -61,7 +62,7 @@ class GrepIndexClient:
 
     def disable(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
         """
-        Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
+        Disables the namespace's grep index by publishing the next manifest number with no segment references. Index maintenance stops when a step reads the disabled manifest. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -74,7 +75,7 @@ class GrepIndexClient:
         Returns
         -------
         GrepIndex
-            Grep root disabled or already disabled
+            Grep index disabled or already disabled
 
         Examples
         --------
@@ -93,7 +94,7 @@ class GrepIndexClient:
 
     def enable(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
         """
-        Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+        Enables the namespace's grep index and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -106,7 +107,7 @@ class GrepIndexClient:
         Returns
         -------
         GrepIndex
-            Grep root enabled or already enabled
+            Grep index enabled or already enabled
 
         Examples
         --------
@@ -124,26 +125,17 @@ class GrepIndexClient:
         return _response.data
 
     def gc(
-        self,
-        namespace_id: str,
-        *,
-        cursor: typing.Optional[str] = OMIT,
-        max_objects: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, namespace_id: str, *, request: GrepGcRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> GrepGcResponse:
         """
-        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped; no grep garbage collection runs implicitly. `max_objects` bounds the reads the pass spends and returns a `next_cursor` when keys remain; resuming re-reads liveness and the grep root, so a cursor only skips enumeration. Requires this deployment to maintain the grep index.
+        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped. Every call reads durable roots and completes one pass. Unreadable or invalid roots fail before deletion. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        cursor : typing.Optional[str]
-            The opaque `next_cursor` returned by an earlier pass for the same namespace.
-
-        max_objects : typing.Optional[int]
-            The maximum reads for this pass, or `None` for the server default.
+        request : GrepGcRequest
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -163,11 +155,10 @@ class GrepIndexClient:
         )
         client.maintenance.grep_index.gc(
             namespace_id="namespace_id",
+            request={"key": "value"},
         )
         """
-        _response = self._raw_client.gc(
-            namespace_id, cursor=cursor, max_objects=max_objects, request_options=request_options
-        )
+        _response = self._raw_client.gc(namespace_id, request=request, request_options=request_options)
         return _response.data
 
 
@@ -230,7 +221,7 @@ class AsyncGrepIndexClient:
 
     async def disable(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
         """
-        Disables the namespace's grep root and clears its segment references with one durable compare-and-swap; index maintenance stops on its own once a step reads the disabled root. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
+        Disables the namespace's grep index by publishing the next manifest number with no segment references. Index maintenance stops when a step reads the disabled manifest. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -243,7 +234,7 @@ class AsyncGrepIndexClient:
         Returns
         -------
         GrepIndex
-            Grep root disabled or already disabled
+            Grep index disabled or already disabled
 
         Examples
         --------
@@ -270,7 +261,7 @@ class AsyncGrepIndexClient:
 
     async def enable(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
         """
-        Enables the namespace's grep root and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+        Enables the namespace's grep index and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -283,7 +274,7 @@ class AsyncGrepIndexClient:
         Returns
         -------
         GrepIndex
-            Grep root enabled or already enabled
+            Grep index enabled or already enabled
 
         Examples
         --------
@@ -309,26 +300,17 @@ class AsyncGrepIndexClient:
         return _response.data
 
     async def gc(
-        self,
-        namespace_id: str,
-        *,
-        cursor: typing.Optional[str] = OMIT,
-        max_objects: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
+        self, namespace_id: str, *, request: GrepGcRequest, request_options: typing.Optional[RequestOptions] = None
     ) -> GrepGcResponse:
         """
-        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped; no grep garbage collection runs implicitly. `max_objects` bounds the reads the pass spends and returns a `next_cursor` when keys remain; resuming re-reads liveness and the grep root, so a cursor only skips enumeration. Requires this deployment to maintain the grep index.
+        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped. Every call reads durable roots and completes one pass. Unreadable or invalid roots fail before deletion. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
         namespace_id : str
             Namespace id
 
-        cursor : typing.Optional[str]
-            The opaque `next_cursor` returned by an earlier pass for the same namespace.
-
-        max_objects : typing.Optional[int]
-            The maximum reads for this pass, or `None` for the server default.
+        request : GrepGcRequest
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -353,12 +335,11 @@ class AsyncGrepIndexClient:
         async def main() -> None:
             await client.maintenance.grep_index.gc(
                 namespace_id="namespace_id",
+                request={"key": "value"},
             )
 
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.gc(
-            namespace_id, cursor=cursor, max_objects=max_objects, request_options=request_options
-        )
+        _response = await self._raw_client.gc(namespace_id, request=request, request_options=request_options)
         return _response.data

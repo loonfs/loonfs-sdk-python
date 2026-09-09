@@ -38,7 +38,7 @@ class RawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListCheckpointsResponse]:
         """
-        Lists one page of active checkpoints in checkpoint-id order. Expired checkpoints remain visible until collection releases them. Released checkpoints are omitted. The cursor resumes a live listing and does not create a snapshot.
+        Lists existing pins in checkpoint-id order. Expired pins remain visible until collection deletes them after expiry plus grace. The cursor resumes a live listing.
 
         Parameters
         ----------
@@ -255,7 +255,7 @@ class RawCheckpointsClient:
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[ReleaseCheckpointResponse]:
         """
-        Releases a user-owned checkpoint pin by id. Idempotent: releasing an already-released or reaped record succeeds. The record is reaped by a later garbage-collection pass; its pinned data becomes collectable only on the pass after that.
+        Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
 
         Parameters
         ----------
@@ -271,7 +271,7 @@ class RawCheckpointsClient:
         Returns
         -------
         HttpResponse[ReleaseCheckpointResponse]
-            Checkpoint release accepted (including an already released or reaped checkpoint)
+            Checkpoint pin deleted
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints/{encode_path_param(checkpoint_id)}/release",
@@ -355,7 +355,7 @@ class AsyncRawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListCheckpointsResponse]:
         """
-        Lists one page of active checkpoints in checkpoint-id order. Expired checkpoints remain visible until collection releases them. Released checkpoints are omitted. The cursor resumes a live listing and does not create a snapshot.
+        Lists existing pins in checkpoint-id order. Expired pins remain visible until collection deletes them after expiry plus grace. The cursor resumes a live listing.
 
         Parameters
         ----------
@@ -572,7 +572,7 @@ class AsyncRawCheckpointsClient:
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[ReleaseCheckpointResponse]:
         """
-        Releases a user-owned checkpoint pin by id. Idempotent: releasing an already-released or reaped record succeeds. The record is reaped by a later garbage-collection pass; its pinned data becomes collectable only on the pass after that.
+        Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
 
         Parameters
         ----------
@@ -588,7 +588,7 @@ class AsyncRawCheckpointsClient:
         Returns
         -------
         AsyncHttpResponse[ReleaseCheckpointResponse]
-            Checkpoint release accepted (including an already released or reaped checkpoint)
+            Checkpoint pin deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints/{encode_path_param(checkpoint_id)}/release",

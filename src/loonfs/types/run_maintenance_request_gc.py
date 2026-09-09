@@ -8,26 +8,13 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RunMaintenanceRequestGc(UniversalBaseModel):
     """
-    Runs one bounded mark-and-sweep garbage-collection pass.
-    """
-
-    cursor: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    The opaque `next_cursor` returned by an earlier call for this namespace.
-    Omitting it joins any active run; scan positions remain server-owned.
+    Collects aged, unreferenced objects.
     """
 
     grace_window_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
     The minimum object age for deletion in milliseconds, which must meet the
     server's advertised safety floor.
-    """
-
-    max_steps: typing.Optional[int] = pydantic.Field(default=None)
-    """
-    Maximum durable GC work steps in this call; the default is 1024.
-    Even a budget of one saves progress through marking and sweeping.
-    This is not a limit on object-store requests or memory.
     """
 
     if IS_PYDANTIC_V2:

@@ -21,11 +21,6 @@ class ReleasedCheckpointCounts(UniversalBaseModel):
     Fork-owned records released because their target namespaces are gone.
     """
 
-    missing_basis: int = pydantic.Field()
-    """
-    Active records released because their basis manifests are gone.
-    """
-
     snapshot: int = pydantic.Field()
     """
     Snapshot-owned records released after expiry or terminal namespace deletion.

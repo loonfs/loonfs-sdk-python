@@ -19,12 +19,7 @@ class GrepGcResponse(UniversalBaseModel):
 
     deleted_segments: int = pydantic.Field()
     """
-    Unreferenced grep segments deleted after the grace window.
-    """
-
-    namespace_degraded: bool = pydantic.Field()
-    """
-    Whether unreadable namespace or grep state forced conservative retention.
+    Unreferenced grep segments older than the minimum segment age.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -37,14 +32,9 @@ class GrepGcResponse(UniversalBaseModel):
     Whether an absent or tombstoned namespace had extension state reaped.
     """
 
-    next_cursor: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    Present when the budget stopped the pass with keys left to examine.
-    """
-
     retained_candidates: int = pydantic.Field()
     """
-    Young or concurrently revived candidates retained by the pass.
+    Referenced, young, or unrecognized candidates retained by the pass.
     """
 
     if IS_PYDANTIC_V2:

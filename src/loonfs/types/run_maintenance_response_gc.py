@@ -12,17 +12,7 @@ from .retained_candidates import RetainedCandidates
 
 class RunMaintenanceResponseGc(UniversalBaseModel):
     """
-    Result of one bounded mark-and-sweep garbage-collection pass.
-    """
-
-    budget_exhausted: bool = pydantic.Field()
-    """
-    Whether the pass reached `max_steps` before completion.
-    """
-
-    content_reclamation_deferred: bool = pydantic.Field()
-    """
-    Whether reference marking is unfinished, so content reclamation has not started.
+    Counts and deadlines from one collection call.
     """
 
     deleted: DeletedObjectCounts = pydantic.Field()
@@ -33,11 +23,6 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     namespace_id: NamespaceId = pydantic.Field()
     """
     Namespace the pass ran against.
-    """
-
-    next_cursor: typing.Optional[str] = pydantic.Field(default=None)
-    """
-    The opaque run token for remaining marking, sweeping, or cleanup work.
     """
 
     next_reclamation_at_ms: typing.Optional[int] = pydantic.Field(default=None)
@@ -63,11 +48,6 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     retained_candidates: int = pydantic.Field()
     """
     The number of candidates retained at deletion time.
-    """
-
-    retention_degraded: bool = pydantic.Field()
-    """
-    True when ambiguous roots suppressed manifest/segment deletion.
     """
 
     if IS_PYDANTIC_V2:

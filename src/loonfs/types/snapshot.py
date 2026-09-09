@@ -21,7 +21,7 @@ class Snapshot(UniversalBaseModel):
 
     expires_at_ms: int = pydantic.Field()
     """
-    When the snapshot lease expires, in Unix milliseconds.
+    When the snapshot expires, in Unix milliseconds.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
