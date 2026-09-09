@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class MetadataCompactionOutcomeFenced(UniversalBaseModel):
     """
-    The job lost its lease; nothing was published.
+    Another process claimed the namespace compactor role; nothing was published.
     """
 
     if IS_PYDANTIC_V2:

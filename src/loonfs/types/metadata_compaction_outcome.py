@@ -118,23 +118,6 @@ class MetadataCompactionOutcome_Published(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class MetadataCompactionOutcome_Superseded(UniversalBaseModel):
-    """
-    The outcome of one metadata compaction run.
-    """
-
-    outcome: typing.Literal["superseded"] = "superseded"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 MetadataCompactionOutcome = typing_extensions.Annotated[
     typing.Union[
         MetadataCompactionOutcome_Abandoned,
@@ -143,7 +126,6 @@ MetadataCompactionOutcome = typing_extensions.Annotated[
         MetadataCompactionOutcome_Fenced,
         MetadataCompactionOutcome_NotNeeded,
         MetadataCompactionOutcome_Published,
-        MetadataCompactionOutcome_Superseded,
     ],
     pydantic.Field(discriminator="outcome"),
 ]

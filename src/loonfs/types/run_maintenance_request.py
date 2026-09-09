@@ -15,9 +15,7 @@ class RunMaintenanceRequest_Gc(UniversalBaseModel):
     """
 
     kind: typing.Literal["gc"] = "gc"
-    cursor: typing.Optional[str] = None
     grace_window_ms: typing.Optional[int] = None
-    max_steps: typing.Optional[int] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -378,7 +378,7 @@ class RawSnapshotsClient:
         self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[ReleaseSnapshotResponse]:
         """
-        Releases a snapshot by id. Repeated releases succeed.
+        Deletes a snapshot pin. A missing id returns snapshot_not_found.
 
         Parameters
         ----------
@@ -806,7 +806,7 @@ class AsyncRawSnapshotsClient:
         self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[ReleaseSnapshotResponse]:
         """
-        Releases a snapshot by id. Repeated releases succeed.
+        Deletes a snapshot pin. A missing id returns snapshot_not_found.
 
         Parameters
         ----------

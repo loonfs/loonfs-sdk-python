@@ -37,7 +37,7 @@ class RawRunsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[RunMaintenanceResponse]:
         """
-        Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, or `retention`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call performs up to 1024 durable work steps unless `max_steps` says otherwise, and returns a cursor when work remains. Steps include marking, merging, and sweeping; the budget does not count object-store requests.
+        Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, or `retention`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call reads current roots, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
 
         Parameters
         ----------
@@ -156,7 +156,7 @@ class AsyncRawRunsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[RunMaintenanceResponse]:
         """
-        Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, or `retention`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call performs up to 1024 durable work steps unless `max_steps` says otherwise, and returns a cursor when work remains. Steps include marking, merging, and sweeping; the budget does not count object-store requests.
+        Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, or `retention`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call reads current roots, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
 
         Parameters
         ----------

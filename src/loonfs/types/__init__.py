@@ -128,6 +128,7 @@ if typing.TYPE_CHECKING:
     from .filesystem_operation_restore_revision import FilesystemOperationRestoreRevision
     from .filesystem_operation_undelete import FilesystemOperationUndelete
     from .filesystem_operation_update_attributes import FilesystemOperationUpdateAttributes
+    from .grep_gc_request import GrepGcRequest
     from .grep_gc_response import GrepGcResponse
     from .grep_index import GrepIndex, GrepIndex_Active, GrepIndex_Backfilling, GrepIndex_Disabled
     from .grep_index_lifecycle_active import GrepIndexLifecycleActive
@@ -153,7 +154,6 @@ if typing.TYPE_CHECKING:
         MetadataCompactionOutcome_Fenced,
         MetadataCompactionOutcome_NotNeeded,
         MetadataCompactionOutcome_Published,
-        MetadataCompactionOutcome_Superseded,
     )
     from .metadata_compaction_outcome_abandoned import MetadataCompactionOutcomeAbandoned
     from .metadata_compaction_outcome_bounded_merge_published import MetadataCompactionOutcomeBoundedMergePublished
@@ -161,7 +161,6 @@ if typing.TYPE_CHECKING:
     from .metadata_compaction_outcome_fenced import MetadataCompactionOutcomeFenced
     from .metadata_compaction_outcome_not_needed import MetadataCompactionOutcomeNotNeeded
     from .metadata_compaction_outcome_published import MetadataCompactionOutcomePublished
-    from .metadata_compaction_outcome_superseded import MetadataCompactionOutcomeSuperseded
     from .name_key import NameKey
     from .namespace import Namespace
     from .namespace_diagnostics import NamespaceDiagnostics
@@ -358,6 +357,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperation_RestoreRevision": ".filesystem_operation",
     "FilesystemOperation_Undelete": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributes": ".filesystem_operation",
+    "GrepGcRequest": ".grep_gc_request",
     "GrepGcResponse": ".grep_gc_response",
     "GrepIndex": ".grep_index",
     "GrepIndexLifecycleActive": ".grep_index_lifecycle_active",
@@ -385,14 +385,12 @@ _dynamic_imports: typing.Dict[str, str] = {
     "MetadataCompactionOutcomeFenced": ".metadata_compaction_outcome_fenced",
     "MetadataCompactionOutcomeNotNeeded": ".metadata_compaction_outcome_not_needed",
     "MetadataCompactionOutcomePublished": ".metadata_compaction_outcome_published",
-    "MetadataCompactionOutcomeSuperseded": ".metadata_compaction_outcome_superseded",
     "MetadataCompactionOutcome_Abandoned": ".metadata_compaction_outcome",
     "MetadataCompactionOutcome_BoundedMergePublished": ".metadata_compaction_outcome",
     "MetadataCompactionOutcome_Cancelled": ".metadata_compaction_outcome",
     "MetadataCompactionOutcome_Fenced": ".metadata_compaction_outcome",
     "MetadataCompactionOutcome_NotNeeded": ".metadata_compaction_outcome",
     "MetadataCompactionOutcome_Published": ".metadata_compaction_outcome",
-    "MetadataCompactionOutcome_Superseded": ".metadata_compaction_outcome",
     "NameKey": ".name_key",
     "Namespace": ".namespace",
     "NamespaceDiagnostics": ".namespace_diagnostics",
@@ -609,6 +607,7 @@ __all__ = [
     "FilesystemOperation_RestoreRevision",
     "FilesystemOperation_Undelete",
     "FilesystemOperation_UpdateAttributes",
+    "GrepGcRequest",
     "GrepGcResponse",
     "GrepIndex",
     "GrepIndexLifecycleActive",
@@ -636,14 +635,12 @@ __all__ = [
     "MetadataCompactionOutcomeFenced",
     "MetadataCompactionOutcomeNotNeeded",
     "MetadataCompactionOutcomePublished",
-    "MetadataCompactionOutcomeSuperseded",
     "MetadataCompactionOutcome_Abandoned",
     "MetadataCompactionOutcome_BoundedMergePublished",
     "MetadataCompactionOutcome_Cancelled",
     "MetadataCompactionOutcome_Fenced",
     "MetadataCompactionOutcome_NotNeeded",
     "MetadataCompactionOutcome_Published",
-    "MetadataCompactionOutcome_Superseded",
     "NameKey",
     "Namespace",
     "NamespaceDiagnostics",

@@ -129,7 +129,7 @@ class FilesClient:
         )
         client.files.create_download(
             namespace_id="namespace_id",
-            snapshot_id="chk_00000000000000000000000000000002",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
             path="/docs/report.txt",
         )
         """
@@ -191,7 +191,7 @@ class FilesClient:
         client.files.list(
             namespace_id="namespace_id",
             path="path",
-            snapshot_id="chk_00000000000000000000000000000002",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
         )
         """
         _response = self._raw_client.list(
@@ -250,7 +250,7 @@ class FilesClient:
         client.files.retrieve(
             namespace_id="namespace_id",
             path="path",
-            snapshot_id="chk_00000000000000000000000000000002",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
         )
         """
         _response = self._raw_client.retrieve(
@@ -328,7 +328,7 @@ class FilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> GrepResponse:
         """
-        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
+        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep index.
 
         Parameters
         ----------
@@ -516,7 +516,7 @@ class AsyncFilesClient:
         async def main() -> None:
             await client.files.create_download(
                 namespace_id="namespace_id",
-                snapshot_id="chk_00000000000000000000000000000002",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
                 path="/docs/report.txt",
             )
 
@@ -586,7 +586,7 @@ class AsyncFilesClient:
             await client.files.list(
                 namespace_id="namespace_id",
                 path="path",
-                snapshot_id="chk_00000000000000000000000000000002",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
             )
 
 
@@ -653,7 +653,7 @@ class AsyncFilesClient:
             await client.files.retrieve(
                 namespace_id="namespace_id",
                 path="path",
-                snapshot_id="chk_00000000000000000000000000000002",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
             )
 
 
@@ -742,7 +742,7 @@ class AsyncFilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> GrepResponse:
         """
-        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep root.
+        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep index.
 
         Parameters
         ----------
