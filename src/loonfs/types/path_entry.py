@@ -8,7 +8,7 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
-from .actor_ref import ActorRef
+from .actor_id import ActorId
 from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
 from .binding_generation import BindingGeneration
@@ -31,10 +31,10 @@ class PathEntry_Dir(UniversalBaseModel):
     attributes: typing.Optional[Attributes] = None
     attributes_revision_no: typing.Optional[AttributeRevisionNo] = None
     attributes_updated_at_ms: typing.Optional[int] = None
-    attributes_updated_by: typing.Optional[ActorRef] = None
+    attributes_updated_by: typing.Optional[ActorId] = None
     binding_generation: typing.Optional[BindingGeneration] = None
     created_at_ms: int
-    created_by: ActorRef
+    created_by: ActorId
     display_name: typing.Optional[DisplayName] = None
     head_seq: ChangeSeq
     inode_id: InodeId
@@ -63,11 +63,11 @@ class PathEntry_File(UniversalBaseModel):
     attributes: typing.Optional[Attributes] = None
     attributes_revision_no: typing.Optional[AttributeRevisionNo] = None
     attributes_updated_at_ms: typing.Optional[int] = None
-    attributes_updated_by: typing.Optional[ActorRef] = None
+    attributes_updated_by: typing.Optional[ActorId] = None
     binding_generation: typing.Optional[BindingGeneration] = None
     content_ref: ContentRef
     created_at_ms: int
-    created_by: ActorRef
+    created_by: ActorId
     display_name: typing.Optional[DisplayName] = None
     head_seq: ChangeSeq
     inode_id: InodeId
@@ -75,7 +75,7 @@ class PathEntry_File(UniversalBaseModel):
     parent_inode_id: typing.Optional[InodeId] = None
     path: AbsolutePath
     revision_committed_at_ms: int
-    revision_committed_by: ActorRef
+    revision_committed_by: ActorId
     revision_no: RevisionNo
     size_bytes: int
 

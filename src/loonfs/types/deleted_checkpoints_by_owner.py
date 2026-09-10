@@ -6,24 +6,24 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class ReleasedCheckpointCounts(UniversalBaseModel):
+class DeletedCheckpointsByOwner(UniversalBaseModel):
     """
-    Checkpoint record counts released by one garbage-collection pass, grouped by reason.
+    Checkpoint record counts deleted by one garbage-collection pass, grouped by owner.
     """
 
     expired: int = pydantic.Field()
     """
-    User-owned records released after expiry or terminal namespace deletion.
+    User-owned records deleted after expiry or terminal namespace deletion.
     """
 
     fork: int = pydantic.Field()
     """
-    Fork-owned records released because their target namespaces are gone.
+    Fork-owned records deleted because their target namespaces are gone.
     """
 
     snapshot: int = pydantic.Field()
     """
-    Snapshot-owned records released after expiry or terminal namespace deletion.
+    Snapshot-owned records deleted after expiry or terminal namespace deletion.
     """
 
     if IS_PYDANTIC_V2:

@@ -4,9 +4,9 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
 from .deleted_object_counts import DeletedObjectCounts
 from .namespace_id import NamespaceId
-from .released_checkpoint_counts import ReleasedCheckpointCounts
 from .retained_candidates import RetainedCandidates
 
 
@@ -18,6 +18,11 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     deleted: DeletedObjectCounts = pydantic.Field()
     """
     Objects the pass deleted, split by object family.
+    """
+
+    deleted_checkpoints_by_owner: DeletedCheckpointsByOwner = pydantic.Field()
+    """
+    The checkpoint records deleted by the pass, grouped by owner.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -33,11 +38,6 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     reclaim_after_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
     The deleted head's irrevocable owner-prefix collection deadline.
-    """
-
-    released_checkpoints: ReleasedCheckpointCounts = pydantic.Field()
-    """
-    The checkpoint records released by the pass, grouped by reason.
     """
 
     retained: RetainedCandidates = pydantic.Field()

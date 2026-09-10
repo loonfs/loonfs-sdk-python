@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .actor_ref import ActorRef
+from .actor_id import ActorId
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .content_ref import ContentRef
@@ -27,7 +27,7 @@ class FileRevision(UniversalBaseModel):
     The commit time in Unix milliseconds; `committed_seq` defines commit order.
     """
 
-    committed_by: ActorRef = pydantic.Field()
+    committed_by: ActorId = pydantic.Field()
     """
     Actor responsible for this revision, as supplied by the application.
     """

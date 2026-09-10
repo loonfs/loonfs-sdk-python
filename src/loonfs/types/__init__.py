@@ -8,8 +8,6 @@ from importlib import import_module
 if typing.TYPE_CHECKING:
     from .absolute_path import AbsolutePath
     from .actor_id import ActorId
-    from .actor_kind import ActorKind
-    from .actor_ref import ActorRef
     from .attribute_key import AttributeKey
     from .attribute_revision_no import AttributeRevisionNo
     from .attribute_value import AttributeValue
@@ -73,8 +71,11 @@ if typing.TYPE_CHECKING:
     from .content_ref import ContentRef
     from .content_ref_kind import ContentRefKind
     from .content_token import ContentToken
+    from .delete_checkpoint_response import DeleteCheckpointResponse
     from .delete_directory_behavior import DeleteDirectoryBehavior
     from .delete_namespace_response import DeleteNamespaceResponse
+    from .delete_snapshot_response import DeleteSnapshotResponse
+    from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
     from .deleted_object_counts import DeletedObjectCounts
     from .destination_behavior import DestinationBehavior
     from .directory_binding import DirectoryBinding
@@ -137,7 +138,6 @@ if typing.TYPE_CHECKING:
     from .grep_match import GrepMatch
     from .grep_response import GrepResponse
     from .inode_id import InodeId
-    from .inode_kind import InodeKind
     from .list_changes_response import ListChangesResponse
     from .list_checkpoints_response import ListCheckpointsResponse
     from .list_file_revisions_response import ListFileRevisionsResponse
@@ -170,19 +170,18 @@ if typing.TYPE_CHECKING:
     from .path_entry import PathEntry, PathEntry_Dir, PathEntry_File
     from .path_entry_directory import PathEntryDirectory
     from .path_entry_file import PathEntryFile
-    from .release_checkpoint_response import ReleaseCheckpointResponse
-    from .release_snapshot_response import ReleaseSnapshotResponse
-    from .released_checkpoint_counts import ReleasedCheckpointCounts
     from .reorganize_step_outcome import (
         ReorganizeStepOutcome,
         ReorganizeStepOutcome_CompactionRequired,
+        ReorganizeStepOutcome_Fenced,
+        ReorganizeStepOutcome_ManifestAdvanced,
         ReorganizeStepOutcome_NotNeeded,
-        ReorganizeStepOutcome_RootAdvanced,
         ReorganizeStepOutcome_UnitPublished,
     )
     from .reorganize_step_outcome_compaction_required import ReorganizeStepOutcomeCompactionRequired
+    from .reorganize_step_outcome_fenced import ReorganizeStepOutcomeFenced
+    from .reorganize_step_outcome_manifest_advanced import ReorganizeStepOutcomeManifestAdvanced
     from .reorganize_step_outcome_not_needed import ReorganizeStepOutcomeNotNeeded
-    from .reorganize_step_outcome_root_advanced import ReorganizeStepOutcomeRootAdvanced
     from .reorganize_step_outcome_unit_published import ReorganizeStepOutcomeUnitPublished
     from .retained_candidates import RetainedCandidates
     from .revision_no import RevisionNo
@@ -249,8 +248,6 @@ if typing.TYPE_CHECKING:
 _dynamic_imports: typing.Dict[str, str] = {
     "AbsolutePath": ".absolute_path",
     "ActorId": ".actor_id",
-    "ActorKind": ".actor_kind",
-    "ActorRef": ".actor_ref",
     "AttributeKey": ".attribute_key",
     "AttributeRevisionNo": ".attribute_revision_no",
     "AttributeValue": ".attribute_value",
@@ -306,8 +303,11 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ContentRef": ".content_ref",
     "ContentRefKind": ".content_ref_kind",
     "ContentToken": ".content_token",
+    "DeleteCheckpointResponse": ".delete_checkpoint_response",
     "DeleteDirectoryBehavior": ".delete_directory_behavior",
     "DeleteNamespaceResponse": ".delete_namespace_response",
+    "DeleteSnapshotResponse": ".delete_snapshot_response",
+    "DeletedCheckpointsByOwner": ".deleted_checkpoints_by_owner",
     "DeletedObjectCounts": ".deleted_object_counts",
     "DestinationBehavior": ".destination_behavior",
     "DirectoryBinding": ".directory_binding",
@@ -369,7 +369,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "GrepMatch": ".grep_match",
     "GrepResponse": ".grep_response",
     "InodeId": ".inode_id",
-    "InodeKind": ".inode_kind",
     "ListChangesResponse": ".list_changes_response",
     "ListCheckpointsResponse": ".list_checkpoints_response",
     "ListFileRevisionsResponse": ".list_file_revisions_response",
@@ -403,17 +402,16 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PathEntryFile": ".path_entry_file",
     "PathEntry_Dir": ".path_entry",
     "PathEntry_File": ".path_entry",
-    "ReleaseCheckpointResponse": ".release_checkpoint_response",
-    "ReleaseSnapshotResponse": ".release_snapshot_response",
-    "ReleasedCheckpointCounts": ".released_checkpoint_counts",
     "ReorganizeStepOutcome": ".reorganize_step_outcome",
     "ReorganizeStepOutcomeCompactionRequired": ".reorganize_step_outcome_compaction_required",
+    "ReorganizeStepOutcomeFenced": ".reorganize_step_outcome_fenced",
+    "ReorganizeStepOutcomeManifestAdvanced": ".reorganize_step_outcome_manifest_advanced",
     "ReorganizeStepOutcomeNotNeeded": ".reorganize_step_outcome_not_needed",
-    "ReorganizeStepOutcomeRootAdvanced": ".reorganize_step_outcome_root_advanced",
     "ReorganizeStepOutcomeUnitPublished": ".reorganize_step_outcome_unit_published",
     "ReorganizeStepOutcome_CompactionRequired": ".reorganize_step_outcome",
+    "ReorganizeStepOutcome_Fenced": ".reorganize_step_outcome",
+    "ReorganizeStepOutcome_ManifestAdvanced": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_NotNeeded": ".reorganize_step_outcome",
-    "ReorganizeStepOutcome_RootAdvanced": ".reorganize_step_outcome",
     "ReorganizeStepOutcome_UnitPublished": ".reorganize_step_outcome",
     "RetainedCandidates": ".retained_candidates",
     "RevisionNo": ".revision_no",
@@ -499,8 +497,6 @@ def __dir__():
 __all__ = [
     "AbsolutePath",
     "ActorId",
-    "ActorKind",
-    "ActorRef",
     "AttributeKey",
     "AttributeRevisionNo",
     "AttributeValue",
@@ -556,8 +552,11 @@ __all__ = [
     "ContentRef",
     "ContentRefKind",
     "ContentToken",
+    "DeleteCheckpointResponse",
     "DeleteDirectoryBehavior",
     "DeleteNamespaceResponse",
+    "DeleteSnapshotResponse",
+    "DeletedCheckpointsByOwner",
     "DeletedObjectCounts",
     "DestinationBehavior",
     "DirectoryBinding",
@@ -619,7 +618,6 @@ __all__ = [
     "GrepMatch",
     "GrepResponse",
     "InodeId",
-    "InodeKind",
     "ListChangesResponse",
     "ListCheckpointsResponse",
     "ListFileRevisionsResponse",
@@ -653,17 +651,16 @@ __all__ = [
     "PathEntryFile",
     "PathEntry_Dir",
     "PathEntry_File",
-    "ReleaseCheckpointResponse",
-    "ReleaseSnapshotResponse",
-    "ReleasedCheckpointCounts",
     "ReorganizeStepOutcome",
     "ReorganizeStepOutcomeCompactionRequired",
+    "ReorganizeStepOutcomeFenced",
+    "ReorganizeStepOutcomeManifestAdvanced",
     "ReorganizeStepOutcomeNotNeeded",
-    "ReorganizeStepOutcomeRootAdvanced",
     "ReorganizeStepOutcomeUnitPublished",
     "ReorganizeStepOutcome_CompactionRequired",
+    "ReorganizeStepOutcome_Fenced",
+    "ReorganizeStepOutcome_ManifestAdvanced",
     "ReorganizeStepOutcome_NotNeeded",
-    "ReorganizeStepOutcome_RootAdvanced",
     "ReorganizeStepOutcome_UnitPublished",
     "RetainedCandidates",
     "RevisionNo",

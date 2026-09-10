@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
-from .actor_ref import ActorRef
+from .actor_id import ActorId
 from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
 from .binding_generation import BindingGeneration
@@ -39,7 +39,7 @@ class PathEntryFile(UniversalBaseModel):
     initial empty state.
     """
 
-    attributes_updated_by: typing.Optional[ActorRef] = pydantic.Field(default=None)
+    attributes_updated_by: typing.Optional[ActorId] = pydantic.Field(default=None)
     """
     The actor responsible for the latest attribute update, or `None` for the
     initial empty state.
@@ -60,7 +60,7 @@ class PathEntryFile(UniversalBaseModel):
     The inode creation time in Unix milliseconds.
     """
 
-    created_by: ActorRef = pydantic.Field()
+    created_by: ActorId = pydantic.Field()
     """
     Actor that created this inode, as supplied by the application.
     """
@@ -100,7 +100,7 @@ class PathEntryFile(UniversalBaseModel):
     The current revision time in Unix milliseconds.
     """
 
-    revision_committed_by: ActorRef = pydantic.Field()
+    revision_committed_by: ActorId = pydantic.Field()
     """
     Actor responsible for the current revision.
     """

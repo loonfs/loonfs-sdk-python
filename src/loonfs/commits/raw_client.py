@@ -17,7 +17,7 @@ from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
-from ..types.actor_ref import ActorRef
+from ..types.actor_id import ActorId
 from ..types.commit_assertion import CommitAssertion
 from ..types.commit_id import CommitId
 from ..types.commit_response import CommitResponse
@@ -38,7 +38,7 @@ class RawCommitsClient:
         self,
         namespace_id: str,
         *,
-        actor: ActorRef,
+        actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
         assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
@@ -54,7 +54,7 @@ class RawCommitsClient:
         namespace_id : str
             Namespace id
 
-        actor : ActorRef
+        actor_id : ActorId
             Actor responsible for the commit, as supplied by the application.
 
         commit_id : CommitId
@@ -84,7 +84,7 @@ class RawCommitsClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/commits",
             method="POST",
             json={
-                "actor": convert_and_respect_annotation_metadata(object_=actor, annotation=ActorRef, direction="write"),
+                "actor_id": actor_id,
                 "assertions": convert_and_respect_annotation_metadata(
                     object_=assertions, annotation=typing.Sequence[CommitAssertion], direction="write"
                 ),
@@ -197,7 +197,7 @@ class AsyncRawCommitsClient:
         self,
         namespace_id: str,
         *,
-        actor: ActorRef,
+        actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
         assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
@@ -213,7 +213,7 @@ class AsyncRawCommitsClient:
         namespace_id : str
             Namespace id
 
-        actor : ActorRef
+        actor_id : ActorId
             Actor responsible for the commit, as supplied by the application.
 
         commit_id : CommitId
@@ -243,7 +243,7 @@ class AsyncRawCommitsClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/commits",
             method="POST",
             json={
-                "actor": convert_and_respect_annotation_metadata(object_=actor, annotation=ActorRef, direction="write"),
+                "actor_id": actor_id,
                 "assertions": convert_and_respect_annotation_metadata(
                     object_=assertions, annotation=typing.Sequence[CommitAssertion], direction="write"
                 ),

@@ -16,9 +16,9 @@ from ...errors.not_found_error import NotFoundError
 from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.checkpoint import Checkpoint
+from ...types.delete_checkpoint_response import DeleteCheckpointResponse
 from ...types.error_response import ErrorResponse
 from ...types.list_checkpoints_response import ListCheckpointsResponse
-from ...types.release_checkpoint_response import ReleaseCheckpointResponse
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -140,7 +140,7 @@ class RawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Checkpoint]:
         """
-        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is deleted, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 
         Parameters
         ----------
@@ -151,7 +151,7 @@ class RawCheckpointsClient:
             The non-unique label recorded on the checkpoint.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds, or `None` for an explicit release only.
+            The checkpoint lifetime in milliseconds, or `None` for an explicit deletion only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -251,9 +251,9 @@ class RawCheckpointsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def release(
+    def delete(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[ReleaseCheckpointResponse]:
+    ) -> HttpResponse[DeleteCheckpointResponse]:
         """
         Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
 
@@ -270,20 +270,20 @@ class RawCheckpointsClient:
 
         Returns
         -------
-        HttpResponse[ReleaseCheckpointResponse]
+        HttpResponse[DeleteCheckpointResponse]
             Checkpoint pin deleted
         """
         _response = self._client_wrapper.httpx_client.request(
-            f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints/{encode_path_param(checkpoint_id)}/release",
-            method="POST",
+            f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints/{encode_path_param(checkpoint_id)}",
+            method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ReleaseCheckpointResponse,
+                    DeleteCheckpointResponse,
                     parse_obj_as(
-                        type_=ReleaseCheckpointResponse,  # type: ignore
+                        type_=DeleteCheckpointResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -457,7 +457,7 @@ class AsyncRawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Checkpoint]:
         """
-        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is deleted, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 
         Parameters
         ----------
@@ -468,7 +468,7 @@ class AsyncRawCheckpointsClient:
             The non-unique label recorded on the checkpoint.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds, or `None` for an explicit release only.
+            The checkpoint lifetime in milliseconds, or `None` for an explicit deletion only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -568,9 +568,9 @@ class AsyncRawCheckpointsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def release(
+    async def delete(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[ReleaseCheckpointResponse]:
+    ) -> AsyncHttpResponse[DeleteCheckpointResponse]:
         """
         Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
 
@@ -587,20 +587,20 @@ class AsyncRawCheckpointsClient:
 
         Returns
         -------
-        AsyncHttpResponse[ReleaseCheckpointResponse]
+        AsyncHttpResponse[DeleteCheckpointResponse]
             Checkpoint pin deleted
         """
         _response = await self._client_wrapper.httpx_client.request(
-            f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints/{encode_path_param(checkpoint_id)}/release",
-            method="POST",
+            f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints/{encode_path_param(checkpoint_id)}",
+            method="DELETE",
             request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    ReleaseCheckpointResponse,
+                    DeleteCheckpointResponse,
                     parse_obj_as(
-                        type_=ReleaseCheckpointResponse,  # type: ignore
+                        type_=DeleteCheckpointResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

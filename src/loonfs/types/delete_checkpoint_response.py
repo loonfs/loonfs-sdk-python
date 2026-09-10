@@ -4,26 +4,23 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .actor_id import ActorId
-from .actor_kind import ActorKind
+from .checkpoint_id import CheckpointId
+from .namespace_id import NamespaceId
 
 
-class ActorRef(UniversalBaseModel):
+class DeleteCheckpointResponse(UniversalBaseModel):
     """
-    Identifies the user, service, or system responsible for a commit.
-
-    LoonFS stores this value as provided. It does not authenticate the actor or
-    look up profile information.
+    Identifies the checkpoint record that was deleted.
     """
 
-    id: ActorId = pydantic.Field()
+    checkpoint_id: CheckpointId = pydantic.Field()
     """
-    A stable identifier supplied by the application.
+    Deleted checkpoint record.
     """
 
-    kind: ActorKind = pydantic.Field()
+    namespace_id: NamespaceId = pydantic.Field()
     """
-    The type of actor.
+    Namespace the checkpoint belonged to.
     """
 
     if IS_PYDANTIC_V2:

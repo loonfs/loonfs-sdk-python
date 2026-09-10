@@ -9,7 +9,7 @@ from .change_seq import ChangeSeq
 
 class WalFlushStepOutcomeFlushed(UniversalBaseModel):
     """
-    The step flushed the WAL tail and advanced the metadata root.
+    The step flushed the WAL tail and published the next current manifest.
     """
 
     manifest_head_seq: ChangeSeq = pydantic.Field()

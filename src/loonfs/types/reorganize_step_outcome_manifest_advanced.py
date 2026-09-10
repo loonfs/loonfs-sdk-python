@@ -4,25 +4,9 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .checkpoint_id import CheckpointId
-from .namespace_id import NamespaceId
 
 
-class ReleaseCheckpointResponse(UniversalBaseModel):
-    """
-    Result of releasing a checkpoint pin.
-    """
-
-    checkpoint_id: CheckpointId = pydantic.Field()
-    """
-    Checkpoint the release targeted.
-    """
-
-    namespace_id: NamespaceId = pydantic.Field()
-    """
-    Namespace the checkpoint belonged to.
-    """
-
+class ReorganizeStepOutcomeManifestAdvanced(UniversalBaseModel):
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:

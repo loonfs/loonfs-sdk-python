@@ -11,11 +11,6 @@ class DeletedObjectCounts(UniversalBaseModel):
     Object counts deleted by one garbage-collection pass, grouped by family.
     """
 
-    checkpoint_records: int = pydantic.Field()
-    """
-    Pin records deleted by this pass.
-    """
-
     content_objects: int = pydantic.Field()
     """
     Content reclaimed through completed upload sessions.

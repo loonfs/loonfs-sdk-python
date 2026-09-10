@@ -8,10 +8,10 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
+from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
 from .deleted_object_counts import DeletedObjectCounts
 from .metadata_compaction_outcome import MetadataCompactionOutcome
 from .namespace_id import NamespaceId
-from .released_checkpoint_counts import ReleasedCheckpointCounts
 from .reorganize_step_outcome import ReorganizeStepOutcome
 from .retained_candidates import RetainedCandidates
 from .wal_flush_step_outcome import WalFlushStepOutcome
@@ -24,10 +24,10 @@ class RunMaintenanceResponse_Gc(UniversalBaseModel):
 
     kind: typing.Literal["gc"] = "gc"
     deleted: DeletedObjectCounts
+    deleted_checkpoints_by_owner: DeletedCheckpointsByOwner
     namespace_id: NamespaceId
     next_reclamation_at_ms: typing.Optional[int] = None
     reclaim_after_ms: typing.Optional[int] = None
-    released_checkpoints: ReleasedCheckpointCounts
     retained: RetainedCandidates
     retained_candidates: int
 
