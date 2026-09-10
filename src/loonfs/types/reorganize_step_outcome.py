@@ -26,12 +26,12 @@ class ReorganizeStepOutcome_CompactionRequired(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ReorganizeStepOutcome_NotNeeded(UniversalBaseModel):
+class ReorganizeStepOutcome_Fenced(UniversalBaseModel):
     """
     The outcome of the metadata-reorganization part of a maintenance pass.
     """
 
-    outcome: typing.Literal["not_needed"] = "not_needed"
+    outcome: typing.Literal["fenced"] = "fenced"
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -43,12 +43,29 @@ class ReorganizeStepOutcome_NotNeeded(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ReorganizeStepOutcome_RootAdvanced(UniversalBaseModel):
+class ReorganizeStepOutcome_ManifestAdvanced(UniversalBaseModel):
     """
     The outcome of the metadata-reorganization part of a maintenance pass.
     """
 
-    outcome: typing.Literal["root_advanced"] = "root_advanced"
+    outcome: typing.Literal["manifest_advanced"] = "manifest_advanced"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class ReorganizeStepOutcome_NotNeeded(UniversalBaseModel):
+    """
+    The outcome of the metadata-reorganization part of a maintenance pass.
+    """
+
+    outcome: typing.Literal["not_needed"] = "not_needed"
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -80,8 +97,9 @@ class ReorganizeStepOutcome_UnitPublished(UniversalBaseModel):
 ReorganizeStepOutcome = typing_extensions.Annotated[
     typing.Union[
         ReorganizeStepOutcome_CompactionRequired,
+        ReorganizeStepOutcome_Fenced,
+        ReorganizeStepOutcome_ManifestAdvanced,
         ReorganizeStepOutcome_NotNeeded,
-        ReorganizeStepOutcome_RootAdvanced,
         ReorganizeStepOutcome_UnitPublished,
     ],
     pydantic.Field(discriminator="outcome"),

@@ -8,9 +8,9 @@ from .checkpoint_id import CheckpointId
 from .namespace_id import NamespaceId
 
 
-class ReleaseSnapshotResponse(UniversalBaseModel):
+class DeleteSnapshotResponse(UniversalBaseModel):
     """
-    Result of releasing a read snapshot.
+    Identifies the snapshot record that was deleted.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -20,7 +20,7 @@ class ReleaseSnapshotResponse(UniversalBaseModel):
 
     snapshot_id: CheckpointId = pydantic.Field()
     """
-    Released snapshot id.
+    Deleted snapshot record.
     """
 
     if IS_PYDANTIC_V2:

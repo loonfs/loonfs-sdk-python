@@ -4,7 +4,7 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.actor_ref import ActorRef
+from ..types.actor_id import ActorId
 from ..types.commit_assertion import CommitAssertion
 from ..types.commit_id import CommitId
 from ..types.commit_response import CommitResponse
@@ -35,7 +35,7 @@ class CommitsClient:
         self,
         namespace_id: str,
         *,
-        actor: ActorRef,
+        actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
         assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
@@ -51,7 +51,7 @@ class CommitsClient:
         namespace_id : str
             Namespace id
 
-        actor : ActorRef
+        actor_id : ActorId
             Actor responsible for the commit, as supplied by the application.
 
         commit_id : CommitId
@@ -79,7 +79,7 @@ class CommitsClient:
 
         Examples
         --------
-        from loonfs.server import ActorRef, FilesystemOperation_CopyPath, LoonFS
+        from loonfs.server import FilesystemOperation_CopyPath, LoonFS
 
         client = LoonFS(
             token="YOUR_TOKEN",
@@ -87,10 +87,7 @@ class CommitsClient:
         )
         client.commits.create(
             namespace_id="namespace_id",
-            actor=ActorRef(
-                id="usr_8f3c",
-                kind="user",
-            ),
+            actor_id="usr_8f3c",
             commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
             operations=[
                 FilesystemOperation_CopyPath(
@@ -102,7 +99,7 @@ class CommitsClient:
         """
         _response = self._raw_client.create(
             namespace_id,
-            actor=actor,
+            actor_id=actor_id,
             commit_id=commit_id,
             operations=operations,
             assertions=assertions,
@@ -132,7 +129,7 @@ class AsyncCommitsClient:
         self,
         namespace_id: str,
         *,
-        actor: ActorRef,
+        actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
         assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
@@ -148,7 +145,7 @@ class AsyncCommitsClient:
         namespace_id : str
             Namespace id
 
-        actor : ActorRef
+        actor_id : ActorId
             Actor responsible for the commit, as supplied by the application.
 
         commit_id : CommitId
@@ -178,7 +175,7 @@ class AsyncCommitsClient:
         --------
         import asyncio
 
-        from loonfs.server import ActorRef, AsyncLoonFS, FilesystemOperation_CopyPath
+        from loonfs.server import AsyncLoonFS, FilesystemOperation_CopyPath
 
         client = AsyncLoonFS(
             token="YOUR_TOKEN",
@@ -189,10 +186,7 @@ class AsyncCommitsClient:
         async def main() -> None:
             await client.commits.create(
                 namespace_id="namespace_id",
-                actor=ActorRef(
-                    id="usr_8f3c",
-                    kind="user",
-                ),
+                actor_id="usr_8f3c",
                 commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
                 operations=[
                     FilesystemOperation_CopyPath(
@@ -207,7 +201,7 @@ class AsyncCommitsClient:
         """
         _response = await self._raw_client.create(
             namespace_id,
-            actor=actor,
+            actor_id=actor_id,
             commit_id=commit_id,
             operations=operations,
             assertions=assertions,

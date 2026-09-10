@@ -503,7 +503,7 @@ Applies one commit: an ordered, non-empty list of path operations that commit to
 <dd>
 
 ```python
-from loonfs.server import LoonFS, ActorRef, FilesystemOperation_CopyPath
+from loonfs.server import LoonFS, FilesystemOperation_CopyPath
 
 client = LoonFS(
     token="<token>",
@@ -512,10 +512,7 @@ client = LoonFS(
 
 client.commits.create(
     namespace_id="namespace_id",
-    actor=ActorRef(
-        id="usr_8f3c",
-        kind="user",
-    ),
+    actor_id="usr_8f3c",
     commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
     operations=[
         FilesystemOperation_CopyPath(
@@ -547,7 +544,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**actor:** `ActorRef` — Actor responsible for the commit, as supplied by the application.
+**actor_id:** `ActorId` — Actor responsible for the commit, as supplied by the application.
     
 </dd>
 </dl>
@@ -1826,7 +1823,7 @@ client.inodes.create_download(
 <dl>
 <dd>
 
-Lists live snapshots in snapshot-id order. Released and expired snapshots are omitted.
+Lists live snapshots in snapshot-id order. Deleted and expired snapshots are omitted.
 </dd>
 </dl>
 </dd>
@@ -1992,6 +1989,87 @@ client.snapshots.create(
 </dl>
 </details>
 
+<details><summary><code>client.snapshots.<a href="src/loonfs/snapshots/client.py">delete</a>(...) -> DeleteSnapshotResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Deletes a snapshot pin. A missing id returns snapshot_not_found.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.snapshots.delete(
+    namespace_id="namespace_id",
+    snapshot_id="snapshot_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `str` — Snapshot id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.snapshots.<a href="src/loonfs/snapshots/client.py">extend</a>(...) -> Snapshot</code></summary>
 <dl>
 <dd>
@@ -2063,87 +2141,6 @@ client.snapshots.extend(
 <dd>
 
 **ttl_ms:** `int` — Requested lifetime from the server's current time, in milliseconds.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.snapshots.<a href="src/loonfs/snapshots/client.py">release</a>(...) -> ReleaseSnapshotResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Deletes a snapshot pin. A missing id returns snapshot_not_found.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs.server import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.snapshots.release(
-    namespace_id="namespace_id",
-    snapshot_id="snapshot_id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**namespace_id:** `str` — Namespace id
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**snapshot_id:** `str` — Snapshot id
     
 </dd>
 </dl>
@@ -2792,7 +2789,7 @@ client.maintenance.checkpoints.list(
 <dl>
 <dd>
 
-Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is deleted, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 </dd>
 </dl>
 </dd>
@@ -2849,7 +2846,7 @@ client.maintenance.checkpoints.create(
 <dl>
 <dd>
 
-**ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds, or `None` for an explicit release only.
+**ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds, or `None` for an explicit deletion only.
     
 </dd>
 </dl>
@@ -2869,7 +2866,7 @@ client.maintenance.checkpoints.create(
 </dl>
 </details>
 
-<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">release</a>(...) -> ReleaseCheckpointResponse</code></summary>
+<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">delete</a>(...) -> DeleteCheckpointResponse</code></summary>
 <dl>
 <dd>
 
@@ -2903,7 +2900,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.maintenance.checkpoints.release(
+client.maintenance.checkpoints.delete(
     namespace_id="namespace_id",
     checkpoint_id="checkpoint_id",
 )
@@ -3336,7 +3333,7 @@ client.maintenance.grep_index.gc(
 <dl>
 <dd>
 
-Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, or `retention`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call reads current roots, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
+Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, or `retention`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call reads the current manifest and lists pins, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
 </dd>
 </dl>
 </dd>

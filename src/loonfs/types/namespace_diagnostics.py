@@ -16,7 +16,7 @@ class NamespaceDiagnostics(UniversalBaseModel):
 
     current_manifest_no: typing.Optional[ManifestNo] = pydantic.Field(default=None)
     """
-    Current manifest pointer recorded by the head.
+    The namespace's current manifest number.
     """
 
     head_seq: ChangeSeq = pydantic.Field()

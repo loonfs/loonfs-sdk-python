@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CheckpointOwnerUser(UniversalBaseModel):
     """
-    An operator-created pin, released by id or by its own expiry.
+    An operator-created pin, deleted by id or by its own expiry.
     """
 
     name: str = pydantic.Field()

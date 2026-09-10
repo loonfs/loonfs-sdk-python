@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .actor_ref import ActorRef
+from .actor_id import ActorId
 from .change_seq import ChangeSeq
 from .directory_binding import DirectoryBinding
 from .inode_id import InodeId
@@ -25,7 +25,7 @@ class TrashEntry(UniversalBaseModel):
     Directory binding removed by the deletion.
     """
 
-    deleted_by: ActorRef = pydantic.Field()
+    deleted_by: ActorId = pydantic.Field()
     """
     Actor responsible for the deletion.
     """

@@ -10,7 +10,7 @@ from .manifest_no import ManifestNo
 
 class WalFlushStepOutcomeAlreadyPublished(UniversalBaseModel):
     """
-    The step did not update a root that already referenced another manifest.
+    The current manifest already covered the captured WAL tail; this step published no manifest.
     """
 
     attempted_seq: ChangeSeq = pydantic.Field()
@@ -20,7 +20,7 @@ class WalFlushStepOutcomeAlreadyPublished(UniversalBaseModel):
 
     current_manifest_no: ManifestNo = pydantic.Field()
     """
-    Manifest the root currently references.
+    The namespace's current manifest number.
     """
 
     if IS_PYDANTIC_V2:

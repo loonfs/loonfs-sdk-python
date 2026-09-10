@@ -5,8 +5,8 @@ import typing
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.request_options import RequestOptions
 from ...types.checkpoint import Checkpoint
+from ...types.delete_checkpoint_response import DeleteCheckpointResponse
 from ...types.list_checkpoints_response import ListCheckpointsResponse
-from ...types.release_checkpoint_response import ReleaseCheckpointResponse
 from .raw_client import AsyncRawCheckpointsClient, RawCheckpointsClient
 
 # this is used as the default value for optional parameters
@@ -82,7 +82,7 @@ class CheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkpoint:
         """
-        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is deleted, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 
         Parameters
         ----------
@@ -93,7 +93,7 @@ class CheckpointsClient:
             The non-unique label recorded on the checkpoint.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds, or `None` for an explicit release only.
+            The checkpoint lifetime in milliseconds, or `None` for an explicit deletion only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -119,9 +119,9 @@ class CheckpointsClient:
         _response = self._raw_client.create(namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options)
         return _response.data
 
-    def release(
+    def delete(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> ReleaseCheckpointResponse:
+    ) -> DeleteCheckpointResponse:
         """
         Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
 
@@ -138,7 +138,7 @@ class CheckpointsClient:
 
         Returns
         -------
-        ReleaseCheckpointResponse
+        DeleteCheckpointResponse
             Checkpoint pin deleted
 
         Examples
@@ -149,12 +149,12 @@ class CheckpointsClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.maintenance.checkpoints.release(
+        client.maintenance.checkpoints.delete(
             namespace_id="namespace_id",
             checkpoint_id="checkpoint_id",
         )
         """
-        _response = self._raw_client.release(namespace_id, checkpoint_id, request_options=request_options)
+        _response = self._raw_client.delete(namespace_id, checkpoint_id, request_options=request_options)
         return _response.data
 
 
@@ -237,7 +237,7 @@ class AsyncCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkpoint:
         """
-        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is released, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is deleted, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 
         Parameters
         ----------
@@ -248,7 +248,7 @@ class AsyncCheckpointsClient:
             The non-unique label recorded on the checkpoint.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds, or `None` for an explicit release only.
+            The checkpoint lifetime in milliseconds, or `None` for an explicit deletion only.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -284,9 +284,9 @@ class AsyncCheckpointsClient:
         )
         return _response.data
 
-    async def release(
+    async def delete(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> ReleaseCheckpointResponse:
+    ) -> DeleteCheckpointResponse:
         """
         Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
 
@@ -303,7 +303,7 @@ class AsyncCheckpointsClient:
 
         Returns
         -------
-        ReleaseCheckpointResponse
+        DeleteCheckpointResponse
             Checkpoint pin deleted
 
         Examples
@@ -319,7 +319,7 @@ class AsyncCheckpointsClient:
 
 
         async def main() -> None:
-            await client.maintenance.checkpoints.release(
+            await client.maintenance.checkpoints.delete(
                 namespace_id="namespace_id",
                 checkpoint_id="checkpoint_id",
             )
@@ -327,5 +327,5 @@ class AsyncCheckpointsClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.release(namespace_id, checkpoint_id, request_options=request_options)
+        _response = await self._raw_client.delete(namespace_id, checkpoint_id, request_options=request_options)
         return _response.data

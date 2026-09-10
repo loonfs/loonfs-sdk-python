@@ -18,7 +18,7 @@ class Checkpoint(UniversalBaseModel):
 
     checkpoint_id: CheckpointId = pydantic.Field()
     """
-    Durable checkpoint id used to address the checkpoint for release.
+    Durable checkpoint id used to address the checkpoint for deletion.
     """
 
     checkpoint_seq: ChangeSeq = pydantic.Field()

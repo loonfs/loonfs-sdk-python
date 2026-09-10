@@ -4,8 +4,8 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
+from ..types.delete_snapshot_response import DeleteSnapshotResponse
 from ..types.list_snapshots_response import ListSnapshotsResponse
-from ..types.release_snapshot_response import ReleaseSnapshotResponse
 from ..types.snapshot import Snapshot
 from .raw_client import AsyncRawSnapshotsClient, RawSnapshotsClient
 
@@ -37,7 +37,7 @@ class SnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListSnapshotsResponse:
         """
-        Lists live snapshots in snapshot-id order. Released and expired snapshots are omitted.
+        Lists live snapshots in snapshot-id order. Deleted and expired snapshots are omitted.
 
         Parameters
         ----------
@@ -115,6 +115,44 @@ class SnapshotsClient:
         _response = self._raw_client.create(namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options)
         return _response.data
 
+    def delete(
+        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteSnapshotResponse:
+        """
+        Deletes a snapshot pin. A missing id returns snapshot_not_found.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteSnapshotResponse
+            Snapshot record deleted
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.snapshots.delete(
+            namespace_id="namespace_id",
+            snapshot_id="snapshot_id",
+        )
+        """
+        _response = self._raw_client.delete(namespace_id, snapshot_id, request_options=request_options)
+        return _response.data
+
     def extend(
         self,
         namespace_id: str,
@@ -162,44 +200,6 @@ class SnapshotsClient:
         _response = self._raw_client.extend(namespace_id, snapshot_id, ttl_ms=ttl_ms, request_options=request_options)
         return _response.data
 
-    def release(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> ReleaseSnapshotResponse:
-        """
-        Deletes a snapshot pin. A missing id returns snapshot_not_found.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        snapshot_id : str
-            Snapshot id
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ReleaseSnapshotResponse
-            Snapshot release accepted
-
-        Examples
-        --------
-        from loonfs.server import LoonFS
-
-        client = LoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-        client.snapshots.release(
-            namespace_id="namespace_id",
-            snapshot_id="snapshot_id",
-        )
-        """
-        _response = self._raw_client.release(namespace_id, snapshot_id, request_options=request_options)
-        return _response.data
-
 
 class AsyncSnapshotsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -225,7 +225,7 @@ class AsyncSnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListSnapshotsResponse:
         """
-        Lists live snapshots in snapshot-id order. Released and expired snapshots are omitted.
+        Lists live snapshots in snapshot-id order. Deleted and expired snapshots are omitted.
 
         Parameters
         ----------
@@ -323,6 +323,52 @@ class AsyncSnapshotsClient:
         )
         return _response.data
 
+    async def delete(
+        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> DeleteSnapshotResponse:
+        """
+        Deletes a snapshot pin. A missing id returns snapshot_not_found.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : str
+            Snapshot id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        DeleteSnapshotResponse
+            Snapshot record deleted
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.snapshots.delete(
+                namespace_id="namespace_id",
+                snapshot_id="snapshot_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.delete(namespace_id, snapshot_id, request_options=request_options)
+        return _response.data
+
     async def extend(
         self,
         namespace_id: str,
@@ -378,50 +424,4 @@ class AsyncSnapshotsClient:
         _response = await self._raw_client.extend(
             namespace_id, snapshot_id, ttl_ms=ttl_ms, request_options=request_options
         )
-        return _response.data
-
-    async def release(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> ReleaseSnapshotResponse:
-        """
-        Deletes a snapshot pin. A missing id returns snapshot_not_found.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        snapshot_id : str
-            Snapshot id
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        ReleaseSnapshotResponse
-            Snapshot release accepted
-
-        Examples
-        --------
-        import asyncio
-
-        from loonfs.server import AsyncLoonFS
-
-        client = AsyncLoonFS(
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-
-
-        async def main() -> None:
-            await client.snapshots.release(
-                namespace_id="namespace_id",
-                snapshot_id="snapshot_id",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.release(namespace_id, snapshot_id, request_options=request_options)
         return _response.data

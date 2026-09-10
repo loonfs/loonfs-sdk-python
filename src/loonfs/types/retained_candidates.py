@@ -13,9 +13,9 @@ class RetainedCandidates(UniversalBaseModel):
     Every field is present and contributes to [`GcResponse::retained_candidates`].
     """
 
-    checkpoint_not_releasable: int = pydantic.Field()
+    checkpoint_not_deletable: int = pydantic.Field()
     """
-    Checkpoint records that could not be safely released or deleted.
+    Checkpoint records whose owner or grace window prevents deletion.
     """
 
     no_provider_timestamp: int = pydantic.Field()
