@@ -139,11 +139,11 @@ class FilesystemChange_Moved(UniversalBaseModel):
 
     kind: typing.Literal["moved"] = "moved"
     binding_generation: BindingGeneration
-    from_display_name: DisplayName
-    from_parent_inode_id: InodeId
+    destination_display_name: DisplayName
+    destination_parent_inode_id: InodeId
     inode_id: InodeId
-    to_display_name: DisplayName
-    to_parent_inode_id: InodeId
+    source_display_name: DisplayName
+    source_parent_inode_id: InodeId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

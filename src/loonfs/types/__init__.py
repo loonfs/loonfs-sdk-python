@@ -49,18 +49,20 @@ if typing.TYPE_CHECKING:
     from .checkpoint_owner_user import CheckpointOwnerUser
     from .checksum import Checksum
     from .checksum_algorithm import ChecksumAlgorithm
-    from .commit_assertion import (
-        CommitAssertion,
-        CommitAssertion_Attributes,
-        CommitAssertion_Binding,
-        CommitAssertion_FileRevision,
-        CommitAssertion_NamespaceHead,
-    )
-    from .commit_assertion_attributes import CommitAssertionAttributes
-    from .commit_assertion_binding import CommitAssertionBinding
-    from .commit_assertion_file_revision import CommitAssertionFileRevision
-    from .commit_assertion_namespace_head import CommitAssertionNamespaceHead
     from .commit_id import CommitId
+    from .commit_precondition import (
+        CommitPrecondition,
+        CommitPrecondition_AttributesRevision,
+        CommitPrecondition_FileRevision,
+        CommitPrecondition_NamespaceHead,
+        CommitPrecondition_PathAbsence,
+        CommitPrecondition_PathBinding,
+    )
+    from .commit_precondition_attributes_revision import CommitPreconditionAttributesRevision
+    from .commit_precondition_file_revision import CommitPreconditionFileRevision
+    from .commit_precondition_namespace_head import CommitPreconditionNamespaceHead
+    from .commit_precondition_path_absence import CommitPreconditionPathAbsence
+    from .commit_precondition_path_binding import CommitPreconditionPathBinding
     from .commit_response import CommitResponse
     from .committed_change import CommittedChange
     from .complete_upload_direct_multipart import CompleteUploadDirectMultipart
@@ -105,12 +107,12 @@ if typing.TYPE_CHECKING:
         FilesystemOperation_CopyPath,
         FilesystemOperation_CreateDirectory,
         FilesystemOperation_CreateDirectoryByInode,
+        FilesystemOperation_CreateFileByInode,
         FilesystemOperation_DeleteByInode,
         FilesystemOperation_DeletePath,
         FilesystemOperation_MoveByInode,
         FilesystemOperation_MovePath,
         FilesystemOperation_PutFile,
-        FilesystemOperation_PutFileByInode,
         FilesystemOperation_PutFileRevisionByInode,
         FilesystemOperation_RestoreRevision,
         FilesystemOperation_Undelete,
@@ -119,12 +121,12 @@ if typing.TYPE_CHECKING:
     from .filesystem_operation_copy_path import FilesystemOperationCopyPath
     from .filesystem_operation_create_directory import FilesystemOperationCreateDirectory
     from .filesystem_operation_create_directory_by_inode import FilesystemOperationCreateDirectoryByInode
+    from .filesystem_operation_create_file_by_inode import FilesystemOperationCreateFileByInode
     from .filesystem_operation_delete_by_inode import FilesystemOperationDeleteByInode
     from .filesystem_operation_delete_path import FilesystemOperationDeletePath
     from .filesystem_operation_move_by_inode import FilesystemOperationMoveByInode
     from .filesystem_operation_move_path import FilesystemOperationMovePath
     from .filesystem_operation_put_file import FilesystemOperationPutFile
-    from .filesystem_operation_put_file_by_inode import FilesystemOperationPutFileByInode
     from .filesystem_operation_put_file_revision_by_inode import FilesystemOperationPutFileRevisionByInode
     from .filesystem_operation_restore_revision import FilesystemOperationRestoreRevision
     from .filesystem_operation_undelete import FilesystemOperationUndelete
@@ -283,16 +285,18 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CheckpointOwnerUser": ".checkpoint_owner_user",
     "Checksum": ".checksum",
     "ChecksumAlgorithm": ".checksum_algorithm",
-    "CommitAssertion": ".commit_assertion",
-    "CommitAssertionAttributes": ".commit_assertion_attributes",
-    "CommitAssertionBinding": ".commit_assertion_binding",
-    "CommitAssertionFileRevision": ".commit_assertion_file_revision",
-    "CommitAssertionNamespaceHead": ".commit_assertion_namespace_head",
-    "CommitAssertion_Attributes": ".commit_assertion",
-    "CommitAssertion_Binding": ".commit_assertion",
-    "CommitAssertion_FileRevision": ".commit_assertion",
-    "CommitAssertion_NamespaceHead": ".commit_assertion",
     "CommitId": ".commit_id",
+    "CommitPrecondition": ".commit_precondition",
+    "CommitPreconditionAttributesRevision": ".commit_precondition_attributes_revision",
+    "CommitPreconditionFileRevision": ".commit_precondition_file_revision",
+    "CommitPreconditionNamespaceHead": ".commit_precondition_namespace_head",
+    "CommitPreconditionPathAbsence": ".commit_precondition_path_absence",
+    "CommitPreconditionPathBinding": ".commit_precondition_path_binding",
+    "CommitPrecondition_AttributesRevision": ".commit_precondition",
+    "CommitPrecondition_FileRevision": ".commit_precondition",
+    "CommitPrecondition_NamespaceHead": ".commit_precondition",
+    "CommitPrecondition_PathAbsence": ".commit_precondition",
+    "CommitPrecondition_PathBinding": ".commit_precondition",
     "CommitResponse": ".commit_response",
     "CommittedChange": ".committed_change",
     "CompleteUploadDirectMultipart": ".complete_upload_direct_multipart",
@@ -334,12 +338,12 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperationCopyPath": ".filesystem_operation_copy_path",
     "FilesystemOperationCreateDirectory": ".filesystem_operation_create_directory",
     "FilesystemOperationCreateDirectoryByInode": ".filesystem_operation_create_directory_by_inode",
+    "FilesystemOperationCreateFileByInode": ".filesystem_operation_create_file_by_inode",
     "FilesystemOperationDeleteByInode": ".filesystem_operation_delete_by_inode",
     "FilesystemOperationDeletePath": ".filesystem_operation_delete_path",
     "FilesystemOperationMoveByInode": ".filesystem_operation_move_by_inode",
     "FilesystemOperationMovePath": ".filesystem_operation_move_path",
     "FilesystemOperationPutFile": ".filesystem_operation_put_file",
-    "FilesystemOperationPutFileByInode": ".filesystem_operation_put_file_by_inode",
     "FilesystemOperationPutFileRevisionByInode": ".filesystem_operation_put_file_revision_by_inode",
     "FilesystemOperationRestoreRevision": ".filesystem_operation_restore_revision",
     "FilesystemOperationUndelete": ".filesystem_operation_undelete",
@@ -347,12 +351,12 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperation_CopyPath": ".filesystem_operation",
     "FilesystemOperation_CreateDirectory": ".filesystem_operation",
     "FilesystemOperation_CreateDirectoryByInode": ".filesystem_operation",
+    "FilesystemOperation_CreateFileByInode": ".filesystem_operation",
     "FilesystemOperation_DeleteByInode": ".filesystem_operation",
     "FilesystemOperation_DeletePath": ".filesystem_operation",
     "FilesystemOperation_MoveByInode": ".filesystem_operation",
     "FilesystemOperation_MovePath": ".filesystem_operation",
     "FilesystemOperation_PutFile": ".filesystem_operation",
-    "FilesystemOperation_PutFileByInode": ".filesystem_operation",
     "FilesystemOperation_PutFileRevisionByInode": ".filesystem_operation",
     "FilesystemOperation_RestoreRevision": ".filesystem_operation",
     "FilesystemOperation_Undelete": ".filesystem_operation",
@@ -532,16 +536,18 @@ __all__ = [
     "CheckpointOwnerUser",
     "Checksum",
     "ChecksumAlgorithm",
-    "CommitAssertion",
-    "CommitAssertionAttributes",
-    "CommitAssertionBinding",
-    "CommitAssertionFileRevision",
-    "CommitAssertionNamespaceHead",
-    "CommitAssertion_Attributes",
-    "CommitAssertion_Binding",
-    "CommitAssertion_FileRevision",
-    "CommitAssertion_NamespaceHead",
     "CommitId",
+    "CommitPrecondition",
+    "CommitPreconditionAttributesRevision",
+    "CommitPreconditionFileRevision",
+    "CommitPreconditionNamespaceHead",
+    "CommitPreconditionPathAbsence",
+    "CommitPreconditionPathBinding",
+    "CommitPrecondition_AttributesRevision",
+    "CommitPrecondition_FileRevision",
+    "CommitPrecondition_NamespaceHead",
+    "CommitPrecondition_PathAbsence",
+    "CommitPrecondition_PathBinding",
     "CommitResponse",
     "CommittedChange",
     "CompleteUploadDirectMultipart",
@@ -583,12 +589,12 @@ __all__ = [
     "FilesystemOperationCopyPath",
     "FilesystemOperationCreateDirectory",
     "FilesystemOperationCreateDirectoryByInode",
+    "FilesystemOperationCreateFileByInode",
     "FilesystemOperationDeleteByInode",
     "FilesystemOperationDeletePath",
     "FilesystemOperationMoveByInode",
     "FilesystemOperationMovePath",
     "FilesystemOperationPutFile",
-    "FilesystemOperationPutFileByInode",
     "FilesystemOperationPutFileRevisionByInode",
     "FilesystemOperationRestoreRevision",
     "FilesystemOperationUndelete",
@@ -596,12 +602,12 @@ __all__ = [
     "FilesystemOperation_CopyPath",
     "FilesystemOperation_CreateDirectory",
     "FilesystemOperation_CreateDirectoryByInode",
+    "FilesystemOperation_CreateFileByInode",
     "FilesystemOperation_DeleteByInode",
     "FilesystemOperation_DeletePath",
     "FilesystemOperation_MoveByInode",
     "FilesystemOperation_MovePath",
     "FilesystemOperation_PutFile",
-    "FilesystemOperation_PutFileByInode",
     "FilesystemOperation_PutFileRevisionByInode",
     "FilesystemOperation_RestoreRevision",
     "FilesystemOperation_Undelete",

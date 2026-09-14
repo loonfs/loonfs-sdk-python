@@ -21,6 +21,16 @@ class FilesystemOperationMoveByInode(UniversalBaseModel):
     Whether an existing destination file may be replaced.
     """
 
+    destination_display_name: DisplayName = pydantic.Field()
+    """
+    New name.
+    """
+
+    destination_parent_inode_id: InodeId = pydantic.Field()
+    """
+    Destination directory.
+    """
+
     expected_binding_generation: BindingGeneration = pydantic.Field()
     """
     Binding generation required for the move.
@@ -33,22 +43,12 @@ class FilesystemOperationMoveByInode(UniversalBaseModel):
 
     expected_destination_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    With `replace` behavior and an inode guard, the required content revision.
+    With `replace` behavior and an inode precondition, the required content revision.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
     Inode to move.
-    """
-
-    to_display_name: DisplayName = pydantic.Field()
-    """
-    New name.
-    """
-
-    to_parent_inode_id: InodeId = pydantic.Field()
-    """
-    Destination directory.
     """
 
     if IS_PYDANTIC_V2:

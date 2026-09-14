@@ -488,7 +488,7 @@ client.changes.list(
 <dl>
 <dd>
 
-Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request assertions check the pre-state after receipt resolution and before operations; a failed assertion names its position in `details.assertion_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request preconditions check the pre-state after receipt resolution and before operations; a failed precondition names its position in `details.precondition_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 </dd>
 </dl>
 </dd>
@@ -516,8 +516,8 @@ client.commits.create(
     commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
     operations=[
         FilesystemOperation_CopyPath(
-            from_path="/docs/report.txt",
-            to_path="/docs/report.txt",
+            destination_path="/docs/report.txt",
+            source_path="/docs/report.txt",
         )
     ],
 )
@@ -568,14 +568,6 @@ client.commits.create(
 <dl>
 <dd>
 
-**assertions:** `typing.Optional[typing.List[CommitAssertion]]` — Ordered admission conditions evaluated before any operations.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **content_tokens:** `typing.Optional[typing.List[ContentToken]]` — The proofs for new external content references in this request.
     
 </dd>
@@ -585,6 +577,14 @@ client.commits.create(
 <dd>
 
 **message:** `typing.Optional[str]` — The caller annotation that forms part of the commit identity.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**preconditions:** `typing.Optional[typing.List[CommitPrecondition]]` — Ordered admission conditions evaluated before any operations.
     
 </dd>
 </dl>

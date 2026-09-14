@@ -5,8 +5,8 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.actor_id import ActorId
-from ..types.commit_assertion import CommitAssertion
 from ..types.commit_id import CommitId
+from ..types.commit_precondition import CommitPrecondition
 from ..types.commit_response import CommitResponse
 from ..types.content_token import ContentToken
 from ..types.filesystem_operation import FilesystemOperation
@@ -38,13 +38,13 @@ class CommitsClient:
         actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
-        assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
+        preconditions: typing.Optional[typing.Sequence[CommitPrecondition]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CommitResponse:
         """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request assertions check the pre-state after receipt resolution and before operations; a failed assertion names its position in `details.assertion_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request preconditions check the pre-state after receipt resolution and before operations; a failed precondition names its position in `details.precondition_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
         Parameters
         ----------
@@ -60,14 +60,14 @@ class CommitsClient:
         operations : typing.Sequence[FilesystemOperation]
             The non-empty ordered operations to commit atomically.
 
-        assertions : typing.Optional[typing.Sequence[CommitAssertion]]
-            Ordered admission conditions evaluated before any operations.
-
         content_tokens : typing.Optional[typing.Sequence[ContentToken]]
             The proofs for new external content references in this request.
 
         message : typing.Optional[str]
             The caller annotation that forms part of the commit identity.
+
+        preconditions : typing.Optional[typing.Sequence[CommitPrecondition]]
+            Ordered admission conditions evaluated before any operations.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -91,8 +91,8 @@ class CommitsClient:
             commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
             operations=[
                 FilesystemOperation_CopyPath(
-                    from_path="/docs/report.txt",
-                    to_path="/docs/report.txt",
+                    destination_path="/docs/report.txt",
+                    source_path="/docs/report.txt",
                 )
             ],
         )
@@ -102,9 +102,9 @@ class CommitsClient:
             actor_id=actor_id,
             commit_id=commit_id,
             operations=operations,
-            assertions=assertions,
             content_tokens=content_tokens,
             message=message,
+            preconditions=preconditions,
             request_options=request_options,
         )
         return _response.data
@@ -132,13 +132,13 @@ class AsyncCommitsClient:
         actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
-        assertions: typing.Optional[typing.Sequence[CommitAssertion]] = OMIT,
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
+        preconditions: typing.Optional[typing.Sequence[CommitPrecondition]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CommitResponse:
         """
-        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request assertions check the pre-state after receipt resolution and before operations; a failed assertion names its position in `details.assertion_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+        Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request preconditions check the pre-state after receipt resolution and before operations; a failed precondition names its position in `details.precondition_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
         Parameters
         ----------
@@ -154,14 +154,14 @@ class AsyncCommitsClient:
         operations : typing.Sequence[FilesystemOperation]
             The non-empty ordered operations to commit atomically.
 
-        assertions : typing.Optional[typing.Sequence[CommitAssertion]]
-            Ordered admission conditions evaluated before any operations.
-
         content_tokens : typing.Optional[typing.Sequence[ContentToken]]
             The proofs for new external content references in this request.
 
         message : typing.Optional[str]
             The caller annotation that forms part of the commit identity.
+
+        preconditions : typing.Optional[typing.Sequence[CommitPrecondition]]
+            Ordered admission conditions evaluated before any operations.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -190,8 +190,8 @@ class AsyncCommitsClient:
                 commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
                 operations=[
                     FilesystemOperation_CopyPath(
-                        from_path="/docs/report.txt",
-                        to_path="/docs/report.txt",
+                        destination_path="/docs/report.txt",
+                        source_path="/docs/report.txt",
                     )
                 ],
             )
@@ -204,9 +204,9 @@ class AsyncCommitsClient:
             actor_id=actor_id,
             commit_id=commit_id,
             operations=operations,
-            assertions=assertions,
             content_tokens=content_tokens,
             message=message,
+            preconditions=preconditions,
             request_options=request_options,
         )
         return _response.data

@@ -20,7 +20,7 @@ class FilesystemOperationUpdateAttributes(UniversalBaseModel):
 
     expected_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
     """
-    The attribute revision that must still be current before the update.
+    With an inode precondition, the attribute revision that must still be current.
     """
 
     expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)

@@ -31,10 +31,10 @@ class FilesystemOperation_CopyPath(UniversalBaseModel):
 
     kind: typing.Literal["copy_path"] = "copy_path"
     behavior: typing.Optional[DestinationBehavior] = None
+    destination_path: AbsolutePath
     expected_destination_inode_id: typing.Optional[InodeId] = None
     expected_destination_revision_no: typing.Optional[RevisionNo] = None
-    from_path: AbsolutePath
-    to_path: AbsolutePath
+    source_path: AbsolutePath
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -75,6 +75,28 @@ class FilesystemOperation_CreateDirectoryByInode(UniversalBaseModel):
     """
 
     kind: typing.Literal["create_directory_by_inode"] = "create_directory_by_inode"
+    display_name: DisplayName
+    parent_inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class FilesystemOperation_CreateFileByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected, and fieldless variants require empty objects.
+    """
+
+    kind: typing.Literal["create_file_by_inode"] = "create_file_by_inode"
+    content_ref: ContentRef
     display_name: DisplayName
     parent_inode_id: InodeId
 
@@ -141,12 +163,12 @@ class FilesystemOperation_MoveByInode(UniversalBaseModel):
 
     kind: typing.Literal["move_by_inode"] = "move_by_inode"
     behavior: typing.Optional[DestinationBehavior] = None
+    destination_display_name: DisplayName
+    destination_parent_inode_id: InodeId
     expected_binding_generation: BindingGeneration
     expected_destination_inode_id: typing.Optional[InodeId] = None
     expected_destination_revision_no: typing.Optional[RevisionNo] = None
     inode_id: InodeId
-    to_display_name: DisplayName
-    to_parent_inode_id: InodeId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -167,10 +189,10 @@ class FilesystemOperation_MovePath(UniversalBaseModel):
 
     kind: typing.Literal["move_path"] = "move_path"
     behavior: typing.Optional[DestinationBehavior] = None
+    destination_path: AbsolutePath
     expected_destination_inode_id: typing.Optional[InodeId] = None
     expected_destination_revision_no: typing.Optional[RevisionNo] = None
-    from_path: AbsolutePath
-    to_path: AbsolutePath
+    source_path: AbsolutePath
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -195,28 +217,6 @@ class FilesystemOperation_PutFile(UniversalBaseModel):
     expected_inode_id: typing.Optional[InodeId] = None
     expected_revision_no: typing.Optional[RevisionNo] = None
     path: AbsolutePath
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class FilesystemOperation_PutFileByInode(UniversalBaseModel):
-    """
-    One filesystem operation.
-
-    Unknown fields are rejected, and fieldless variants require empty objects.
-    """
-
-    kind: typing.Literal["put_file_by_inode"] = "put_file_by_inode"
-    content_ref: ContentRef
-    display_name: DisplayName
-    parent_inode_id: InodeId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -280,8 +280,8 @@ class FilesystemOperation_Undelete(UniversalBaseModel):
 
     kind: typing.Literal["undelete"] = "undelete"
     deletion_seq: ChangeSeq
+    destination_path: typing.Optional[AbsolutePath] = None
     inode_id: InodeId
-    path: typing.Optional[AbsolutePath] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -324,12 +324,12 @@ FilesystemOperation = typing_extensions.Annotated[
         FilesystemOperation_CopyPath,
         FilesystemOperation_CreateDirectory,
         FilesystemOperation_CreateDirectoryByInode,
+        FilesystemOperation_CreateFileByInode,
         FilesystemOperation_DeleteByInode,
         FilesystemOperation_DeletePath,
         FilesystemOperation_MoveByInode,
         FilesystemOperation_MovePath,
         FilesystemOperation_PutFile,
-        FilesystemOperation_PutFileByInode,
         FilesystemOperation_PutFileRevisionByInode,
         FilesystemOperation_RestoreRevision,
         FilesystemOperation_Undelete,

@@ -19,14 +19,14 @@ class FilesystemChangeMoved(UniversalBaseModel):
     Opaque identifier for the binding created by this event.
     """
 
-    from_display_name: DisplayName = pydantic.Field()
+    destination_display_name: DisplayName = pydantic.Field()
     """
-    Spelling of the old binding.
+    Spelling of the new binding.
     """
 
-    from_parent_inode_id: InodeId = pydantic.Field()
+    destination_parent_inode_id: InodeId = pydantic.Field()
     """
-    Directory that held the old binding.
+    Directory holding the new binding.
     """
 
     inode_id: InodeId = pydantic.Field()
@@ -34,14 +34,14 @@ class FilesystemChangeMoved(UniversalBaseModel):
     Inode whose binding changed.
     """
 
-    to_display_name: DisplayName = pydantic.Field()
+    source_display_name: DisplayName = pydantic.Field()
     """
-    Spelling of the new binding.
+    Spelling of the removed binding.
     """
 
-    to_parent_inode_id: InodeId = pydantic.Field()
+    source_parent_inode_id: InodeId = pydantic.Field()
     """
-    Directory holding the new binding.
+    Directory that held the removed binding.
     """
 
     if IS_PYDANTIC_V2:

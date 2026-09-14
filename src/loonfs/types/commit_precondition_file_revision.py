@@ -4,17 +4,23 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .inode_id import InodeId
+from .revision_no import RevisionNo
 
 
-class CommitAssertionNamespaceHead(UniversalBaseModel):
+class CommitPreconditionFileRevision(UniversalBaseModel):
     """
-    Requires the pre-state head sequence to equal `expected_head_seq`.
+    Requires a visible inode with the content revision the caller read.
     """
 
-    expected_head_seq: ChangeSeq = pydantic.Field()
+    expected_revision_no: RevisionNo = pydantic.Field()
     """
-    Sequence observed when the caller read its inputs.
+    Content revision observed by the caller.
+    """
+
+    inode_id: InodeId = pydantic.Field()
+    """
+    Inode whose state the caller read.
     """
 
     if IS_PYDANTIC_V2:

@@ -9,19 +9,19 @@ from .binding_generation import BindingGeneration
 from .inode_id import InodeId
 
 
-class CommitAssertionBinding(UniversalBaseModel):
+class CommitPreconditionPathBinding(UniversalBaseModel):
     """
-    Requires the path to retain the binding or absence the caller read.
+    Requires the path to retain the binding the caller read.
     """
 
     expected_binding_generation: typing.Optional[BindingGeneration] = pydantic.Field(default=None)
     """
-    Requires an inode expectation and detects moves away and back.
+    Detects moves away and back.
     """
 
-    expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
+    expected_inode_id: InodeId = pydantic.Field()
     """
-    When absent, requires the path to be unbound.
+    Inode required at the path.
     """
 
     path: AbsolutePath = pydantic.Field()

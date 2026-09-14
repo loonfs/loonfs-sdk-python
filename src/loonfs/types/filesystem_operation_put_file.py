@@ -33,7 +33,7 @@ class FilesystemOperationPutFile(UniversalBaseModel):
 
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    With `replace` behavior and an inode guard, the request requires this content revision.
+    With `replace` behavior and an inode precondition, the request requires this content revision.
     """
 
     path: AbsolutePath = pydantic.Field()

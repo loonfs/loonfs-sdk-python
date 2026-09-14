@@ -4,29 +4,23 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .content_ref import ContentRef
-from .display_name import DisplayName
+from .attribute_revision_no import AttributeRevisionNo
 from .inode_id import InodeId
 
 
-class FilesystemOperationPutFileByInode(UniversalBaseModel):
+class CommitPreconditionAttributesRevision(UniversalBaseModel):
     """
-    Create a file with an unused name under an existing parent inode.
-    """
-
-    content_ref: ContentRef = pydantic.Field()
-    """
-    Immutable bytes that must be covered by a valid preparation proof.
+    Requires a visible inode with the attribute revision the caller read.
     """
 
-    display_name: DisplayName = pydantic.Field()
+    expected_attributes_revision_no: AttributeRevisionNo = pydantic.Field()
     """
-    New file name.
+    Attribute revision observed by the caller.
     """
 
-    parent_inode_id: InodeId = pydantic.Field()
+    inode_id: InodeId = pydantic.Field()
     """
-    Parent directory.
+    Inode whose state the caller read.
     """
 
     if IS_PYDANTIC_V2:

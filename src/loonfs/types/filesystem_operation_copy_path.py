@@ -20,6 +20,11 @@ class FilesystemOperationCopyPath(UniversalBaseModel):
     Whether an existing destination file may be replaced.
     """
 
+    destination_path: AbsolutePath = pydantic.Field()
+    """
+    Absolute destination whose parent must be visible and writable.
+    """
+
     expected_destination_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
     With `replace` behavior, the destination inode required by the request.
@@ -27,17 +32,12 @@ class FilesystemOperationCopyPath(UniversalBaseModel):
 
     expected_destination_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    With `replace` behavior and an inode guard, the required content revision.
+    With `replace` behavior and an inode precondition, the required content revision.
     """
 
-    from_path: AbsolutePath = pydantic.Field()
+    source_path: AbsolutePath = pydantic.Field()
     """
     Absolute source path that must resolve to a visible file.
-    """
-
-    to_path: AbsolutePath = pydantic.Field()
-    """
-    Absolute destination whose parent must be visible and writable.
     """
 
     if IS_PYDANTIC_V2:

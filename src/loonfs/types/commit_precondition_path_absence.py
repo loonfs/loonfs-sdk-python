@@ -4,23 +4,17 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .attribute_revision_no import AttributeRevisionNo
-from .inode_id import InodeId
+from .absolute_path import AbsolutePath
 
 
-class CommitAssertionAttributes(UniversalBaseModel):
+class CommitPreconditionPathAbsence(UniversalBaseModel):
     """
-    Requires a visible inode with the attribute revision the caller read.
-    """
-
-    expected_attributes_revision_no: AttributeRevisionNo = pydantic.Field()
-    """
-    Attribute revision observed by the caller.
+    Requires no visible entry at the full path.
     """
 
-    inode_id: InodeId = pydantic.Field()
+    path: AbsolutePath = pydantic.Field()
     """
-    Inode whose state the caller read.
+    Absolute path to check, including the root.
     """
 
     if IS_PYDANTIC_V2:
