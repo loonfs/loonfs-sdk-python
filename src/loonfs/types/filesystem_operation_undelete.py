@@ -19,14 +19,14 @@ class FilesystemOperationUndelete(UniversalBaseModel):
     Observed deletion sequence, which prevents cancelling a newer tombstone generation.
     """
 
+    destination_path: typing.Optional[AbsolutePath] = pydantic.Field(default=None)
+    """
+    The restore destination, or `None` to use the recorded binding.
+    """
+
     inode_id: InodeId = pydantic.Field()
     """
     Deleted inode to make reachable again.
-    """
-
-    path: typing.Optional[AbsolutePath] = pydantic.Field(default=None)
-    """
-    The restore destination, or `None` to use the recorded binding.
     """
 
     if IS_PYDANTIC_V2:

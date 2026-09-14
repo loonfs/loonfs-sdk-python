@@ -15,14 +15,14 @@ from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
-class CommitAssertion_Attributes(UniversalBaseModel):
+class CommitPrecondition_AttributesRevision(UniversalBaseModel):
     """
     Admission conditions checked against the candidate's pre-state before its operations.
     The pre-state head sequence is the last admitted commit's sequence in the batch,
     or the batch's base head sequence when no earlier candidate was admitted.
     """
 
-    kind: typing.Literal["attributes"] = "attributes"
+    kind: typing.Literal["attributes_revision"] = "attributes_revision"
     expected_attributes_revision_no: AttributeRevisionNo
     inode_id: InodeId
 
@@ -36,29 +36,7 @@ class CommitAssertion_Attributes(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class CommitAssertion_Binding(UniversalBaseModel):
-    """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
-    """
-
-    kind: typing.Literal["binding"] = "binding"
-    expected_binding_generation: typing.Optional[BindingGeneration] = None
-    expected_inode_id: typing.Optional[InodeId] = None
-    path: AbsolutePath
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class CommitAssertion_FileRevision(UniversalBaseModel):
+class CommitPrecondition_FileRevision(UniversalBaseModel):
     """
     Admission conditions checked against the candidate's pre-state before its operations.
     The pre-state head sequence is the last admitted commit's sequence in the batch,
@@ -79,7 +57,7 @@ class CommitAssertion_FileRevision(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class CommitAssertion_NamespaceHead(UniversalBaseModel):
+class CommitPrecondition_NamespaceHead(UniversalBaseModel):
     """
     Admission conditions checked against the candidate's pre-state before its operations.
     The pre-state head sequence is the last admitted commit's sequence in the batch,
@@ -99,9 +77,55 @@ class CommitAssertion_NamespaceHead(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-CommitAssertion = typing_extensions.Annotated[
+class CommitPrecondition_PathAbsence(UniversalBaseModel):
+    """
+    Admission conditions checked against the candidate's pre-state before its operations.
+    The pre-state head sequence is the last admitted commit's sequence in the batch,
+    or the batch's base head sequence when no earlier candidate was admitted.
+    """
+
+    kind: typing.Literal["path_absence"] = "path_absence"
+    path: AbsolutePath
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class CommitPrecondition_PathBinding(UniversalBaseModel):
+    """
+    Admission conditions checked against the candidate's pre-state before its operations.
+    The pre-state head sequence is the last admitted commit's sequence in the batch,
+    or the batch's base head sequence when no earlier candidate was admitted.
+    """
+
+    kind: typing.Literal["path_binding"] = "path_binding"
+    expected_binding_generation: typing.Optional[BindingGeneration] = None
+    expected_inode_id: InodeId
+    path: AbsolutePath
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+CommitPrecondition = typing_extensions.Annotated[
     typing.Union[
-        CommitAssertion_Attributes, CommitAssertion_Binding, CommitAssertion_FileRevision, CommitAssertion_NamespaceHead
+        CommitPrecondition_AttributesRevision,
+        CommitPrecondition_FileRevision,
+        CommitPrecondition_NamespaceHead,
+        CommitPrecondition_PathAbsence,
+        CommitPrecondition_PathBinding,
     ],
     pydantic.Field(discriminator="kind"),
 ]

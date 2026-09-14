@@ -4,23 +4,29 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .content_ref import ContentRef
+from .display_name import DisplayName
 from .inode_id import InodeId
-from .revision_no import RevisionNo
 
 
-class CommitAssertionFileRevision(UniversalBaseModel):
+class FilesystemOperationCreateFileByInode(UniversalBaseModel):
     """
-    Requires a visible inode with the content revision the caller read.
-    """
-
-    expected_revision_no: RevisionNo = pydantic.Field()
-    """
-    Content revision observed by the caller.
+    Create a file with an unused name under an existing parent inode.
     """
 
-    inode_id: InodeId = pydantic.Field()
+    content_ref: ContentRef = pydantic.Field()
     """
-    Inode whose state the caller read.
+    Immutable bytes that must be covered by a valid preparation proof.
+    """
+
+    display_name: DisplayName = pydantic.Field()
+    """
+    New file name.
+    """
+
+    parent_inode_id: InodeId = pydantic.Field()
+    """
+    Parent directory.
     """
 
     if IS_PYDANTIC_V2:

@@ -5,6 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .attribute_revision_no import AttributeRevisionNo
+from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .inode_id import InodeId
@@ -38,6 +39,11 @@ class ErrorDetails(UniversalBaseModel):
     Attribute revision that is actually current for the inode.
     """
 
+    actual_binding_generation: typing.Optional[BindingGeneration] = pydantic.Field(default=None)
+    """
+    Current binding token; absent for the root, which has no binding.
+    """
+
     actual_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
     Deletion generation actually active for the inode.
@@ -63,11 +69,6 @@ class ErrorDetails(UniversalBaseModel):
     Change-feed cursor the request asked to resume after.
     """
 
-    assertion_index: typing.Optional[int] = pydantic.Field(default=None)
-    """
-    Zero-based position of the failed request assertion.
-    """
-
     commit_id: typing.Optional[CommitId] = pydantic.Field(default=None)
     """
     Idempotency key of the commit the error concerns.
@@ -86,6 +87,11 @@ class ErrorDetails(UniversalBaseModel):
     expected_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
     """
     Attribute revision the request expected to be current.
+    """
+
+    expected_binding_generation: typing.Optional[BindingGeneration] = pydantic.Field(default=None)
+    """
+    Opaque binding token supplied by the request.
     """
 
     expected_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
@@ -126,6 +132,11 @@ class ErrorDetails(UniversalBaseModel):
     operation_index: typing.Optional[int] = pydantic.Field(default=None)
     """
     The index of the failed operation in the request.
+    """
+
+    precondition_index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Zero-based position of the failed request precondition.
     """
 
     retention_floor_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
