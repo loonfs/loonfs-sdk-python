@@ -17,9 +17,9 @@ from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.change_seq import ChangeSeq
-from ..types.checkpoint_id import CheckpointId
 from ..types.error_response import ErrorResponse
 from ..types.list_changes_response import ListChangesResponse
+from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
 
 
@@ -33,7 +33,7 @@ class RawChangesClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListChangesResponse]:
         """
@@ -50,7 +50,7 @@ class RawChangesClient:
         limit : typing.Optional[int]
             Maximum page size
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             End the feed at this snapshot's captured sequence
 
         request_options : typing.Optional[RequestOptions]
@@ -167,7 +167,7 @@ class AsyncRawChangesClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListChangesResponse]:
         """
@@ -184,7 +184,7 @@ class AsyncRawChangesClient:
         limit : typing.Optional[int]
             Maximum page size
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             End the feed at this snapshot's captured sequence
 
         request_options : typing.Optional[RequestOptions]

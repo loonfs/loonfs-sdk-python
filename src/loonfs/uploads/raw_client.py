@@ -19,12 +19,10 @@ from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
-from ..types.begin_upload_request import BeginUploadRequest
-from ..types.begin_upload_response import BeginUploadResponse
+from ..types.complete_upload_body import CompleteUploadBody
+from ..types.create_upload_body import CreateUploadBody
 from ..types.error_response import ErrorResponse
 from ..types.sign_upload_parts_response import SignUploadPartsResponse
-from ..types.upload_completion import UploadCompletion
-from ..types.upload_content_response import UploadContentResponse
 from ..types.upload_part_checksum_claim import UploadPartChecksumClaim
 from ..types.upload_session import UploadSession
 from pydantic import ValidationError
@@ -38,8 +36,8 @@ class RawUploadsClient:
         self._client_wrapper = client_wrapper
 
     def create(
-        self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[BeginUploadResponse]:
+        self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[UploadSession]:
         """
         Starts an upload session for content that may later be attached to a file. Service-proxied uploads send bytes through the server; direct-put uploads return object-store presigned credentials.
 
@@ -48,14 +46,14 @@ class RawUploadsClient:
         namespace_id : str
             Namespace id
 
-        request : BeginUploadRequest
+        request : CreateUploadBody
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[BeginUploadResponse]
+        HttpResponse[UploadSession]
             Upload session started
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -65,7 +63,7 @@ class RawUploadsClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/uploads",
             method="POST",
             json=convert_and_respect_annotation_metadata(
-                object_=request, annotation=BeginUploadRequest, direction="write"
+                object_=request, annotation=CreateUploadBody, direction="write"
             ),
             headers={
                 "content-type": "application/json",
@@ -76,9 +74,9 @@ class RawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    BeginUploadResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=BeginUploadResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -173,7 +171,7 @@ class RawUploadsClient:
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadSession]:
         """
-        Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
+        Returns an upload session. An open direct_put session includes freshly signed access. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
@@ -387,7 +385,7 @@ class RawUploadsClient:
         namespace_id: str,
         upload_id: str,
         *,
-        request: UploadCompletion,
+        request: CompleteUploadBody,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[UploadSession]:
         """
@@ -401,7 +399,7 @@ class RawUploadsClient:
         upload_id : str
             Upload session id
 
-        request : UploadCompletion
+        request : CompleteUploadBody
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -415,7 +413,7 @@ class RawUploadsClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/uploads/{encode_path_param(upload_id)}/complete",
             method="POST",
             json=convert_and_respect_annotation_metadata(
-                object_=request, annotation=UploadCompletion, direction="write"
+                object_=request, annotation=CompleteUploadBody, direction="write"
             ),
             headers={
                 "content-type": "application/json",
@@ -526,9 +524,9 @@ class RawUploadsClient:
         *,
         request: typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]],
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[UploadContentResponse]:
+    ) -> HttpResponse[UploadSession]:
         """
-        Uploads bytes into a service-proxied upload session and returns the content reference for the stored object.
+        Uploads bytes into a service-proxied upload session and returns the open session with the staged content reference.
 
         Parameters
         ----------
@@ -545,8 +543,8 @@ class RawUploadsClient:
 
         Returns
         -------
-        HttpResponse[UploadContentResponse]
-            Upload content accepted
+        HttpResponse[UploadSession]
+            Open session with the staged content reference
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/uploads/{encode_path_param(upload_id)}/content",
@@ -561,9 +559,9 @@ class RawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UploadContentResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=UploadContentResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -811,8 +809,8 @@ class AsyncRawUploadsClient:
         self._client_wrapper = client_wrapper
 
     async def create(
-        self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[BeginUploadResponse]:
+        self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[UploadSession]:
         """
         Starts an upload session for content that may later be attached to a file. Service-proxied uploads send bytes through the server; direct-put uploads return object-store presigned credentials.
 
@@ -821,14 +819,14 @@ class AsyncRawUploadsClient:
         namespace_id : str
             Namespace id
 
-        request : BeginUploadRequest
+        request : CreateUploadBody
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[BeginUploadResponse]
+        AsyncHttpResponse[UploadSession]
             Upload session started
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -838,7 +836,7 @@ class AsyncRawUploadsClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/uploads",
             method="POST",
             json=convert_and_respect_annotation_metadata(
-                object_=request, annotation=BeginUploadRequest, direction="write"
+                object_=request, annotation=CreateUploadBody, direction="write"
             ),
             headers={
                 "content-type": "application/json",
@@ -849,9 +847,9 @@ class AsyncRawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    BeginUploadResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=BeginUploadResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -946,7 +944,7 @@ class AsyncRawUploadsClient:
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadSession]:
         """
-        Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
+        Returns an upload session. An open direct_put session includes freshly signed access. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
@@ -1160,7 +1158,7 @@ class AsyncRawUploadsClient:
         namespace_id: str,
         upload_id: str,
         *,
-        request: UploadCompletion,
+        request: CompleteUploadBody,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[UploadSession]:
         """
@@ -1174,7 +1172,7 @@ class AsyncRawUploadsClient:
         upload_id : str
             Upload session id
 
-        request : UploadCompletion
+        request : CompleteUploadBody
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1188,7 +1186,7 @@ class AsyncRawUploadsClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/uploads/{encode_path_param(upload_id)}/complete",
             method="POST",
             json=convert_and_respect_annotation_metadata(
-                object_=request, annotation=UploadCompletion, direction="write"
+                object_=request, annotation=CompleteUploadBody, direction="write"
             ),
             headers={
                 "content-type": "application/json",
@@ -1299,9 +1297,9 @@ class AsyncRawUploadsClient:
         *,
         request: typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]],
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[UploadContentResponse]:
+    ) -> AsyncHttpResponse[UploadSession]:
         """
-        Uploads bytes into a service-proxied upload session and returns the content reference for the stored object.
+        Uploads bytes into a service-proxied upload session and returns the open session with the staged content reference.
 
         Parameters
         ----------
@@ -1318,8 +1316,8 @@ class AsyncRawUploadsClient:
 
         Returns
         -------
-        AsyncHttpResponse[UploadContentResponse]
-            Upload content accepted
+        AsyncHttpResponse[UploadSession]
+            Open session with the staged content reference
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/uploads/{encode_path_param(upload_id)}/content",
@@ -1334,9 +1332,9 @@ class AsyncRawUploadsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    UploadContentResponse,
+                    UploadSession,
                     parse_obj_as(
-                        type_=UploadContentResponse,  # type: ignore
+                        type_=UploadSession,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
-from .committed_change import CommittedChange
+from .commit import Commit
 from .namespace_id import NamespaceId
 
 
@@ -19,7 +19,7 @@ class ListChangesResponse(UniversalBaseModel):
     Exclusive cursor supplied by the caller, or the endpoint's initial position.
     """
 
-    changes: typing.List[CommittedChange] = pydantic.Field()
+    changes: typing.List[Commit] = pydantic.Field()
     """
     Logical commits after `after_seq`, ordered by ascending namespace sequence.
     """

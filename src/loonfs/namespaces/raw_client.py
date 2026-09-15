@@ -17,11 +17,11 @@ from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.change_seq import ChangeSeq
-from ..types.checkpoint_id import CheckpointId
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.error_response import ErrorResponse
 from ..types.namespace import Namespace
 from ..types.namespace_id import NamespaceId
+from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -365,7 +365,7 @@ class RawNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[CheckpointId] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Namespace]:
         """
@@ -379,7 +379,7 @@ class RawNamespacesClient:
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
@@ -829,7 +829,7 @@ class AsyncRawNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[CheckpointId] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Namespace]:
         """
@@ -843,7 +843,7 @@ class AsyncRawNamespacesClient:
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]

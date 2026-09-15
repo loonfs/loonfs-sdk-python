@@ -6,9 +6,9 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class CompleteUploadServiceProxied(UniversalBaseModel):
+class CreateUploadBodyServiceProxied(UniversalBaseModel):
     """
-    Complete a service-proxied upload.
+    Send the bytes to the service, which writes the content object.
     """
 
     if IS_PYDANTIC_V2:

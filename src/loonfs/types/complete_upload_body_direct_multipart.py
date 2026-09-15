@@ -4,11 +4,23 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .completed_upload_part import CompletedUploadPart
+from .upload_content_claim import UploadContentClaim
 
 
-class BeginUploadServiceProxied(UniversalBaseModel):
+class CompleteUploadBodyDirectMultipart(UniversalBaseModel):
     """
-    Send the bytes to the service, which writes the content object.
+    Complete a direct multipart upload.
+    """
+
+    content: UploadContentClaim = pydantic.Field()
+    """
+    Expected length and checksum of the assembled object.
+    """
+
+    parts: typing.List[CompletedUploadPart] = pydantic.Field()
+    """
+    Uploaded parts in ascending part order.
     """
 
     if IS_PYDANTIC_V2:

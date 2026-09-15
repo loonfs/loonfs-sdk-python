@@ -20,4 +20,29 @@ class ApiError(Exception):
         self.body = body
 
     def __str__(self) -> str:
-        return f"headers: {self.headers}, status_code: {self.status_code}, body: {self.body}"
+        if isinstance(self.body, dict):
+            body = self.body
+        else:
+            body = {
+                field: getattr(self.body, field, None)
+                for field in ("code", "message", "param", "request_id", "details")
+            }
+        if body.get("code") is None or body.get("message") is None:
+            return f"headers: {self.headers}, status_code: {self.status_code}, body: {self.body}"
+
+        result = f"{body['code']}: {body['message']}"
+        param = body.get("param")
+        if param is not None:
+            result += f" (param {param})"
+        request_id = body.get("request_id")
+        if request_id is not None:
+            result += f" [request {request_id}]"
+        details = body.get("details")
+        if details is not None:
+            if isinstance(details, dict):
+                details = {key: value for key, value in details.items() if value is not None}
+            else:
+                details = details.model_dump(exclude_none=True)
+            if details:
+                result += f"\ndetails: {details}"
+        return result

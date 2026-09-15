@@ -29,7 +29,6 @@ class RunMaintenanceResponse_Gc(UniversalBaseModel):
     next_reclamation_at_ms: typing.Optional[int] = None
     reclaim_after_ms: typing.Optional[int] = None
     retained: RetainedCandidates
-    retained_candidates: int
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

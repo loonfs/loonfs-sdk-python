@@ -4,13 +4,30 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .actor_id import ActorId
 from .change_seq import ChangeSeq
+from .namespace_fork_basis import NamespaceForkBasis
 from .namespace_id import NamespaceId
 
 
 class Namespace(UniversalBaseModel):
     """
     Current state for one namespace.
+    """
+
+    created_at_ms: int = pydantic.Field()
+    """
+    Time the namespace was created, in Unix milliseconds.
+    """
+
+    created_by: ActorId = pydantic.Field()
+    """
+    Actor that created the namespace, as supplied by the application.
+    """
+
+    fork_basis: typing.Optional[NamespaceForkBasis] = pydantic.Field(default=None)
+    """
+    Present only for a fork: the source it was forked from.
     """
 
     head_seq: ChangeSeq = pydantic.Field()

@@ -9,8 +9,6 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 class RetainedCandidates(UniversalBaseModel):
     """
     The candidates inspected but not deleted by one garbage-collection pass.
-
-    Every field is present and contributes to [`GcResponse::retained_candidates`].
     """
 
     checkpoint_not_deletable: int = pydantic.Field()

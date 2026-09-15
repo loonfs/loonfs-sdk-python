@@ -6,7 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class BeginUploadDirectPut(UniversalBaseModel):
+class CreateUploadBodyDirectPut(UniversalBaseModel):
     """
     Write the whole object through one presigned request.
     """

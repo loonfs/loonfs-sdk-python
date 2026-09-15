@@ -4,8 +4,8 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .checkpoint_id import CheckpointId
 from .namespace_id import NamespaceId
+from .snapshot_id import SnapshotId
 
 
 class DeleteSnapshotResponse(UniversalBaseModel):
@@ -18,7 +18,7 @@ class DeleteSnapshotResponse(UniversalBaseModel):
     Namespace the snapshot belonged to.
     """
 
-    snapshot_id: CheckpointId = pydantic.Field()
+    snapshot_id: SnapshotId = pydantic.Field()
     """
     Deleted snapshot record.
     """

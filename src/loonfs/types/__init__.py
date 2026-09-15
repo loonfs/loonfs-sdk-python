@@ -12,27 +12,6 @@ if typing.TYPE_CHECKING:
     from .attribute_revision_no import AttributeRevisionNo
     from .attribute_value import AttributeValue
     from .attributes import Attributes
-    from .begin_download_by_inode_request import BeginDownloadByInodeRequest
-    from .begin_download_by_inode_response import BeginDownloadByInodeResponse
-    from .begin_download_response import BeginDownloadResponse
-    from .begin_upload_direct_multipart import BeginUploadDirectMultipart
-    from .begin_upload_direct_put import BeginUploadDirectPut
-    from .begin_upload_request import (
-        BeginUploadRequest,
-        BeginUploadRequest_DirectMultipart,
-        BeginUploadRequest_DirectPut,
-        BeginUploadRequest_ServiceProxied,
-    )
-    from .begin_upload_response import (
-        BeginUploadResponse,
-        BeginUploadResponse_DirectMultipart,
-        BeginUploadResponse_DirectPut,
-        BeginUploadResponse_ServiceProxied,
-    )
-    from .begin_upload_response_direct_multipart import BeginUploadResponseDirectMultipart
-    from .begin_upload_response_direct_put import BeginUploadResponseDirectPut
-    from .begin_upload_response_service_proxied import BeginUploadResponseServiceProxied
-    from .begin_upload_service_proxied import BeginUploadServiceProxied
     from .binding_generation import BindingGeneration
     from .capability_document import CapabilityDocument
     from .change_seq import ChangeSeq
@@ -49,6 +28,7 @@ if typing.TYPE_CHECKING:
     from .checkpoint_owner_user import CheckpointOwnerUser
     from .checksum import Checksum
     from .checksum_algorithm import ChecksumAlgorithm
+    from .commit import Commit
     from .commit_id import CommitId
     from .commit_precondition import (
         CommitPrecondition,
@@ -63,16 +43,31 @@ if typing.TYPE_CHECKING:
     from .commit_precondition_namespace_head import CommitPreconditionNamespaceHead
     from .commit_precondition_path_absence import CommitPreconditionPathAbsence
     from .commit_precondition_path_binding import CommitPreconditionPathBinding
-    from .commit_response import CommitResponse
-    from .committed_change import CommittedChange
-    from .complete_upload_direct_multipart import CompleteUploadDirectMultipart
-    from .complete_upload_direct_put import CompleteUploadDirectPut
-    from .complete_upload_service_proxied import CompleteUploadServiceProxied
+    from .complete_upload_body import (
+        CompleteUploadBody,
+        CompleteUploadBody_DirectMultipart,
+        CompleteUploadBody_DirectPut,
+        CompleteUploadBody_ServiceProxied,
+    )
+    from .complete_upload_body_direct_multipart import CompleteUploadBodyDirectMultipart
+    from .complete_upload_body_direct_put import CompleteUploadBodyDirectPut
+    from .complete_upload_body_service_proxied import CompleteUploadBodyServiceProxied
     from .completed_upload_part import CompletedUploadPart
     from .content_id import ContentId
     from .content_ref import ContentRef
     from .content_ref_kind import ContentRefKind
     from .content_token import ContentToken
+    from .create_download_by_inode_response import CreateDownloadByInodeResponse
+    from .create_download_response import CreateDownloadResponse
+    from .create_upload_body import (
+        CreateUploadBody,
+        CreateUploadBody_DirectMultipart,
+        CreateUploadBody_DirectPut,
+        CreateUploadBody_ServiceProxied,
+    )
+    from .create_upload_body_direct_multipart import CreateUploadBodyDirectMultipart
+    from .create_upload_body_direct_put import CreateUploadBodyDirectPut
+    from .create_upload_body_service_proxied import CreateUploadBodyServiceProxied
     from .delete_checkpoint_response import DeleteCheckpointResponse
     from .delete_directory_behavior import DeleteDirectoryBehavior
     from .delete_namespace_response import DeleteNamespaceResponse
@@ -140,6 +135,7 @@ if typing.TYPE_CHECKING:
     from .grep_match import GrepMatch
     from .grep_response import GrepResponse
     from .inode_id import InodeId
+    from .inode_kind import InodeKind
     from .list_changes_response import ListChangesResponse
     from .list_checkpoints_response import ListCheckpointsResponse
     from .list_file_revisions_response import ListFileRevisionsResponse
@@ -166,6 +162,7 @@ if typing.TYPE_CHECKING:
     from .name_key import NameKey
     from .namespace import Namespace
     from .namespace_diagnostics import NamespaceDiagnostics
+    from .namespace_fork_basis import NamespaceForkBasis
     from .namespace_id import NamespaceId
     from .object_transfer_access import ObjectTransferAccess, ObjectTransferAccess_PresignedUrl
     from .object_transfer_access_presigned_url import ObjectTransferAccessPresignedUrl
@@ -214,19 +211,13 @@ if typing.TYPE_CHECKING:
     from .sign_upload_parts_response import SignUploadPartsResponse
     from .signed_upload_part import SignedUploadPart
     from .snapshot import Snapshot
+    from .snapshot_id import SnapshotId
     from .store_probe_check_outcome import StoreProbeCheckOutcome
     from .store_probe_check_result import StoreProbeCheckResult
     from .store_probe_request import StoreProbeRequest
     from .store_probe_response import StoreProbeResponse
     from .trash_entry import TrashEntry
-    from .upload_completion import (
-        UploadCompletion,
-        UploadCompletion_DirectMultipart,
-        UploadCompletion_DirectPut,
-        UploadCompletion_ServiceProxied,
-    )
     from .upload_content_claim import UploadContentClaim
-    from .upload_content_response import UploadContentResponse
     from .upload_id import UploadId
     from .upload_mode import UploadMode
     from .upload_part_checksum_claim import UploadPartChecksumClaim
@@ -254,23 +245,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "AttributeRevisionNo": ".attribute_revision_no",
     "AttributeValue": ".attribute_value",
     "Attributes": ".attributes",
-    "BeginDownloadByInodeRequest": ".begin_download_by_inode_request",
-    "BeginDownloadByInodeResponse": ".begin_download_by_inode_response",
-    "BeginDownloadResponse": ".begin_download_response",
-    "BeginUploadDirectMultipart": ".begin_upload_direct_multipart",
-    "BeginUploadDirectPut": ".begin_upload_direct_put",
-    "BeginUploadRequest": ".begin_upload_request",
-    "BeginUploadRequest_DirectMultipart": ".begin_upload_request",
-    "BeginUploadRequest_DirectPut": ".begin_upload_request",
-    "BeginUploadRequest_ServiceProxied": ".begin_upload_request",
-    "BeginUploadResponse": ".begin_upload_response",
-    "BeginUploadResponseDirectMultipart": ".begin_upload_response_direct_multipart",
-    "BeginUploadResponseDirectPut": ".begin_upload_response_direct_put",
-    "BeginUploadResponseServiceProxied": ".begin_upload_response_service_proxied",
-    "BeginUploadResponse_DirectMultipart": ".begin_upload_response",
-    "BeginUploadResponse_DirectPut": ".begin_upload_response",
-    "BeginUploadResponse_ServiceProxied": ".begin_upload_response",
-    "BeginUploadServiceProxied": ".begin_upload_service_proxied",
     "BindingGeneration": ".binding_generation",
     "CapabilityDocument": ".capability_document",
     "ChangeSeq": ".change_seq",
@@ -285,6 +259,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CheckpointOwnerUser": ".checkpoint_owner_user",
     "Checksum": ".checksum",
     "ChecksumAlgorithm": ".checksum_algorithm",
+    "Commit": ".commit",
     "CommitId": ".commit_id",
     "CommitPrecondition": ".commit_precondition",
     "CommitPreconditionAttributesRevision": ".commit_precondition_attributes_revision",
@@ -297,16 +272,27 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CommitPrecondition_NamespaceHead": ".commit_precondition",
     "CommitPrecondition_PathAbsence": ".commit_precondition",
     "CommitPrecondition_PathBinding": ".commit_precondition",
-    "CommitResponse": ".commit_response",
-    "CommittedChange": ".committed_change",
-    "CompleteUploadDirectMultipart": ".complete_upload_direct_multipart",
-    "CompleteUploadDirectPut": ".complete_upload_direct_put",
-    "CompleteUploadServiceProxied": ".complete_upload_service_proxied",
+    "CompleteUploadBody": ".complete_upload_body",
+    "CompleteUploadBodyDirectMultipart": ".complete_upload_body_direct_multipart",
+    "CompleteUploadBodyDirectPut": ".complete_upload_body_direct_put",
+    "CompleteUploadBodyServiceProxied": ".complete_upload_body_service_proxied",
+    "CompleteUploadBody_DirectMultipart": ".complete_upload_body",
+    "CompleteUploadBody_DirectPut": ".complete_upload_body",
+    "CompleteUploadBody_ServiceProxied": ".complete_upload_body",
     "CompletedUploadPart": ".completed_upload_part",
     "ContentId": ".content_id",
     "ContentRef": ".content_ref",
     "ContentRefKind": ".content_ref_kind",
     "ContentToken": ".content_token",
+    "CreateDownloadByInodeResponse": ".create_download_by_inode_response",
+    "CreateDownloadResponse": ".create_download_response",
+    "CreateUploadBody": ".create_upload_body",
+    "CreateUploadBodyDirectMultipart": ".create_upload_body_direct_multipart",
+    "CreateUploadBodyDirectPut": ".create_upload_body_direct_put",
+    "CreateUploadBodyServiceProxied": ".create_upload_body_service_proxied",
+    "CreateUploadBody_DirectMultipart": ".create_upload_body",
+    "CreateUploadBody_DirectPut": ".create_upload_body",
+    "CreateUploadBody_ServiceProxied": ".create_upload_body",
     "DeleteCheckpointResponse": ".delete_checkpoint_response",
     "DeleteDirectoryBehavior": ".delete_directory_behavior",
     "DeleteNamespaceResponse": ".delete_namespace_response",
@@ -373,6 +359,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "GrepMatch": ".grep_match",
     "GrepResponse": ".grep_response",
     "InodeId": ".inode_id",
+    "InodeKind": ".inode_kind",
     "ListChangesResponse": ".list_changes_response",
     "ListCheckpointsResponse": ".list_checkpoints_response",
     "ListFileRevisionsResponse": ".list_file_revisions_response",
@@ -397,6 +384,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "NameKey": ".name_key",
     "Namespace": ".namespace",
     "NamespaceDiagnostics": ".namespace_diagnostics",
+    "NamespaceForkBasis": ".namespace_fork_basis",
     "NamespaceId": ".namespace_id",
     "ObjectTransferAccess": ".object_transfer_access",
     "ObjectTransferAccessPresignedUrl": ".object_transfer_access_presigned_url",
@@ -442,17 +430,13 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SignUploadPartsResponse": ".sign_upload_parts_response",
     "SignedUploadPart": ".signed_upload_part",
     "Snapshot": ".snapshot",
+    "SnapshotId": ".snapshot_id",
     "StoreProbeCheckOutcome": ".store_probe_check_outcome",
     "StoreProbeCheckResult": ".store_probe_check_result",
     "StoreProbeRequest": ".store_probe_request",
     "StoreProbeResponse": ".store_probe_response",
     "TrashEntry": ".trash_entry",
-    "UploadCompletion": ".upload_completion",
-    "UploadCompletion_DirectMultipart": ".upload_completion",
-    "UploadCompletion_DirectPut": ".upload_completion",
-    "UploadCompletion_ServiceProxied": ".upload_completion",
     "UploadContentClaim": ".upload_content_claim",
-    "UploadContentResponse": ".upload_content_response",
     "UploadId": ".upload_id",
     "UploadMode": ".upload_mode",
     "UploadPartChecksumClaim": ".upload_part_checksum_claim",
@@ -505,23 +489,6 @@ __all__ = [
     "AttributeRevisionNo",
     "AttributeValue",
     "Attributes",
-    "BeginDownloadByInodeRequest",
-    "BeginDownloadByInodeResponse",
-    "BeginDownloadResponse",
-    "BeginUploadDirectMultipart",
-    "BeginUploadDirectPut",
-    "BeginUploadRequest",
-    "BeginUploadRequest_DirectMultipart",
-    "BeginUploadRequest_DirectPut",
-    "BeginUploadRequest_ServiceProxied",
-    "BeginUploadResponse",
-    "BeginUploadResponseDirectMultipart",
-    "BeginUploadResponseDirectPut",
-    "BeginUploadResponseServiceProxied",
-    "BeginUploadResponse_DirectMultipart",
-    "BeginUploadResponse_DirectPut",
-    "BeginUploadResponse_ServiceProxied",
-    "BeginUploadServiceProxied",
     "BindingGeneration",
     "CapabilityDocument",
     "ChangeSeq",
@@ -536,6 +503,7 @@ __all__ = [
     "CheckpointOwnerUser",
     "Checksum",
     "ChecksumAlgorithm",
+    "Commit",
     "CommitId",
     "CommitPrecondition",
     "CommitPreconditionAttributesRevision",
@@ -548,16 +516,27 @@ __all__ = [
     "CommitPrecondition_NamespaceHead",
     "CommitPrecondition_PathAbsence",
     "CommitPrecondition_PathBinding",
-    "CommitResponse",
-    "CommittedChange",
-    "CompleteUploadDirectMultipart",
-    "CompleteUploadDirectPut",
-    "CompleteUploadServiceProxied",
+    "CompleteUploadBody",
+    "CompleteUploadBodyDirectMultipart",
+    "CompleteUploadBodyDirectPut",
+    "CompleteUploadBodyServiceProxied",
+    "CompleteUploadBody_DirectMultipart",
+    "CompleteUploadBody_DirectPut",
+    "CompleteUploadBody_ServiceProxied",
     "CompletedUploadPart",
     "ContentId",
     "ContentRef",
     "ContentRefKind",
     "ContentToken",
+    "CreateDownloadByInodeResponse",
+    "CreateDownloadResponse",
+    "CreateUploadBody",
+    "CreateUploadBodyDirectMultipart",
+    "CreateUploadBodyDirectPut",
+    "CreateUploadBodyServiceProxied",
+    "CreateUploadBody_DirectMultipart",
+    "CreateUploadBody_DirectPut",
+    "CreateUploadBody_ServiceProxied",
     "DeleteCheckpointResponse",
     "DeleteDirectoryBehavior",
     "DeleteNamespaceResponse",
@@ -624,6 +603,7 @@ __all__ = [
     "GrepMatch",
     "GrepResponse",
     "InodeId",
+    "InodeKind",
     "ListChangesResponse",
     "ListCheckpointsResponse",
     "ListFileRevisionsResponse",
@@ -648,6 +628,7 @@ __all__ = [
     "NameKey",
     "Namespace",
     "NamespaceDiagnostics",
+    "NamespaceForkBasis",
     "NamespaceId",
     "ObjectTransferAccess",
     "ObjectTransferAccessPresignedUrl",
@@ -693,17 +674,13 @@ __all__ = [
     "SignUploadPartsResponse",
     "SignedUploadPart",
     "Snapshot",
+    "SnapshotId",
     "StoreProbeCheckOutcome",
     "StoreProbeCheckResult",
     "StoreProbeRequest",
     "StoreProbeResponse",
     "TrashEntry",
-    "UploadCompletion",
-    "UploadCompletion_DirectMultipart",
-    "UploadCompletion_DirectPut",
-    "UploadCompletion_ServiceProxied",
     "UploadContentClaim",
-    "UploadContentResponse",
     "UploadId",
     "UploadMode",
     "UploadPartChecksumClaim",

@@ -4,23 +4,17 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .namespace_id import NamespaceId
-from .upload_id import UploadId
+from .upload_content_claim import UploadContentClaim
 
 
-class BeginUploadResponseServiceProxied(UniversalBaseModel):
+class CompleteUploadBodyDirectPut(UniversalBaseModel):
     """
-    The service will receive the bytes and write the content object.
-    """
-
-    namespace_id: NamespaceId = pydantic.Field()
-    """
-    Namespace authorized to consume the eventual staged content.
+    Complete a direct-PUT upload.
     """
 
-    upload_id: UploadId = pydantic.Field()
+    content: UploadContentClaim = pydantic.Field()
     """
-    The session identity used by later append and completion calls.
+    Expected length and checksum of the stored object.
     """
 
     if IS_PYDANTIC_V2:

@@ -4,10 +4,9 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.actor_id import ActorId
+from ..types.commit import Commit
 from ..types.commit_id import CommitId
 from ..types.commit_precondition import CommitPrecondition
-from ..types.commit_response import CommitResponse
 from ..types.content_token import ContentToken
 from ..types.filesystem_operation import FilesystemOperation
 from .raw_client import AsyncRawCommitsClient, RawCommitsClient
@@ -35,14 +34,13 @@ class CommitsClient:
         self,
         namespace_id: str,
         *,
-        actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
         preconditions: typing.Optional[typing.Sequence[CommitPrecondition]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> CommitResponse:
+    ) -> Commit:
         """
         Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request preconditions check the pre-state after receipt resolution and before operations; a failed precondition names its position in `details.precondition_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
@@ -50,9 +48,6 @@ class CommitsClient:
         ----------
         namespace_id : str
             Namespace id
-
-        actor_id : ActorId
-            Actor responsible for the commit, as supplied by the application.
 
         commit_id : CommitId
             Caller-supplied idempotency key for the whole request.
@@ -74,7 +69,7 @@ class CommitsClient:
 
         Returns
         -------
-        CommitResponse
+        Commit
             Commit applied
 
         Examples
@@ -82,12 +77,12 @@ class CommitsClient:
         from loonfs.server import FilesystemOperation_CopyPath, LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.commits.create(
             namespace_id="namespace_id",
-            actor_id="usr_8f3c",
             commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
             operations=[
                 FilesystemOperation_CopyPath(
@@ -99,7 +94,6 @@ class CommitsClient:
         """
         _response = self._raw_client.create(
             namespace_id,
-            actor_id=actor_id,
             commit_id=commit_id,
             operations=operations,
             content_tokens=content_tokens,
@@ -129,14 +123,13 @@ class AsyncCommitsClient:
         self,
         namespace_id: str,
         *,
-        actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
         preconditions: typing.Optional[typing.Sequence[CommitPrecondition]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> CommitResponse:
+    ) -> Commit:
         """
         Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request preconditions check the pre-state after receipt resolution and before operations; a failed precondition names its position in `details.precondition_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
@@ -144,9 +137,6 @@ class AsyncCommitsClient:
         ----------
         namespace_id : str
             Namespace id
-
-        actor_id : ActorId
-            Actor responsible for the commit, as supplied by the application.
 
         commit_id : CommitId
             Caller-supplied idempotency key for the whole request.
@@ -168,7 +158,7 @@ class AsyncCommitsClient:
 
         Returns
         -------
-        CommitResponse
+        Commit
             Commit applied
 
         Examples
@@ -178,6 +168,7 @@ class AsyncCommitsClient:
         from loonfs.server import AsyncLoonFS, FilesystemOperation_CopyPath
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -186,7 +177,6 @@ class AsyncCommitsClient:
         async def main() -> None:
             await client.commits.create(
                 namespace_id="namespace_id",
-                actor_id="usr_8f3c",
                 commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
                 operations=[
                     FilesystemOperation_CopyPath(
@@ -201,7 +191,6 @@ class AsyncCommitsClient:
         """
         _response = await self._raw_client.create(
             namespace_id,
-            actor_id=actor_id,
             commit_id=commit_id,
             operations=operations,
             content_tokens=content_tokens,

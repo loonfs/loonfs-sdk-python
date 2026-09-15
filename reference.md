@@ -356,7 +356,7 @@ client.namespaces.fork(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[CheckpointId]` — Fork from this live snapshot instead of the current head.
+**snapshot_id:** `typing.Optional[SnapshotId]` — Fork from this live snapshot instead of the current head.
     
 </dd>
 </dl>
@@ -455,7 +455,7 @@ client.changes.list(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[CheckpointId]` — End the feed at this snapshot's captured sequence
+**snapshot_id:** `typing.Optional[SnapshotId]` — End the feed at this snapshot's captured sequence
     
 </dd>
 </dl>
@@ -476,7 +476,7 @@ client.changes.list(
 </details>
 
 ## Commits
-<details><summary><code>client.commits.<a href="src/loonfs/commits/client.py">create</a>(...) -> CommitResponse</code></summary>
+<details><summary><code>client.commits.<a href="src/loonfs/commits/client.py">create</a>(...) -> Commit</code></summary>
 <dl>
 <dd>
 
@@ -512,7 +512,6 @@ client = LoonFS(
 
 client.commits.create(
     namespace_id="namespace_id",
-    actor_id="usr_8f3c",
     commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
     operations=[
         FilesystemOperation_CopyPath(
@@ -537,14 +536,6 @@ client.commits.create(
 <dd>
 
 **namespace_id:** `str` — Namespace id
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**actor_id:** `ActorId` — Actor responsible for the commit, as supplied by the application.
     
 </dd>
 </dl>
@@ -682,7 +673,7 @@ client.files.content(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[CheckpointId]` — Use the file revision captured by this snapshot
+**snapshot_id:** `typing.Optional[SnapshotId]` — Use the file revision captured by this snapshot
     
 </dd>
 </dl>
@@ -702,7 +693,7 @@ client.files.content(
 </dl>
 </details>
 
-<details><summary><code>client.files.<a href="src/loonfs/files/client.py">create_download</a>(...) -> BeginDownloadResponse</code></summary>
+<details><summary><code>client.files.<a href="src/loonfs/files/client.py">create_download</a>(...) -> CreateDownloadResponse</code></summary>
 <dl>
 <dd>
 
@@ -738,7 +729,6 @@ client = LoonFS(
 
 client.files.create_download(
     namespace_id="namespace_id",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
     path="/docs/report.txt",
 )
 
@@ -772,7 +762,10 @@ client.files.create_download(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[CheckpointId]` — Use the file revision captured by this snapshot
+**revision_no:** `typing.Optional[RevisionNo]` 
+
+Revision to read, or `None` for the path's current revision.
+Cannot be combined with `snapshot_id`.
     
 </dd>
 </dl>
@@ -780,7 +773,10 @@ client.files.create_download(
 <dl>
 <dd>
 
-**revision_no:** `typing.Optional[RevisionNo]` — Revision to read, or `None` for the path's current revision.
+**snapshot_id:** `typing.Optional[SnapshotId]` 
+
+Read the file revision captured by this snapshot.
+Cannot be combined with `revision_no`.
     
 </dd>
 </dl>
@@ -894,7 +890,7 @@ client.files.list(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[CheckpointId]` — Use the directory state captured by this snapshot
+**snapshot_id:** `typing.Optional[SnapshotId]` — Use the directory state captured by this snapshot
     
 </dd>
 </dl>
@@ -992,7 +988,7 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[CheckpointId]` — Use the path state captured by this snapshot
+**snapshot_id:** `typing.Optional[SnapshotId]` — Use the path state captured by this snapshot
     
 </dd>
 </dl>
@@ -1340,7 +1336,7 @@ client.trash.list(
 <dl>
 <dd>
 
-Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
+Returns the path entry for a visible inode from the current state or a live snapshot. Unknown or hidden inodes answer `inode_not_found`.
 </dd>
 </dl>
 </dd>
@@ -1365,6 +1361,7 @@ client = LoonFS(
 client.inodes.retrieve(
     namespace_id="namespace_id",
     inode_id="ino_123",
+    snapshot_id="pin_00000000000000000001-0000000000000002",
 )
 
 ```
@@ -1405,6 +1402,14 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
+**snapshot_id:** `typing.Optional[SnapshotId]` — Use the path state captured by this snapshot
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -1429,7 +1434,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+Lists one page of a directory's children from the current state or a live snapshot, addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
 </dd>
 </dl>
 </dd>
@@ -1454,6 +1459,7 @@ client = LoonFS(
 client.inodes.list_children(
     namespace_id="namespace_id",
     inode_id="ino_123",
+    snapshot_id="pin_00000000000000000001-0000000000000002",
 )
 
 ```
@@ -1503,6 +1509,14 @@ client.inodes.list_children(
 <dd>
 
 **include_attributes:** `typing.Optional[bool]` — Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[SnapshotId]` — Use the directory state captured by this snapshot
     
 </dd>
 </dl>
@@ -1709,7 +1723,7 @@ client.inodes.content(
 </dl>
 </details>
 
-<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">create_download</a>(...) -> BeginDownloadByInodeResponse</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">create_download</a>(...) -> CreateDownloadByInodeResponse</code></summary>
 <dl>
 <dd>
 
@@ -1721,7 +1735,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-Authorizes a direct read of one retained inode revision. The request body is `{}` and the response does not include a path.
+Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
 </dd>
 </dl>
 </dd>
@@ -1747,9 +1761,6 @@ client.inodes.create_download(
     namespace_id="namespace_id",
     inode_id="ino_123",
     revision_no=1000000,
-    request={
-        "key": "value"
-    },
 )
 
 ```
@@ -1783,14 +1794,6 @@ client.inodes.create_download(
 <dd>
 
 **revision_no:** `RevisionNo` — Revision number
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request:** `BeginDownloadByInodeRequest` 
     
 </dd>
 </dl>
@@ -2025,7 +2028,7 @@ client = LoonFS(
 
 client.snapshots.delete(
     namespace_id="namespace_id",
-    snapshot_id="snapshot_id",
+    snapshot_id="pin_00000000000000000001-0000000000000002",
 )
 
 ```
@@ -2050,7 +2053,7 @@ client.snapshots.delete(
 <dl>
 <dd>
 
-**snapshot_id:** `str` — Snapshot id
+**snapshot_id:** `SnapshotId` — Snapshot id
     
 </dd>
 </dl>
@@ -2106,7 +2109,7 @@ client = LoonFS(
 
 client.snapshots.extend(
     namespace_id="namespace_id",
-    snapshot_id="snapshot_id",
+    snapshot_id="pin_00000000000000000001-0000000000000002",
     ttl_ms=1000000,
 )
 
@@ -2132,7 +2135,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-**snapshot_id:** `str` — Snapshot id
+**snapshot_id:** `SnapshotId` — Snapshot id
     
 </dd>
 </dl>
@@ -2161,7 +2164,7 @@ client.snapshots.extend(
 </details>
 
 ## uploads
-<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">create</a>(...) -> BeginUploadResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">create</a>(...) -> UploadSession</code></summary>
 <dl>
 <dd>
 
@@ -2188,7 +2191,7 @@ Starts an upload session for content that may later be attached to a file. Servi
 <dd>
 
 ```python
-from loonfs.server import LoonFS, BeginUploadRequest_DirectMultipart
+from loonfs.server import LoonFS, CreateUploadBody_DirectMultipart
 
 client = LoonFS(
     token="<token>",
@@ -2197,7 +2200,7 @@ client = LoonFS(
 
 client.uploads.create(
     namespace_id="namespace_id",
-    request=BeginUploadRequest_DirectMultipart(),
+    request=CreateUploadBody_DirectMultipart(),
 )
 
 ```
@@ -2222,7 +2225,7 @@ client.uploads.create(
 <dl>
 <dd>
 
-**request:** `BeginUploadRequest` 
+**request:** `CreateUploadBody` 
     
 </dd>
 </dl>
@@ -2254,7 +2257,7 @@ client.uploads.create(
 <dl>
 <dd>
 
-Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
+Returns an upload session. An open direct_put session includes freshly signed access. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 </dd>
 </dl>
 </dd>
@@ -2431,7 +2434,7 @@ Completes an upload. The request mode must match the mode used to start the sess
 <dd>
 
 ```python
-from loonfs.server import LoonFS, UploadCompletion_DirectMultipart, UploadContentClaim, Checksum, CompletedUploadPart
+from loonfs.server import LoonFS, CompleteUploadBody_DirectMultipart, UploadContentClaim, Checksum, CompletedUploadPart
 
 client = LoonFS(
     token="<token>",
@@ -2441,7 +2444,7 @@ client = LoonFS(
 client.uploads.complete(
     namespace_id="namespace_id",
     upload_id="upload_id",
-    request=UploadCompletion_DirectMultipart(
+    request=CompleteUploadBody_DirectMultipart(
         content=UploadContentClaim(
             checksum=Checksum(
                 algorithm="sha256",
@@ -2492,7 +2495,7 @@ client.uploads.complete(
 <dl>
 <dd>
 
-**request:** `UploadCompletion` 
+**request:** `CompleteUploadBody` 
     
 </dd>
 </dl>
@@ -2512,7 +2515,7 @@ client.uploads.complete(
 </dl>
 </details>
 
-<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">put_content</a>(...) -> UploadContentResponse</code></summary>
+<details><summary><code>client.uploads.<a href="src/loonfs/uploads/client.py">put_content</a>(...) -> UploadSession</code></summary>
 <dl>
 <dd>
 
@@ -2524,7 +2527,7 @@ client.uploads.complete(
 <dl>
 <dd>
 
-Uploads bytes into a service-proxied upload session and returns the content reference for the stored object.
+Uploads bytes into a service-proxied upload session and returns the open session with the staged content reference.
 </dd>
 </dl>
 </dd>

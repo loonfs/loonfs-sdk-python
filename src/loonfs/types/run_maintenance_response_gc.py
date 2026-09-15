@@ -42,12 +42,7 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
 
     retained: RetainedCandidates = pydantic.Field()
     """
-    `retained_candidates` grouped by reason.
-    """
-
-    retained_candidates: int = pydantic.Field()
-    """
-    The number of candidates retained at deletion time.
+    Candidates retained at deletion time, grouped by reason.
     """
 
     if IS_PYDANTIC_V2:

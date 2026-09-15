@@ -4,35 +4,41 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .checksum_algorithm import ChecksumAlgorithm
+from .content_ref import ContentRef
+from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .object_transfer_access import ObjectTransferAccess
-from .upload_id import UploadId
+from .revision_no import RevisionNo
 
 
-class BeginUploadResponseDirectPut(UniversalBaseModel):
+class CreateDownloadByInodeResponse(UniversalBaseModel):
     """
-    One presigned request writes the whole object.
+    A short-lived capability to read one inode revision.
     """
 
     access: ObjectTransferAccess = pydantic.Field()
     """
-    Short-lived permission to write the object.
+    Short-lived provider access without the raw object key.
     """
 
-    checksum_algorithm: ChecksumAlgorithm = pydantic.Field()
+    content_ref: ContentRef = pydantic.Field()
     """
-    Checksum algorithm the client must use for its completion claim.
+    Content identity, size, and checksum.
+    """
+
+    inode_id: InodeId = pydantic.Field()
+    """
+    File inode being read.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace authorized to consume the eventual staged content.
+    Namespace that was read.
     """
 
-    upload_id: UploadId = pydantic.Field()
+    revision_no: RevisionNo = pydantic.Field()
     """
-    Durable session identity used by subsequent completion calls.
+    Revision being read.
     """
 
     if IS_PYDANTIC_V2:

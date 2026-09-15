@@ -5,10 +5,10 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.change_seq import ChangeSeq
-from ..types.checkpoint_id import CheckpointId
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.namespace import Namespace
 from ..types.namespace_id import NamespaceId
+from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawNamespacesClient, RawNamespacesClient
 
 # this is used as the default value for optional parameters
@@ -54,6 +54,7 @@ class NamespacesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -86,6 +87,7 @@ class NamespacesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -127,6 +129,7 @@ class NamespacesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -144,7 +147,7 @@ class NamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[CheckpointId] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Namespace:
         """
@@ -158,7 +161,7 @@ class NamespacesClient:
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
@@ -174,6 +177,7 @@ class NamespacesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -229,6 +233,7 @@ class AsyncNamespacesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -271,6 +276,7 @@ class AsyncNamespacesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -320,6 +326,7 @@ class AsyncNamespacesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -343,7 +350,7 @@ class AsyncNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[CheckpointId] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Namespace:
         """
@@ -357,7 +364,7 @@ class AsyncNamespacesClient:
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
@@ -375,6 +382,7 @@ class AsyncNamespacesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )

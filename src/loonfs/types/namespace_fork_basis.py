@@ -4,29 +4,23 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .content_ref import ContentRef
+from .change_seq import ChangeSeq
 from .namespace_id import NamespaceId
-from .upload_id import UploadId
 
 
-class UploadContentResponse(UniversalBaseModel):
+class NamespaceForkBasis(UniversalBaseModel):
     """
-    Response after uploading bytes into a session.
-    """
-
-    content_ref: ContentRef = pydantic.Field()
-    """
-    Digest and byte length computed from the accepted body.
+    The source a forked namespace started from.
     """
 
-    namespace_id: NamespaceId = pydantic.Field()
+    source_head_seq: ChangeSeq = pydantic.Field()
     """
-    Namespace that owns the upload session.
+    Source sequence the fork captured.
     """
 
-    upload_id: UploadId = pydantic.Field()
+    source_namespace_id: NamespaceId = pydantic.Field()
     """
-    Session into which the service staged these bytes.
+    Namespace the fork was taken from.
     """
 
     if IS_PYDANTIC_V2:

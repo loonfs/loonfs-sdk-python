@@ -7,6 +7,7 @@ from ..core.request_options import RequestOptions
 from ..types.delete_snapshot_response import DeleteSnapshotResponse
 from ..types.list_snapshots_response import ListSnapshotsResponse
 from ..types.snapshot import Snapshot
+from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawSnapshotsClient, RawSnapshotsClient
 
 # this is used as the default value for optional parameters
@@ -63,6 +64,7 @@ class SnapshotsClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -103,6 +105,7 @@ class SnapshotsClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -116,7 +119,7 @@ class SnapshotsClient:
         return _response.data
 
     def delete(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
         """
         Deletes a snapshot pin. A missing id returns snapshot_not_found.
@@ -126,7 +129,7 @@ class SnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             Snapshot id
 
         request_options : typing.Optional[RequestOptions]
@@ -142,12 +145,13 @@ class SnapshotsClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.delete(
             namespace_id="namespace_id",
-            snapshot_id="snapshot_id",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
         )
         """
         _response = self._raw_client.delete(namespace_id, snapshot_id, request_options=request_options)
@@ -156,7 +160,7 @@ class SnapshotsClient:
     def extend(
         self,
         namespace_id: str,
-        snapshot_id: str,
+        snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
@@ -169,7 +173,7 @@ class SnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             Snapshot id
 
         ttl_ms : int
@@ -188,12 +192,13 @@ class SnapshotsClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.extend(
             namespace_id="namespace_id",
-            snapshot_id="snapshot_id",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
             ttl_ms=1000000,
         )
         """
@@ -253,6 +258,7 @@ class AsyncSnapshotsClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -303,6 +309,7 @@ class AsyncSnapshotsClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -324,7 +331,7 @@ class AsyncSnapshotsClient:
         return _response.data
 
     async def delete(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
         """
         Deletes a snapshot pin. A missing id returns snapshot_not_found.
@@ -334,7 +341,7 @@ class AsyncSnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             Snapshot id
 
         request_options : typing.Optional[RequestOptions]
@@ -352,6 +359,7 @@ class AsyncSnapshotsClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -360,7 +368,7 @@ class AsyncSnapshotsClient:
         async def main() -> None:
             await client.snapshots.delete(
                 namespace_id="namespace_id",
-                snapshot_id="snapshot_id",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
             )
 
 
@@ -372,7 +380,7 @@ class AsyncSnapshotsClient:
     async def extend(
         self,
         namespace_id: str,
-        snapshot_id: str,
+        snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
@@ -385,7 +393,7 @@ class AsyncSnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             Snapshot id
 
         ttl_ms : int
@@ -406,6 +414,7 @@ class AsyncSnapshotsClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -414,7 +423,7 @@ class AsyncSnapshotsClient:
         async def main() -> None:
             await client.snapshots.extend(
                 namespace_id="namespace_id",
-                snapshot_id="snapshot_id",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
                 ttl_ms=1000000,
             )
 

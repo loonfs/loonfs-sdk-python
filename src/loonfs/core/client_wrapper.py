@@ -11,6 +11,7 @@ class BaseClientWrapper:
     def __init__(
         self,
         *,
+        actor_id: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
@@ -18,6 +19,7 @@ class BaseClientWrapper:
         max_retries: int = 2,
         logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
     ):
+        self._actor_id = actor_id
         self._token = token
         self._headers = headers
         self._base_url = base_url
@@ -35,6 +37,8 @@ class BaseClientWrapper:
             "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",
             **(self.get_custom_headers() or {}),
         }
+        if self._actor_id is not None:
+            headers["Loonfs-Actor"] = self._actor_id
         headers["Authorization"] = f"Bearer {self._get_token()}"
         return headers
 
@@ -61,6 +65,7 @@ class SyncClientWrapper(BaseClientWrapper):
     def __init__(
         self,
         *,
+        actor_id: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
@@ -70,6 +75,7 @@ class SyncClientWrapper(BaseClientWrapper):
         httpx_client: httpx.Client,
     ):
         super().__init__(
+            actor_id=actor_id,
             token=token,
             headers=headers,
             base_url=base_url,
@@ -91,6 +97,7 @@ class AsyncClientWrapper(BaseClientWrapper):
     def __init__(
         self,
         *,
+        actor_id: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
@@ -101,6 +108,7 @@ class AsyncClientWrapper(BaseClientWrapper):
         httpx_client: httpx.AsyncClient,
     ):
         super().__init__(
+            actor_id=actor_id,
             token=token,
             headers=headers,
             base_url=base_url,

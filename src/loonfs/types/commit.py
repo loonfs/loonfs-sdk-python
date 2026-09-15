@@ -8,16 +8,17 @@ from .actor_id import ActorId
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .filesystem_change import FilesystemChange
+from .namespace_id import NamespaceId
 
 
-class CommittedChange(UniversalBaseModel):
+class Commit(UniversalBaseModel):
     """
-    One committed change in namespace order.
+    One committed logical commit: its identity and the events it applied.
     """
 
     commit_id: CommitId = pydantic.Field()
     """
-    Client idempotency key for this logical commit.
+    The idempotency key for the commit.
     """
 
     committed_at_ms: int = pydantic.Field()
@@ -32,17 +33,23 @@ class CommittedChange(UniversalBaseModel):
 
     committed_seq: ChangeSeq = pydantic.Field()
     """
-    Namespace sequence for this logical commit.
+    Sequence number where the commit became visible.
     """
 
-    events: typing.List[FilesystemChange] = pydantic.Field()
+    events: typing.Optional[typing.List[FilesystemChange]] = pydantic.Field(default=None)
     """
-    The filesystem events for this commit in commit order.
+    Always present on the change feed. Absent only from a replayed
+    `POST /commits` response whose WAL record has been retired.
     """
 
     message: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Caller annotation, omitted when absent and carrying no filesystem semantics.
+    The optional caller annotation for the commit.
+    """
+
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    Namespace that changed.
     """
 
     if IS_PYDANTIC_V2:
