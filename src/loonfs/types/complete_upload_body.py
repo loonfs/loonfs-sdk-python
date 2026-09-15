@@ -7,22 +7,18 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .checksum_algorithm import ChecksumAlgorithm
-from .namespace_id import NamespaceId
-from .object_transfer_access import ObjectTransferAccess
-from .upload_id import UploadId
+from .completed_upload_part import CompletedUploadPart
+from .upload_content_claim import UploadContentClaim
 
 
-class BeginUploadResponse_DirectMultipart(UniversalBaseModel):
+class CompleteUploadBody_DirectMultipart(UniversalBaseModel):
     """
-    The response from starting an upload session for one transport mode.
+    Completes an upload using the mode that started it.
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
-    checksum_algorithm: ChecksumAlgorithm
-    namespace_id: NamespaceId
-    part_size_bytes: int
-    upload_id: UploadId
+    content: UploadContentClaim
+    parts: typing.List[CompletedUploadPart]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -34,16 +30,13 @@ class BeginUploadResponse_DirectMultipart(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class BeginUploadResponse_DirectPut(UniversalBaseModel):
+class CompleteUploadBody_DirectPut(UniversalBaseModel):
     """
-    The response from starting an upload session for one transport mode.
+    Completes an upload using the mode that started it.
     """
 
     mode: typing.Literal["direct_put"] = "direct_put"
-    access: ObjectTransferAccess
-    checksum_algorithm: ChecksumAlgorithm
-    namespace_id: NamespaceId
-    upload_id: UploadId
+    content: UploadContentClaim
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -55,14 +48,12 @@ class BeginUploadResponse_DirectPut(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class BeginUploadResponse_ServiceProxied(UniversalBaseModel):
+class CompleteUploadBody_ServiceProxied(UniversalBaseModel):
     """
-    The response from starting an upload session for one transport mode.
+    Completes an upload using the mode that started it.
     """
 
     mode: typing.Literal["service_proxied"] = "service_proxied"
-    namespace_id: NamespaceId
-    upload_id: UploadId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -74,9 +65,7 @@ class BeginUploadResponse_ServiceProxied(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-BeginUploadResponse = typing_extensions.Annotated[
-    typing.Union[
-        BeginUploadResponse_DirectMultipart, BeginUploadResponse_DirectPut, BeginUploadResponse_ServiceProxied
-    ],
+CompleteUploadBody = typing_extensions.Annotated[
+    typing.Union[CompleteUploadBody_DirectMultipart, CompleteUploadBody_DirectPut, CompleteUploadBody_ServiceProxied],
     pydantic.Field(discriminator="mode"),
 ]

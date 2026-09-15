@@ -4,16 +4,13 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.begin_download_by_inode_request import BeginDownloadByInodeRequest
-from ..types.begin_download_by_inode_response import BeginDownloadByInodeResponse
+from ..types.create_download_by_inode_response import CreateDownloadByInodeResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_inode_children_response import ListInodeChildrenResponse
 from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
+from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawInodesClient, RawInodesClient
-
-# this is used as the default value for optional parameters
-OMIT = typing.cast(typing.Any, ...)
 
 
 class InodesClient:
@@ -37,10 +34,11 @@ class InodesClient:
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PathEntry:
         """
-        Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
+        Returns the path entry for a visible inode from the current state or a live snapshot. Unknown or hidden inodes answer `inode_not_found`.
 
         Parameters
         ----------
@@ -52,6 +50,9 @@ class InodesClient:
 
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -66,16 +67,22 @@ class InodesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.retrieve(
             namespace_id="namespace_id",
             inode_id="ino_123",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
         )
         """
         _response = self._raw_client.retrieve(
-            namespace_id, inode_id, include_attributes=include_attributes, request_options=request_options
+            namespace_id,
+            inode_id,
+            include_attributes=include_attributes,
+            snapshot_id=snapshot_id,
+            request_options=request_options,
         )
         return _response.data
 
@@ -87,10 +94,11 @@ class InodesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListInodeChildrenResponse:
         """
-        Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+        Lists one page of a directory's children from the current state or a live snapshot, addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
 
         Parameters
         ----------
@@ -109,6 +117,9 @@ class InodesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            Use the directory state captured by this snapshot
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -122,12 +133,14 @@ class InodesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.list_children(
             namespace_id="namespace_id",
             inode_id="ino_123",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
         )
         """
         _response = self._raw_client.list_children(
@@ -136,6 +149,7 @@ class InodesClient:
             limit=limit,
             cursor=cursor,
             include_attributes=include_attributes,
+            snapshot_id=snapshot_id,
             request_options=request_options,
         )
         return _response.data
@@ -179,6 +193,7 @@ class InodesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -227,6 +242,7 @@ class InodesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -245,11 +261,10 @@ class InodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
-        request: BeginDownloadByInodeRequest,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> BeginDownloadByInodeResponse:
+    ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of one retained inode revision. The request body is `{}` and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -262,14 +277,12 @@ class InodesClient:
         revision_no : RevisionNo
             Revision number
 
-        request : BeginDownloadByInodeRequest
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        BeginDownloadByInodeResponse
+        CreateDownloadByInodeResponse
             Download authorized
 
         Examples
@@ -277,6 +290,7 @@ class InodesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -284,11 +298,10 @@ class InodesClient:
             namespace_id="namespace_id",
             inode_id="ino_123",
             revision_no=1000000,
-            request={"key": "value"},
         )
         """
         _response = self._raw_client.create_download(
-            namespace_id, inode_id, revision_no, request=request, request_options=request_options
+            namespace_id, inode_id, revision_no, request_options=request_options
         )
         return _response.data
 
@@ -314,10 +327,11 @@ class AsyncInodesClient:
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PathEntry:
         """
-        Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
+        Returns the path entry for a visible inode from the current state or a live snapshot. Unknown or hidden inodes answer `inode_not_found`.
 
         Parameters
         ----------
@@ -329,6 +343,9 @@ class AsyncInodesClient:
 
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -345,6 +362,7 @@ class AsyncInodesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -354,13 +372,18 @@ class AsyncInodesClient:
             await client.inodes.retrieve(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.retrieve(
-            namespace_id, inode_id, include_attributes=include_attributes, request_options=request_options
+            namespace_id,
+            inode_id,
+            include_attributes=include_attributes,
+            snapshot_id=snapshot_id,
+            request_options=request_options,
         )
         return _response.data
 
@@ -372,10 +395,11 @@ class AsyncInodesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListInodeChildrenResponse:
         """
-        Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+        Lists one page of a directory's children from the current state or a live snapshot, addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
 
         Parameters
         ----------
@@ -394,6 +418,9 @@ class AsyncInodesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            Use the directory state captured by this snapshot
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -409,6 +436,7 @@ class AsyncInodesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -418,6 +446,7 @@ class AsyncInodesClient:
             await client.inodes.list_children(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
             )
 
 
@@ -429,6 +458,7 @@ class AsyncInodesClient:
             limit=limit,
             cursor=cursor,
             include_attributes=include_attributes,
+            snapshot_id=snapshot_id,
             request_options=request_options,
         )
         return _response.data
@@ -474,6 +504,7 @@ class AsyncInodesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -530,6 +561,7 @@ class AsyncInodesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -555,11 +587,10 @@ class AsyncInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
-        request: BeginDownloadByInodeRequest,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> BeginDownloadByInodeResponse:
+    ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of one retained inode revision. The request body is `{}` and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -572,14 +603,12 @@ class AsyncInodesClient:
         revision_no : RevisionNo
             Revision number
 
-        request : BeginDownloadByInodeRequest
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        BeginDownloadByInodeResponse
+        CreateDownloadByInodeResponse
             Download authorized
 
         Examples
@@ -589,6 +618,7 @@ class AsyncInodesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -599,13 +629,12 @@ class AsyncInodesClient:
                 namespace_id="namespace_id",
                 inode_id="ino_123",
                 revision_no=1000000,
-                request={"key": "value"},
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.create_download(
-            namespace_id, inode_id, revision_no, request=request, request_options=request_options
+            namespace_id, inode_id, revision_no, request_options=request_options
         )
         return _response.data

@@ -4,7 +4,10 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .checksum_algorithm import ChecksumAlgorithm
+from .content_ref import ContentRef
 from .namespace_id import NamespaceId
+from .object_transfer_access import ObjectTransferAccess
 from .upload_id import UploadId
 from .upload_mode import UploadMode
 
@@ -12,6 +15,21 @@ from .upload_mode import UploadMode
 class UploadSessionStatusOpen(UniversalBaseModel):
     """
     Accepting content until its lease passes.
+    """
+
+    access: typing.Optional[ObjectTransferAccess] = pydantic.Field(default=None)
+    """
+    Present for `direct_put` sessions; minted fresh on every read.
+    """
+
+    checksum_algorithm: typing.Optional[ChecksumAlgorithm] = pydantic.Field(default=None)
+    """
+    Present for `direct_put` and `direct_multipart` sessions.
+    """
+
+    content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
+    """
+    Present after content is staged in a `service_proxied` session.
     """
 
     expires_at_ms: int = pydantic.Field()
@@ -27,6 +45,11 @@ class UploadSessionStatusOpen(UniversalBaseModel):
     namespace_id: NamespaceId = pydantic.Field()
     """
     Namespace that owns the session.
+    """
+
+    part_size_bytes: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Present for `direct_multipart` sessions.
     """
 
     upload_id: UploadId = pydantic.Field()

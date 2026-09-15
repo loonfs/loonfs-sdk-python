@@ -17,10 +17,9 @@ from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
-from ..types.actor_id import ActorId
+from ..types.commit import Commit
 from ..types.commit_id import CommitId
 from ..types.commit_precondition import CommitPrecondition
-from ..types.commit_response import CommitResponse
 from ..types.content_token import ContentToken
 from ..types.error_response import ErrorResponse
 from ..types.filesystem_operation import FilesystemOperation
@@ -38,14 +37,13 @@ class RawCommitsClient:
         self,
         namespace_id: str,
         *,
-        actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
         preconditions: typing.Optional[typing.Sequence[CommitPrecondition]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[CommitResponse]:
+    ) -> HttpResponse[Commit]:
         """
         Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request preconditions check the pre-state after receipt resolution and before operations; a failed precondition names its position in `details.precondition_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
@@ -53,9 +51,6 @@ class RawCommitsClient:
         ----------
         namespace_id : str
             Namespace id
-
-        actor_id : ActorId
-            Actor responsible for the commit, as supplied by the application.
 
         commit_id : CommitId
             Caller-supplied idempotency key for the whole request.
@@ -77,14 +72,13 @@ class RawCommitsClient:
 
         Returns
         -------
-        HttpResponse[CommitResponse]
+        HttpResponse[Commit]
             Commit applied
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/commits",
             method="POST",
             json={
-                "actor_id": actor_id,
                 "commit_id": commit_id,
                 "content_tokens": convert_and_respect_annotation_metadata(
                     object_=content_tokens, annotation=typing.Sequence[ContentToken], direction="write"
@@ -106,9 +100,9 @@ class RawCommitsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    CommitResponse,
+                    Commit,
                     parse_obj_as(
-                        type_=CommitResponse,  # type: ignore
+                        type_=Commit,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -197,14 +191,13 @@ class AsyncRawCommitsClient:
         self,
         namespace_id: str,
         *,
-        actor_id: ActorId,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
         content_tokens: typing.Optional[typing.Sequence[ContentToken]] = OMIT,
         message: typing.Optional[str] = OMIT,
         preconditions: typing.Optional[typing.Sequence[CommitPrecondition]] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[CommitResponse]:
+    ) -> AsyncHttpResponse[Commit]:
         """
         Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request preconditions check the pre-state after receipt resolution and before operations; a failed precondition names its position in `details.precondition_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
 
@@ -212,9 +205,6 @@ class AsyncRawCommitsClient:
         ----------
         namespace_id : str
             Namespace id
-
-        actor_id : ActorId
-            Actor responsible for the commit, as supplied by the application.
 
         commit_id : CommitId
             Caller-supplied idempotency key for the whole request.
@@ -236,14 +226,13 @@ class AsyncRawCommitsClient:
 
         Returns
         -------
-        AsyncHttpResponse[CommitResponse]
+        AsyncHttpResponse[Commit]
             Commit applied
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/commits",
             method="POST",
             json={
-                "actor_id": actor_id,
                 "commit_id": commit_id,
                 "content_tokens": convert_and_respect_annotation_metadata(
                     object_=content_tokens, annotation=typing.Sequence[ContentToken], direction="write"
@@ -265,9 +254,9 @@ class AsyncRawCommitsClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    CommitResponse,
+                    Commit,
                     parse_obj_as(
-                        type_=CommitResponse,  # type: ignore
+                        type_=Commit,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

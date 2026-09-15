@@ -5,8 +5,8 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.change_seq import ChangeSeq
-from ..types.checkpoint_id import CheckpointId
 from ..types.list_changes_response import ListChangesResponse
+from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawChangesClient, RawChangesClient
 
 
@@ -31,7 +31,7 @@ class ChangesClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListChangesResponse:
         """
@@ -48,7 +48,7 @@ class ChangesClient:
         limit : typing.Optional[int]
             Maximum page size
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             End the feed at this snapshot's captured sequence
 
         request_options : typing.Optional[RequestOptions]
@@ -64,6 +64,7 @@ class ChangesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -100,7 +101,7 @@ class AsyncChangesClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListChangesResponse:
         """
@@ -117,7 +118,7 @@ class AsyncChangesClient:
         limit : typing.Optional[int]
             Maximum page size
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             End the feed at this snapshot's captured sequence
 
         request_options : typing.Optional[RequestOptions]
@@ -135,6 +136,7 @@ class AsyncChangesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )

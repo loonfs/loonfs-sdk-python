@@ -9,9 +9,9 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class BeginUploadRequest_DirectMultipart(UniversalBaseModel):
+class CreateUploadBody_DirectMultipart(UniversalBaseModel):
     """
-    A request to start an upload session for one required transport mode.
+    Selects the transport for a new upload session.
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
@@ -27,9 +27,9 @@ class BeginUploadRequest_DirectMultipart(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class BeginUploadRequest_DirectPut(UniversalBaseModel):
+class CreateUploadBody_DirectPut(UniversalBaseModel):
     """
-    A request to start an upload session for one required transport mode.
+    Selects the transport for a new upload session.
     """
 
     mode: typing.Literal["direct_put"] = "direct_put"
@@ -45,9 +45,9 @@ class BeginUploadRequest_DirectPut(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class BeginUploadRequest_ServiceProxied(UniversalBaseModel):
+class CreateUploadBody_ServiceProxied(UniversalBaseModel):
     """
-    A request to start an upload session for one required transport mode.
+    Selects the transport for a new upload session.
     """
 
     mode: typing.Literal["service_proxied"] = "service_proxied"
@@ -62,7 +62,7 @@ class BeginUploadRequest_ServiceProxied(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-BeginUploadRequest = typing_extensions.Annotated[
-    typing.Union[BeginUploadRequest_DirectMultipart, BeginUploadRequest_DirectPut, BeginUploadRequest_ServiceProxied],
+CreateUploadBody = typing_extensions.Annotated[
+    typing.Union[CreateUploadBody_DirectMultipart, CreateUploadBody_DirectPut, CreateUploadBody_ServiceProxied],
     pydantic.Field(discriminator="mode"),
 ]

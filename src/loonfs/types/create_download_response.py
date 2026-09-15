@@ -11,7 +11,7 @@ from .object_transfer_access import ObjectTransferAccess
 from .revision_no import RevisionNo
 
 
-class BeginDownloadResponse(UniversalBaseModel):
+class CreateDownloadResponse(UniversalBaseModel):
     """
     A presigned URL for one content object.
 

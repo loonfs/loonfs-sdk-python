@@ -5,13 +5,13 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.absolute_path import AbsolutePath
-from ..types.begin_download_response import BeginDownloadResponse
-from ..types.checkpoint_id import CheckpointId
+from ..types.create_download_response import CreateDownloadResponse
 from ..types.grep_response import GrepResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
 from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
+from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawFilesClient, RawFilesClient
 
 # this is used as the default value for optional parameters
@@ -39,7 +39,7 @@ class FilesClient:
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
@@ -56,7 +56,7 @@ class FilesClient:
         revision_no : typing.Optional[RevisionNo]
             Optional prior revision number; cannot be combined with snapshot_id
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Use the file revision captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -72,6 +72,7 @@ class FilesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -90,10 +91,10 @@ class FilesClient:
         namespace_id: str,
         *,
         path: AbsolutePath,
-        snapshot_id: typing.Optional[CheckpointId] = None,
         revision_no: typing.Optional[RevisionNo] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> BeginDownloadResponse:
+    ) -> CreateDownloadResponse:
         """
         Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.max_content_bytes`.
 
@@ -105,18 +106,20 @@ class FilesClient:
         path : AbsolutePath
             Absolute path of the file to read.
 
-        snapshot_id : typing.Optional[CheckpointId]
-            Use the file revision captured by this snapshot
-
         revision_no : typing.Optional[RevisionNo]
             Revision to read, or `None` for the path's current revision.
+            Cannot be combined with `snapshot_id`.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            Read the file revision captured by this snapshot.
+            Cannot be combined with `revision_no`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        BeginDownloadResponse
+        CreateDownloadResponse
             Download authorized
 
         Examples
@@ -124,17 +127,17 @@ class FilesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.files.create_download(
             namespace_id="namespace_id",
-            snapshot_id="pin_00000000000000000001-0000000000000002",
             path="/docs/report.txt",
         )
         """
         _response = self._raw_client.create_download(
-            namespace_id, path=path, snapshot_id=snapshot_id, revision_no=revision_no, request_options=request_options
+            namespace_id, path=path, revision_no=revision_no, snapshot_id=snapshot_id, request_options=request_options
         )
         return _response.data
 
@@ -146,7 +149,7 @@ class FilesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListPathEntriesResponse:
         """
@@ -169,7 +172,7 @@ class FilesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Use the directory state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -185,6 +188,7 @@ class FilesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -211,7 +215,7 @@ class FilesClient:
         *,
         path: str,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PathEntry:
         """
@@ -228,7 +232,7 @@ class FilesClient:
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -244,6 +248,7 @@ class FilesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -301,6 +306,7 @@ class FilesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -369,6 +375,7 @@ class FilesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -412,7 +419,7 @@ class AsyncFilesClient:
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
@@ -429,7 +436,7 @@ class AsyncFilesClient:
         revision_no : typing.Optional[RevisionNo]
             Optional prior revision number; cannot be combined with snapshot_id
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Use the file revision captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -447,6 +454,7 @@ class AsyncFilesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -472,10 +480,10 @@ class AsyncFilesClient:
         namespace_id: str,
         *,
         path: AbsolutePath,
-        snapshot_id: typing.Optional[CheckpointId] = None,
         revision_no: typing.Optional[RevisionNo] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> BeginDownloadResponse:
+    ) -> CreateDownloadResponse:
         """
         Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.max_content_bytes`.
 
@@ -487,18 +495,20 @@ class AsyncFilesClient:
         path : AbsolutePath
             Absolute path of the file to read.
 
-        snapshot_id : typing.Optional[CheckpointId]
-            Use the file revision captured by this snapshot
-
         revision_no : typing.Optional[RevisionNo]
             Revision to read, or `None` for the path's current revision.
+            Cannot be combined with `snapshot_id`.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            Read the file revision captured by this snapshot.
+            Cannot be combined with `revision_no`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        BeginDownloadResponse
+        CreateDownloadResponse
             Download authorized
 
         Examples
@@ -508,6 +518,7 @@ class AsyncFilesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -516,7 +527,6 @@ class AsyncFilesClient:
         async def main() -> None:
             await client.files.create_download(
                 namespace_id="namespace_id",
-                snapshot_id="pin_00000000000000000001-0000000000000002",
                 path="/docs/report.txt",
             )
 
@@ -524,7 +534,7 @@ class AsyncFilesClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.create_download(
-            namespace_id, path=path, snapshot_id=snapshot_id, revision_no=revision_no, request_options=request_options
+            namespace_id, path=path, revision_no=revision_no, snapshot_id=snapshot_id, request_options=request_options
         )
         return _response.data
 
@@ -536,7 +546,7 @@ class AsyncFilesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListPathEntriesResponse:
         """
@@ -559,7 +569,7 @@ class AsyncFilesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Use the directory state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -577,6 +587,7 @@ class AsyncFilesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -609,7 +620,7 @@ class AsyncFilesClient:
         *,
         path: str,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[CheckpointId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PathEntry:
         """
@@ -626,7 +637,7 @@ class AsyncFilesClient:
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
 
-        snapshot_id : typing.Optional[CheckpointId]
+        snapshot_id : typing.Optional[SnapshotId]
             Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -644,6 +655,7 @@ class AsyncFilesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -709,6 +721,7 @@ class AsyncFilesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -785,6 +798,7 @@ class AsyncFilesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )

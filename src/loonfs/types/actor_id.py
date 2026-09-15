@@ -2,5 +2,5 @@
 
 ActorId = str
 """
-Opaque hosting-platform actor id: non-empty, at most 256 UTF-8 bytes, without leading or trailing whitespace or control characters.
+Stable opaque actor id containing 1 to 256 visible ASCII characters.
 """

@@ -4,17 +4,16 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .upload_content_claim import UploadContentClaim
 
 
-class CompleteUploadDirectPut(UniversalBaseModel):
+class CreateUploadBodyDirectMultipart(UniversalBaseModel):
     """
-    Complete a direct-PUT upload.
+    Write the object in parts through presigned part uploads.
     """
 
-    content: UploadContentClaim = pydantic.Field()
+    part_size_bytes: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Expected length and checksum of the stored object.
+    The byte length of every part except the last, or `None` for the server default.
     """
 
     if IS_PYDANTIC_V2:

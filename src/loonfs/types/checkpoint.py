@@ -16,14 +16,14 @@ class Checkpoint(UniversalBaseModel):
     One checkpoint resource described by its durable record.
     """
 
+    captured_seq: ChangeSeq = pydantic.Field()
+    """
+    Namespace sequence captured by the checkpoint.
+    """
+
     checkpoint_id: CheckpointId = pydantic.Field()
     """
     Durable checkpoint id used to address the checkpoint for deletion.
-    """
-
-    checkpoint_seq: ChangeSeq = pydantic.Field()
-    """
-    Sequence covered by the checkpoint's pinned basis.
     """
 
     created_at_ms: int = pydantic.Field()

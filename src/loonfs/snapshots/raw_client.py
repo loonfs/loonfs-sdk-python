@@ -20,6 +20,7 @@ from ..types.delete_snapshot_response import DeleteSnapshotResponse
 from ..types.error_response import ErrorResponse
 from ..types.list_snapshots_response import ListSnapshotsResponse
 from ..types.snapshot import Snapshot
+from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -259,7 +260,7 @@ class RawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def delete(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[DeleteSnapshotResponse]:
         """
         Deletes a snapshot pin. A missing id returns snapshot_not_found.
@@ -269,7 +270,7 @@ class RawSnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             Snapshot id
 
         request_options : typing.Optional[RequestOptions]
@@ -351,7 +352,7 @@ class RawSnapshotsClient:
     def extend(
         self,
         namespace_id: str,
-        snapshot_id: str,
+        snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
@@ -364,7 +365,7 @@ class RawSnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             Snapshot id
 
         ttl_ms : int
@@ -698,7 +699,7 @@ class AsyncRawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def delete(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[DeleteSnapshotResponse]:
         """
         Deletes a snapshot pin. A missing id returns snapshot_not_found.
@@ -708,7 +709,7 @@ class AsyncRawSnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             Snapshot id
 
         request_options : typing.Optional[RequestOptions]
@@ -790,7 +791,7 @@ class AsyncRawSnapshotsClient:
     async def extend(
         self,
         namespace_id: str,
-        snapshot_id: str,
+        snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
@@ -803,7 +804,7 @@ class AsyncRawSnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             Snapshot id
 
         ttl_ms : int

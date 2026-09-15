@@ -4,11 +4,9 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.begin_upload_request import BeginUploadRequest
-from ..types.begin_upload_response import BeginUploadResponse
+from ..types.complete_upload_body import CompleteUploadBody
+from ..types.create_upload_body import CreateUploadBody
 from ..types.sign_upload_parts_response import SignUploadPartsResponse
-from ..types.upload_completion import UploadCompletion
-from ..types.upload_content_response import UploadContentResponse
 from ..types.upload_part_checksum_claim import UploadPartChecksumClaim
 from ..types.upload_session import UploadSession
 from .raw_client import AsyncRawUploadsClient, RawUploadsClient
@@ -33,8 +31,8 @@ class UploadsClient:
         return self._raw_client
 
     def create(
-        self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
-    ) -> BeginUploadResponse:
+        self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
+    ) -> UploadSession:
         """
         Starts an upload session for content that may later be attached to a file. Service-proxied uploads send bytes through the server; direct-put uploads return object-store presigned credentials.
 
@@ -43,27 +41,28 @@ class UploadsClient:
         namespace_id : str
             Namespace id
 
-        request : BeginUploadRequest
+        request : CreateUploadBody
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        BeginUploadResponse
+        UploadSession
             Upload session started
 
         Examples
         --------
-        from loonfs.server import BeginUploadRequest_DirectMultipart, LoonFS
+        from loonfs.server import CreateUploadBody_DirectMultipart, LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.uploads.create(
             namespace_id="namespace_id",
-            request=BeginUploadRequest_DirectMultipart(),
+            request=CreateUploadBody_DirectMultipart(),
         )
         """
         _response = self._raw_client.create(namespace_id, request=request, request_options=request_options)
@@ -73,7 +72,7 @@ class UploadsClient:
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
-        Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
+        Returns an upload session. An open direct_put session includes freshly signed access. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
@@ -96,6 +95,7 @@ class UploadsClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -134,6 +134,7 @@ class UploadsClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -150,7 +151,7 @@ class UploadsClient:
         namespace_id: str,
         upload_id: str,
         *,
-        request: UploadCompletion,
+        request: CompleteUploadBody,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UploadSession:
         """
@@ -164,7 +165,7 @@ class UploadsClient:
         upload_id : str
             Upload session id
 
-        request : UploadCompletion
+        request : CompleteUploadBody
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -179,19 +180,20 @@ class UploadsClient:
         from loonfs.server import (
             Checksum,
             CompletedUploadPart,
+            CompleteUploadBody_DirectMultipart,
             LoonFS,
-            UploadCompletion_DirectMultipart,
             UploadContentClaim,
         )
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.uploads.complete(
             namespace_id="namespace_id",
             upload_id="upload_id",
-            request=UploadCompletion_DirectMultipart(
+            request=CompleteUploadBody_DirectMultipart(
                 content=UploadContentClaim(
                     checksum=Checksum(
                         algorithm="sha256",
@@ -222,9 +224,9 @@ class UploadsClient:
         *,
         request: typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]],
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> UploadContentResponse:
+    ) -> UploadSession:
         """
-        Uploads bytes into a service-proxied upload session and returns the content reference for the stored object.
+        Uploads bytes into a service-proxied upload session and returns the open session with the staged content reference.
 
         Parameters
         ----------
@@ -241,8 +243,8 @@ class UploadsClient:
 
         Returns
         -------
-        UploadContentResponse
-            Upload content accepted
+        UploadSession
+            Open session with the staged content reference
         """
         _response = self._raw_client.put_content(
             namespace_id, upload_id, request=request, request_options=request_options
@@ -284,6 +286,7 @@ class UploadsClient:
         from loonfs.server import Checksum, LoonFS, UploadPartChecksumClaim
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -321,8 +324,8 @@ class AsyncUploadsClient:
         return self._raw_client
 
     async def create(
-        self, namespace_id: str, *, request: BeginUploadRequest, request_options: typing.Optional[RequestOptions] = None
-    ) -> BeginUploadResponse:
+        self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
+    ) -> UploadSession:
         """
         Starts an upload session for content that may later be attached to a file. Service-proxied uploads send bytes through the server; direct-put uploads return object-store presigned credentials.
 
@@ -331,23 +334,24 @@ class AsyncUploadsClient:
         namespace_id : str
             Namespace id
 
-        request : BeginUploadRequest
+        request : CreateUploadBody
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        BeginUploadResponse
+        UploadSession
             Upload session started
 
         Examples
         --------
         import asyncio
 
-        from loonfs.server import AsyncLoonFS, BeginUploadRequest_DirectMultipart
+        from loonfs.server import AsyncLoonFS, CreateUploadBody_DirectMultipart
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -356,7 +360,7 @@ class AsyncUploadsClient:
         async def main() -> None:
             await client.uploads.create(
                 namespace_id="namespace_id",
-                request=BeginUploadRequest_DirectMultipart(),
+                request=CreateUploadBody_DirectMultipart(),
             )
 
 
@@ -369,7 +373,7 @@ class AsyncUploadsClient:
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
-        Returns an upload session. A completed session includes a new content token so the client can retry the commit without uploading the content again.
+        Returns an upload session. An open direct_put session includes freshly signed access. A completed session includes a new content token so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
@@ -394,6 +398,7 @@ class AsyncUploadsClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -440,6 +445,7 @@ class AsyncUploadsClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -462,7 +468,7 @@ class AsyncUploadsClient:
         namespace_id: str,
         upload_id: str,
         *,
-        request: UploadCompletion,
+        request: CompleteUploadBody,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> UploadSession:
         """
@@ -476,7 +482,7 @@ class AsyncUploadsClient:
         upload_id : str
             Upload session id
 
-        request : UploadCompletion
+        request : CompleteUploadBody
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -494,11 +500,12 @@ class AsyncUploadsClient:
             AsyncLoonFS,
             Checksum,
             CompletedUploadPart,
-            UploadCompletion_DirectMultipart,
+            CompleteUploadBody_DirectMultipart,
             UploadContentClaim,
         )
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -508,7 +515,7 @@ class AsyncUploadsClient:
             await client.uploads.complete(
                 namespace_id="namespace_id",
                 upload_id="upload_id",
-                request=UploadCompletion_DirectMultipart(
+                request=CompleteUploadBody_DirectMultipart(
                     content=UploadContentClaim(
                         checksum=Checksum(
                             algorithm="sha256",
@@ -544,9 +551,9 @@ class AsyncUploadsClient:
         *,
         request: typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]],
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> UploadContentResponse:
+    ) -> UploadSession:
         """
-        Uploads bytes into a service-proxied upload session and returns the content reference for the stored object.
+        Uploads bytes into a service-proxied upload session and returns the open session with the staged content reference.
 
         Parameters
         ----------
@@ -563,8 +570,8 @@ class AsyncUploadsClient:
 
         Returns
         -------
-        UploadContentResponse
-            Upload content accepted
+        UploadSession
+            Open session with the staged content reference
         """
         _response = await self._raw_client.put_content(
             namespace_id, upload_id, request=request, request_options=request_options
@@ -608,6 +615,7 @@ class AsyncUploadsClient:
         from loonfs.server import AsyncLoonFS, Checksum, UploadPartChecksumClaim
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )

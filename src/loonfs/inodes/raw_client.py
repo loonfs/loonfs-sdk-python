@@ -19,17 +19,14 @@ from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
-from ..types.begin_download_by_inode_request import BeginDownloadByInodeRequest
-from ..types.begin_download_by_inode_response import BeginDownloadByInodeResponse
+from ..types.create_download_by_inode_response import CreateDownloadByInodeResponse
 from ..types.error_response import ErrorResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_inode_children_response import ListInodeChildrenResponse
 from ..types.path_entry import PathEntry
 from ..types.revision_no import RevisionNo
+from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
-
-# this is used as the default value for optional parameters
-OMIT = typing.cast(typing.Any, ...)
 
 
 class RawInodesClient:
@@ -42,10 +39,11 @@ class RawInodesClient:
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[PathEntry]:
         """
-        Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
+        Returns the path entry for a visible inode from the current state or a live snapshot. Unknown or hidden inodes answer `inode_not_found`.
 
         Parameters
         ----------
@@ -57,6 +55,9 @@ class RawInodesClient:
 
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -71,6 +72,7 @@ class RawInodesClient:
             method="GET",
             params={
                 "include_attributes": include_attributes,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         )
@@ -156,10 +158,11 @@ class RawInodesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListInodeChildrenResponse]:
         """
-        Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+        Lists one page of a directory's children from the current state or a live snapshot, addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
 
         Parameters
         ----------
@@ -178,6 +181,9 @@ class RawInodesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            Use the directory state captured by this snapshot
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -193,6 +199,7 @@ class RawInodesClient:
                 "limit": limit,
                 "cursor": cursor,
                 "include_attributes": include_attributes,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         )
@@ -553,11 +560,10 @@ class RawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
-        request: BeginDownloadByInodeRequest,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[BeginDownloadByInodeResponse]:
+    ) -> HttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The request body is `{}` and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -570,32 +576,25 @@ class RawInodesClient:
         revision_no : RevisionNo
             Revision number
 
-        request : BeginDownloadByInodeRequest
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[BeginDownloadByInodeResponse]
+        HttpResponse[CreateDownloadByInodeResponse]
             Download authorized
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/downloads",
             method="POST",
-            json=request,
-            headers={
-                "content-type": "application/json",
-            },
             request_options=request_options,
-            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    BeginDownloadByInodeResponse,
+                    CreateDownloadByInodeResponse,
                     parse_obj_as(
-                        type_=BeginDownloadByInodeResponse,  # type: ignore
+                        type_=CreateDownloadByInodeResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -697,10 +696,11 @@ class AsyncRawInodesClient:
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[PathEntry]:
         """
-        Returns the current path entry for a visible inode. Unknown or hidden inodes answer `inode_not_found`.
+        Returns the path entry for a visible inode from the current state or a live snapshot. Unknown or hidden inodes answer `inode_not_found`.
 
         Parameters
         ----------
@@ -712,6 +712,9 @@ class AsyncRawInodesClient:
 
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -726,6 +729,7 @@ class AsyncRawInodesClient:
             method="GET",
             params={
                 "include_attributes": include_attributes,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         )
@@ -811,10 +815,11 @@ class AsyncRawInodesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListInodeChildrenResponse]:
         """
-        Lists one page of a directory's children addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+        Lists one page of a directory's children from the current state or a live snapshot, addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
 
         Parameters
         ----------
@@ -833,6 +838,9 @@ class AsyncRawInodesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            Use the directory state captured by this snapshot
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -848,6 +856,7 @@ class AsyncRawInodesClient:
                 "limit": limit,
                 "cursor": cursor,
                 "include_attributes": include_attributes,
+                "snapshot_id": snapshot_id,
             },
             request_options=request_options,
         )
@@ -1209,11 +1218,10 @@ class AsyncRawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
-        request: BeginDownloadByInodeRequest,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[BeginDownloadByInodeResponse]:
+    ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The request body is `{}` and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -1226,32 +1234,25 @@ class AsyncRawInodesClient:
         revision_no : RevisionNo
             Revision number
 
-        request : BeginDownloadByInodeRequest
-
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[BeginDownloadByInodeResponse]
+        AsyncHttpResponse[CreateDownloadByInodeResponse]
             Download authorized
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/downloads",
             method="POST",
-            json=request,
-            headers={
-                "content-type": "application/json",
-            },
             request_options=request_options,
-            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    BeginDownloadByInodeResponse,
+                    CreateDownloadByInodeResponse,
                     parse_obj_as(
-                        type_=BeginDownloadByInodeResponse,  # type: ignore
+                        type_=CreateDownloadByInodeResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

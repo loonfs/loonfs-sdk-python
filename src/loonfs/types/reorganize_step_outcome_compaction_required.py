@@ -7,6 +7,10 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
 class ReorganizeStepOutcomeCompactionRequired(UniversalBaseModel):
+    """
+    A family group needs a streaming compaction. Run the `metadata_compaction` job.
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:

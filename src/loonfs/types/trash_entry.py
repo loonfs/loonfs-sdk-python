@@ -8,6 +8,7 @@ from .actor_id import ActorId
 from .change_seq import ChangeSeq
 from .directory_binding import DirectoryBinding
 from .inode_id import InodeId
+from .inode_kind import InodeKind
 
 
 class TrashEntry(UniversalBaseModel):
@@ -38,6 +39,11 @@ class TrashEntry(UniversalBaseModel):
     inode_id: InodeId = pydantic.Field()
     """
     Inode hidden by the deletion.
+    """
+
+    inode_kind: InodeKind = pydantic.Field()
+    """
+    Whether the deleted root is a file or a directory.
     """
 
     if IS_PYDANTIC_V2:

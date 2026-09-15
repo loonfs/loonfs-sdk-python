@@ -5,13 +5,18 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
-from .checkpoint_id import CheckpointId
 from .namespace_id import NamespaceId
+from .snapshot_id import SnapshotId
 
 
 class Snapshot(UniversalBaseModel):
     """
     A live snapshot.
+    """
+
+    captured_seq: ChangeSeq = pydantic.Field()
+    """
+    Namespace sequence captured by the snapshot.
     """
 
     created_at_ms: int = pydantic.Field()
@@ -24,11 +29,6 @@ class Snapshot(UniversalBaseModel):
     When the snapshot expires, in Unix milliseconds.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
-    """
-    Namespace sequence captured by the snapshot.
-    """
-
     name: str = pydantic.Field()
     """
     Snapshot label.
@@ -39,7 +39,7 @@ class Snapshot(UniversalBaseModel):
     Namespace whose state the snapshot captured.
     """
 
-    snapshot_id: CheckpointId = pydantic.Field()
+    snapshot_id: SnapshotId = pydantic.Field()
     """
     Snapshot id.
     """

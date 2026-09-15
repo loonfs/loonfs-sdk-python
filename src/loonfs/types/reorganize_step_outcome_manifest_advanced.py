@@ -7,6 +7,10 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
 class ReorganizeStepOutcomeManifestAdvanced(UniversalBaseModel):
+    """
+    Another publisher changed the current manifest before this step could publish.
+    """
+
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
     else:

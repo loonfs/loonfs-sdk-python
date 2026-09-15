@@ -57,6 +57,7 @@ class RunsClient:
         from loonfs.server import LoonFS, RunMaintenanceRequest_Gc
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -116,6 +117,7 @@ class AsyncRunsClient:
         from loonfs.server import AsyncLoonFS, RunMaintenanceRequest_Gc
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )

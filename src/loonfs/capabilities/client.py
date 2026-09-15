@@ -42,6 +42,7 @@ class CapabilitiesClient:
         from loonfs.server import LoonFS
 
         client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -87,6 +88,7 @@ class AsyncCapabilitiesClient:
         from loonfs.server import AsyncLoonFS
 
         client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )

@@ -30,6 +30,7 @@ class LoonFS:
     base_url : str
         The base url to use for requests from the client.
 
+    actor_id : typing.Optional[str]
     token : typing.Union[str, typing.Callable[[], str]]
     headers : typing.Optional[typing.Dict[str, str]]
         Additional headers to send with every request.
@@ -54,6 +55,7 @@ class LoonFS:
     from loonfs.server import LoonFS
 
     client = LoonFS(
+        actor_id="YOUR_ACTOR_ID",
         token="YOUR_TOKEN",
         base_url="https://yourhost.com/path/to/api",
     )
@@ -63,6 +65,7 @@ class LoonFS:
         self,
         *,
         base_url: str,
+        actor_id: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
@@ -75,6 +78,7 @@ class LoonFS:
         _defaulted_max_retries = max_retries if max_retries is not None else 2
         self._client_wrapper = SyncClientWrapper(
             base_url=base_url,
+            actor_id=actor_id,
             token=token,
             headers=headers,
             httpx_client=httpx_client
@@ -205,6 +209,7 @@ class AsyncLoonFS:
     base_url : str
         The base url to use for requests from the client.
 
+    actor_id : typing.Optional[str]
     token : typing.Union[str, typing.Callable[[], str]]
     headers : typing.Optional[typing.Dict[str, str]]
         Additional headers to send with every request.
@@ -232,6 +237,7 @@ class AsyncLoonFS:
     from loonfs.server import AsyncLoonFS
 
     client = AsyncLoonFS(
+        actor_id="YOUR_ACTOR_ID",
         token="YOUR_TOKEN",
         base_url="https://yourhost.com/path/to/api",
     )
@@ -241,6 +247,7 @@ class AsyncLoonFS:
         self,
         *,
         base_url: str,
+        actor_id: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
@@ -254,6 +261,7 @@ class AsyncLoonFS:
         _defaulted_max_retries = max_retries if max_retries is not None else 2
         self._client_wrapper = AsyncClientWrapper(
             base_url=base_url,
+            actor_id=actor_id,
             token=token,
             headers=headers,
             async_token=async_token,
