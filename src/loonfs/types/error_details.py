@@ -4,6 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .access_revision_no import AccessRevisionNo
 from .attribute_revision_no import AttributeRevisionNo
 from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
@@ -32,6 +33,11 @@ class ErrorDetails(UniversalBaseModel):
     active_writer_epoch: typing.Optional[WriterEpoch] = pydantic.Field(default=None)
     """
     Epoch that currently owns the namespace.
+    """
+
+    actual_access_revision_no: typing.Optional[AccessRevisionNo] = pydantic.Field(default=None)
+    """
+    Access revision that is actually current for the inode.
     """
 
     actual_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
@@ -82,6 +88,11 @@ class ErrorDetails(UniversalBaseModel):
     committed_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
     The sequence where this commit ID already landed, when recorded by a durable receipt.
+    """
+
+    expected_access_revision_no: typing.Optional[AccessRevisionNo] = pydantic.Field(default=None)
+    """
+    Access revision the request expected to be current.
     """
 
     expected_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)

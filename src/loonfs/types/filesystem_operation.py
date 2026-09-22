@@ -9,6 +9,8 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .absolute_path import AbsolutePath
+from .access_grants import AccessGrants
+from .access_revision_no import AccessRevisionNo
 from .attribute_key import AttributeKey
 from .attribute_revision_no import AttributeRevisionNo
 from .attribute_value import AttributeValue
@@ -96,8 +98,9 @@ class FilesystemOperation_CreateFileByInode(UniversalBaseModel):
     """
 
     kind: typing.Literal["create_file_by_inode"] = "create_file_by_inode"
-    content_ref: ContentRef
+    content_ref: typing.Optional[ContentRef] = None
     display_name: DisplayName
+    inline_content: typing.Optional[str] = None
     parent_inode_id: InodeId
 
     if IS_PYDANTIC_V2:
@@ -213,9 +216,10 @@ class FilesystemOperation_PutFile(UniversalBaseModel):
 
     kind: typing.Literal["put_file"] = "put_file"
     behavior: typing.Optional[DestinationBehavior] = None
-    content_ref: ContentRef
+    content_ref: typing.Optional[ContentRef] = None
     expected_inode_id: typing.Optional[InodeId] = None
     expected_revision_no: typing.Optional[RevisionNo] = None
+    inline_content: typing.Optional[str] = None
     path: AbsolutePath
 
     if IS_PYDANTIC_V2:
@@ -236,8 +240,9 @@ class FilesystemOperation_PutFileRevisionByInode(UniversalBaseModel):
     """
 
     kind: typing.Literal["put_file_revision_by_inode"] = "put_file_revision_by_inode"
-    content_ref: ContentRef
+    content_ref: typing.Optional[ContentRef] = None
     expected_revision_no: RevisionNo
+    inline_content: typing.Optional[str] = None
     inode_id: InodeId
 
     if IS_PYDANTIC_V2:
@@ -293,6 +298,30 @@ class FilesystemOperation_Undelete(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_UpdateAccess(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected, and fieldless variants require empty objects.
+    """
+
+    kind: typing.Literal["update_access"] = "update_access"
+    boundary: bool
+    expected_access_revision_no: typing.Optional[AccessRevisionNo] = None
+    expected_inode_id: typing.Optional[InodeId] = None
+    grants: AccessGrants
+    path: AbsolutePath
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_UpdateAttributes(UniversalBaseModel):
     """
     One filesystem operation.
@@ -333,6 +362,7 @@ FilesystemOperation = typing_extensions.Annotated[
         FilesystemOperation_PutFileRevisionByInode,
         FilesystemOperation_RestoreRevision,
         FilesystemOperation_Undelete,
+        FilesystemOperation_UpdateAccess,
         FilesystemOperation_UpdateAttributes,
     ],
     pydantic.Field(discriminator="kind"),

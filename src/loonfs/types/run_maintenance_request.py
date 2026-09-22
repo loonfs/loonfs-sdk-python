@@ -7,6 +7,7 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .principal_id import PrincipalId
 
 
 class RunMaintenanceRequest_Gc(UniversalBaseModel):
@@ -62,6 +63,24 @@ class RunMaintenanceRequest_MetadataCompaction(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class RunMaintenanceRequest_RecoverAdministrator(UniversalBaseModel):
+    """
+    One maintenance job for one namespace.
+    """
+
+    kind: typing.Literal["recover_administrator"] = "recover_administrator"
+    principal_id: PrincipalId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class RunMaintenanceRequest_Retention(UniversalBaseModel):
     """
     One maintenance job for one namespace.
@@ -84,6 +103,7 @@ RunMaintenanceRequest = typing_extensions.Annotated[
         RunMaintenanceRequest_Gc,
         RunMaintenanceRequest_Metadata,
         RunMaintenanceRequest_MetadataCompaction,
+        RunMaintenanceRequest_RecoverAdministrator,
         RunMaintenanceRequest_Retention,
     ],
     pydantic.Field(discriminator="kind"),

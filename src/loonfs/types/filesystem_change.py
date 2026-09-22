@@ -7,6 +7,8 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .access_grants import AccessGrants
+from .access_revision_no import AccessRevisionNo
 from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
 from .binding_generation import BindingGeneration
@@ -15,6 +17,29 @@ from .directory_binding import DirectoryBinding
 from .display_name import DisplayName
 from .inode_id import InodeId
 from .revision_no import RevisionNo
+
+
+class FilesystemChange_AccessChanged(UniversalBaseModel):
+    """
+    One filesystem change within a commit.
+
+    One request operation can produce multiple changes.
+    """
+
+    kind: typing.Literal["access_changed"] = "access_changed"
+    access_revision_no: AccessRevisionNo
+    boundary: bool
+    grants: AccessGrants
+    inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
 
 
 class FilesystemChange_AttributesChanged(UniversalBaseModel):
@@ -180,6 +205,7 @@ class FilesystemChange_Undeleted(UniversalBaseModel):
 
 FilesystemChange = typing_extensions.Annotated[
     typing.Union[
+        FilesystemChange_AccessChanged,
         FilesystemChange_AttributesChanged,
         FilesystemChange_ContentChanged,
         FilesystemChange_Deleted,

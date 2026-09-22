@@ -12,16 +12,22 @@ from .inode_id import InodeId
 class FilesystemOperationCreateFileByInode(UniversalBaseModel):
     """
     Create a file with an unused name under an existing parent inode.
+    Requires exactly one of `content_ref` and `inline_content`.
     """
 
-    content_ref: ContentRef = pydantic.Field()
+    content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
     """
-    Immutable bytes that must be covered by a valid preparation proof.
+    Uploaded content covered by a token; mutually exclusive with `inline_content`.
     """
 
     display_name: DisplayName = pydantic.Field()
     """
     New file name.
+    """
+
+    inline_content: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Complete file bytes as base64; mutually exclusive with `content_ref`.
     """
 
     parent_inode_id: InodeId = pydantic.Field()

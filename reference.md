@@ -123,6 +123,17 @@ client.namespaces.create(
 <dl>
 <dd>
 
+**access:** `typing.Optional[NamespaceAccess]`
+
+The access mode, fixed for the namespace's life. Defaults to
+unrestricted.
+
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>

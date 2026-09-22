@@ -10,6 +10,7 @@ from ..core.jsonable_encoder import encode_path_param
 from ..core.parse_error import ParsingError
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
+from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
 from ..errors.gone_error import GoneError
@@ -20,6 +21,7 @@ from ..types.change_seq import ChangeSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.error_response import ErrorResponse
 from ..types.namespace import Namespace
+from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
 from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
@@ -33,7 +35,11 @@ class RawNamespacesClient:
         self._client_wrapper = client_wrapper
 
     def create(
-        self, *, namespace_id: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        namespace_id: NamespaceId,
+        access: typing.Optional[NamespaceAccess] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Namespace]:
         """
         Creates a new empty namespace.
@@ -42,6 +48,10 @@ class RawNamespacesClient:
         ----------
         namespace_id : NamespaceId
             Durable namespace id to create.
+
+        access : typing.Optional[NamespaceAccess]
+            The access mode, fixed for the namespace's life. Defaults to
+            unrestricted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -58,6 +68,9 @@ class RawNamespacesClient:
             "v0/namespaces",
             method="POST",
             json={
+                "access": convert_and_respect_annotation_metadata(
+                    object_=access, annotation=NamespaceAccess, direction="write"
+                ),
                 "namespace_id": namespace_id,
             },
             headers={
@@ -497,7 +510,11 @@ class AsyncRawNamespacesClient:
         self._client_wrapper = client_wrapper
 
     async def create(
-        self, *, namespace_id: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        namespace_id: NamespaceId,
+        access: typing.Optional[NamespaceAccess] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Namespace]:
         """
         Creates a new empty namespace.
@@ -506,6 +523,10 @@ class AsyncRawNamespacesClient:
         ----------
         namespace_id : NamespaceId
             Durable namespace id to create.
+
+        access : typing.Optional[NamespaceAccess]
+            The access mode, fixed for the namespace's life. Defaults to
+            unrestricted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -522,6 +543,9 @@ class AsyncRawNamespacesClient:
             "v0/namespaces",
             method="POST",
             json={
+                "access": convert_and_respect_annotation_metadata(
+                    object_=access, annotation=NamespaceAccess, direction="write"
+                ),
                 "namespace_id": namespace_id,
             },
             headers={
