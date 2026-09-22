@@ -7,7 +7,9 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .access_revision_no import AccessRevisionNo
 from .change_seq import ChangeSeq
+from .commit_id import CommitId
 from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
 from .deleted_object_counts import DeletedObjectCounts
 from .metadata_compaction_outcome import MetadataCompactionOutcome
@@ -79,6 +81,27 @@ class RunMaintenanceResponse_MetadataCompaction(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class RunMaintenanceResponse_RecoverAdministrator(UniversalBaseModel):
+    """
+    The result of one maintenance job. The `kind` matches the request.
+    """
+
+    kind: typing.Literal["recover_administrator"] = "recover_administrator"
+    access_revision_no: AccessRevisionNo
+    commit_id: CommitId
+    committed_seq: ChangeSeq
+    namespace_id: NamespaceId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class RunMaintenanceResponse_Retention(UniversalBaseModel):
     """
     The result of one maintenance job. The `kind` matches the request.
@@ -103,6 +126,7 @@ RunMaintenanceResponse = typing_extensions.Annotated[
         RunMaintenanceResponse_Gc,
         RunMaintenanceResponse_Metadata,
         RunMaintenanceResponse_MetadataCompaction,
+        RunMaintenanceResponse_RecoverAdministrator,
         RunMaintenanceResponse_Retention,
     ],
     pydantic.Field(discriminator="kind"),

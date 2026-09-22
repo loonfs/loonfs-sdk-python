@@ -7,6 +7,10 @@ from importlib import import_module
 
 if typing.TYPE_CHECKING:
     from .absolute_path import AbsolutePath
+    from .access_grants import AccessGrants
+    from .access_revision_no import AccessRevisionNo
+    from .access_right import AccessRight
+    from .access_rights import AccessRights
     from .actor_id import ActorId
     from .attribute_key import AttributeKey
     from .attribute_revision_no import AttributeRevisionNo
@@ -32,12 +36,14 @@ if typing.TYPE_CHECKING:
     from .commit_id import CommitId
     from .commit_precondition import (
         CommitPrecondition,
+        CommitPrecondition_AccessRevision,
         CommitPrecondition_AttributesRevision,
         CommitPrecondition_FileRevision,
         CommitPrecondition_NamespaceHead,
         CommitPrecondition_PathAbsence,
         CommitPrecondition_PathBinding,
     )
+    from .commit_precondition_access_revision import CommitPreconditionAccessRevision
     from .commit_precondition_attributes_revision import CommitPreconditionAttributesRevision
     from .commit_precondition_file_revision import CommitPreconditionFileRevision
     from .commit_precondition_namespace_head import CommitPreconditionNamespaceHead
@@ -82,6 +88,7 @@ if typing.TYPE_CHECKING:
     from .file_revision import FileRevision
     from .filesystem_change import (
         FilesystemChange,
+        FilesystemChange_AccessChanged,
         FilesystemChange_AttributesChanged,
         FilesystemChange_ContentChanged,
         FilesystemChange_Deleted,
@@ -90,6 +97,7 @@ if typing.TYPE_CHECKING:
         FilesystemChange_Moved,
         FilesystemChange_Undeleted,
     )
+    from .filesystem_change_access_changed import FilesystemChangeAccessChanged
     from .filesystem_change_attributes_changed import FilesystemChangeAttributesChanged
     from .filesystem_change_content_changed import FilesystemChangeContentChanged
     from .filesystem_change_deleted import FilesystemChangeDeleted
@@ -111,6 +119,7 @@ if typing.TYPE_CHECKING:
         FilesystemOperation_PutFileRevisionByInode,
         FilesystemOperation_RestoreRevision,
         FilesystemOperation_Undelete,
+        FilesystemOperation_UpdateAccess,
         FilesystemOperation_UpdateAttributes,
     )
     from .filesystem_operation_copy_path import FilesystemOperationCopyPath
@@ -125,6 +134,7 @@ if typing.TYPE_CHECKING:
     from .filesystem_operation_put_file_revision_by_inode import FilesystemOperationPutFileRevisionByInode
     from .filesystem_operation_restore_revision import FilesystemOperationRestoreRevision
     from .filesystem_operation_undelete import FilesystemOperationUndelete
+    from .filesystem_operation_update_access import FilesystemOperationUpdateAccess
     from .filesystem_operation_update_attributes import FilesystemOperationUpdateAttributes
     from .grep_gc_request import GrepGcRequest
     from .grep_gc_response import GrepGcResponse
@@ -161,6 +171,12 @@ if typing.TYPE_CHECKING:
     from .metadata_compaction_outcome_published import MetadataCompactionOutcomePublished
     from .name_key import NameKey
     from .namespace import Namespace
+    from .namespace_access import NamespaceAccess, NamespaceAccess_Acl, NamespaceAccess_Unrestricted
+    from .namespace_access_acl import NamespaceAccessAcl
+    from .namespace_access_mode import NamespaceAccessMode, NamespaceAccessMode_Acl, NamespaceAccessMode_Unrestricted
+    from .namespace_access_mode_acl import NamespaceAccessModeAcl
+    from .namespace_access_mode_unrestricted import NamespaceAccessModeUnrestricted
+    from .namespace_access_unrestricted import NamespaceAccessUnrestricted
     from .namespace_diagnostics import NamespaceDiagnostics
     from .namespace_fork_basis import NamespaceForkBasis
     from .namespace_id import NamespaceId
@@ -169,6 +185,8 @@ if typing.TYPE_CHECKING:
     from .path_entry import PathEntry, PathEntry_Dir, PathEntry_File
     from .path_entry_directory import PathEntryDirectory
     from .path_entry_file import PathEntryFile
+    from .principal_id import PrincipalId
+    from .principal_scope import PrincipalScope
     from .reorganize_step_outcome import (
         ReorganizeStepOutcome,
         ReorganizeStepOutcome_CompactionRequired,
@@ -189,22 +207,26 @@ if typing.TYPE_CHECKING:
         RunMaintenanceRequest_Gc,
         RunMaintenanceRequest_Metadata,
         RunMaintenanceRequest_MetadataCompaction,
+        RunMaintenanceRequest_RecoverAdministrator,
         RunMaintenanceRequest_Retention,
     )
     from .run_maintenance_request_gc import RunMaintenanceRequestGc
     from .run_maintenance_request_metadata import RunMaintenanceRequestMetadata
     from .run_maintenance_request_metadata_compaction import RunMaintenanceRequestMetadataCompaction
+    from .run_maintenance_request_recover_administrator import RunMaintenanceRequestRecoverAdministrator
     from .run_maintenance_request_retention import RunMaintenanceRequestRetention
     from .run_maintenance_response import (
         RunMaintenanceResponse,
         RunMaintenanceResponse_Gc,
         RunMaintenanceResponse_Metadata,
         RunMaintenanceResponse_MetadataCompaction,
+        RunMaintenanceResponse_RecoverAdministrator,
         RunMaintenanceResponse_Retention,
     )
     from .run_maintenance_response_gc import RunMaintenanceResponseGc
     from .run_maintenance_response_metadata import RunMaintenanceResponseMetadata
     from .run_maintenance_response_metadata_compaction import RunMaintenanceResponseMetadataCompaction
+    from .run_maintenance_response_recover_administrator import RunMaintenanceResponseRecoverAdministrator
     from .run_maintenance_response_retention import RunMaintenanceResponseRetention
     from .run_no import RunNo
     from .service_unavailable_error_body import ServiceUnavailableErrorBody
@@ -240,6 +262,10 @@ if typing.TYPE_CHECKING:
     from .writer_id import WriterId
 _dynamic_imports: typing.Dict[str, str] = {
     "AbsolutePath": ".absolute_path",
+    "AccessGrants": ".access_grants",
+    "AccessRevisionNo": ".access_revision_no",
+    "AccessRight": ".access_right",
+    "AccessRights": ".access_rights",
     "ActorId": ".actor_id",
     "AttributeKey": ".attribute_key",
     "AttributeRevisionNo": ".attribute_revision_no",
@@ -262,11 +288,13 @@ _dynamic_imports: typing.Dict[str, str] = {
     "Commit": ".commit",
     "CommitId": ".commit_id",
     "CommitPrecondition": ".commit_precondition",
+    "CommitPreconditionAccessRevision": ".commit_precondition_access_revision",
     "CommitPreconditionAttributesRevision": ".commit_precondition_attributes_revision",
     "CommitPreconditionFileRevision": ".commit_precondition_file_revision",
     "CommitPreconditionNamespaceHead": ".commit_precondition_namespace_head",
     "CommitPreconditionPathAbsence": ".commit_precondition_path_absence",
     "CommitPreconditionPathBinding": ".commit_precondition_path_binding",
+    "CommitPrecondition_AccessRevision": ".commit_precondition",
     "CommitPrecondition_AttributesRevision": ".commit_precondition",
     "CommitPrecondition_FileRevision": ".commit_precondition",
     "CommitPrecondition_NamespaceHead": ".commit_precondition",
@@ -306,6 +334,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "ErrorResponse": ".error_response",
     "FileRevision": ".file_revision",
     "FilesystemChange": ".filesystem_change",
+    "FilesystemChangeAccessChanged": ".filesystem_change_access_changed",
     "FilesystemChangeAttributesChanged": ".filesystem_change_attributes_changed",
     "FilesystemChangeContentChanged": ".filesystem_change_content_changed",
     "FilesystemChangeDeleted": ".filesystem_change_deleted",
@@ -313,6 +342,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemChangeFileCreated": ".filesystem_change_file_created",
     "FilesystemChangeMoved": ".filesystem_change_moved",
     "FilesystemChangeUndeleted": ".filesystem_change_undeleted",
+    "FilesystemChange_AccessChanged": ".filesystem_change",
     "FilesystemChange_AttributesChanged": ".filesystem_change",
     "FilesystemChange_ContentChanged": ".filesystem_change",
     "FilesystemChange_Deleted": ".filesystem_change",
@@ -333,6 +363,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperationPutFileRevisionByInode": ".filesystem_operation_put_file_revision_by_inode",
     "FilesystemOperationRestoreRevision": ".filesystem_operation_restore_revision",
     "FilesystemOperationUndelete": ".filesystem_operation_undelete",
+    "FilesystemOperationUpdateAccess": ".filesystem_operation_update_access",
     "FilesystemOperationUpdateAttributes": ".filesystem_operation_update_attributes",
     "FilesystemOperation_CopyPath": ".filesystem_operation",
     "FilesystemOperation_CreateDirectory": ".filesystem_operation",
@@ -346,6 +377,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperation_PutFileRevisionByInode": ".filesystem_operation",
     "FilesystemOperation_RestoreRevision": ".filesystem_operation",
     "FilesystemOperation_Undelete": ".filesystem_operation",
+    "FilesystemOperation_UpdateAccess": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributes": ".filesystem_operation",
     "GrepGcRequest": ".grep_gc_request",
     "GrepGcResponse": ".grep_gc_response",
@@ -383,6 +415,16 @@ _dynamic_imports: typing.Dict[str, str] = {
     "MetadataCompactionOutcome_Published": ".metadata_compaction_outcome",
     "NameKey": ".name_key",
     "Namespace": ".namespace",
+    "NamespaceAccess": ".namespace_access",
+    "NamespaceAccessAcl": ".namespace_access_acl",
+    "NamespaceAccessMode": ".namespace_access_mode",
+    "NamespaceAccessModeAcl": ".namespace_access_mode_acl",
+    "NamespaceAccessModeUnrestricted": ".namespace_access_mode_unrestricted",
+    "NamespaceAccessMode_Acl": ".namespace_access_mode",
+    "NamespaceAccessMode_Unrestricted": ".namespace_access_mode",
+    "NamespaceAccessUnrestricted": ".namespace_access_unrestricted",
+    "NamespaceAccess_Acl": ".namespace_access",
+    "NamespaceAccess_Unrestricted": ".namespace_access",
     "NamespaceDiagnostics": ".namespace_diagnostics",
     "NamespaceForkBasis": ".namespace_fork_basis",
     "NamespaceId": ".namespace_id",
@@ -394,6 +436,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PathEntryFile": ".path_entry_file",
     "PathEntry_Dir": ".path_entry",
     "PathEntry_File": ".path_entry",
+    "PrincipalId": ".principal_id",
+    "PrincipalScope": ".principal_scope",
     "ReorganizeStepOutcome": ".reorganize_step_outcome",
     "ReorganizeStepOutcomeCompactionRequired": ".reorganize_step_outcome_compaction_required",
     "ReorganizeStepOutcomeFenced": ".reorganize_step_outcome_fenced",
@@ -411,19 +455,23 @@ _dynamic_imports: typing.Dict[str, str] = {
     "RunMaintenanceRequestGc": ".run_maintenance_request_gc",
     "RunMaintenanceRequestMetadata": ".run_maintenance_request_metadata",
     "RunMaintenanceRequestMetadataCompaction": ".run_maintenance_request_metadata_compaction",
+    "RunMaintenanceRequestRecoverAdministrator": ".run_maintenance_request_recover_administrator",
     "RunMaintenanceRequestRetention": ".run_maintenance_request_retention",
     "RunMaintenanceRequest_Gc": ".run_maintenance_request",
     "RunMaintenanceRequest_Metadata": ".run_maintenance_request",
     "RunMaintenanceRequest_MetadataCompaction": ".run_maintenance_request",
+    "RunMaintenanceRequest_RecoverAdministrator": ".run_maintenance_request",
     "RunMaintenanceRequest_Retention": ".run_maintenance_request",
     "RunMaintenanceResponse": ".run_maintenance_response",
     "RunMaintenanceResponseGc": ".run_maintenance_response_gc",
     "RunMaintenanceResponseMetadata": ".run_maintenance_response_metadata",
     "RunMaintenanceResponseMetadataCompaction": ".run_maintenance_response_metadata_compaction",
+    "RunMaintenanceResponseRecoverAdministrator": ".run_maintenance_response_recover_administrator",
     "RunMaintenanceResponseRetention": ".run_maintenance_response_retention",
     "RunMaintenanceResponse_Gc": ".run_maintenance_response",
     "RunMaintenanceResponse_Metadata": ".run_maintenance_response",
     "RunMaintenanceResponse_MetadataCompaction": ".run_maintenance_response",
+    "RunMaintenanceResponse_RecoverAdministrator": ".run_maintenance_response",
     "RunMaintenanceResponse_Retention": ".run_maintenance_response",
     "RunNo": ".run_no",
     "ServiceUnavailableErrorBody": ".service_unavailable_error_body",
@@ -484,6 +532,10 @@ def __dir__():
 
 __all__ = [
     "AbsolutePath",
+    "AccessGrants",
+    "AccessRevisionNo",
+    "AccessRight",
+    "AccessRights",
     "ActorId",
     "AttributeKey",
     "AttributeRevisionNo",
@@ -506,11 +558,13 @@ __all__ = [
     "Commit",
     "CommitId",
     "CommitPrecondition",
+    "CommitPreconditionAccessRevision",
     "CommitPreconditionAttributesRevision",
     "CommitPreconditionFileRevision",
     "CommitPreconditionNamespaceHead",
     "CommitPreconditionPathAbsence",
     "CommitPreconditionPathBinding",
+    "CommitPrecondition_AccessRevision",
     "CommitPrecondition_AttributesRevision",
     "CommitPrecondition_FileRevision",
     "CommitPrecondition_NamespaceHead",
@@ -550,6 +604,7 @@ __all__ = [
     "ErrorResponse",
     "FileRevision",
     "FilesystemChange",
+    "FilesystemChangeAccessChanged",
     "FilesystemChangeAttributesChanged",
     "FilesystemChangeContentChanged",
     "FilesystemChangeDeleted",
@@ -557,6 +612,7 @@ __all__ = [
     "FilesystemChangeFileCreated",
     "FilesystemChangeMoved",
     "FilesystemChangeUndeleted",
+    "FilesystemChange_AccessChanged",
     "FilesystemChange_AttributesChanged",
     "FilesystemChange_ContentChanged",
     "FilesystemChange_Deleted",
@@ -577,6 +633,7 @@ __all__ = [
     "FilesystemOperationPutFileRevisionByInode",
     "FilesystemOperationRestoreRevision",
     "FilesystemOperationUndelete",
+    "FilesystemOperationUpdateAccess",
     "FilesystemOperationUpdateAttributes",
     "FilesystemOperation_CopyPath",
     "FilesystemOperation_CreateDirectory",
@@ -590,6 +647,7 @@ __all__ = [
     "FilesystemOperation_PutFileRevisionByInode",
     "FilesystemOperation_RestoreRevision",
     "FilesystemOperation_Undelete",
+    "FilesystemOperation_UpdateAccess",
     "FilesystemOperation_UpdateAttributes",
     "GrepGcRequest",
     "GrepGcResponse",
@@ -627,6 +685,16 @@ __all__ = [
     "MetadataCompactionOutcome_Published",
     "NameKey",
     "Namespace",
+    "NamespaceAccess",
+    "NamespaceAccessAcl",
+    "NamespaceAccessMode",
+    "NamespaceAccessModeAcl",
+    "NamespaceAccessModeUnrestricted",
+    "NamespaceAccessMode_Acl",
+    "NamespaceAccessMode_Unrestricted",
+    "NamespaceAccessUnrestricted",
+    "NamespaceAccess_Acl",
+    "NamespaceAccess_Unrestricted",
     "NamespaceDiagnostics",
     "NamespaceForkBasis",
     "NamespaceId",
@@ -638,6 +706,8 @@ __all__ = [
     "PathEntryFile",
     "PathEntry_Dir",
     "PathEntry_File",
+    "PrincipalId",
+    "PrincipalScope",
     "ReorganizeStepOutcome",
     "ReorganizeStepOutcomeCompactionRequired",
     "ReorganizeStepOutcomeFenced",
@@ -655,19 +725,23 @@ __all__ = [
     "RunMaintenanceRequestGc",
     "RunMaintenanceRequestMetadata",
     "RunMaintenanceRequestMetadataCompaction",
+    "RunMaintenanceRequestRecoverAdministrator",
     "RunMaintenanceRequestRetention",
     "RunMaintenanceRequest_Gc",
     "RunMaintenanceRequest_Metadata",
     "RunMaintenanceRequest_MetadataCompaction",
+    "RunMaintenanceRequest_RecoverAdministrator",
     "RunMaintenanceRequest_Retention",
     "RunMaintenanceResponse",
     "RunMaintenanceResponseGc",
     "RunMaintenanceResponseMetadata",
     "RunMaintenanceResponseMetadataCompaction",
+    "RunMaintenanceResponseRecoverAdministrator",
     "RunMaintenanceResponseRetention",
     "RunMaintenanceResponse_Gc",
     "RunMaintenanceResponse_Metadata",
     "RunMaintenanceResponse_MetadataCompaction",
+    "RunMaintenanceResponse_RecoverAdministrator",
     "RunMaintenanceResponse_Retention",
     "RunNo",
     "ServiceUnavailableErrorBody",

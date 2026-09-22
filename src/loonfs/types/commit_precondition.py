@@ -8,11 +8,33 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
+from .access_revision_no import AccessRevisionNo
 from .attribute_revision_no import AttributeRevisionNo
 from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .inode_id import InodeId
 from .revision_no import RevisionNo
+
+
+class CommitPrecondition_AccessRevision(UniversalBaseModel):
+    """
+    Admission conditions checked against the candidate's pre-state before its operations.
+    The pre-state head sequence is the last admitted commit's sequence in the batch,
+    or the batch's base head sequence when no earlier candidate was admitted.
+    """
+
+    kind: typing.Literal["access_revision"] = "access_revision"
+    expected_access_revision_no: AccessRevisionNo
+    inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
 
 
 class CommitPrecondition_AttributesRevision(UniversalBaseModel):
@@ -121,6 +143,7 @@ class CommitPrecondition_PathBinding(UniversalBaseModel):
 
 CommitPrecondition = typing_extensions.Annotated[
     typing.Union[
+        CommitPrecondition_AccessRevision,
         CommitPrecondition_AttributesRevision,
         CommitPrecondition_FileRevision,
         CommitPrecondition_NamespaceHead,

@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .actor_id import ActorId
 from .change_seq import ChangeSeq
+from .namespace_access_mode import NamespaceAccessMode
 from .namespace_fork_basis import NamespaceForkBasis
 from .namespace_id import NamespaceId
 
@@ -13,6 +14,11 @@ from .namespace_id import NamespaceId
 class Namespace(UniversalBaseModel):
     """
     Current state for one namespace.
+    """
+
+    access: NamespaceAccessMode = pydantic.Field()
+    """
+    The namespace's access mode.
     """
 
     created_at_ms: int = pydantic.Field()

@@ -82,6 +82,10 @@ def _compute_requires_conversion(type_: typing.Any, seen: typing.Set[typing.Any]
         # Unhashable type; skip cycle tracking (the type graph is finite in practice).
         pass
 
+    # Class variables are not response fields (including Pydantic's model_config).
+    if typing_extensions.get_origin(clean_type) is typing.ClassVar:
+        return False
+
     # Models / TypedDicts: a field alias here means we must dealias; otherwise recurse into fields.
     if (inspect.isclass(clean_type) and issubclass(clean_type, pydantic.BaseModel)) or typing_extensions.is_typeddict(
         clean_type

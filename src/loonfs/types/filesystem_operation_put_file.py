@@ -13,7 +13,8 @@ from .revision_no import RevisionNo
 
 class FilesystemOperationPutFile(UniversalBaseModel):
     """
-    Create or replace one file with an already-durable content ref.
+    Create or replace one file from uploaded or inline content.
+    Requires exactly one of `content_ref` and `inline_content`.
     """
 
     behavior: typing.Optional[DestinationBehavior] = pydantic.Field(default=None)
@@ -21,9 +22,9 @@ class FilesystemOperationPutFile(UniversalBaseModel):
     Whether an existing file may receive a new revision instead of causing a conflict.
     """
 
-    content_ref: ContentRef = pydantic.Field()
+    content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
     """
-    Immutable bytes that must be covered by a valid preparation proof.
+    Uploaded content covered by a token; mutually exclusive with `inline_content`.
     """
 
     expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
@@ -34,6 +35,11 @@ class FilesystemOperationPutFile(UniversalBaseModel):
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
     With `replace` behavior and an inode precondition, the request requires this content revision.
+    """
+
+    inline_content: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Complete file bytes as base64; mutually exclusive with `content_ref`.
     """
 
     path: AbsolutePath = pydantic.Field()

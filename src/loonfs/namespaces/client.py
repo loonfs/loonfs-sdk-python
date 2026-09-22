@@ -7,6 +7,7 @@ from ..core.request_options import RequestOptions
 from ..types.change_seq import ChangeSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.namespace import Namespace
+from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
 from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawNamespacesClient, RawNamespacesClient
@@ -31,7 +32,11 @@ class NamespacesClient:
         return self._raw_client
 
     def create(
-        self, *, namespace_id: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        namespace_id: NamespaceId,
+        access: typing.Optional[NamespaceAccess] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> Namespace:
         """
         Creates a new empty namespace.
@@ -40,6 +45,10 @@ class NamespacesClient:
         ----------
         namespace_id : NamespaceId
             Durable namespace id to create.
+
+        access : typing.Optional[NamespaceAccess]
+            The access mode, fixed for the namespace's life. Defaults to
+            unrestricted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -55,6 +64,9 @@ class NamespacesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -62,7 +74,7 @@ class NamespacesClient:
             namespace_id="demo",
         )
         """
-        _response = self._raw_client.create(namespace_id=namespace_id, request_options=request_options)
+        _response = self._raw_client.create(namespace_id=namespace_id, access=access, request_options=request_options)
         return _response.data
 
     def retrieve(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Namespace:
@@ -88,6 +100,9 @@ class NamespacesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -130,6 +145,9 @@ class NamespacesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -178,6 +196,9 @@ class NamespacesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -208,7 +229,11 @@ class AsyncNamespacesClient:
         return self._raw_client
 
     async def create(
-        self, *, namespace_id: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+        self,
+        *,
+        namespace_id: NamespaceId,
+        access: typing.Optional[NamespaceAccess] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> Namespace:
         """
         Creates a new empty namespace.
@@ -217,6 +242,10 @@ class AsyncNamespacesClient:
         ----------
         namespace_id : NamespaceId
             Durable namespace id to create.
+
+        access : typing.Optional[NamespaceAccess]
+            The access mode, fixed for the namespace's life. Defaults to
+            unrestricted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -234,6 +263,9 @@ class AsyncNamespacesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -247,7 +279,9 @@ class AsyncNamespacesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create(namespace_id=namespace_id, request_options=request_options)
+        _response = await self._raw_client.create(
+            namespace_id=namespace_id, access=access, request_options=request_options
+        )
         return _response.data
 
     async def retrieve(
@@ -277,6 +311,9 @@ class AsyncNamespacesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -327,6 +364,9 @@ class AsyncNamespacesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -383,6 +423,9 @@ class AsyncNamespacesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )

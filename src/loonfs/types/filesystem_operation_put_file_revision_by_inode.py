@@ -12,16 +12,22 @@ from .revision_no import RevisionNo
 class FilesystemOperationPutFileRevisionByInode(UniversalBaseModel):
     """
     Append a revision to a file inode if its current revision matches.
+    Requires exactly one of `content_ref` and `inline_content`.
     """
 
-    content_ref: ContentRef = pydantic.Field()
+    content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
     """
-    Immutable bytes that must be covered by a valid preparation proof.
+    Uploaded content covered by a token; mutually exclusive with `inline_content`.
     """
 
     expected_revision_no: RevisionNo = pydantic.Field()
     """
     Current revision required for the write.
+    """
+
+    inline_content: typing.Optional[str] = pydantic.Field(default=None)
+    """
+    Complete file bytes as base64; mutually exclusive with `content_ref`.
     """
 
     inode_id: InodeId = pydantic.Field()
