@@ -7,7 +7,6 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .checksum import Checksum
 from .content_id import ContentId
 from .content_ref_kind import ContentRefKind
-from .namespace_generation import NamespaceGeneration
 from .namespace_id import NamespaceId
 
 
@@ -31,11 +30,6 @@ class ContentRef(UniversalBaseModel):
     kind: ContentRefKind = pydantic.Field()
     """
     Content strategy used by the referenced object.
-    """
-
-    owner_generation: NamespaceGeneration = pydantic.Field()
-    """
-    Generation of the owner namespace that wrote the bytes.
     """
 
     owner_namespace_id: NamespaceId = pydantic.Field()
