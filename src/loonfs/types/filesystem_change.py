@@ -9,8 +9,8 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .access_grants import AccessGrants
 from .access_revision_no import AccessRevisionNo
-from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
+from .attributes_revision_no import AttributesRevisionNo
 from .binding_generation import BindingGeneration
 from .content_ref import ContentRef
 from .directory_binding import DirectoryBinding
@@ -51,7 +51,7 @@ class FilesystemChange_AttributesChanged(UniversalBaseModel):
 
     kind: typing.Literal["attributes_changed"] = "attributes_changed"
     attributes: Attributes
-    attributes_revision_no: AttributeRevisionNo
+    attributes_revision_no: AttributesRevisionNo
     inode_id: InodeId
 
     if IS_PYDANTIC_V2:

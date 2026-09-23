@@ -9,8 +9,8 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .actor_id import ActorId
-from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
+from .attributes_revision_no import AttributesRevisionNo
 from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .content_ref import ContentRef
@@ -29,7 +29,7 @@ class PathEntry_Dir(UniversalBaseModel):
 
     inode_kind: typing.Literal["dir"] = "dir"
     attributes: typing.Optional[Attributes] = None
-    attributes_revision_no: typing.Optional[AttributeRevisionNo] = None
+    attributes_revision_no: typing.Optional[AttributesRevisionNo] = None
     attributes_updated_at_ms: typing.Optional[int] = None
     attributes_updated_by: typing.Optional[ActorId] = None
     binding_generation: typing.Optional[BindingGeneration] = None
@@ -61,7 +61,7 @@ class PathEntry_File(UniversalBaseModel):
 
     inode_kind: typing.Literal["file"] = "file"
     attributes: typing.Optional[Attributes] = None
-    attributes_revision_no: typing.Optional[AttributeRevisionNo] = None
+    attributes_revision_no: typing.Optional[AttributesRevisionNo] = None
     attributes_updated_at_ms: typing.Optional[int] = None
     attributes_updated_by: typing.Optional[ActorId] = None
     binding_generation: typing.Optional[BindingGeneration] = None

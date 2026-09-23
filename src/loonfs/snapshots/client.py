@@ -6,8 +6,8 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.delete_snapshot_response import DeleteSnapshotResponse
 from ..types.list_snapshots_response import ListSnapshotsResponse
+from ..types.pin_id import PinId
 from ..types.snapshot import Snapshot
-from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawSnapshotsClient, RawSnapshotsClient
 
 # this is used as the default value for optional parameters
@@ -125,7 +125,7 @@ class SnapshotsClient:
         return _response.data
 
     def delete(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
         """
         Deletes a snapshot pin. A missing id returns snapshot_not_found.
@@ -135,7 +135,7 @@ class SnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : SnapshotId
+        snapshot_id : PinId
             Snapshot id
 
         request_options : typing.Optional[RequestOptions]
@@ -169,7 +169,7 @@ class SnapshotsClient:
     def extend(
         self,
         namespace_id: str,
-        snapshot_id: SnapshotId,
+        snapshot_id: PinId,
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
@@ -182,7 +182,7 @@ class SnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : SnapshotId
+        snapshot_id : PinId
             Snapshot id
 
         ttl_ms : int
@@ -349,7 +349,7 @@ class AsyncSnapshotsClient:
         return _response.data
 
     async def delete(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
         """
         Deletes a snapshot pin. A missing id returns snapshot_not_found.
@@ -359,7 +359,7 @@ class AsyncSnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : SnapshotId
+        snapshot_id : PinId
             Snapshot id
 
         request_options : typing.Optional[RequestOptions]
@@ -401,7 +401,7 @@ class AsyncSnapshotsClient:
     async def extend(
         self,
         namespace_id: str,
-        snapshot_id: SnapshotId,
+        snapshot_id: PinId,
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
@@ -414,7 +414,7 @@ class AsyncSnapshotsClient:
         namespace_id : str
             Namespace id
 
-        snapshot_id : SnapshotId
+        snapshot_id : PinId
             Snapshot id
 
         ttl_ms : int

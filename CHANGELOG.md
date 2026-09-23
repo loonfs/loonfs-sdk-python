@@ -1,3 +1,9 @@
+# Unreleased
+
+Regenerated from LoonFS `7183dce7478f8e504a34d3d361cfa8837784253f`.
+Updates capability limit names and namespace generation fields. `PinId` replaces
+`CheckpointId` and `SnapshotId`; `AttributesRevisionNo` replaces `AttributeRevisionNo`.
+
 # SDK 0.3.0
 
 Regenerated from LoonFS `6ea950f9f5e0030066e18061efe787dcaf9be4db` (PR #996 plus the

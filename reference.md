@@ -123,11 +123,11 @@ client.namespaces.create(
 <dl>
 <dd>
 
-**access:** `typing.Optional[NamespaceAccess]`
+**access:** `typing.Optional[NamespaceAccess]` 
 
 The access mode, fixed for the namespace's life. Defaults to
 unrestricted.
-
+    
 </dd>
 </dl>
 
@@ -367,7 +367,7 @@ client.namespaces.fork(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[SnapshotId]` — Fork from this live snapshot instead of the current head.
+**snapshot_id:** `typing.Optional[PinId]` — Fork from this live snapshot instead of the current head.
     
 </dd>
 </dl>
@@ -466,7 +466,7 @@ client.changes.list(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[SnapshotId]` — End the feed at this snapshot's captured sequence
+**snapshot_id:** `typing.Optional[PinId]` — End the feed at this snapshot's captured sequence
     
 </dd>
 </dl>
@@ -684,7 +684,7 @@ client.files.content(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[SnapshotId]` — Use the file revision captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — Use the file revision captured by this snapshot
     
 </dd>
 </dl>
@@ -716,7 +716,7 @@ client.files.content(
 <dl>
 <dd>
 
-Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.max_content_bytes`.
+Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
 </dd>
 </dl>
 </dd>
@@ -784,7 +784,7 @@ Cannot be combined with `snapshot_id`.
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[SnapshotId]` 
+**snapshot_id:** `typing.Optional[PinId]` 
 
 Read the file revision captured by this snapshot.
 Cannot be combined with `revision_no`.
@@ -901,7 +901,7 @@ client.files.list(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[SnapshotId]` — Use the directory state captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — Use the directory state captured by this snapshot
     
 </dd>
 </dl>
@@ -999,7 +999,7 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[SnapshotId]` — Use the path state captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — Use the path state captured by this snapshot
     
 </dd>
 </dl>
@@ -1413,7 +1413,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[SnapshotId]` — Use the path state captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — Use the path state captured by this snapshot
     
 </dd>
 </dl>
@@ -1527,7 +1527,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[SnapshotId]` — Use the directory state captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — Use the directory state captured by this snapshot
     
 </dd>
 </dl>
@@ -2064,7 +2064,7 @@ client.snapshots.delete(
 <dl>
 <dd>
 
-**snapshot_id:** `SnapshotId` — Snapshot id
+**snapshot_id:** `PinId` — Snapshot id
     
 </dd>
 </dl>
@@ -2146,7 +2146,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-**snapshot_id:** `SnapshotId` — Snapshot id
+**snapshot_id:** `PinId` — Snapshot id
     
 </dd>
 </dl>

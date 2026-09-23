@@ -4,8 +4,8 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
+from .attributes_revision_no import AttributesRevisionNo
 from .inode_id import InodeId
 
 
@@ -20,7 +20,7 @@ class FilesystemChangeAttributesChanged(UniversalBaseModel):
     when all attributes were cleared.
     """
 
-    attributes_revision_no: AttributeRevisionNo = pydantic.Field()
+    attributes_revision_no: AttributesRevisionNo = pydantic.Field()
     """
     New attribute revision for that inode.
     """

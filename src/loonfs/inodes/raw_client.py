@@ -24,8 +24,8 @@ from ..types.error_response import ErrorResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_inode_children_response import ListInodeChildrenResponse
 from ..types.path_entry import PathEntry
+from ..types.pin_id import PinId
 from ..types.revision_no import RevisionNo
-from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
 
 
@@ -39,7 +39,7 @@ class RawInodesClient:
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[PathEntry]:
         """
@@ -56,7 +56,7 @@ class RawInodesClient:
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -158,7 +158,7 @@ class RawInodesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListInodeChildrenResponse]:
         """
@@ -181,7 +181,7 @@ class RawInodesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the directory state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -696,7 +696,7 @@ class AsyncRawInodesClient:
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[PathEntry]:
         """
@@ -713,7 +713,7 @@ class AsyncRawInodesClient:
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -815,7 +815,7 @@ class AsyncRawInodesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListInodeChildrenResponse]:
         """
@@ -838,7 +838,7 @@ class AsyncRawInodesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the directory state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]

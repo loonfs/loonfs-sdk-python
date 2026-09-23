@@ -6,8 +6,8 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .actor_id import ActorId
-from .attribute_revision_no import AttributeRevisionNo
 from .attributes import Attributes
+from .attributes_revision_no import AttributesRevisionNo
 from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .content_ref import ContentRef
@@ -28,7 +28,7 @@ class PathEntryFile(UniversalBaseModel):
     for the initial state.
     """
 
-    attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
+    attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
     """
     The attribute revision this projection represents.
     """

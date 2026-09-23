@@ -23,7 +23,7 @@ from ..types.error_response import ErrorResponse
 from ..types.namespace import Namespace
 from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
-from ..types.snapshot_id import SnapshotId
+from ..types.pin_id import PinId
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -113,17 +113,6 @@ class RawNamespacesClient:
                 )
             if _response.status_code == 409:
                 raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -378,7 +367,7 @@ class RawNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[SnapshotId] = OMIT,
+        snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Namespace]:
         """
@@ -392,7 +381,7 @@ class RawNamespacesClient:
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
@@ -588,17 +577,6 @@ class AsyncRawNamespacesClient:
                 )
             if _response.status_code == 409:
                 raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -853,7 +831,7 @@ class AsyncRawNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[SnapshotId] = OMIT,
+        snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Namespace]:
         """
@@ -867,7 +845,7 @@ class AsyncRawNamespacesClient:
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]

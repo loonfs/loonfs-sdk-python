@@ -9,7 +9,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .access_revision_no import AccessRevisionNo
-from .attribute_revision_no import AttributeRevisionNo
+from .attributes_revision_no import AttributesRevisionNo
 from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .inode_id import InodeId
@@ -45,7 +45,7 @@ class CommitPrecondition_AttributesRevision(UniversalBaseModel):
     """
 
     kind: typing.Literal["attributes_revision"] = "attributes_revision"
-    expected_attributes_revision_no: AttributeRevisionNo
+    expected_attributes_revision_no: AttributesRevisionNo
     inode_id: InodeId
 
     if IS_PYDANTIC_V2:

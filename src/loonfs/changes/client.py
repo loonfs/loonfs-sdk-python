@@ -6,7 +6,7 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.change_seq import ChangeSeq
 from ..types.list_changes_response import ListChangesResponse
-from ..types.snapshot_id import SnapshotId
+from ..types.pin_id import PinId
 from .raw_client import AsyncRawChangesClient, RawChangesClient
 
 
@@ -31,7 +31,7 @@ class ChangesClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListChangesResponse:
         """
@@ -48,7 +48,7 @@ class ChangesClient:
         limit : typing.Optional[int]
             Maximum page size
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             End the feed at this snapshot's captured sequence
 
         request_options : typing.Optional[RequestOptions]
@@ -104,7 +104,7 @@ class AsyncChangesClient:
         *,
         after_seq: ChangeSeq,
         limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListChangesResponse:
         """
@@ -121,7 +121,7 @@ class AsyncChangesClient:
         limit : typing.Optional[int]
             Maximum page size
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             End the feed at this snapshot's captured sequence
 
         request_options : typing.Optional[RequestOptions]

@@ -9,7 +9,7 @@ from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.namespace import Namespace
 from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
-from ..types.snapshot_id import SnapshotId
+from ..types.pin_id import PinId
 from .raw_client import AsyncRawNamespacesClient, RawNamespacesClient
 
 # this is used as the default value for optional parameters
@@ -165,7 +165,7 @@ class NamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[SnapshotId] = OMIT,
+        snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Namespace:
         """
@@ -179,7 +179,7 @@ class NamespacesClient:
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]
@@ -390,7 +390,7 @@ class AsyncNamespacesClient:
         namespace_id: str,
         *,
         new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[SnapshotId] = OMIT,
+        snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Namespace:
         """
@@ -404,7 +404,7 @@ class AsyncNamespacesClient:
         new_namespace_id : NamespaceId
             Durable namespace id for the fork target.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Fork from this live snapshot instead of the current head.
 
         request_options : typing.Optional[RequestOptions]

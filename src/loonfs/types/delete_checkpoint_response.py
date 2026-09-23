@@ -4,8 +4,8 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .checkpoint_id import CheckpointId
 from .namespace_id import NamespaceId
+from .pin_id import PinId
 
 
 class DeleteCheckpointResponse(UniversalBaseModel):
@@ -13,7 +13,7 @@ class DeleteCheckpointResponse(UniversalBaseModel):
     Identifies the checkpoint record that was deleted.
     """
 
-    checkpoint_id: CheckpointId = pydantic.Field()
+    checkpoint_id: PinId = pydantic.Field()
     """
     Deleted checkpoint record.
     """

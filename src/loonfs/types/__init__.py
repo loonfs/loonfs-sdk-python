@@ -13,14 +13,13 @@ if typing.TYPE_CHECKING:
     from .access_rights import AccessRights
     from .actor_id import ActorId
     from .attribute_key import AttributeKey
-    from .attribute_revision_no import AttributeRevisionNo
     from .attribute_value import AttributeValue
     from .attributes import Attributes
+    from .attributes_revision_no import AttributesRevisionNo
     from .binding_generation import BindingGeneration
     from .capability_document import CapabilityDocument
     from .change_seq import ChangeSeq
     from .checkpoint import Checkpoint
-    from .checkpoint_id import CheckpointId
     from .checkpoint_owner_fork import CheckpointOwnerFork
     from .checkpoint_owner_snapshot import CheckpointOwnerSnapshot
     from .checkpoint_owner_summary import (
@@ -179,12 +178,14 @@ if typing.TYPE_CHECKING:
     from .namespace_access_unrestricted import NamespaceAccessUnrestricted
     from .namespace_diagnostics import NamespaceDiagnostics
     from .namespace_fork_basis import NamespaceForkBasis
+    from .namespace_generation import NamespaceGeneration
     from .namespace_id import NamespaceId
     from .object_transfer_access import ObjectTransferAccess, ObjectTransferAccess_PresignedUrl
     from .object_transfer_access_presigned_url import ObjectTransferAccessPresignedUrl
     from .path_entry import PathEntry, PathEntry_Dir, PathEntry_File
     from .path_entry_directory import PathEntryDirectory
     from .path_entry_file import PathEntryFile
+    from .pin_id import PinId
     from .principal_id import PrincipalId
     from .principal_scope import PrincipalScope
     from .reorganize_step_outcome import (
@@ -233,7 +234,6 @@ if typing.TYPE_CHECKING:
     from .sign_upload_parts_response import SignUploadPartsResponse
     from .signed_upload_part import SignedUploadPart
     from .snapshot import Snapshot
-    from .snapshot_id import SnapshotId
     from .store_probe_check_outcome import StoreProbeCheckOutcome
     from .store_probe_check_result import StoreProbeCheckResult
     from .store_probe_request import StoreProbeRequest
@@ -268,14 +268,13 @@ _dynamic_imports: typing.Dict[str, str] = {
     "AccessRights": ".access_rights",
     "ActorId": ".actor_id",
     "AttributeKey": ".attribute_key",
-    "AttributeRevisionNo": ".attribute_revision_no",
     "AttributeValue": ".attribute_value",
     "Attributes": ".attributes",
+    "AttributesRevisionNo": ".attributes_revision_no",
     "BindingGeneration": ".binding_generation",
     "CapabilityDocument": ".capability_document",
     "ChangeSeq": ".change_seq",
     "Checkpoint": ".checkpoint",
-    "CheckpointId": ".checkpoint_id",
     "CheckpointOwnerFork": ".checkpoint_owner_fork",
     "CheckpointOwnerSnapshot": ".checkpoint_owner_snapshot",
     "CheckpointOwnerSummary": ".checkpoint_owner_summary",
@@ -427,6 +426,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "NamespaceAccess_Unrestricted": ".namespace_access",
     "NamespaceDiagnostics": ".namespace_diagnostics",
     "NamespaceForkBasis": ".namespace_fork_basis",
+    "NamespaceGeneration": ".namespace_generation",
     "NamespaceId": ".namespace_id",
     "ObjectTransferAccess": ".object_transfer_access",
     "ObjectTransferAccessPresignedUrl": ".object_transfer_access_presigned_url",
@@ -436,6 +436,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PathEntryFile": ".path_entry_file",
     "PathEntry_Dir": ".path_entry",
     "PathEntry_File": ".path_entry",
+    "PinId": ".pin_id",
     "PrincipalId": ".principal_id",
     "PrincipalScope": ".principal_scope",
     "ReorganizeStepOutcome": ".reorganize_step_outcome",
@@ -478,7 +479,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "SignUploadPartsResponse": ".sign_upload_parts_response",
     "SignedUploadPart": ".signed_upload_part",
     "Snapshot": ".snapshot",
-    "SnapshotId": ".snapshot_id",
     "StoreProbeCheckOutcome": ".store_probe_check_outcome",
     "StoreProbeCheckResult": ".store_probe_check_result",
     "StoreProbeRequest": ".store_probe_request",
@@ -538,14 +538,13 @@ __all__ = [
     "AccessRights",
     "ActorId",
     "AttributeKey",
-    "AttributeRevisionNo",
     "AttributeValue",
     "Attributes",
+    "AttributesRevisionNo",
     "BindingGeneration",
     "CapabilityDocument",
     "ChangeSeq",
     "Checkpoint",
-    "CheckpointId",
     "CheckpointOwnerFork",
     "CheckpointOwnerSnapshot",
     "CheckpointOwnerSummary",
@@ -697,6 +696,7 @@ __all__ = [
     "NamespaceAccess_Unrestricted",
     "NamespaceDiagnostics",
     "NamespaceForkBasis",
+    "NamespaceGeneration",
     "NamespaceId",
     "ObjectTransferAccess",
     "ObjectTransferAccessPresignedUrl",
@@ -706,6 +706,7 @@ __all__ = [
     "PathEntryFile",
     "PathEntry_Dir",
     "PathEntry_File",
+    "PinId",
     "PrincipalId",
     "PrincipalScope",
     "ReorganizeStepOutcome",
@@ -748,7 +749,6 @@ __all__ = [
     "SignUploadPartsResponse",
     "SignedUploadPart",
     "Snapshot",
-    "SnapshotId",
     "StoreProbeCheckOutcome",
     "StoreProbeCheckResult",
     "StoreProbeRequest",
