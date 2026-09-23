@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .access_revision_no import AccessRevisionNo
-from .attribute_revision_no import AttributeRevisionNo
+from .attributes_revision_no import AttributesRevisionNo
 from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
@@ -40,7 +40,7 @@ class ErrorDetails(UniversalBaseModel):
     Access revision that is actually current for the inode.
     """
 
-    actual_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
+    actual_attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
     """
     Attribute revision that is actually current for the inode.
     """
@@ -95,7 +95,7 @@ class ErrorDetails(UniversalBaseModel):
     Access revision the request expected to be current.
     """
 
-    expected_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
+    expected_attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
     """
     Attribute revision the request expected to be current.
     """

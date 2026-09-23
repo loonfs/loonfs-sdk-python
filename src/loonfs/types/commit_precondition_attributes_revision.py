@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .attribute_revision_no import AttributeRevisionNo
+from .attributes_revision_no import AttributesRevisionNo
 from .inode_id import InodeId
 
 
@@ -13,7 +13,7 @@ class CommitPreconditionAttributesRevision(UniversalBaseModel):
     Requires a visible inode with the attribute revision the caller read.
     """
 
-    expected_attributes_revision_no: AttributeRevisionNo = pydantic.Field()
+    expected_attributes_revision_no: AttributesRevisionNo = pydantic.Field()
     """
     Attribute revision observed by the caller.
     """

@@ -5,9 +5,9 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
-from .checkpoint_id import CheckpointId
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
+from .pin_id import PinId
 from .run_no import RunNo
 
 
@@ -16,7 +16,7 @@ class GrepIndexLifecycleBackfilling(UniversalBaseModel):
     An initial scan of a pinned checkpoint that is not yet searchable.
     """
 
-    checkpoint_id: CheckpointId = pydantic.Field()
+    checkpoint_id: PinId = pydantic.Field()
     """
     Checkpoint pinning the state being walked.
     """

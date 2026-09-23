@@ -12,8 +12,8 @@ from .absolute_path import AbsolutePath
 from .access_grants import AccessGrants
 from .access_revision_no import AccessRevisionNo
 from .attribute_key import AttributeKey
-from .attribute_revision_no import AttributeRevisionNo
 from .attribute_value import AttributeValue
+from .attributes_revision_no import AttributesRevisionNo
 from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .content_ref import ContentRef
@@ -330,7 +330,7 @@ class FilesystemOperation_UpdateAttributes(UniversalBaseModel):
     """
 
     kind: typing.Literal["update_attributes"] = "update_attributes"
-    expected_attributes_revision_no: typing.Optional[AttributeRevisionNo] = None
+    expected_attributes_revision_no: typing.Optional[AttributesRevisionNo] = None
     expected_inode_id: typing.Optional[InodeId] = None
     path: AbsolutePath
     remove: typing.Optional[typing.List[AttributeKey]] = None

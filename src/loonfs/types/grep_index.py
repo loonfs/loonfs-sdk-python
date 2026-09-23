@@ -8,9 +8,9 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
-from .checkpoint_id import CheckpointId
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
+from .pin_id import PinId
 from .run_no import RunNo
 
 
@@ -42,7 +42,7 @@ class GrepIndex_Backfilling(UniversalBaseModel):
     """
 
     status: typing.Literal["backfilling"] = "backfilling"
-    checkpoint_id: CheckpointId
+    checkpoint_id: PinId
     cursor_inode_id: typing.Optional[InodeId] = None
     namespace_id: NamespaceId
     next_run_no: RunNo

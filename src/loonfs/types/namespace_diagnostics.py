@@ -8,6 +8,7 @@ from .actor_id import ActorId
 from .change_seq import ChangeSeq
 from .manifest_no import ManifestNo
 from .namespace_fork_basis import NamespaceForkBasis
+from .namespace_generation import NamespaceGeneration
 from .namespace_id import NamespaceId
 
 
@@ -34,6 +35,11 @@ class NamespaceDiagnostics(UniversalBaseModel):
     fork_basis: typing.Optional[NamespaceForkBasis] = pydantic.Field(default=None)
     """
     Present only for a fork: the source it was forked from.
+    """
+
+    generation: NamespaceGeneration = pydantic.Field()
+    """
+    Which generation of its id this namespace is. Recreating a deleted id increments it.
     """
 
     head_seq: ChangeSeq = pydantic.Field()

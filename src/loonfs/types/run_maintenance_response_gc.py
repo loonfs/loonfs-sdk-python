@@ -32,12 +32,12 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
 
     next_reclamation_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The earliest known future reclamation time observed by this pass.
+    The earliest pending generation deadline or future upload cleanup time.
     """
 
     reclaim_after_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The deleted head's irrevocable owner-prefix collection deadline.
+    The current tombstone's deletion time plus the configured retirement grace.
     """
 
     retained: RetainedCandidates = pydantic.Field()

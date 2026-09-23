@@ -5,10 +5,10 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
-from .checkpoint_id import CheckpointId
 from .checkpoint_owner_summary import CheckpointOwnerSummary
 from .manifest_no import ManifestNo
 from .namespace_id import NamespaceId
+from .pin_id import PinId
 
 
 class Checkpoint(UniversalBaseModel):
@@ -21,7 +21,7 @@ class Checkpoint(UniversalBaseModel):
     Namespace sequence captured by the checkpoint.
     """
 
-    checkpoint_id: CheckpointId = pydantic.Field()
+    checkpoint_id: PinId = pydantic.Field()
     """
     Durable checkpoint id used to address the checkpoint for deletion.
     """

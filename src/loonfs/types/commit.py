@@ -36,10 +36,9 @@ class Commit(UniversalBaseModel):
     Sequence number where the commit became visible.
     """
 
-    events: typing.Optional[typing.List[FilesystemChange]] = pydantic.Field(default=None)
+    events: typing.List[FilesystemChange] = pydantic.Field()
     """
-    Always present on the change feed. Absent only from a replayed
-    `POST /commits` response whose WAL record has been retired.
+    The semantic filesystem operations the commit applied, in request order.
     """
 
     message: typing.Optional[str] = pydantic.Field(default=None)

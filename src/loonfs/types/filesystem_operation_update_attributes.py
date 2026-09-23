@@ -8,8 +8,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from ..core.serialization import FieldMetadata
 from .absolute_path import AbsolutePath
 from .attribute_key import AttributeKey
-from .attribute_revision_no import AttributeRevisionNo
 from .attribute_value import AttributeValue
+from .attributes_revision_no import AttributesRevisionNo
 from .inode_id import InodeId
 
 
@@ -18,7 +18,7 @@ class FilesystemOperationUpdateAttributes(UniversalBaseModel):
     Write and remove attributes on the inode one path resolves to.
     """
 
-    expected_attributes_revision_no: typing.Optional[AttributeRevisionNo] = pydantic.Field(default=None)
+    expected_attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
     """
     With an inode precondition, the attribute revision that must still be current.
     """

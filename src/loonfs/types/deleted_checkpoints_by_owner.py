@@ -13,7 +13,7 @@ class DeletedCheckpointsByOwner(UniversalBaseModel):
 
     expired: int = pydantic.Field()
     """
-    User-owned records deleted after expiry or terminal namespace deletion.
+    User-owned records deleted after expiry or namespace deletion.
     """
 
     fork: int = pydantic.Field()
@@ -21,9 +21,14 @@ class DeletedCheckpointsByOwner(UniversalBaseModel):
     Fork-owned records deleted because their target namespaces are gone.
     """
 
+    retired: int = pydantic.Field()
+    """
+    Retired records deleted after their generations are reclaimed.
+    """
+
     snapshot: int = pydantic.Field()
     """
-    Snapshot-owned records deleted after expiry or terminal namespace deletion.
+    Snapshot-owned records deleted after expiry or namespace deletion.
     """
 
     if IS_PYDANTIC_V2:

@@ -6,7 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
 from .namespace_id import NamespaceId
-from .snapshot_id import SnapshotId
+from .pin_id import PinId
 
 
 class Snapshot(UniversalBaseModel):
@@ -39,7 +39,7 @@ class Snapshot(UniversalBaseModel):
     Namespace whose state the snapshot captured.
     """
 
-    snapshot_id: SnapshotId = pydantic.Field()
+    snapshot_id: PinId = pydantic.Field()
     """
     Snapshot id.
     """

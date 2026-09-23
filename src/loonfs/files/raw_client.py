@@ -26,8 +26,8 @@ from ..types.grep_response import GrepResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
 from ..types.path_entry import PathEntry
+from ..types.pin_id import PinId
 from ..types.revision_no import RevisionNo
-from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -45,7 +45,7 @@ class RawFilesClient:
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[HttpResponse[typing.Iterator[bytes]]]:
         """
@@ -62,7 +62,7 @@ class RawFilesClient:
         revision_no : typing.Optional[RevisionNo]
             Optional prior revision number; cannot be combined with snapshot_id
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the file revision captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -180,11 +180,11 @@ class RawFilesClient:
         *,
         path: AbsolutePath,
         revision_no: typing.Optional[RevisionNo] = OMIT,
-        snapshot_id: typing.Optional[SnapshotId] = OMIT,
+        snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadResponse]:
         """
-        Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.max_content_bytes`.
+        Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
 
         Parameters
         ----------
@@ -198,7 +198,7 @@ class RawFilesClient:
             Revision to read, or `None` for the path's current revision.
             Cannot be combined with `snapshot_id`.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Read the file revision captured by this snapshot.
             Cannot be combined with `revision_no`.
 
@@ -317,7 +317,7 @@ class RawFilesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListPathEntriesResponse]:
         """
@@ -340,7 +340,7 @@ class RawFilesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the directory state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -443,7 +443,7 @@ class RawFilesClient:
         *,
         path: str,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[PathEntry]:
         """
@@ -460,7 +460,7 @@ class RawFilesClient:
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -845,7 +845,7 @@ class AsyncRawFilesClient:
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[AsyncHttpResponse[typing.AsyncIterator[bytes]]]:
         """
@@ -862,7 +862,7 @@ class AsyncRawFilesClient:
         revision_no : typing.Optional[RevisionNo]
             Optional prior revision number; cannot be combined with snapshot_id
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the file revision captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -981,11 +981,11 @@ class AsyncRawFilesClient:
         *,
         path: AbsolutePath,
         revision_no: typing.Optional[RevisionNo] = OMIT,
-        snapshot_id: typing.Optional[SnapshotId] = OMIT,
+        snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadResponse]:
         """
-        Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.max_content_bytes`.
+        Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
 
         Parameters
         ----------
@@ -999,7 +999,7 @@ class AsyncRawFilesClient:
             Revision to read, or `None` for the path's current revision.
             Cannot be combined with `snapshot_id`.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Read the file revision captured by this snapshot.
             Cannot be combined with `revision_no`.
 
@@ -1118,7 +1118,7 @@ class AsyncRawFilesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListPathEntriesResponse]:
         """
@@ -1141,7 +1141,7 @@ class AsyncRawFilesClient:
         include_attributes : typing.Optional[bool]
             Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the directory state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
@@ -1244,7 +1244,7 @@ class AsyncRawFilesClient:
         *,
         path: str,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[SnapshotId] = None,
+        snapshot_id: typing.Optional[PinId] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[PathEntry]:
         """
@@ -1261,7 +1261,7 @@ class AsyncRawFilesClient:
         include_attributes : typing.Optional[bool]
             Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
 
-        snapshot_id : typing.Optional[SnapshotId]
+        snapshot_id : typing.Optional[PinId]
             Use the path state captured by this snapshot
 
         request_options : typing.Optional[RequestOptions]
