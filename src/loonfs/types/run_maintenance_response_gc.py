@@ -32,7 +32,7 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
 
     next_reclamation_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The earliest pending generation deadline or future upload cleanup time.
+    The earliest future retirement deadline, pin deletion time, or upload cleanup time.
     """
 
     reclaim_after_ms: typing.Optional[int] = pydantic.Field(default=None)
