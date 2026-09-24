@@ -122,6 +122,17 @@ class RawNamespacesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -248,7 +259,7 @@ class RawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[DeleteNamespaceResponse]:
         """
-        Marks a namespace as deleted.
+        Marks a namespace as deleted. The id can never be created or forked into again.
 
         Parameters
         ----------
@@ -586,6 +597,17 @@ class AsyncRawNamespacesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -712,7 +734,7 @@ class AsyncRawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[DeleteNamespaceResponse]:
         """
-        Marks a namespace as deleted.
+        Marks a namespace as deleted. The id can never be created or forked into again.
 
         Parameters
         ----------

@@ -21,11 +21,6 @@ class DeletedCheckpointsByOwner(UniversalBaseModel):
     Fork-owned records deleted because their target namespaces are gone.
     """
 
-    retired: int = pydantic.Field()
-    """
-    Retired records deleted after their generations are reclaimed.
-    """
-
     snapshot: int = pydantic.Field()
     """
     Snapshot-owned records deleted after expiry or namespace deletion.

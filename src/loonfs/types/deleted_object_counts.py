@@ -28,7 +28,7 @@ class DeletedObjectCounts(UniversalBaseModel):
 
     retired_content_objects: int = pydantic.Field()
     """
-    Successful deletion attempts under a retired namespace owner prefix.
+    Listed content objects deleted from a retired namespace.
     """
 
     upload_sessions: int = pydantic.Field()

@@ -281,10 +281,13 @@ class RawSnapshotsClient:
         HttpResponse[DeleteSnapshotResponse]
             Snapshot record deleted
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}",
             method="DELETE",
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -720,10 +723,13 @@ class AsyncRawSnapshotsClient:
         AsyncHttpResponse[DeleteSnapshotResponse]
             Snapshot record deleted
         """
+        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
+            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
+        )
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}",
             method="DELETE",
-            request_options=request_options,
+            request_options=_request_options_with_retries_disabled,
         )
         try:
             if 200 <= _response.status_code < 300:

@@ -178,7 +178,6 @@ if typing.TYPE_CHECKING:
     from .namespace_access_unrestricted import NamespaceAccessUnrestricted
     from .namespace_diagnostics import NamespaceDiagnostics
     from .namespace_fork_basis import NamespaceForkBasis
-    from .namespace_generation import NamespaceGeneration
     from .namespace_id import NamespaceId
     from .object_transfer_access import ObjectTransferAccess, ObjectTransferAccess_PresignedUrl
     from .object_transfer_access_presigned_url import ObjectTransferAccessPresignedUrl
@@ -426,7 +425,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "NamespaceAccess_Unrestricted": ".namespace_access",
     "NamespaceDiagnostics": ".namespace_diagnostics",
     "NamespaceForkBasis": ".namespace_fork_basis",
-    "NamespaceGeneration": ".namespace_generation",
     "NamespaceId": ".namespace_id",
     "ObjectTransferAccess": ".object_transfer_access",
     "ObjectTransferAccessPresignedUrl": ".object_transfer_access_presigned_url",
@@ -696,7 +694,6 @@ __all__ = [
     "NamespaceAccess_Unrestricted",
     "NamespaceDiagnostics",
     "NamespaceForkBasis",
-    "NamespaceGeneration",
     "NamespaceId",
     "ObjectTransferAccess",
     "ObjectTransferAccessPresignedUrl",

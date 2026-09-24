@@ -230,7 +230,7 @@ client.namespaces.retrieve(
 <dl>
 <dd>
 
-Marks a namespace as deleted.
+Marks a namespace as deleted. The id can never be created or forked into again.
 </dd>
 </dl>
 </dd>
@@ -3347,7 +3347,7 @@ client.maintenance.grep_index.gc(
 <dl>
 <dd>
 
-Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, or `retention`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call reads the current manifest and lists pins, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
+Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, `retention`, or `recover_administrator`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call reads the current manifest and lists pins, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
 </dd>
 </dl>
 </dd>

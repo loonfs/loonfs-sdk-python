@@ -6,7 +6,7 @@
     "client_class_name": "LoonFS",
     "package_name": "loonfs"
   },
-  "originGitCommit": "7183dce7478f8e504a34d3d361cfa8837784253f",
+  "originGitCommit": "fd27fb03fc62c75d5d3cc0ee91127f88fed953f8",
   "originGitCommitIsDirty": false,
   "invokedBy": "manual"
 }
