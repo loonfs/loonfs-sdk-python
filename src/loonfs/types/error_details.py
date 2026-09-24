@@ -10,6 +10,7 @@ from .binding_generation import BindingGeneration
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .inode_id import InodeId
+from .namespace_id import NamespaceId
 from .revision_no import RevisionNo
 from .writer_epoch import WriterEpoch
 from .writer_id import WriterId
@@ -138,6 +139,11 @@ class ErrorDetails(UniversalBaseModel):
     max_writer_sessions: typing.Optional[int] = pydantic.Field(default=None)
     """
     Maximum writer sessions admitted by the node.
+    """
+
+    namespace_id: typing.Optional[NamespaceId] = pydantic.Field(default=None)
+    """
+    The deleted namespace that caused the operation to fail.
     """
 
     operation_index: typing.Optional[int] = pydantic.Field(default=None)

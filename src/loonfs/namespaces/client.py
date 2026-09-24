@@ -121,7 +121,7 @@ class NamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DeleteNamespaceResponse:
         """
-        Marks a namespace as deleted.
+        Marks a namespace as deleted. The id can never be created or forked into again.
 
         Parameters
         ----------
@@ -338,7 +338,7 @@ class AsyncNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DeleteNamespaceResponse:
         """
-        Marks a namespace as deleted.
+        Marks a namespace as deleted. The id can never be created or forked into again.
 
         Parameters
         ----------
