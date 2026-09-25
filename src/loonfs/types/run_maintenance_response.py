@@ -42,6 +42,28 @@ class RunMaintenanceResponse_Gc(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class RunMaintenanceResponse_GrepGc(UniversalBaseModel):
+    """
+    The result of one maintenance job. The `kind` matches the request.
+    """
+
+    kind: typing.Literal["grep_gc"] = "grep_gc"
+    deleted_other_objects: int
+    deleted_segments: int
+    namespace_id: NamespaceId
+    namespace_reaped: bool
+    retained_candidates: int
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class RunMaintenanceResponse_Metadata(UniversalBaseModel):
     """
     The result of one maintenance job. The `kind` matches the request.
@@ -124,6 +146,7 @@ class RunMaintenanceResponse_Retention(UniversalBaseModel):
 RunMaintenanceResponse = typing_extensions.Annotated[
     typing.Union[
         RunMaintenanceResponse_Gc,
+        RunMaintenanceResponse_GrepGc,
         RunMaintenanceResponse_Metadata,
         RunMaintenanceResponse_MetadataCompaction,
         RunMaintenanceResponse_RecoverAdministrator,

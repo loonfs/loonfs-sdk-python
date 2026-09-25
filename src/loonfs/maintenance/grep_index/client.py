@@ -4,13 +4,8 @@ import typing
 
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.request_options import RequestOptions
-from ...types.grep_gc_request import GrepGcRequest
-from ...types.grep_gc_response import GrepGcResponse
 from ...types.grep_index import GrepIndex
 from .raw_client import AsyncRawGrepIndexClient, RawGrepIndexClient
-
-# this is used as the default value for optional parameters
-OMIT = typing.cast(typing.Any, ...)
 
 
 class GrepIndexClient:
@@ -134,47 +129,6 @@ class GrepIndexClient:
         )
         """
         _response = self._raw_client.enable(namespace_id, request_options=request_options)
-        return _response.data
-
-    def gc(
-        self, namespace_id: str, *, request: GrepGcRequest, request_options: typing.Optional[RequestOptions] = None
-    ) -> GrepGcResponse:
-        """
-        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped. Every call reads durable roots and completes one pass. Unreadable or invalid roots fail before deletion. Requires this deployment to maintain the grep index.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        request : GrepGcRequest
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        GrepGcResponse
-            Namespace grep garbage collection completed
-
-        Examples
-        --------
-        from loonfs.server import LoonFS
-
-        client = LoonFS(
-            actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
-            principals="YOUR_PRINCIPALS",
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-        client.maintenance.grep_index.gc(
-            namespace_id="namespace_id",
-            request={"key": "value"},
-        )
-        """
-        _response = self._raw_client.gc(namespace_id, request=request, request_options=request_options)
         return _response.data
 
 
@@ -325,53 +279,4 @@ class AsyncGrepIndexClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.enable(namespace_id, request_options=request_options)
-        return _response.data
-
-    async def gc(
-        self, namespace_id: str, *, request: GrepGcRequest, request_options: typing.Optional[RequestOptions] = None
-    ) -> GrepGcResponse:
-        """
-        Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped. Every call reads durable roots and completes one pass. Unreadable or invalid roots fail before deletion. Requires this deployment to maintain the grep index.
-
-        Parameters
-        ----------
-        namespace_id : str
-            Namespace id
-
-        request : GrepGcRequest
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        GrepGcResponse
-            Namespace grep garbage collection completed
-
-        Examples
-        --------
-        import asyncio
-
-        from loonfs.server import AsyncLoonFS
-
-        client = AsyncLoonFS(
-            actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
-            principals="YOUR_PRINCIPALS",
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-
-
-        async def main() -> None:
-            await client.maintenance.grep_index.gc(
-                namespace_id="namespace_id",
-                request={"key": "value"},
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.gc(namespace_id, request=request, request_options=request_options)
         return _response.data
