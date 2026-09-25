@@ -2803,7 +2803,7 @@ client.maintenance.checkpoints.list(
 <dl>
 <dd>
 
-Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is deleted, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+Creates a user-owned checkpoint record pinning the current namespace view. It first folds any WAL tail after the current manifest. Every call creates a new record under a new id; the name is a label, not a key. The record retains its manifest until it is deleted, either explicitly or by collection after expiry plus grace, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 </dd>
 </dl>
 </dd>
@@ -2860,7 +2860,7 @@ client.maintenance.checkpoints.create(
 <dl>
 <dd>
 
-**ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds, or `None` for an explicit deletion only.
+**ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds, or `None` to keep the checkpoint until it is deleted.
     
 </dd>
 </dl>
@@ -3251,89 +3251,6 @@ client.maintenance.grep_index.enable(
 </dl>
 </details>
 
-<details><summary><code>client.maintenance.grep_index.<a href="src/loonfs/maintenance/grep_index/client.py">gc</a>(...) -> GrepGcResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Runs one explicit garbage-collection pass over only this namespace's grep-owned extension keyspace. A tombstoned or absent namespace has aged extension state reaped. Every call reads durable roots and completes one pass. Unreadable or invalid roots fail before deletion. Requires this deployment to maintain the grep index.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs.server import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.maintenance.grep_index.gc(
-    namespace_id="namespace_id",
-    request={
-        "key": "value"
-    },
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**namespace_id:** `str` — Namespace id
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request:** `GrepGcRequest` 
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
 ## Maintenance Runs
 <details><summary><code>client.maintenance.runs.<a href="src/loonfs/maintenance/runs/client.py">create</a>(...) -> RunMaintenanceResponse</code></summary>
 <dl>
@@ -3347,7 +3264,7 @@ client.maintenance.grep_index.gc(
 <dl>
 <dd>
 
-Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, `retention`, or `recover_administrator`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc`. A `gc` call reads the current manifest and lists pins, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
+Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, `grep_gc`, `retention`, or `recover_administrator`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc` or `grep_gc`. A `grep_gc` call collects aged, unreferenced grep index objects and requires `maintenance.grep.index`. A `gc` call reads the current manifest and lists pins, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
 </dd>
 </dl>
 </dd>

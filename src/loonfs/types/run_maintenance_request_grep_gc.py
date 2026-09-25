@@ -4,23 +4,11 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .metadata_compaction_outcome import MetadataCompactionOutcome
-from .namespace_id import NamespaceId
 
 
-class RunMaintenanceResponseMetadataCompaction(UniversalBaseModel):
+class RunMaintenanceRequestGrepGc(UniversalBaseModel):
     """
-    Result of one metadata compaction unit.
-    """
-
-    compaction: MetadataCompactionOutcome = pydantic.Field()
-    """
-    The compaction outcome.
-    """
-
-    namespace_id: NamespaceId = pydantic.Field()
-    """
-    Namespace compacted by this run.
+    Collects aged, unreferenced grep index objects.
     """
 
     if IS_PYDANTIC_V2:

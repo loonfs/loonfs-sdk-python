@@ -14,7 +14,7 @@ from .access_revision_no import AccessRevisionNo
 from .attribute_key import AttributeKey
 from .attribute_value import AttributeValue
 from .attributes_revision_no import AttributesRevisionNo
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .change_seq import ChangeSeq
 from .content_ref import ContentRef
 from .delete_directory_behavior import DeleteDirectoryBehavior
@@ -122,7 +122,7 @@ class FilesystemOperation_DeleteByInode(UniversalBaseModel):
 
     kind: typing.Literal["delete_by_inode"] = "delete_by_inode"
     behavior: typing.Optional[DeleteDirectoryBehavior] = None
-    expected_binding_generation: BindingGeneration
+    expected_binding_version: BindingVersion
     inode_id: InodeId
 
     if IS_PYDANTIC_V2:
@@ -168,7 +168,7 @@ class FilesystemOperation_MoveByInode(UniversalBaseModel):
     behavior: typing.Optional[DestinationBehavior] = None
     destination_display_name: DisplayName
     destination_parent_inode_id: InodeId
-    expected_binding_generation: BindingGeneration
+    expected_binding_version: BindingVersion
     expected_destination_inode_id: typing.Optional[InodeId] = None
     expected_destination_revision_no: typing.Optional[RevisionNo] = None
     inode_id: InodeId

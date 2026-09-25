@@ -8,7 +8,7 @@ from .absolute_path import AbsolutePath
 from .actor_id import ActorId
 from .attributes import Attributes
 from .attributes_revision_no import AttributesRevisionNo
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .change_seq import ChangeSeq
 from .display_name import DisplayName
 from .inode_id import InodeId
@@ -43,7 +43,7 @@ class PathEntryDirectory(UniversalBaseModel):
     initial empty state.
     """
 
-    binding_generation: typing.Optional[BindingGeneration] = pydantic.Field(default=None)
+    binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
     The opaque ID for the current parent and name binding, or `None` for the namespace root.
     """

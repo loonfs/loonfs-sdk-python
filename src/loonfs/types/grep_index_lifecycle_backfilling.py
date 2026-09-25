@@ -16,6 +16,11 @@ class GrepIndexLifecycleBackfilling(UniversalBaseModel):
     An initial scan of a pinned checkpoint that is not yet searchable.
     """
 
+    captured_seq: ChangeSeq = pydantic.Field()
+    """
+    The namespace sequence that completes the backfill when reached.
+    """
+
     checkpoint_id: PinId = pydantic.Field()
     """
     Checkpoint pinning the state being walked.
@@ -39,11 +44,6 @@ class GrepIndexLifecycleBackfilling(UniversalBaseModel):
     reorganize_pending: bool = pydantic.Field()
     """
     True while a partitioned segment reorganization is in progress.
-    """
-
-    target_seq: ChangeSeq = pydantic.Field()
-    """
-    The namespace sequence that completes the backfill when reached.
     """
 
     if IS_PYDANTIC_V2:

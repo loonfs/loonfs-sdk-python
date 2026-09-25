@@ -7,9 +7,9 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .namespace_id import NamespaceId
 
 
-class GrepGcResponse(UniversalBaseModel):
+class RunMaintenanceResponseGrepGc(UniversalBaseModel):
     """
-    Result of one explicit grep index garbage-collection pass (maintenance API group).
+    Counts from one grep index collection pass.
     """
 
     deleted_other_objects: int = pydantic.Field()

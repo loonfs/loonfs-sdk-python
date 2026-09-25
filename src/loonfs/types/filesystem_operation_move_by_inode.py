@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .destination_behavior import DestinationBehavior
 from .display_name import DisplayName
 from .inode_id import InodeId
@@ -31,9 +31,9 @@ class FilesystemOperationMoveByInode(UniversalBaseModel):
     Destination directory.
     """
 
-    expected_binding_generation: BindingGeneration = pydantic.Field()
+    expected_binding_version: BindingVersion = pydantic.Field()
     """
-    Binding generation required for the move.
+    Binding version required for the move.
     """
 
     expected_destination_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)

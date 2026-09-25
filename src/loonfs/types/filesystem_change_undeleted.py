@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .display_name import DisplayName
 from .inode_id import InodeId
 
@@ -14,7 +14,7 @@ class FilesystemChangeUndeleted(UniversalBaseModel):
     A deleted inode was recovered and re-bound.
     """
 
-    binding_generation: BindingGeneration = pydantic.Field()
+    binding_version: BindingVersion = pydantic.Field()
     """
     Opaque identifier for the binding created by this event.
     """

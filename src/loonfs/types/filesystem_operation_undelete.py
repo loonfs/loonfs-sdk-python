@@ -16,7 +16,7 @@ class FilesystemOperationUndelete(UniversalBaseModel):
 
     deletion_seq: ChangeSeq = pydantic.Field()
     """
-    Observed deletion sequence, which prevents cancelling a newer tombstone generation.
+    Observed deletion sequence, which prevents cancelling a newer tombstone sequence.
     """
 
     destination_path: typing.Optional[AbsolutePath] = pydantic.Field(default=None)

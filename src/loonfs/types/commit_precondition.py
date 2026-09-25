@@ -10,7 +10,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .access_revision_no import AccessRevisionNo
 from .attributes_revision_no import AttributesRevisionNo
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .change_seq import ChangeSeq
 from .inode_id import InodeId
 from .revision_no import RevisionNo
@@ -127,7 +127,7 @@ class CommitPrecondition_PathBinding(UniversalBaseModel):
     """
 
     kind: typing.Literal["path_binding"] = "path_binding"
-    expected_binding_generation: typing.Optional[BindingGeneration] = None
+    expected_binding_version: typing.Optional[BindingVersion] = None
     expected_inode_id: InodeId
     path: AbsolutePath
 

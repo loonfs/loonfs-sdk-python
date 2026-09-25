@@ -42,12 +42,12 @@ class GrepIndex_Backfilling(UniversalBaseModel):
     """
 
     status: typing.Literal["backfilling"] = "backfilling"
+    captured_seq: ChangeSeq
     checkpoint_id: PinId
     cursor_inode_id: typing.Optional[InodeId] = None
     namespace_id: NamespaceId
     next_run_no: RunNo
     reorganize_pending: bool
-    target_seq: ChangeSeq
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

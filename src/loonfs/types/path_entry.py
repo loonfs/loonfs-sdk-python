@@ -11,7 +11,7 @@ from .absolute_path import AbsolutePath
 from .actor_id import ActorId
 from .attributes import Attributes
 from .attributes_revision_no import AttributesRevisionNo
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .change_seq import ChangeSeq
 from .content_ref import ContentRef
 from .display_name import DisplayName
@@ -32,7 +32,7 @@ class PathEntry_Dir(UniversalBaseModel):
     attributes_revision_no: typing.Optional[AttributesRevisionNo] = None
     attributes_updated_at_ms: typing.Optional[int] = None
     attributes_updated_by: typing.Optional[ActorId] = None
-    binding_generation: typing.Optional[BindingGeneration] = None
+    binding_version: typing.Optional[BindingVersion] = None
     created_at_ms: int
     created_by: ActorId
     display_name: typing.Optional[DisplayName] = None
@@ -64,7 +64,7 @@ class PathEntry_File(UniversalBaseModel):
     attributes_revision_no: typing.Optional[AttributesRevisionNo] = None
     attributes_updated_at_ms: typing.Optional[int] = None
     attributes_updated_by: typing.Optional[ActorId] = None
-    binding_generation: typing.Optional[BindingGeneration] = None
+    binding_version: typing.Optional[BindingVersion] = None
     content_ref: ContentRef
     created_at_ms: int
     created_by: ActorId

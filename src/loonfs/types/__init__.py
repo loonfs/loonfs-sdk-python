@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
     from .attribute_value import AttributeValue
     from .attributes import Attributes
     from .attributes_revision_no import AttributesRevisionNo
-    from .binding_generation import BindingGeneration
+    from .binding_version import BindingVersion
     from .capability_document import CapabilityDocument
     from .change_seq import ChangeSeq
     from .checkpoint import Checkpoint
@@ -135,8 +135,6 @@ if typing.TYPE_CHECKING:
     from .filesystem_operation_undelete import FilesystemOperationUndelete
     from .filesystem_operation_update_access import FilesystemOperationUpdateAccess
     from .filesystem_operation_update_attributes import FilesystemOperationUpdateAttributes
-    from .grep_gc_request import GrepGcRequest
-    from .grep_gc_response import GrepGcResponse
     from .grep_index import GrepIndex, GrepIndex_Active, GrepIndex_Backfilling, GrepIndex_Disabled
     from .grep_index_lifecycle_active import GrepIndexLifecycleActive
     from .grep_index_lifecycle_backfilling import GrepIndexLifecycleBackfilling
@@ -205,12 +203,14 @@ if typing.TYPE_CHECKING:
     from .run_maintenance_request import (
         RunMaintenanceRequest,
         RunMaintenanceRequest_Gc,
+        RunMaintenanceRequest_GrepGc,
         RunMaintenanceRequest_Metadata,
         RunMaintenanceRequest_MetadataCompaction,
         RunMaintenanceRequest_RecoverAdministrator,
         RunMaintenanceRequest_Retention,
     )
     from .run_maintenance_request_gc import RunMaintenanceRequestGc
+    from .run_maintenance_request_grep_gc import RunMaintenanceRequestGrepGc
     from .run_maintenance_request_metadata import RunMaintenanceRequestMetadata
     from .run_maintenance_request_metadata_compaction import RunMaintenanceRequestMetadataCompaction
     from .run_maintenance_request_recover_administrator import RunMaintenanceRequestRecoverAdministrator
@@ -218,12 +218,14 @@ if typing.TYPE_CHECKING:
     from .run_maintenance_response import (
         RunMaintenanceResponse,
         RunMaintenanceResponse_Gc,
+        RunMaintenanceResponse_GrepGc,
         RunMaintenanceResponse_Metadata,
         RunMaintenanceResponse_MetadataCompaction,
         RunMaintenanceResponse_RecoverAdministrator,
         RunMaintenanceResponse_Retention,
     )
     from .run_maintenance_response_gc import RunMaintenanceResponseGc
+    from .run_maintenance_response_grep_gc import RunMaintenanceResponseGrepGc
     from .run_maintenance_response_metadata import RunMaintenanceResponseMetadata
     from .run_maintenance_response_metadata_compaction import RunMaintenanceResponseMetadataCompaction
     from .run_maintenance_response_recover_administrator import RunMaintenanceResponseRecoverAdministrator
@@ -270,7 +272,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "AttributeValue": ".attribute_value",
     "Attributes": ".attributes",
     "AttributesRevisionNo": ".attributes_revision_no",
-    "BindingGeneration": ".binding_generation",
+    "BindingVersion": ".binding_version",
     "CapabilityDocument": ".capability_document",
     "ChangeSeq": ".change_seq",
     "Checkpoint": ".checkpoint",
@@ -377,8 +379,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperation_Undelete": ".filesystem_operation",
     "FilesystemOperation_UpdateAccess": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributes": ".filesystem_operation",
-    "GrepGcRequest": ".grep_gc_request",
-    "GrepGcResponse": ".grep_gc_response",
     "GrepIndex": ".grep_index",
     "GrepIndexLifecycleActive": ".grep_index_lifecycle_active",
     "GrepIndexLifecycleBackfilling": ".grep_index_lifecycle_backfilling",
@@ -452,22 +452,26 @@ _dynamic_imports: typing.Dict[str, str] = {
     "RevisionNo": ".revision_no",
     "RunMaintenanceRequest": ".run_maintenance_request",
     "RunMaintenanceRequestGc": ".run_maintenance_request_gc",
+    "RunMaintenanceRequestGrepGc": ".run_maintenance_request_grep_gc",
     "RunMaintenanceRequestMetadata": ".run_maintenance_request_metadata",
     "RunMaintenanceRequestMetadataCompaction": ".run_maintenance_request_metadata_compaction",
     "RunMaintenanceRequestRecoverAdministrator": ".run_maintenance_request_recover_administrator",
     "RunMaintenanceRequestRetention": ".run_maintenance_request_retention",
     "RunMaintenanceRequest_Gc": ".run_maintenance_request",
+    "RunMaintenanceRequest_GrepGc": ".run_maintenance_request",
     "RunMaintenanceRequest_Metadata": ".run_maintenance_request",
     "RunMaintenanceRequest_MetadataCompaction": ".run_maintenance_request",
     "RunMaintenanceRequest_RecoverAdministrator": ".run_maintenance_request",
     "RunMaintenanceRequest_Retention": ".run_maintenance_request",
     "RunMaintenanceResponse": ".run_maintenance_response",
     "RunMaintenanceResponseGc": ".run_maintenance_response_gc",
+    "RunMaintenanceResponseGrepGc": ".run_maintenance_response_grep_gc",
     "RunMaintenanceResponseMetadata": ".run_maintenance_response_metadata",
     "RunMaintenanceResponseMetadataCompaction": ".run_maintenance_response_metadata_compaction",
     "RunMaintenanceResponseRecoverAdministrator": ".run_maintenance_response_recover_administrator",
     "RunMaintenanceResponseRetention": ".run_maintenance_response_retention",
     "RunMaintenanceResponse_Gc": ".run_maintenance_response",
+    "RunMaintenanceResponse_GrepGc": ".run_maintenance_response",
     "RunMaintenanceResponse_Metadata": ".run_maintenance_response",
     "RunMaintenanceResponse_MetadataCompaction": ".run_maintenance_response",
     "RunMaintenanceResponse_RecoverAdministrator": ".run_maintenance_response",
@@ -539,7 +543,7 @@ __all__ = [
     "AttributeValue",
     "Attributes",
     "AttributesRevisionNo",
-    "BindingGeneration",
+    "BindingVersion",
     "CapabilityDocument",
     "ChangeSeq",
     "Checkpoint",
@@ -646,8 +650,6 @@ __all__ = [
     "FilesystemOperation_Undelete",
     "FilesystemOperation_UpdateAccess",
     "FilesystemOperation_UpdateAttributes",
-    "GrepGcRequest",
-    "GrepGcResponse",
     "GrepIndex",
     "GrepIndexLifecycleActive",
     "GrepIndexLifecycleBackfilling",
@@ -721,22 +723,26 @@ __all__ = [
     "RevisionNo",
     "RunMaintenanceRequest",
     "RunMaintenanceRequestGc",
+    "RunMaintenanceRequestGrepGc",
     "RunMaintenanceRequestMetadata",
     "RunMaintenanceRequestMetadataCompaction",
     "RunMaintenanceRequestRecoverAdministrator",
     "RunMaintenanceRequestRetention",
     "RunMaintenanceRequest_Gc",
+    "RunMaintenanceRequest_GrepGc",
     "RunMaintenanceRequest_Metadata",
     "RunMaintenanceRequest_MetadataCompaction",
     "RunMaintenanceRequest_RecoverAdministrator",
     "RunMaintenanceRequest_Retention",
     "RunMaintenanceResponse",
     "RunMaintenanceResponseGc",
+    "RunMaintenanceResponseGrepGc",
     "RunMaintenanceResponseMetadata",
     "RunMaintenanceResponseMetadataCompaction",
     "RunMaintenanceResponseRecoverAdministrator",
     "RunMaintenanceResponseRetention",
     "RunMaintenanceResponse_Gc",
+    "RunMaintenanceResponse_GrepGc",
     "RunMaintenanceResponse_Metadata",
     "RunMaintenanceResponse_MetadataCompaction",
     "RunMaintenanceResponse_RecoverAdministrator",
