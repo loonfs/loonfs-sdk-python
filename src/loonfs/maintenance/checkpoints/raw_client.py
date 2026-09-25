@@ -11,6 +11,7 @@ from ...core.parse_error import ParsingError
 from ...core.pydantic_utilities import parse_obj_as
 from ...core.request_options import RequestOptions
 from ...errors.bad_request_error import BadRequestError
+from ...errors.content_too_large_error import ContentTooLargeError
 from ...errors.gone_error import GoneError
 from ...errors.not_found_error import NotFoundError
 from ...errors.service_unavailable_error import ServiceUnavailableError
@@ -222,6 +223,17 @@ class RawCheckpointsClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -542,6 +554,17 @@ class AsyncRawCheckpointsClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
