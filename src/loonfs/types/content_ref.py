@@ -12,9 +12,11 @@ from .namespace_id import NamespaceId
 
 class ContentRef(UniversalBaseModel):
     """
-    A reference to one immutable content object.
+    Identifies one piece of immutable file content.
 
-    The object must be durable before the reference is published.
+    The owner namespace and content id name the content object that holds the
+    bytes. A reference is not proof that the object exists: content committed
+    inline has no object until a flush writes it.
     """
 
     checksum: Checksum = pydantic.Field()
@@ -24,12 +26,12 @@ class ContentRef(UniversalBaseModel):
 
     content_id: ContentId = pydantic.Field()
     """
-    Immutable identity of the referenced object.
+    Immutable identity of the content; with the owner, it determines the object key.
     """
 
     kind: ContentRefKind = pydantic.Field()
     """
-    Content strategy used by the referenced object.
+    Content strategy used by the referenced content.
     """
 
     owner_namespace_id: NamespaceId = pydantic.Field()

@@ -6,7 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .access_revision_no import AccessRevisionNo
 from .attributes_revision_no import AttributesRevisionNo
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .inode_id import InodeId
@@ -26,14 +26,14 @@ class ErrorDetails(UniversalBaseModel):
     The Unix-millisecond time when the current writer acquired its epoch, when available.
     """
 
-    active_writer: typing.Optional[WriterId] = pydantic.Field(default=None)
-    """
-    The writer ID recorded for the current epoch, when available.
-    """
-
     active_writer_epoch: typing.Optional[WriterEpoch] = pydantic.Field(default=None)
     """
     Epoch that currently owns the namespace.
+    """
+
+    active_writer_id: typing.Optional[WriterId] = pydantic.Field(default=None)
+    """
+    The writer ID recorded for the current epoch, when available.
     """
 
     actual_access_revision_no: typing.Optional[AccessRevisionNo] = pydantic.Field(default=None)
@@ -46,14 +46,14 @@ class ErrorDetails(UniversalBaseModel):
     Attribute revision that is actually current for the inode.
     """
 
-    actual_binding_generation: typing.Optional[BindingGeneration] = pydantic.Field(default=None)
+    actual_binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
     Current binding token; absent for the root, which has no binding.
     """
 
     actual_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Deletion generation actually active for the inode.
+    Deletion sequence actually active for the inode.
     """
 
     actual_head_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
@@ -101,14 +101,14 @@ class ErrorDetails(UniversalBaseModel):
     Attribute revision the request expected to be current.
     """
 
-    expected_binding_generation: typing.Optional[BindingGeneration] = pydantic.Field(default=None)
+    expected_binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
     Opaque binding token supplied by the request.
     """
 
     expected_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Deletion generation the undelete expected to be active.
+    Deletion sequence the undelete expected to be active.
     """
 
     expected_head_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)

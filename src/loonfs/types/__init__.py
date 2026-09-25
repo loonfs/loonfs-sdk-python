@@ -16,7 +16,7 @@ if typing.TYPE_CHECKING:
     from .attribute_value import AttributeValue
     from .attributes import Attributes
     from .attributes_revision_no import AttributesRevisionNo
-    from .binding_generation import BindingGeneration
+    from .binding_version import BindingVersion
     from .capability_document import CapabilityDocument
     from .change_seq import ChangeSeq
     from .checkpoint import Checkpoint
@@ -270,7 +270,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "AttributeValue": ".attribute_value",
     "Attributes": ".attributes",
     "AttributesRevisionNo": ".attributes_revision_no",
-    "BindingGeneration": ".binding_generation",
+    "BindingVersion": ".binding_version",
     "CapabilityDocument": ".capability_document",
     "ChangeSeq": ".change_seq",
     "Checkpoint": ".checkpoint",
@@ -539,7 +539,7 @@ __all__ = [
     "AttributeValue",
     "Attributes",
     "AttributesRevisionNo",
-    "BindingGeneration",
+    "BindingVersion",
     "CapabilityDocument",
     "ChangeSeq",
     "Checkpoint",

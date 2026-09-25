@@ -35,7 +35,7 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     The earliest future retirement deadline, pin deletion time, or upload cleanup time.
     """
 
-    reclaim_after_ms: typing.Optional[int] = pydantic.Field(default=None)
+    reclaimable_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
     The current tombstone's deletion time plus the configured retirement grace.
     """

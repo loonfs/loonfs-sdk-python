@@ -11,11 +11,6 @@ class DeletedCheckpointsByOwner(UniversalBaseModel):
     Checkpoint record counts deleted by one garbage-collection pass, grouped by owner.
     """
 
-    expired: int = pydantic.Field()
-    """
-    User-owned records deleted after expiry or namespace deletion.
-    """
-
     fork: int = pydantic.Field()
     """
     Fork-owned records deleted because their target namespaces are gone.
@@ -24,6 +19,11 @@ class DeletedCheckpointsByOwner(UniversalBaseModel):
     snapshot: int = pydantic.Field()
     """
     Snapshot-owned records deleted after expiry or namespace deletion.
+    """
+
+    user: int = pydantic.Field()
+    """
+    User-owned records deleted after expiry or namespace deletion.
     """
 
     if IS_PYDANTIC_V2:

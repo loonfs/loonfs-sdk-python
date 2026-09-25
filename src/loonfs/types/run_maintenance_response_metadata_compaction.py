@@ -10,7 +10,7 @@ from .namespace_id import NamespaceId
 
 class RunMaintenanceResponseMetadataCompaction(UniversalBaseModel):
     """
-    Result of one full metadata compaction.
+    Result of one metadata compaction unit.
     """
 
     compaction: MetadataCompactionOutcome = pydantic.Field()

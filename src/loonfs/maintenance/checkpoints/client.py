@@ -56,7 +56,7 @@ class CheckpointsClient:
         Returns
         -------
         ListCheckpointsResponse
-            Active checkpoint objects
+            Existing checkpoint objects
 
         Examples
         --------
@@ -86,7 +86,7 @@ class CheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkpoint:
         """
-        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is deleted, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+        Creates a user-owned checkpoint record pinning the current namespace view. It first folds any WAL tail after the current manifest. Every call creates a new record under a new id; the name is a label, not a key. The record retains its manifest until it is deleted, either explicitly or by collection after expiry plus grace, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 
         Parameters
         ----------
@@ -97,7 +97,7 @@ class CheckpointsClient:
             The non-unique label recorded on the checkpoint.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds, or `None` for an explicit deletion only.
+            The checkpoint lifetime in milliseconds, or `None` to keep the checkpoint until it is deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -213,7 +213,7 @@ class AsyncCheckpointsClient:
         Returns
         -------
         ListCheckpointsResponse
-            Active checkpoint objects
+            Existing checkpoint objects
 
         Examples
         --------
@@ -253,7 +253,7 @@ class AsyncCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Checkpoint:
         """
-        Creates a named, user-owned checkpoint record pinning the current namespace view. Every call mints a new record under a new id; the name is a label, not a key. The record is a garbage-collection root until it is deleted, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+        Creates a user-owned checkpoint record pinning the current namespace view. It first folds any WAL tail after the current manifest. Every call creates a new record under a new id; the name is a label, not a key. The record retains its manifest until it is deleted, either explicitly or by collection after expiry plus grace, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
 
         Parameters
         ----------
@@ -264,7 +264,7 @@ class AsyncCheckpointsClient:
             The non-unique label recorded on the checkpoint.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds, or `None` for an explicit deletion only.
+            The checkpoint lifetime in milliseconds, or `None` to keep the checkpoint until it is deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

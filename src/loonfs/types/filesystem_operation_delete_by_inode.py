@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .delete_directory_behavior import DeleteDirectoryBehavior
 from .inode_id import InodeId
 
@@ -19,9 +19,9 @@ class FilesystemOperationDeleteByInode(UniversalBaseModel):
     Whether a non-empty directory may be tombstoned recursively.
     """
 
-    expected_binding_generation: BindingGeneration = pydantic.Field()
+    expected_binding_version: BindingVersion = pydantic.Field()
     """
-    Binding generation required for the delete.
+    Binding version required for the delete.
     """
 
     inode_id: InodeId = pydantic.Field()

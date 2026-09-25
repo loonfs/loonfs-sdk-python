@@ -11,7 +11,7 @@ from .access_grants import AccessGrants
 from .access_revision_no import AccessRevisionNo
 from .attributes import Attributes
 from .attributes_revision_no import AttributesRevisionNo
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .content_ref import ContentRef
 from .directory_binding import DirectoryBinding
 from .display_name import DisplayName
@@ -115,7 +115,7 @@ class FilesystemChange_DirectoryCreated(UniversalBaseModel):
     """
 
     kind: typing.Literal["directory_created"] = "directory_created"
-    binding_generation: BindingGeneration
+    binding_version: BindingVersion
     display_name: DisplayName
     inode_id: InodeId
     parent_inode_id: InodeId
@@ -138,7 +138,7 @@ class FilesystemChange_FileCreated(UniversalBaseModel):
     """
 
     kind: typing.Literal["file_created"] = "file_created"
-    binding_generation: BindingGeneration
+    binding_version: BindingVersion
     content_ref: ContentRef
     display_name: DisplayName
     inode_id: InodeId
@@ -163,7 +163,7 @@ class FilesystemChange_Moved(UniversalBaseModel):
     """
 
     kind: typing.Literal["moved"] = "moved"
-    binding_generation: BindingGeneration
+    binding_version: BindingVersion
     destination_display_name: DisplayName
     destination_parent_inode_id: InodeId
     inode_id: InodeId
@@ -188,7 +188,7 @@ class FilesystemChange_Undeleted(UniversalBaseModel):
     """
 
     kind: typing.Literal["undeleted"] = "undeleted"
-    binding_generation: BindingGeneration
+    binding_version: BindingVersion
     display_name: DisplayName
     inode_id: InodeId
     parent_inode_id: InodeId

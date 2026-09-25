@@ -28,7 +28,7 @@ class CapabilityDocument(UniversalBaseModel):
 
     protocol_version: str = pydantic.Field()
     """
-    The protocol generation, currently `v0`.
+    The protocol version, `v0`.
     """
 
     if IS_PYDANTIC_V2:

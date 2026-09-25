@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
-from .binding_generation import BindingGeneration
+from .binding_version import BindingVersion
 from .inode_id import InodeId
 
 
@@ -14,7 +14,7 @@ class CommitPreconditionPathBinding(UniversalBaseModel):
     Requires the path to retain the binding the caller read.
     """
 
-    expected_binding_generation: typing.Optional[BindingGeneration] = pydantic.Field(default=None)
+    expected_binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
     Detects moves away and back.
     """

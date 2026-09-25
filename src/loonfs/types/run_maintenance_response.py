@@ -29,7 +29,7 @@ class RunMaintenanceResponse_Gc(UniversalBaseModel):
     deleted_checkpoints_by_owner: DeletedCheckpointsByOwner
     namespace_id: NamespaceId
     next_reclamation_at_ms: typing.Optional[int] = None
-    reclaim_after_ms: typing.Optional[int] = None
+    reclaimable_at_ms: typing.Optional[int] = None
     retained: RetainedCandidates
 
     if IS_PYDANTIC_V2:
