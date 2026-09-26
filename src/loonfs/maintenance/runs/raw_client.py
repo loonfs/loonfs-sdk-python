@@ -12,6 +12,7 @@ from ...core.pydantic_utilities import parse_obj_as
 from ...core.request_options import RequestOptions
 from ...core.serialization import convert_and_respect_annotation_metadata
 from ...errors.bad_request_error import BadRequestError
+from ...errors.content_too_large_error import ContentTooLargeError
 from ...errors.gone_error import GoneError
 from ...errors.not_found_error import NotFoundError
 from ...errors.not_implemented_error import NotImplementedError
@@ -115,6 +116,17 @@ class RawRunsClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -245,6 +257,17 @@ class AsyncRawRunsClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

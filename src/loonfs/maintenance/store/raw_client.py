@@ -10,6 +10,7 @@ from ...core.parse_error import ParsingError
 from ...core.pydantic_utilities import parse_obj_as
 from ...core.request_options import RequestOptions
 from ...errors.bad_request_error import BadRequestError
+from ...errors.content_too_large_error import ContentTooLargeError
 from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.error_response import ErrorResponse
@@ -76,6 +77,17 @@ class RawStoreClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -161,6 +173,17 @@ class AsyncRawStoreClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

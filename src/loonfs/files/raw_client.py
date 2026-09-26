@@ -278,6 +278,17 @@ class RawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 501:
                 raise NotImplementedError(
                     headers=dict(_response.headers),
@@ -1070,6 +1081,17 @@ class AsyncRawFilesClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
