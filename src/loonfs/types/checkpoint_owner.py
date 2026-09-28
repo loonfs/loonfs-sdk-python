@@ -10,7 +10,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .namespace_id import NamespaceId
 
 
-class CheckpointOwnerSummary_Fork(UniversalBaseModel):
+class CheckpointOwner_Fork(UniversalBaseModel):
     """
     The owner of a checkpoint record.
     """
@@ -28,7 +28,7 @@ class CheckpointOwnerSummary_Fork(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class CheckpointOwnerSummary_Snapshot(UniversalBaseModel):
+class CheckpointOwner_Snapshot(UniversalBaseModel):
     """
     The owner of a checkpoint record.
     """
@@ -46,7 +46,7 @@ class CheckpointOwnerSummary_Snapshot(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class CheckpointOwnerSummary_User(UniversalBaseModel):
+class CheckpointOwner_User(UniversalBaseModel):
     """
     The owner of a checkpoint record.
     """
@@ -64,7 +64,7 @@ class CheckpointOwnerSummary_User(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-CheckpointOwnerSummary = typing_extensions.Annotated[
-    typing.Union[CheckpointOwnerSummary_Fork, CheckpointOwnerSummary_Snapshot, CheckpointOwnerSummary_User],
+CheckpointOwner = typing_extensions.Annotated[
+    typing.Union[CheckpointOwner_Fork, CheckpointOwner_Snapshot, CheckpointOwner_User],
     pydantic.Field(discriminator="kind"),
 ]

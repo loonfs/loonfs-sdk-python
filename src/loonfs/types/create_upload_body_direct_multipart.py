@@ -13,7 +13,7 @@ class CreateUploadBodyDirectMultipart(UniversalBaseModel):
 
     part_size_bytes: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The byte length of every part except the last, or `None` for the server default.
+    The byte length of every part except the last. Omit it for the server default.
     """
 
     if IS_PYDANTIC_V2:

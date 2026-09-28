@@ -31,12 +31,12 @@ class ListChangesResponse(UniversalBaseModel):
 
     next_after_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Cursor to request when another page remains, or `None` at `through_seq`.
+    Cursor to request when another page remains, absent at `through_seq`.
     """
 
     through_seq: ChangeSeq = pydantic.Field()
     """
-    Snapshot head through which this page was evaluated.
+    Namespace head through which this page was evaluated.
     """
 
     if IS_PYDANTIC_V2:

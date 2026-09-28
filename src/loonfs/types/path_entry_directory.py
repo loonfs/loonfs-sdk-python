@@ -33,19 +33,19 @@ class PathEntryDirectory(UniversalBaseModel):
 
     attributes_updated_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The latest attribute update time in Unix milliseconds, or `None` for the
+    The latest attribute update time in Unix milliseconds, absent for the
     initial empty state.
     """
 
     attributes_updated_by: typing.Optional[ActorId] = pydantic.Field(default=None)
     """
-    The actor responsible for the latest attribute update, or `None` for the
+    The actor responsible for the latest attribute update, absent for the
     initial empty state.
     """
 
     binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
-    The opaque ID for the current parent and name binding, or `None` for the namespace root.
+    The opaque ID for the current parent and name binding, absent for the namespace root.
     """
 
     created_at_ms: int = pydantic.Field()
@@ -80,7 +80,7 @@ class PathEntryDirectory(UniversalBaseModel):
 
     parent_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Parent directory inode, or `None` for the root.
+    Parent directory inode, absent for the root.
     """
 
     path: AbsolutePath = pydantic.Field()

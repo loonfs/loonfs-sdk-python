@@ -18,7 +18,7 @@ from .writer_id import WriterId
 
 class ErrorDetails(UniversalBaseModel):
     """
-    Optional machine-readable identifiers and state for an [`ApiError`].
+    Optional machine-readable identifiers and state for an `ErrorResponse`.
     """
 
     active_acquired_at_ms: typing.Optional[int] = pydantic.Field(default=None)

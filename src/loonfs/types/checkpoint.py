@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
-from .checkpoint_owner_summary import CheckpointOwnerSummary
+from .checkpoint_owner import CheckpointOwner
 from .manifest_no import ManifestNo
 from .namespace_id import NamespaceId
 from .pin_id import PinId
@@ -46,7 +46,7 @@ class Checkpoint(UniversalBaseModel):
     Namespace that owns the checkpoint.
     """
 
-    owner: CheckpointOwnerSummary = pydantic.Field()
+    owner: CheckpointOwner = pydantic.Field()
     """
     Who owns the checkpoint, including the label carried by a user pin.
     """

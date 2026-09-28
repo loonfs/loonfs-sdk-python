@@ -28,7 +28,7 @@ class UploadSessionStatusCompleted(UniversalBaseModel):
 
     content_token: typing.Optional[ContentToken] = pydantic.Field(default=None)
     """
-    Fresh proof for a later commit, or `None` after the token minting window closes.
+    Fresh proof for a later commit, absent after the token minting window closes.
     """
 
     mode: UploadMode = pydantic.Field()

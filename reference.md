@@ -775,7 +775,7 @@ client.files.create_download(
 
 **revision_no:** `typing.Optional[RevisionNo]` 
 
-Revision to read, or `None` for the path's current revision.
+Revision to read. Omit it for the path's current revision.
 Cannot be combined with `snapshot_id`.
     
 </dd>
@@ -2860,7 +2860,7 @@ client.maintenance.checkpoints.create(
 <dl>
 <dd>
 
-**ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds, or `None` to keep the checkpoint until it is deleted.
+**ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds. Omit it to keep the checkpoint until it is deleted.
     
 </dd>
 </dl>

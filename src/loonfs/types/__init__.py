@@ -20,14 +20,9 @@ if typing.TYPE_CHECKING:
     from .capability_document import CapabilityDocument
     from .change_seq import ChangeSeq
     from .checkpoint import Checkpoint
+    from .checkpoint_owner import CheckpointOwner, CheckpointOwner_Fork, CheckpointOwner_Snapshot, CheckpointOwner_User
     from .checkpoint_owner_fork import CheckpointOwnerFork
     from .checkpoint_owner_snapshot import CheckpointOwnerSnapshot
-    from .checkpoint_owner_summary import (
-        CheckpointOwnerSummary,
-        CheckpointOwnerSummary_Fork,
-        CheckpointOwnerSummary_Snapshot,
-        CheckpointOwnerSummary_User,
-    )
     from .checkpoint_owner_user import CheckpointOwnerUser
     from .checksum import Checksum
     from .checksum_algorithm import ChecksumAlgorithm
@@ -276,13 +271,13 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CapabilityDocument": ".capability_document",
     "ChangeSeq": ".change_seq",
     "Checkpoint": ".checkpoint",
+    "CheckpointOwner": ".checkpoint_owner",
     "CheckpointOwnerFork": ".checkpoint_owner_fork",
     "CheckpointOwnerSnapshot": ".checkpoint_owner_snapshot",
-    "CheckpointOwnerSummary": ".checkpoint_owner_summary",
-    "CheckpointOwnerSummary_Fork": ".checkpoint_owner_summary",
-    "CheckpointOwnerSummary_Snapshot": ".checkpoint_owner_summary",
-    "CheckpointOwnerSummary_User": ".checkpoint_owner_summary",
     "CheckpointOwnerUser": ".checkpoint_owner_user",
+    "CheckpointOwner_Fork": ".checkpoint_owner",
+    "CheckpointOwner_Snapshot": ".checkpoint_owner",
+    "CheckpointOwner_User": ".checkpoint_owner",
     "Checksum": ".checksum",
     "ChecksumAlgorithm": ".checksum_algorithm",
     "Commit": ".commit",
@@ -547,13 +542,13 @@ __all__ = [
     "CapabilityDocument",
     "ChangeSeq",
     "Checkpoint",
+    "CheckpointOwner",
     "CheckpointOwnerFork",
     "CheckpointOwnerSnapshot",
-    "CheckpointOwnerSummary",
-    "CheckpointOwnerSummary_Fork",
-    "CheckpointOwnerSummary_Snapshot",
-    "CheckpointOwnerSummary_User",
     "CheckpointOwnerUser",
+    "CheckpointOwner_Fork",
+    "CheckpointOwner_Snapshot",
+    "CheckpointOwner_User",
     "Checksum",
     "ChecksumAlgorithm",
     "Commit",
