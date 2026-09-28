@@ -2,7 +2,7 @@
 
 AttributeValue = str
 """
-A validated inode attribute value of at most [`MAX_ATTRIBUTE_VALUE_BYTES`] UTF-8 bytes.
+A validated inode attribute value of at most 4,096 UTF-8 bytes.
 
 Empty strings and control characters are valid, and only an explicit remove
 operation deletes an attribute.

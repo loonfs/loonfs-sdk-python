@@ -110,7 +110,7 @@ class FilesClient:
             Absolute path of the file to read.
 
         revision_no : typing.Optional[RevisionNo]
-            Revision to read, or `None` for the path's current revision.
+            Revision to read. Omit it for the path's current revision.
             Cannot be combined with `snapshot_id`.
 
         snapshot_id : typing.Optional[PinId]
@@ -517,7 +517,7 @@ class AsyncFilesClient:
             Absolute path of the file to read.
 
         revision_no : typing.Optional[RevisionNo]
-            Revision to read, or `None` for the path's current revision.
+            Revision to read. Omit it for the path's current revision.
             Cannot be combined with `snapshot_id`.
 
         snapshot_id : typing.Optional[PinId]

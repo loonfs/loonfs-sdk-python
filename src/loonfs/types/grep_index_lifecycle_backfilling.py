@@ -28,7 +28,7 @@ class GrepIndexLifecycleBackfilling(UniversalBaseModel):
 
     cursor_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    The inode after which the scan resumes, or `None` before the first page.
+    The inode after which the scan resumes, absent before the first page.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

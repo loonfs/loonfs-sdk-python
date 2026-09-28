@@ -13,7 +13,7 @@ class RunMaintenanceRequestMetadata(UniversalBaseModel):
 
     max_wal_tail_segments: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The WAL-tail threshold for flushing, or `None` for the server default.
+    The WAL-tail threshold for flushing. Omit it for the server default.
     """
 
     if IS_PYDANTIC_V2:

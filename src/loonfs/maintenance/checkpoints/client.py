@@ -97,7 +97,7 @@ class CheckpointsClient:
             The non-unique label recorded on the checkpoint.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds, or `None` to keep the checkpoint until it is deleted.
+            The checkpoint lifetime in milliseconds. Omit it to keep the checkpoint until it is deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -264,7 +264,7 @@ class AsyncCheckpointsClient:
             The non-unique label recorded on the checkpoint.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds, or `None` to keep the checkpoint until it is deleted.
+            The checkpoint lifetime in milliseconds. Omit it to keep the checkpoint until it is deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

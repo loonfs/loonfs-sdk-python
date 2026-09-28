@@ -21,7 +21,7 @@ class FilesystemOperationUndelete(UniversalBaseModel):
 
     destination_path: typing.Optional[AbsolutePath] = pydantic.Field(default=None)
     """
-    The restore destination, or `None` to use the recorded binding.
+    The restore destination. Omit it to use the recorded binding.
     """
 
     inode_id: InodeId = pydantic.Field()
