@@ -11,7 +11,7 @@ from .namespace_fork_basis import NamespaceForkBasis
 from .namespace_id import NamespaceId
 
 
-class Namespace(UniversalBaseModel):
+class NamespaceMetadata(UniversalBaseModel):
     """
     Current state for one namespace.
     """
@@ -48,7 +48,8 @@ class Namespace(UniversalBaseModel):
 
     retention_floor_seq: ChangeSeq = pydantic.Field()
     """
-    Oldest sequence still promised for incremental replay.
+    Oldest position a change feed can resume after. The feed returns
+    changes above it.
     """
 
     if IS_PYDANTIC_V2:

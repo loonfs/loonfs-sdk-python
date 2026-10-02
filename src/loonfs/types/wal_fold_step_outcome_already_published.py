@@ -4,11 +4,23 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .change_seq import ChangeSeq
+from .manifest_no import ManifestNo
 
 
-class ReorganizeStepOutcomeUnitPublished(UniversalBaseModel):
+class WalFoldStepOutcomeAlreadyPublished(UniversalBaseModel):
     """
-    One family group was merged and a manifest published.
+    The current manifest already covered the captured WAL tail; this step published no manifest.
+    """
+
+    attempted_seq: ChangeSeq = pydantic.Field()
+    """
+    Sequence this step attempted to fold through.
+    """
+
+    current_manifest_no: ManifestNo = pydantic.Field()
+    """
+    The namespace's current manifest number.
     """
 
     if IS_PYDANTIC_V2:

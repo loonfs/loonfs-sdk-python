@@ -63,7 +63,7 @@ client.capabilities.retrieve()
 </details>
 
 ## namespaces
-<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">create</a>(...) -> Namespace</code></summary>
+<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">create</a>(...) -> NamespaceMetadata</code></summary>
 <dl>
 <dd>
 
@@ -146,7 +146,7 @@ unrestricted.
 </dl>
 </details>
 
-<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">retrieve</a>(...) -> Namespace</code></summary>
+<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">retrieve</a>(...) -> NamespaceMetadata</code></summary>
 <dl>
 <dd>
 
@@ -298,7 +298,7 @@ client.namespaces.delete(
 </dl>
 </details>
 
-<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">fork</a>(...) -> Namespace</code></summary>
+<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">fork</a>(...) -> NamespaceMetadata</code></summary>
 <dl>
 <dd>
 
@@ -1925,7 +1925,7 @@ client.snapshots.list(
 <dl>
 <dd>
 
-Creates a snapshot of the current namespace state. Every call creates a new snapshot.
+Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
 </dd>
 </dl>
 </dd>
@@ -2803,7 +2803,7 @@ client.maintenance.checkpoints.list(
 <dl>
 <dd>
 
-Creates a user-owned checkpoint record pinning the current namespace view. It first folds any WAL tail after the current manifest. Every call creates a new record under a new id; the name is a label, not a key. The record retains its manifest until it is deleted, either explicitly or by collection after expiry plus grace, so routine maintenance should flush the WAL instead. This is a maintenance operation, not a file mutation.
+Creates a user-owned checkpoint record pinning the current namespace view. It first folds any WAL tail after the current manifest. Every call creates a new record under a new id; the name is a label, not a key. The record retains its manifest until it is deleted, either explicitly or by collection after expiry plus grace, so routine maintenance should fold the WAL instead. This is a maintenance operation, not a file mutation.
 </dd>
 </dl>
 </dd>
@@ -3191,7 +3191,7 @@ client.maintenance.grep_index.disable(
 <dl>
 <dd>
 
-Enables the namespace's grep index and asks this deployment's maintenance runner for the backfill's first step. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+Enables the namespace's grep index. A deployment that runs maintenance builds the backfill on its next maintenance pass. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 </dd>
 </dl>
 </dd>

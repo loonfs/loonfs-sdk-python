@@ -43,6 +43,19 @@ if typing.TYPE_CHECKING:
     from .commit_precondition_namespace_head import CommitPreconditionNamespaceHead
     from .commit_precondition_path_absence import CommitPreconditionPathAbsence
     from .commit_precondition_path_binding import CommitPreconditionPathBinding
+    from .compaction_step_outcome import (
+        CompactionStepOutcome,
+        CompactionStepOutcome_Fenced,
+        CompactionStepOutcome_ManifestAdvanced,
+        CompactionStepOutcome_MetadataCompactionRequired,
+        CompactionStepOutcome_NotNeeded,
+        CompactionStepOutcome_UnitPublished,
+    )
+    from .compaction_step_outcome_fenced import CompactionStepOutcomeFenced
+    from .compaction_step_outcome_manifest_advanced import CompactionStepOutcomeManifestAdvanced
+    from .compaction_step_outcome_metadata_compaction_required import CompactionStepOutcomeMetadataCompactionRequired
+    from .compaction_step_outcome_not_needed import CompactionStepOutcomeNotNeeded
+    from .compaction_step_outcome_unit_published import CompactionStepOutcomeUnitPublished
     from .complete_upload_body import (
         CompleteUploadBody,
         CompleteUploadBody_DirectMultipart,
@@ -162,7 +175,6 @@ if typing.TYPE_CHECKING:
     from .metadata_compaction_outcome_not_needed import MetadataCompactionOutcomeNotNeeded
     from .metadata_compaction_outcome_published import MetadataCompactionOutcomePublished
     from .name_key import NameKey
-    from .namespace import Namespace
     from .namespace_access import NamespaceAccess, NamespaceAccess_Acl, NamespaceAccess_Unrestricted
     from .namespace_access_acl import NamespaceAccessAcl
     from .namespace_access_mode import NamespaceAccessMode, NamespaceAccessMode_Acl, NamespaceAccessMode_Unrestricted
@@ -172,6 +184,7 @@ if typing.TYPE_CHECKING:
     from .namespace_diagnostics import NamespaceDiagnostics
     from .namespace_fork_basis import NamespaceForkBasis
     from .namespace_id import NamespaceId
+    from .namespace_metadata import NamespaceMetadata
     from .object_transfer_access import ObjectTransferAccess, ObjectTransferAccess_PresignedUrl
     from .object_transfer_access_presigned_url import ObjectTransferAccessPresignedUrl
     from .path_entry import PathEntry, PathEntry_Dir, PathEntry_File
@@ -180,19 +193,6 @@ if typing.TYPE_CHECKING:
     from .pin_id import PinId
     from .principal_id import PrincipalId
     from .principal_scope import PrincipalScope
-    from .reorganize_step_outcome import (
-        ReorganizeStepOutcome,
-        ReorganizeStepOutcome_CompactionRequired,
-        ReorganizeStepOutcome_Fenced,
-        ReorganizeStepOutcome_ManifestAdvanced,
-        ReorganizeStepOutcome_NotNeeded,
-        ReorganizeStepOutcome_UnitPublished,
-    )
-    from .reorganize_step_outcome_compaction_required import ReorganizeStepOutcomeCompactionRequired
-    from .reorganize_step_outcome_fenced import ReorganizeStepOutcomeFenced
-    from .reorganize_step_outcome_manifest_advanced import ReorganizeStepOutcomeManifestAdvanced
-    from .reorganize_step_outcome_not_needed import ReorganizeStepOutcomeNotNeeded
-    from .reorganize_step_outcome_unit_published import ReorganizeStepOutcomeUnitPublished
     from .retained_candidates import RetainedCandidates
     from .revision_no import RevisionNo
     from .run_maintenance_request import (
@@ -243,17 +243,17 @@ if typing.TYPE_CHECKING:
     from .upload_session_status_aborted import UploadSessionStatusAborted
     from .upload_session_status_completed import UploadSessionStatusCompleted
     from .upload_session_status_open import UploadSessionStatusOpen
-    from .wal_flush_step_outcome import (
-        WalFlushStepOutcome,
-        WalFlushStepOutcome_AlreadyPublished,
-        WalFlushStepOutcome_Flushed,
-        WalFlushStepOutcome_NotNeeded,
-        WalFlushStepOutcome_RetriesExhausted,
+    from .wal_fold_step_outcome import (
+        WalFoldStepOutcome,
+        WalFoldStepOutcome_AlreadyPublished,
+        WalFoldStepOutcome_Folded,
+        WalFoldStepOutcome_NotNeeded,
+        WalFoldStepOutcome_RetriesExhausted,
     )
-    from .wal_flush_step_outcome_already_published import WalFlushStepOutcomeAlreadyPublished
-    from .wal_flush_step_outcome_flushed import WalFlushStepOutcomeFlushed
-    from .wal_flush_step_outcome_not_needed import WalFlushStepOutcomeNotNeeded
-    from .wal_flush_step_outcome_retries_exhausted import WalFlushStepOutcomeRetriesExhausted
+    from .wal_fold_step_outcome_already_published import WalFoldStepOutcomeAlreadyPublished
+    from .wal_fold_step_outcome_folded import WalFoldStepOutcomeFolded
+    from .wal_fold_step_outcome_not_needed import WalFoldStepOutcomeNotNeeded
+    from .wal_fold_step_outcome_retries_exhausted import WalFoldStepOutcomeRetriesExhausted
     from .writer_epoch import WriterEpoch
     from .writer_id import WriterId
 _dynamic_imports: typing.Dict[str, str] = {
@@ -295,6 +295,17 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CommitPrecondition_NamespaceHead": ".commit_precondition",
     "CommitPrecondition_PathAbsence": ".commit_precondition",
     "CommitPrecondition_PathBinding": ".commit_precondition",
+    "CompactionStepOutcome": ".compaction_step_outcome",
+    "CompactionStepOutcomeFenced": ".compaction_step_outcome_fenced",
+    "CompactionStepOutcomeManifestAdvanced": ".compaction_step_outcome_manifest_advanced",
+    "CompactionStepOutcomeMetadataCompactionRequired": ".compaction_step_outcome_metadata_compaction_required",
+    "CompactionStepOutcomeNotNeeded": ".compaction_step_outcome_not_needed",
+    "CompactionStepOutcomeUnitPublished": ".compaction_step_outcome_unit_published",
+    "CompactionStepOutcome_Fenced": ".compaction_step_outcome",
+    "CompactionStepOutcome_ManifestAdvanced": ".compaction_step_outcome",
+    "CompactionStepOutcome_MetadataCompactionRequired": ".compaction_step_outcome",
+    "CompactionStepOutcome_NotNeeded": ".compaction_step_outcome",
+    "CompactionStepOutcome_UnitPublished": ".compaction_step_outcome",
     "CompleteUploadBody": ".complete_upload_body",
     "CompleteUploadBodyDirectMultipart": ".complete_upload_body_direct_multipart",
     "CompleteUploadBodyDirectPut": ".complete_upload_body_direct_put",
@@ -407,7 +418,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "MetadataCompactionOutcome_NotNeeded": ".metadata_compaction_outcome",
     "MetadataCompactionOutcome_Published": ".metadata_compaction_outcome",
     "NameKey": ".name_key",
-    "Namespace": ".namespace",
     "NamespaceAccess": ".namespace_access",
     "NamespaceAccessAcl": ".namespace_access_acl",
     "NamespaceAccessMode": ".namespace_access_mode",
@@ -421,6 +431,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "NamespaceDiagnostics": ".namespace_diagnostics",
     "NamespaceForkBasis": ".namespace_fork_basis",
     "NamespaceId": ".namespace_id",
+    "NamespaceMetadata": ".namespace_metadata",
     "ObjectTransferAccess": ".object_transfer_access",
     "ObjectTransferAccessPresignedUrl": ".object_transfer_access_presigned_url",
     "ObjectTransferAccess_PresignedUrl": ".object_transfer_access",
@@ -432,17 +443,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PinId": ".pin_id",
     "PrincipalId": ".principal_id",
     "PrincipalScope": ".principal_scope",
-    "ReorganizeStepOutcome": ".reorganize_step_outcome",
-    "ReorganizeStepOutcomeCompactionRequired": ".reorganize_step_outcome_compaction_required",
-    "ReorganizeStepOutcomeFenced": ".reorganize_step_outcome_fenced",
-    "ReorganizeStepOutcomeManifestAdvanced": ".reorganize_step_outcome_manifest_advanced",
-    "ReorganizeStepOutcomeNotNeeded": ".reorganize_step_outcome_not_needed",
-    "ReorganizeStepOutcomeUnitPublished": ".reorganize_step_outcome_unit_published",
-    "ReorganizeStepOutcome_CompactionRequired": ".reorganize_step_outcome",
-    "ReorganizeStepOutcome_Fenced": ".reorganize_step_outcome",
-    "ReorganizeStepOutcome_ManifestAdvanced": ".reorganize_step_outcome",
-    "ReorganizeStepOutcome_NotNeeded": ".reorganize_step_outcome",
-    "ReorganizeStepOutcome_UnitPublished": ".reorganize_step_outcome",
     "RetainedCandidates": ".retained_candidates",
     "RevisionNo": ".revision_no",
     "RunMaintenanceRequest": ".run_maintenance_request",
@@ -492,15 +492,15 @@ _dynamic_imports: typing.Dict[str, str] = {
     "UploadSession_Aborted": ".upload_session",
     "UploadSession_Completed": ".upload_session",
     "UploadSession_Open": ".upload_session",
-    "WalFlushStepOutcome": ".wal_flush_step_outcome",
-    "WalFlushStepOutcomeAlreadyPublished": ".wal_flush_step_outcome_already_published",
-    "WalFlushStepOutcomeFlushed": ".wal_flush_step_outcome_flushed",
-    "WalFlushStepOutcomeNotNeeded": ".wal_flush_step_outcome_not_needed",
-    "WalFlushStepOutcomeRetriesExhausted": ".wal_flush_step_outcome_retries_exhausted",
-    "WalFlushStepOutcome_AlreadyPublished": ".wal_flush_step_outcome",
-    "WalFlushStepOutcome_Flushed": ".wal_flush_step_outcome",
-    "WalFlushStepOutcome_NotNeeded": ".wal_flush_step_outcome",
-    "WalFlushStepOutcome_RetriesExhausted": ".wal_flush_step_outcome",
+    "WalFoldStepOutcome": ".wal_fold_step_outcome",
+    "WalFoldStepOutcomeAlreadyPublished": ".wal_fold_step_outcome_already_published",
+    "WalFoldStepOutcomeFolded": ".wal_fold_step_outcome_folded",
+    "WalFoldStepOutcomeNotNeeded": ".wal_fold_step_outcome_not_needed",
+    "WalFoldStepOutcomeRetriesExhausted": ".wal_fold_step_outcome_retries_exhausted",
+    "WalFoldStepOutcome_AlreadyPublished": ".wal_fold_step_outcome",
+    "WalFoldStepOutcome_Folded": ".wal_fold_step_outcome",
+    "WalFoldStepOutcome_NotNeeded": ".wal_fold_step_outcome",
+    "WalFoldStepOutcome_RetriesExhausted": ".wal_fold_step_outcome",
     "WriterEpoch": ".writer_epoch",
     "WriterId": ".writer_id",
 }
@@ -566,6 +566,17 @@ __all__ = [
     "CommitPrecondition_NamespaceHead",
     "CommitPrecondition_PathAbsence",
     "CommitPrecondition_PathBinding",
+    "CompactionStepOutcome",
+    "CompactionStepOutcomeFenced",
+    "CompactionStepOutcomeManifestAdvanced",
+    "CompactionStepOutcomeMetadataCompactionRequired",
+    "CompactionStepOutcomeNotNeeded",
+    "CompactionStepOutcomeUnitPublished",
+    "CompactionStepOutcome_Fenced",
+    "CompactionStepOutcome_ManifestAdvanced",
+    "CompactionStepOutcome_MetadataCompactionRequired",
+    "CompactionStepOutcome_NotNeeded",
+    "CompactionStepOutcome_UnitPublished",
     "CompleteUploadBody",
     "CompleteUploadBodyDirectMultipart",
     "CompleteUploadBodyDirectPut",
@@ -678,7 +689,6 @@ __all__ = [
     "MetadataCompactionOutcome_NotNeeded",
     "MetadataCompactionOutcome_Published",
     "NameKey",
-    "Namespace",
     "NamespaceAccess",
     "NamespaceAccessAcl",
     "NamespaceAccessMode",
@@ -692,6 +702,7 @@ __all__ = [
     "NamespaceDiagnostics",
     "NamespaceForkBasis",
     "NamespaceId",
+    "NamespaceMetadata",
     "ObjectTransferAccess",
     "ObjectTransferAccessPresignedUrl",
     "ObjectTransferAccess_PresignedUrl",
@@ -703,17 +714,6 @@ __all__ = [
     "PinId",
     "PrincipalId",
     "PrincipalScope",
-    "ReorganizeStepOutcome",
-    "ReorganizeStepOutcomeCompactionRequired",
-    "ReorganizeStepOutcomeFenced",
-    "ReorganizeStepOutcomeManifestAdvanced",
-    "ReorganizeStepOutcomeNotNeeded",
-    "ReorganizeStepOutcomeUnitPublished",
-    "ReorganizeStepOutcome_CompactionRequired",
-    "ReorganizeStepOutcome_Fenced",
-    "ReorganizeStepOutcome_ManifestAdvanced",
-    "ReorganizeStepOutcome_NotNeeded",
-    "ReorganizeStepOutcome_UnitPublished",
     "RetainedCandidates",
     "RevisionNo",
     "RunMaintenanceRequest",
@@ -763,15 +763,15 @@ __all__ = [
     "UploadSession_Aborted",
     "UploadSession_Completed",
     "UploadSession_Open",
-    "WalFlushStepOutcome",
-    "WalFlushStepOutcomeAlreadyPublished",
-    "WalFlushStepOutcomeFlushed",
-    "WalFlushStepOutcomeNotNeeded",
-    "WalFlushStepOutcomeRetriesExhausted",
-    "WalFlushStepOutcome_AlreadyPublished",
-    "WalFlushStepOutcome_Flushed",
-    "WalFlushStepOutcome_NotNeeded",
-    "WalFlushStepOutcome_RetriesExhausted",
+    "WalFoldStepOutcome",
+    "WalFoldStepOutcomeAlreadyPublished",
+    "WalFoldStepOutcomeFolded",
+    "WalFoldStepOutcomeNotNeeded",
+    "WalFoldStepOutcomeRetriesExhausted",
+    "WalFoldStepOutcome_AlreadyPublished",
+    "WalFoldStepOutcome_Folded",
+    "WalFoldStepOutcome_NotNeeded",
+    "WalFoldStepOutcome_RetriesExhausted",
     "WriterEpoch",
     "WriterId",
 ]

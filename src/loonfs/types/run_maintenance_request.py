@@ -51,7 +51,7 @@ class RunMaintenanceRequest_Metadata(UniversalBaseModel):
     """
 
     kind: typing.Literal["metadata"] = "metadata"
-    max_wal_tail_segments: typing.Optional[int] = None
+    max_wal_tail_objects: typing.Optional[int] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

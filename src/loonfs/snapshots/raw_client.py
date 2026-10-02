@@ -138,7 +138,7 @@ class RawSnapshotsClient:
         self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Snapshot]:
         """
-        Creates a snapshot of the current namespace state. Every call creates a new snapshot.
+        Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
 
         Parameters
         ----------
@@ -602,7 +602,7 @@ class AsyncRawSnapshotsClient:
         self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Snapshot]:
         """
-        Creates a snapshot of the current namespace state. Every call creates a new snapshot.
+        Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
 
         Parameters
         ----------

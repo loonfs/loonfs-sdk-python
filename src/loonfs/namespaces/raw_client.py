@@ -21,9 +21,9 @@ from ..errors.unauthorized_error import UnauthorizedError
 from ..types.change_seq import ChangeSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.error_response import ErrorResponse
-from ..types.namespace import Namespace
 from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
+from ..types.namespace_metadata import NamespaceMetadata
 from ..types.pin_id import PinId
 from pydantic import ValidationError
 
@@ -41,7 +41,7 @@ class RawNamespacesClient:
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Namespace]:
+    ) -> HttpResponse[NamespaceMetadata]:
         """
         Creates a new empty namespace.
 
@@ -59,7 +59,7 @@ class RawNamespacesClient:
 
         Returns
         -------
-        HttpResponse[Namespace]
+        HttpResponse[NamespaceMetadata]
             Namespace created
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -83,9 +83,9 @@ class RawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    NamespaceMetadata,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=NamespaceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -167,7 +167,7 @@ class RawNamespacesClient:
 
     def retrieve(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[Namespace]:
+    ) -> HttpResponse[NamespaceMetadata]:
         """
         Returns the current head and retention state for a namespace.
 
@@ -181,7 +181,7 @@ class RawNamespacesClient:
 
         Returns
         -------
-        HttpResponse[Namespace]
+        HttpResponse[NamespaceMetadata]
             Namespace
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -192,9 +192,9 @@ class RawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    NamespaceMetadata,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=NamespaceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -392,7 +392,7 @@ class RawNamespacesClient:
         new_namespace_id: NamespaceId,
         snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Namespace]:
+    ) -> HttpResponse[NamespaceMetadata]:
         """
         Creates a new namespace from the source current head or a live snapshot.
 
@@ -412,7 +412,7 @@ class RawNamespacesClient:
 
         Returns
         -------
-        HttpResponse[Namespace]
+        HttpResponse[NamespaceMetadata]
             Namespace forked
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -434,9 +434,9 @@ class RawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    NamespaceMetadata,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=NamespaceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -538,7 +538,7 @@ class AsyncRawNamespacesClient:
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Namespace]:
+    ) -> AsyncHttpResponse[NamespaceMetadata]:
         """
         Creates a new empty namespace.
 
@@ -556,7 +556,7 @@ class AsyncRawNamespacesClient:
 
         Returns
         -------
-        AsyncHttpResponse[Namespace]
+        AsyncHttpResponse[NamespaceMetadata]
             Namespace created
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -580,9 +580,9 @@ class AsyncRawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    NamespaceMetadata,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=NamespaceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -664,7 +664,7 @@ class AsyncRawNamespacesClient:
 
     async def retrieve(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[Namespace]:
+    ) -> AsyncHttpResponse[NamespaceMetadata]:
         """
         Returns the current head and retention state for a namespace.
 
@@ -678,7 +678,7 @@ class AsyncRawNamespacesClient:
 
         Returns
         -------
-        AsyncHttpResponse[Namespace]
+        AsyncHttpResponse[NamespaceMetadata]
             Namespace
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -689,9 +689,9 @@ class AsyncRawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    NamespaceMetadata,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=NamespaceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -889,7 +889,7 @@ class AsyncRawNamespacesClient:
         new_namespace_id: NamespaceId,
         snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Namespace]:
+    ) -> AsyncHttpResponse[NamespaceMetadata]:
         """
         Creates a new namespace from the source current head or a live snapshot.
 
@@ -909,7 +909,7 @@ class AsyncRawNamespacesClient:
 
         Returns
         -------
-        AsyncHttpResponse[Namespace]
+        AsyncHttpResponse[NamespaceMetadata]
             Namespace forked
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -931,9 +931,9 @@ class AsyncRawNamespacesClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    Namespace,
+                    NamespaceMetadata,
                     parse_obj_as(
-                        type_=Namespace,  # type: ignore
+                        type_=NamespaceMetadata,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

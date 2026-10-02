@@ -7,14 +7,18 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .change_seq import ChangeSeq
+from .manifest_no import ManifestNo
 
 
-class ReorganizeStepOutcome_CompactionRequired(UniversalBaseModel):
+class WalFoldStepOutcome_AlreadyPublished(UniversalBaseModel):
     """
-    The outcome of the metadata-reorganization part of a maintenance pass.
+    What the WAL fold part of a maintenance pass did.
     """
 
-    outcome: typing.Literal["compaction_required"] = "compaction_required"
+    outcome: typing.Literal["already_published"] = "already_published"
+    attempted_seq: ChangeSeq
+    current_manifest_no: ManifestNo
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -26,12 +30,13 @@ class ReorganizeStepOutcome_CompactionRequired(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ReorganizeStepOutcome_Fenced(UniversalBaseModel):
+class WalFoldStepOutcome_Folded(UniversalBaseModel):
     """
-    The outcome of the metadata-reorganization part of a maintenance pass.
+    What the WAL fold part of a maintenance pass did.
     """
 
-    outcome: typing.Literal["fenced"] = "fenced"
+    outcome: typing.Literal["folded"] = "folded"
+    manifest_head_seq: ChangeSeq
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -43,26 +48,9 @@ class ReorganizeStepOutcome_Fenced(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ReorganizeStepOutcome_ManifestAdvanced(UniversalBaseModel):
+class WalFoldStepOutcome_NotNeeded(UniversalBaseModel):
     """
-    The outcome of the metadata-reorganization part of a maintenance pass.
-    """
-
-    outcome: typing.Literal["manifest_advanced"] = "manifest_advanced"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class ReorganizeStepOutcome_NotNeeded(UniversalBaseModel):
-    """
-    The outcome of the metadata-reorganization part of a maintenance pass.
+    What the WAL fold part of a maintenance pass did.
     """
 
     outcome: typing.Literal["not_needed"] = "not_needed"
@@ -77,12 +65,13 @@ class ReorganizeStepOutcome_NotNeeded(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class ReorganizeStepOutcome_UnitPublished(UniversalBaseModel):
+class WalFoldStepOutcome_RetriesExhausted(UniversalBaseModel):
     """
-    The outcome of the metadata-reorganization part of a maintenance pass.
+    What the WAL fold part of a maintenance pass did.
     """
 
-    outcome: typing.Literal["unit_published"] = "unit_published"
+    outcome: typing.Literal["retries_exhausted"] = "retries_exhausted"
+    observed_head_seq: ChangeSeq
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -94,13 +83,12 @@ class ReorganizeStepOutcome_UnitPublished(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-ReorganizeStepOutcome = typing_extensions.Annotated[
+WalFoldStepOutcome = typing_extensions.Annotated[
     typing.Union[
-        ReorganizeStepOutcome_CompactionRequired,
-        ReorganizeStepOutcome_Fenced,
-        ReorganizeStepOutcome_ManifestAdvanced,
-        ReorganizeStepOutcome_NotNeeded,
-        ReorganizeStepOutcome_UnitPublished,
+        WalFoldStepOutcome_AlreadyPublished,
+        WalFoldStepOutcome_Folded,
+        WalFoldStepOutcome_NotNeeded,
+        WalFoldStepOutcome_RetriesExhausted,
     ],
     pydantic.Field(discriminator="outcome"),
 ]

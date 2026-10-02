@@ -6,9 +6,9 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class WalFlushStepOutcomeNotNeeded(UniversalBaseModel):
+class CompactionStepOutcomeFenced(UniversalBaseModel):
     """
-    The tail was below the threshold, so there was nothing to flush.
+    A newer runtime holds the compactor epoch.
     """
 
     if IS_PYDANTIC_V2:

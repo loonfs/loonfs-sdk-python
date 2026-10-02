@@ -6,9 +6,9 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class ReorganizeStepOutcomeFenced(UniversalBaseModel):
+class CompactionStepOutcomeNotNeeded(UniversalBaseModel):
     """
-    A newer runtime holds the compactor epoch.
+    No family group had enough delta runs to merge.
     """
 
     if IS_PYDANTIC_V2:

@@ -6,9 +6,9 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class ReorganizeStepOutcomeNotNeeded(UniversalBaseModel):
+class CompactionStepOutcomeManifestAdvanced(UniversalBaseModel):
     """
-    No family group had enough delta runs to merge.
+    Another publisher changed the current manifest before this step could publish.
     """
 
     if IS_PYDANTIC_V2:

@@ -7,18 +7,14 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
-from .manifest_no import ManifestNo
 
 
-class WalFlushStepOutcome_AlreadyPublished(UniversalBaseModel):
+class CompactionStepOutcome_Fenced(UniversalBaseModel):
     """
-    What the WAL-flush part of a maintenance pass did.
+    What the bounded compaction part of a maintenance pass did.
     """
 
-    outcome: typing.Literal["already_published"] = "already_published"
-    attempted_seq: ChangeSeq
-    current_manifest_no: ManifestNo
+    outcome: typing.Literal["fenced"] = "fenced"
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -30,13 +26,12 @@ class WalFlushStepOutcome_AlreadyPublished(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class WalFlushStepOutcome_Flushed(UniversalBaseModel):
+class CompactionStepOutcome_ManifestAdvanced(UniversalBaseModel):
     """
-    What the WAL-flush part of a maintenance pass did.
+    What the bounded compaction part of a maintenance pass did.
     """
 
-    outcome: typing.Literal["flushed"] = "flushed"
-    manifest_head_seq: ChangeSeq
+    outcome: typing.Literal["manifest_advanced"] = "manifest_advanced"
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -48,9 +43,26 @@ class WalFlushStepOutcome_Flushed(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class WalFlushStepOutcome_NotNeeded(UniversalBaseModel):
+class CompactionStepOutcome_MetadataCompactionRequired(UniversalBaseModel):
     """
-    What the WAL-flush part of a maintenance pass did.
+    What the bounded compaction part of a maintenance pass did.
+    """
+
+    outcome: typing.Literal["metadata_compaction_required"] = "metadata_compaction_required"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class CompactionStepOutcome_NotNeeded(UniversalBaseModel):
+    """
+    What the bounded compaction part of a maintenance pass did.
     """
 
     outcome: typing.Literal["not_needed"] = "not_needed"
@@ -65,13 +77,12 @@ class WalFlushStepOutcome_NotNeeded(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class WalFlushStepOutcome_RetriesExhausted(UniversalBaseModel):
+class CompactionStepOutcome_UnitPublished(UniversalBaseModel):
     """
-    What the WAL-flush part of a maintenance pass did.
+    What the bounded compaction part of a maintenance pass did.
     """
 
-    outcome: typing.Literal["retries_exhausted"] = "retries_exhausted"
-    observed_head_seq: ChangeSeq
+    outcome: typing.Literal["unit_published"] = "unit_published"
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -83,12 +94,13 @@ class WalFlushStepOutcome_RetriesExhausted(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-WalFlushStepOutcome = typing_extensions.Annotated[
+CompactionStepOutcome = typing_extensions.Annotated[
     typing.Union[
-        WalFlushStepOutcome_AlreadyPublished,
-        WalFlushStepOutcome_Flushed,
-        WalFlushStepOutcome_NotNeeded,
-        WalFlushStepOutcome_RetriesExhausted,
+        CompactionStepOutcome_Fenced,
+        CompactionStepOutcome_ManifestAdvanced,
+        CompactionStepOutcome_MetadataCompactionRequired,
+        CompactionStepOutcome_NotNeeded,
+        CompactionStepOutcome_UnitPublished,
     ],
     pydantic.Field(discriminator="outcome"),
 ]

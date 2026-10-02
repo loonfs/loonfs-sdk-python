@@ -4,14 +4,19 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .compaction_step_outcome import CompactionStepOutcome
 from .namespace_id import NamespaceId
-from .reorganize_step_outcome import ReorganizeStepOutcome
-from .wal_flush_step_outcome import WalFlushStepOutcome
+from .wal_fold_step_outcome import WalFoldStepOutcome
 
 
 class RunMaintenanceResponseMetadata(UniversalBaseModel):
     """
-    Result of WAL flushing and one bounded metadata reorganization step.
+    Result of the WAL fold and one bounded compaction step.
+    """
+
+    compaction: CompactionStepOutcome = pydantic.Field()
+    """
+    What the bounded compaction step did.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -19,14 +24,9 @@ class RunMaintenanceResponseMetadata(UniversalBaseModel):
     Namespace maintained by this run.
     """
 
-    reorganize: ReorganizeStepOutcome = pydantic.Field()
+    wal_fold: WalFoldStepOutcome = pydantic.Field()
     """
-    What the reorganization unit did.
-    """
-
-    wal_flush: WalFlushStepOutcome = pydantic.Field()
-    """
-    What the WAL flush did.
+    What the WAL fold did.
     """
 
     if IS_PYDANTIC_V2:
