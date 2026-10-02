@@ -82,7 +82,7 @@ class SnapshotsClient:
         self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
     ) -> Snapshot:
         """
-        Creates a snapshot of the current namespace state. Every call creates a new snapshot.
+        Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
 
         Parameters
         ----------
@@ -296,7 +296,7 @@ class AsyncSnapshotsClient:
         self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
     ) -> Snapshot:
         """
-        Creates a snapshot of the current namespace state. Every call creates a new snapshot.
+        Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
 
         Parameters
         ----------

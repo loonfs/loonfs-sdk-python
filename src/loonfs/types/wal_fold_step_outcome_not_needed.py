@@ -6,9 +6,9 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class ReorganizeStepOutcomeManifestAdvanced(UniversalBaseModel):
+class WalFoldStepOutcomeNotNeeded(UniversalBaseModel):
     """
-    Another publisher changed the current manifest before this step could publish.
+    The tail was below the threshold, so there was nothing to fold.
     """
 
     if IS_PYDANTIC_V2:

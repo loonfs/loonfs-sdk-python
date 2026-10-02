@@ -10,13 +10,13 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .access_revision_no import AccessRevisionNo
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
+from .compaction_step_outcome import CompactionStepOutcome
 from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
 from .deleted_object_counts import DeletedObjectCounts
 from .metadata_compaction_outcome import MetadataCompactionOutcome
 from .namespace_id import NamespaceId
-from .reorganize_step_outcome import ReorganizeStepOutcome
 from .retained_candidates import RetainedCandidates
-from .wal_flush_step_outcome import WalFlushStepOutcome
+from .wal_fold_step_outcome import WalFoldStepOutcome
 
 
 class RunMaintenanceResponse_Gc(UniversalBaseModel):
@@ -70,9 +70,9 @@ class RunMaintenanceResponse_Metadata(UniversalBaseModel):
     """
 
     kind: typing.Literal["metadata"] = "metadata"
+    compaction: CompactionStepOutcome
     namespace_id: NamespaceId
-    reorganize: ReorganizeStepOutcome
-    wal_flush: WalFlushStepOutcome
+    wal_fold: WalFoldStepOutcome
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

@@ -43,7 +43,7 @@ class NamespaceDiagnostics(UniversalBaseModel):
 
     live_checkpoints: int = pydantic.Field()
     """
-    Number of active user checkpoints, including expired records awaiting collection.
+    Number of user checkpoints, including expired records awaiting collection.
     """
 
     live_snapshots: int = pydantic.Field()
@@ -58,12 +58,13 @@ class NamespaceDiagnostics(UniversalBaseModel):
 
     retention_floor_seq: ChangeSeq = pydantic.Field()
     """
-    Oldest sequence still promised for incremental replay.
+    Oldest position a change feed can resume after. The feed returns
+    changes above it.
     """
 
-    wal_tail_segments: int = pydantic.Field()
+    wal_tail_objects: int = pydantic.Field()
     """
-    Number of visible WAL segments after the current manifest.
+    Number of visible WAL objects after the current manifest.
     """
 
     if IS_PYDANTIC_V2:

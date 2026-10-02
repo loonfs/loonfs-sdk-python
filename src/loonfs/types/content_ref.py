@@ -16,7 +16,7 @@ class ContentRef(UniversalBaseModel):
 
     The owner namespace and content id name the content object that holds the
     bytes. A reference is not proof that the object exists: content committed
-    inline has no object until a flush writes it.
+    inline has no object until a fold writes it.
     """
 
     checksum: Checksum = pydantic.Field()

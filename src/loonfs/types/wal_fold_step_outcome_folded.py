@@ -7,9 +7,9 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
 
 
-class WalFlushStepOutcomeFlushed(UniversalBaseModel):
+class WalFoldStepOutcomeFolded(UniversalBaseModel):
     """
-    The step flushed the WAL tail and published the next current manifest.
+    The step folded the WAL tail and published the next current manifest.
     """
 
     manifest_head_seq: ChangeSeq = pydantic.Field()

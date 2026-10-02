@@ -6,9 +6,9 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.change_seq import ChangeSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
-from ..types.namespace import Namespace
 from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
+from ..types.namespace_metadata import NamespaceMetadata
 from ..types.pin_id import PinId
 from .raw_client import AsyncRawNamespacesClient, RawNamespacesClient
 
@@ -37,7 +37,7 @@ class NamespacesClient:
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Namespace:
+    ) -> NamespaceMetadata:
         """
         Creates a new empty namespace.
 
@@ -55,7 +55,7 @@ class NamespacesClient:
 
         Returns
         -------
-        Namespace
+        NamespaceMetadata
             Namespace created
 
         Examples
@@ -77,7 +77,9 @@ class NamespacesClient:
         _response = self._raw_client.create(namespace_id=namespace_id, access=access, request_options=request_options)
         return _response.data
 
-    def retrieve(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> Namespace:
+    def retrieve(
+        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> NamespaceMetadata:
         """
         Returns the current head and retention state for a namespace.
 
@@ -91,7 +93,7 @@ class NamespacesClient:
 
         Returns
         -------
-        Namespace
+        NamespaceMetadata
             Namespace
 
         Examples
@@ -167,7 +169,7 @@ class NamespacesClient:
         new_namespace_id: NamespaceId,
         snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Namespace:
+    ) -> NamespaceMetadata:
         """
         Creates a new namespace from the source current head or a live snapshot.
 
@@ -187,7 +189,7 @@ class NamespacesClient:
 
         Returns
         -------
-        Namespace
+        NamespaceMetadata
             Namespace forked
 
         Examples
@@ -234,7 +236,7 @@ class AsyncNamespacesClient:
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Namespace:
+    ) -> NamespaceMetadata:
         """
         Creates a new empty namespace.
 
@@ -252,7 +254,7 @@ class AsyncNamespacesClient:
 
         Returns
         -------
-        Namespace
+        NamespaceMetadata
             Namespace created
 
         Examples
@@ -286,7 +288,7 @@ class AsyncNamespacesClient:
 
     async def retrieve(
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> Namespace:
+    ) -> NamespaceMetadata:
         """
         Returns the current head and retention state for a namespace.
 
@@ -300,7 +302,7 @@ class AsyncNamespacesClient:
 
         Returns
         -------
-        Namespace
+        NamespaceMetadata
             Namespace
 
         Examples
@@ -392,7 +394,7 @@ class AsyncNamespacesClient:
         new_namespace_id: NamespaceId,
         snapshot_id: typing.Optional[PinId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> Namespace:
+    ) -> NamespaceMetadata:
         """
         Creates a new namespace from the source current head or a live snapshot.
 
@@ -412,7 +414,7 @@ class AsyncNamespacesClient:
 
         Returns
         -------
-        Namespace
+        NamespaceMetadata
             Namespace forked
 
         Examples

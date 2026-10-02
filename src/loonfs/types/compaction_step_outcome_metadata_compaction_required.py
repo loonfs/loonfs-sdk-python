@@ -6,9 +6,10 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class ReorganizeStepOutcomeCompactionRequired(UniversalBaseModel):
+class CompactionStepOutcomeMetadataCompactionRequired(UniversalBaseModel):
     """
-    A family group needs a streaming compaction. Run the `metadata_compaction` job.
+    A family group's window is too large for one bounded merge. Run the
+    `metadata_compaction` job, which compacts it by streaming.
     """
 
     if IS_PYDANTIC_V2:

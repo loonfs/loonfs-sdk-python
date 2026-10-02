@@ -48,7 +48,7 @@ class ErrorDetails(UniversalBaseModel):
 
     actual_binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
-    Current binding token; absent for the root, which has no binding.
+    Current binding token.
     """
 
     actual_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
@@ -136,11 +136,6 @@ class ErrorDetails(UniversalBaseModel):
     Inode the failed precondition or operation targeted.
     """
 
-    max_writer_sessions: typing.Optional[int] = pydantic.Field(default=None)
-    """
-    Maximum writer sessions admitted by the node.
-    """
-
     namespace_id: typing.Optional[NamespaceId] = pydantic.Field(default=None)
     """
     The deleted namespace that caused the operation to fail.
@@ -158,7 +153,8 @@ class ErrorDetails(UniversalBaseModel):
 
     retention_floor_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Oldest sequence still promised for incremental replay.
+    Oldest position a change feed can resume after. The feed returns
+    changes above it.
     """
 
     if IS_PYDANTIC_V2:

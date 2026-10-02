@@ -7,7 +7,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .change_seq import ChangeSeq
 
 
-class WalFlushStepOutcomeRetriesExhausted(UniversalBaseModel):
+class WalFoldStepOutcomeRetriesExhausted(UniversalBaseModel):
     """
     Concurrent updates prevented every publication attempt.
     """

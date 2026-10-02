@@ -8,12 +8,13 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RunMaintenanceRequestMetadata(UniversalBaseModel):
     """
-    Runs WAL flushing and one bounded metadata reorganization step.
+    Folds the WAL tail and runs one bounded compaction step.
     """
 
-    max_wal_tail_segments: typing.Optional[int] = pydantic.Field(default=None)
+    max_wal_tail_objects: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The WAL-tail threshold for flushing. Omit it for the server default.
+    The WAL tail length, in WAL objects, that triggers a fold. Omit it for
+    the server default.
     """
 
     if IS_PYDANTIC_V2:

@@ -36,9 +36,9 @@ class DeletedObjectCounts(UniversalBaseModel):
     Upload-session control objects deleted after the reap window.
     """
 
-    wal_segments: int = pydantic.Field()
+    wal_objects: int = pydantic.Field()
     """
-    Unreferenced WAL segments deleted.
+    Unreferenced WAL objects deleted.
     """
 
     if IS_PYDANTIC_V2:
