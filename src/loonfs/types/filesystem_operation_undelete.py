@@ -6,12 +6,16 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .change_seq import ChangeSeq
+from .display_name import DisplayName
 from .inode_id import InodeId
 
 
 class FilesystemOperationUndelete(UniversalBaseModel):
     """
     Restore the deletion identified by `inode_id` and `deletion_seq`.
+    Name the destination with `destination_path`, or with
+    `destination_parent_inode_id` and `destination_display_name`; omit
+    both to use the recorded binding.
     """
 
     deletion_seq: ChangeSeq = pydantic.Field()
@@ -19,9 +23,19 @@ class FilesystemOperationUndelete(UniversalBaseModel):
     Observed deletion sequence, which prevents cancelling a newer tombstone sequence.
     """
 
+    destination_display_name: typing.Optional[DisplayName] = pydantic.Field(default=None)
+    """
+    Name to restore under `destination_parent_inode_id`.
+    """
+
+    destination_parent_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
+    """
+    Directory to restore into; requires `destination_display_name`.
+    """
+
     destination_path: typing.Optional[AbsolutePath] = pydantic.Field(default=None)
     """
-    The restore destination. Omit it to use the recorded binding.
+    Absolute restore destination; cannot be combined with a parent inode destination.
     """
 
     inode_id: InodeId = pydantic.Field()

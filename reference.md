@@ -134,6 +134,17 @@ unrestricted.
 <dl>
 <dd>
 
+**naming:** `typing.Optional[NamespaceNaming]` 
+
+How sibling names compare, fixed for the namespace's life. Defaults
+to `case_insensitive`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -514,7 +525,7 @@ Applies one commit: an ordered, non-empty list of path operations that commit to
 <dd>
 
 ```python
-from loonfs.server import LoonFS, FilesystemOperation_CopyPath
+from loonfs.server import LoonFS, FilesystemOperation_CopyByInode
 
 client = LoonFS(
     token="<token>",
@@ -525,9 +536,10 @@ client.commits.create(
     namespace_id="namespace_id",
     commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
     operations=[
-        FilesystemOperation_CopyPath(
-            destination_path="/docs/report.txt",
-            source_path="/docs/report.txt",
+        FilesystemOperation_CopyByInode(
+            destination_display_name="report.txt",
+            destination_parent_inode_id="ino_123",
+            inode_id="ino_123",
         )
     ],
 )
@@ -1153,6 +1165,7 @@ client = LoonFS(
 client.files.grep(
     namespace_id="namespace_id",
     pattern="pattern",
+    inode_id="ino_123",
 )
 
 ```
@@ -1193,7 +1206,15 @@ client.files.grep(
 <dl>
 <dd>
 
-**path_prefix:** `typing.Optional[str]` — Complete absolute path used to restrict matches.
+**path_prefix:** `typing.Optional[str]` — Complete absolute path used to restrict matches. Cannot be combined with `inode_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**inode_id:** `typing.Optional[str]` — Inode whose descendants restrict matches. Cannot be combined with `path_prefix`.
     
 </dd>
 </dl>
@@ -1547,6 +1568,185 @@ client.inodes.list_children(
 </dl>
 </details>
 
+<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">content</a>(...) -> typing.Iterator[bytes]</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Reads and verifies the current revision of a visible file inode, wherever it is bound, or the revision a live snapshot captured. Unknown or hidden inodes answer `inode_not_found`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.inodes.content(
+    namespace_id="namespace_id",
+    inode_id="inode_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**inode_id:** `str` — File inode ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[PinId]` — Use the file revision captured by this snapshot
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">create_download</a>(...) -> CreateDownloadByInodeResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.inodes.create_download(
+    namespace_id="namespace_id",
+    inode_id="ino_123",
+    snapshot_id="pin_00000000000000000001-0000000000000002",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**inode_id:** `str` — File inode ID
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[PinId]` — Use the file revision captured by this snapshot
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">list_revisions</a>(...) -> ListFileRevisionsResponse</code></summary>
 <dl>
 <dd>
@@ -1644,7 +1844,7 @@ client.inodes.list_revisions(
 </dl>
 </details>
 
-<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">content</a>(...) -> typing.Iterator[bytes]</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">revision_content</a>(...) -> typing.Iterator[bytes]</code></summary>
 <dl>
 <dd>
 
@@ -1678,7 +1878,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.inodes.content(
+client.inodes.revision_content(
     namespace_id="namespace_id",
     inode_id="inode_id",
     revision_no=1000000,
@@ -1734,7 +1934,7 @@ client.inodes.content(
 </dl>
 </details>
 
-<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">create_download</a>(...) -> CreateDownloadByInodeResponse</code></summary>
+<details><summary><code>client.inodes.<a href="src/loonfs/inodes/client.py">create_revision_download</a>(...) -> CreateDownloadByInodeResponse</code></summary>
 <dl>
 <dd>
 
@@ -1768,7 +1968,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.inodes.create_download(
+client.inodes.create_revision_download(
     namespace_id="namespace_id",
     inode_id="ino_123",
     revision_no=1000000,
@@ -3191,7 +3391,7 @@ client.maintenance.grep_index.disable(
 <dl>
 <dd>
 
-Enables the namespace's grep index. A deployment that runs maintenance builds the backfill on its next maintenance pass. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+Enables the namespace's grep index. A deployment that runs maintenance starts the backfill on its next session tick and continues until it is active. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 </dd>
 </dl>
 </dd>
@@ -3264,7 +3464,7 @@ client.maintenance.grep_index.enable(
 <dl>
 <dd>
 
-Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, `grep_gc`, `retention`, or `recover_administrator`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc` or `grep_gc`. A `grep_gc` call collects aged, unreferenced grep index objects and requires `maintenance.grep.index`. A `gc` call reads the current manifest and lists pins, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation.
+Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, `grep_gc`, `retention`, or `recover_administrator`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc` or `grep_gc`. A `grep_gc` call collects aged, unreferenced grep index objects and requires `maintenance.grep.index`. A `gc` call reads the current manifest and lists pins, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation. A `retention` call advances the retention floor to the folded manifest head, or to the one target that `to_seq` or `cutoff_at_ms` names.
 </dd>
 </dl>
 </dd>

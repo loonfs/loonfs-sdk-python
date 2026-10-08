@@ -7,6 +7,7 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .change_seq import ChangeSeq
 from .principal_id import PrincipalId
 
 
@@ -104,6 +105,8 @@ class RunMaintenanceRequest_Retention(UniversalBaseModel):
     """
 
     kind: typing.Literal["retention"] = "retention"
+    cutoff_at_ms: typing.Optional[int] = None
+    to_seq: typing.Optional[ChangeSeq] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

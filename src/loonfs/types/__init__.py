@@ -33,6 +33,8 @@ if typing.TYPE_CHECKING:
         CommitPrecondition_AccessRevision,
         CommitPrecondition_AttributesRevision,
         CommitPrecondition_FileRevision,
+        CommitPrecondition_InodeBinding,
+        CommitPrecondition_NameAbsence,
         CommitPrecondition_NamespaceHead,
         CommitPrecondition_PathAbsence,
         CommitPrecondition_PathBinding,
@@ -40,6 +42,8 @@ if typing.TYPE_CHECKING:
     from .commit_precondition_access_revision import CommitPreconditionAccessRevision
     from .commit_precondition_attributes_revision import CommitPreconditionAttributesRevision
     from .commit_precondition_file_revision import CommitPreconditionFileRevision
+    from .commit_precondition_inode_binding import CommitPreconditionInodeBinding
+    from .commit_precondition_name_absence import CommitPreconditionNameAbsence
     from .commit_precondition_namespace_head import CommitPreconditionNamespaceHead
     from .commit_precondition_path_absence import CommitPreconditionPathAbsence
     from .commit_precondition_path_binding import CommitPreconditionPathBinding
@@ -114,6 +118,7 @@ if typing.TYPE_CHECKING:
     from .filesystem_change_undeleted import FilesystemChangeUndeleted
     from .filesystem_operation import (
         FilesystemOperation,
+        FilesystemOperation_CopyByInode,
         FilesystemOperation_CopyPath,
         FilesystemOperation_CreateDirectory,
         FilesystemOperation_CreateDirectoryByInode,
@@ -125,10 +130,14 @@ if typing.TYPE_CHECKING:
         FilesystemOperation_PutFile,
         FilesystemOperation_PutFileRevisionByInode,
         FilesystemOperation_RestoreRevision,
+        FilesystemOperation_RestoreRevisionByInode,
         FilesystemOperation_Undelete,
         FilesystemOperation_UpdateAccess,
+        FilesystemOperation_UpdateAccessByInode,
         FilesystemOperation_UpdateAttributes,
+        FilesystemOperation_UpdateAttributesByInode,
     )
+    from .filesystem_operation_copy_by_inode import FilesystemOperationCopyByInode
     from .filesystem_operation_copy_path import FilesystemOperationCopyPath
     from .filesystem_operation_create_directory import FilesystemOperationCreateDirectory
     from .filesystem_operation_create_directory_by_inode import FilesystemOperationCreateDirectoryByInode
@@ -140,9 +149,12 @@ if typing.TYPE_CHECKING:
     from .filesystem_operation_put_file import FilesystemOperationPutFile
     from .filesystem_operation_put_file_revision_by_inode import FilesystemOperationPutFileRevisionByInode
     from .filesystem_operation_restore_revision import FilesystemOperationRestoreRevision
+    from .filesystem_operation_restore_revision_by_inode import FilesystemOperationRestoreRevisionByInode
     from .filesystem_operation_undelete import FilesystemOperationUndelete
     from .filesystem_operation_update_access import FilesystemOperationUpdateAccess
+    from .filesystem_operation_update_access_by_inode import FilesystemOperationUpdateAccessByInode
     from .filesystem_operation_update_attributes import FilesystemOperationUpdateAttributes
+    from .filesystem_operation_update_attributes_by_inode import FilesystemOperationUpdateAttributesByInode
     from .grep_index import GrepIndex, GrepIndex_Active, GrepIndex_Backfilling, GrepIndex_Disabled
     from .grep_index_lifecycle_active import GrepIndexLifecycleActive
     from .grep_index_lifecycle_backfilling import GrepIndexLifecycleBackfilling
@@ -185,6 +197,7 @@ if typing.TYPE_CHECKING:
     from .namespace_fork_basis import NamespaceForkBasis
     from .namespace_id import NamespaceId
     from .namespace_metadata import NamespaceMetadata
+    from .namespace_naming import NamespaceNaming
     from .object_transfer_access import ObjectTransferAccess, ObjectTransferAccess_PresignedUrl
     from .object_transfer_access_presigned_url import ObjectTransferAccessPresignedUrl
     from .path_entry import PathEntry, PathEntry_Dir, PathEntry_File
@@ -286,12 +299,16 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CommitPreconditionAccessRevision": ".commit_precondition_access_revision",
     "CommitPreconditionAttributesRevision": ".commit_precondition_attributes_revision",
     "CommitPreconditionFileRevision": ".commit_precondition_file_revision",
+    "CommitPreconditionInodeBinding": ".commit_precondition_inode_binding",
+    "CommitPreconditionNameAbsence": ".commit_precondition_name_absence",
     "CommitPreconditionNamespaceHead": ".commit_precondition_namespace_head",
     "CommitPreconditionPathAbsence": ".commit_precondition_path_absence",
     "CommitPreconditionPathBinding": ".commit_precondition_path_binding",
     "CommitPrecondition_AccessRevision": ".commit_precondition",
     "CommitPrecondition_AttributesRevision": ".commit_precondition",
     "CommitPrecondition_FileRevision": ".commit_precondition",
+    "CommitPrecondition_InodeBinding": ".commit_precondition",
+    "CommitPrecondition_NameAbsence": ".commit_precondition",
     "CommitPrecondition_NamespaceHead": ".commit_precondition",
     "CommitPrecondition_PathAbsence": ".commit_precondition",
     "CommitPrecondition_PathBinding": ".commit_precondition",
@@ -357,6 +374,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemChange_Moved": ".filesystem_change",
     "FilesystemChange_Undeleted": ".filesystem_change",
     "FilesystemOperation": ".filesystem_operation",
+    "FilesystemOperationCopyByInode": ".filesystem_operation_copy_by_inode",
     "FilesystemOperationCopyPath": ".filesystem_operation_copy_path",
     "FilesystemOperationCreateDirectory": ".filesystem_operation_create_directory",
     "FilesystemOperationCreateDirectoryByInode": ".filesystem_operation_create_directory_by_inode",
@@ -368,9 +386,13 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperationPutFile": ".filesystem_operation_put_file",
     "FilesystemOperationPutFileRevisionByInode": ".filesystem_operation_put_file_revision_by_inode",
     "FilesystemOperationRestoreRevision": ".filesystem_operation_restore_revision",
+    "FilesystemOperationRestoreRevisionByInode": ".filesystem_operation_restore_revision_by_inode",
     "FilesystemOperationUndelete": ".filesystem_operation_undelete",
     "FilesystemOperationUpdateAccess": ".filesystem_operation_update_access",
+    "FilesystemOperationUpdateAccessByInode": ".filesystem_operation_update_access_by_inode",
     "FilesystemOperationUpdateAttributes": ".filesystem_operation_update_attributes",
+    "FilesystemOperationUpdateAttributesByInode": ".filesystem_operation_update_attributes_by_inode",
+    "FilesystemOperation_CopyByInode": ".filesystem_operation",
     "FilesystemOperation_CopyPath": ".filesystem_operation",
     "FilesystemOperation_CreateDirectory": ".filesystem_operation",
     "FilesystemOperation_CreateDirectoryByInode": ".filesystem_operation",
@@ -382,9 +404,12 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperation_PutFile": ".filesystem_operation",
     "FilesystemOperation_PutFileRevisionByInode": ".filesystem_operation",
     "FilesystemOperation_RestoreRevision": ".filesystem_operation",
+    "FilesystemOperation_RestoreRevisionByInode": ".filesystem_operation",
     "FilesystemOperation_Undelete": ".filesystem_operation",
     "FilesystemOperation_UpdateAccess": ".filesystem_operation",
+    "FilesystemOperation_UpdateAccessByInode": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributes": ".filesystem_operation",
+    "FilesystemOperation_UpdateAttributesByInode": ".filesystem_operation",
     "GrepIndex": ".grep_index",
     "GrepIndexLifecycleActive": ".grep_index_lifecycle_active",
     "GrepIndexLifecycleBackfilling": ".grep_index_lifecycle_backfilling",
@@ -432,6 +457,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "NamespaceForkBasis": ".namespace_fork_basis",
     "NamespaceId": ".namespace_id",
     "NamespaceMetadata": ".namespace_metadata",
+    "NamespaceNaming": ".namespace_naming",
     "ObjectTransferAccess": ".object_transfer_access",
     "ObjectTransferAccessPresignedUrl": ".object_transfer_access_presigned_url",
     "ObjectTransferAccess_PresignedUrl": ".object_transfer_access",
@@ -557,12 +583,16 @@ __all__ = [
     "CommitPreconditionAccessRevision",
     "CommitPreconditionAttributesRevision",
     "CommitPreconditionFileRevision",
+    "CommitPreconditionInodeBinding",
+    "CommitPreconditionNameAbsence",
     "CommitPreconditionNamespaceHead",
     "CommitPreconditionPathAbsence",
     "CommitPreconditionPathBinding",
     "CommitPrecondition_AccessRevision",
     "CommitPrecondition_AttributesRevision",
     "CommitPrecondition_FileRevision",
+    "CommitPrecondition_InodeBinding",
+    "CommitPrecondition_NameAbsence",
     "CommitPrecondition_NamespaceHead",
     "CommitPrecondition_PathAbsence",
     "CommitPrecondition_PathBinding",
@@ -628,6 +658,7 @@ __all__ = [
     "FilesystemChange_Moved",
     "FilesystemChange_Undeleted",
     "FilesystemOperation",
+    "FilesystemOperationCopyByInode",
     "FilesystemOperationCopyPath",
     "FilesystemOperationCreateDirectory",
     "FilesystemOperationCreateDirectoryByInode",
@@ -639,9 +670,13 @@ __all__ = [
     "FilesystemOperationPutFile",
     "FilesystemOperationPutFileRevisionByInode",
     "FilesystemOperationRestoreRevision",
+    "FilesystemOperationRestoreRevisionByInode",
     "FilesystemOperationUndelete",
     "FilesystemOperationUpdateAccess",
+    "FilesystemOperationUpdateAccessByInode",
     "FilesystemOperationUpdateAttributes",
+    "FilesystemOperationUpdateAttributesByInode",
+    "FilesystemOperation_CopyByInode",
     "FilesystemOperation_CopyPath",
     "FilesystemOperation_CreateDirectory",
     "FilesystemOperation_CreateDirectoryByInode",
@@ -653,9 +688,12 @@ __all__ = [
     "FilesystemOperation_PutFile",
     "FilesystemOperation_PutFileRevisionByInode",
     "FilesystemOperation_RestoreRevision",
+    "FilesystemOperation_RestoreRevisionByInode",
     "FilesystemOperation_Undelete",
     "FilesystemOperation_UpdateAccess",
+    "FilesystemOperation_UpdateAccessByInode",
     "FilesystemOperation_UpdateAttributes",
+    "FilesystemOperation_UpdateAttributesByInode",
     "GrepIndex",
     "GrepIndexLifecycleActive",
     "GrepIndexLifecycleBackfilling",
@@ -703,6 +741,7 @@ __all__ = [
     "NamespaceForkBasis",
     "NamespaceId",
     "NamespaceMetadata",
+    "NamespaceNaming",
     "ObjectTransferAccess",
     "ObjectTransferAccessPresignedUrl",
     "ObjectTransferAccess_PresignedUrl",

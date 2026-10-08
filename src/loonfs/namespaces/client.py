@@ -9,6 +9,7 @@ from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
 from ..types.namespace_metadata import NamespaceMetadata
+from ..types.namespace_naming import NamespaceNaming
 from ..types.pin_id import PinId
 from .raw_client import AsyncRawNamespacesClient, RawNamespacesClient
 
@@ -36,6 +37,7 @@ class NamespacesClient:
         *,
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
+        naming: typing.Optional[NamespaceNaming] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NamespaceMetadata:
         """
@@ -49,6 +51,10 @@ class NamespacesClient:
         access : typing.Optional[NamespaceAccess]
             The access mode, fixed for the namespace's life. Defaults to
             unrestricted.
+
+        naming : typing.Optional[NamespaceNaming]
+            How sibling names compare, fixed for the namespace's life. Defaults
+            to `case_insensitive`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -74,7 +80,9 @@ class NamespacesClient:
             namespace_id="demo",
         )
         """
-        _response = self._raw_client.create(namespace_id=namespace_id, access=access, request_options=request_options)
+        _response = self._raw_client.create(
+            namespace_id=namespace_id, access=access, naming=naming, request_options=request_options
+        )
         return _response.data
 
     def retrieve(
@@ -235,6 +243,7 @@ class AsyncNamespacesClient:
         *,
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
+        naming: typing.Optional[NamespaceNaming] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NamespaceMetadata:
         """
@@ -248,6 +257,10 @@ class AsyncNamespacesClient:
         access : typing.Optional[NamespaceAccess]
             The access mode, fixed for the namespace's life. Defaults to
             unrestricted.
+
+        naming : typing.Optional[NamespaceNaming]
+            How sibling names compare, fixed for the namespace's life. Defaults
+            to `case_insensitive`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -282,7 +295,7 @@ class AsyncNamespacesClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.create(
-            namespace_id=namespace_id, access=access, request_options=request_options
+            namespace_id=namespace_id, access=access, naming=naming, request_options=request_options
         )
         return _response.data
 

@@ -24,6 +24,7 @@ from ..types.error_response import ErrorResponse
 from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
 from ..types.namespace_metadata import NamespaceMetadata
+from ..types.namespace_naming import NamespaceNaming
 from ..types.pin_id import PinId
 from pydantic import ValidationError
 
@@ -40,6 +41,7 @@ class RawNamespacesClient:
         *,
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
+        naming: typing.Optional[NamespaceNaming] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[NamespaceMetadata]:
         """
@@ -53,6 +55,10 @@ class RawNamespacesClient:
         access : typing.Optional[NamespaceAccess]
             The access mode, fixed for the namespace's life. Defaults to
             unrestricted.
+
+        naming : typing.Optional[NamespaceNaming]
+            How sibling names compare, fixed for the namespace's life. Defaults
+            to `case_insensitive`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -73,6 +79,7 @@ class RawNamespacesClient:
                     object_=access, annotation=NamespaceAccess, direction="write"
                 ),
                 "namespace_id": namespace_id,
+                "naming": naming,
             },
             headers={
                 "content-type": "application/json",
@@ -537,6 +544,7 @@ class AsyncRawNamespacesClient:
         *,
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
+        naming: typing.Optional[NamespaceNaming] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[NamespaceMetadata]:
         """
@@ -550,6 +558,10 @@ class AsyncRawNamespacesClient:
         access : typing.Optional[NamespaceAccess]
             The access mode, fixed for the namespace's life. Defaults to
             unrestricted.
+
+        naming : typing.Optional[NamespaceNaming]
+            How sibling names compare, fixed for the namespace's life. Defaults
+            to `case_insensitive`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -570,6 +582,7 @@ class AsyncRawNamespacesClient:
                     object_=access, annotation=NamespaceAccess, direction="write"
                 ),
                 "namespace_id": namespace_id,
+                "naming": naming,
             },
             headers={
                 "content-type": "application/json",
