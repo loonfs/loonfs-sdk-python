@@ -181,10 +181,11 @@ class RawFilesClient:
         path: AbsolutePath,
         revision_no: typing.Optional[RevisionNo] = OMIT,
         snapshot_id: typing.Optional[PinId] = OMIT,
+        start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadResponse]:
         """
-        Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
+        Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. The capability reads exactly `[start_offset, size_bytes)` of the object: it signs that `Range`, and `access.headers` carries it for the client to send unchanged. A client that resumes asks for a new grant from its offset. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
 
         Parameters
         ----------
@@ -202,6 +203,12 @@ class RawFilesClient:
             Read the file revision captured by this snapshot.
             Cannot be combined with `revision_no`.
 
+        start_offset : typing.Optional[int]
+            The first byte the grant reads. It names `[start_offset, size_bytes)`
+            of the revision; a client that resumes asks for a new grant from the
+            bytes it holds. Must be below the revision's size, except 0 for a
+            revision of zero bytes.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -217,6 +224,7 @@ class RawFilesClient:
                 "path": path,
                 "revision_no": revision_no,
                 "snapshot_id": snapshot_id,
+                "start_offset": start_offset,
             },
             headers={
                 "content-type": "application/json",
@@ -998,10 +1006,11 @@ class AsyncRawFilesClient:
         path: AbsolutePath,
         revision_no: typing.Optional[RevisionNo] = OMIT,
         snapshot_id: typing.Optional[PinId] = OMIT,
+        start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadResponse]:
         """
-        Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
+        Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. The capability reads exactly `[start_offset, size_bytes)` of the object: it signs that `Range`, and `access.headers` carries it for the client to send unchanged. A client that resumes asks for a new grant from its offset. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
 
         Parameters
         ----------
@@ -1019,6 +1028,12 @@ class AsyncRawFilesClient:
             Read the file revision captured by this snapshot.
             Cannot be combined with `revision_no`.
 
+        start_offset : typing.Optional[int]
+            The first byte the grant reads. It names `[start_offset, size_bytes)`
+            of the revision; a client that resumes asks for a new grant from the
+            bytes it holds. Must be below the revision's size, except 0 for a
+            revision of zero bytes.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1034,6 +1049,7 @@ class AsyncRawFilesClient:
                 "path": path,
                 "revision_no": revision_no,
                 "snapshot_id": snapshot_id,
+                "start_offset": start_offset,
             },
             headers={
                 "content-type": "application/json",
