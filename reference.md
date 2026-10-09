@@ -525,7 +525,7 @@ Applies one commit: an ordered, non-empty list of path operations that commit to
 <dd>
 
 ```python
-from loonfs.server import LoonFS, FilesystemOperation_CopyByInode
+from loonfs.server import LoonFS, FilesystemOperation_AppendFile
 
 client = LoonFS(
     token="<token>",
@@ -536,10 +536,9 @@ client.commits.create(
     namespace_id="namespace_id",
     commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
     operations=[
-        FilesystemOperation_CopyByInode(
-            destination_display_name="report.txt",
-            destination_parent_inode_id="ino_123",
-            inode_id="ino_123",
+        FilesystemOperation_AppendFile(
+            inline_content="inline_content",
+            path="/docs/report.txt",
         )
     ],
 )
@@ -728,7 +727,7 @@ client.files.content(
 <dl>
 <dd>
 
-Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
+Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. The capability reads exactly `[start_offset, size_bytes)` of the object: it signs that `Range`, and `access.headers` carries it for the client to send unchanged. A client that resumes asks for a new grant from its offset. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
 </dd>
 </dl>
 </dd>
@@ -800,6 +799,19 @@ Cannot be combined with `snapshot_id`.
 
 Read the file revision captured by this snapshot.
 Cannot be combined with `revision_no`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start_offset:** `typing.Optional[int]` 
+
+The first byte the grant reads. It names `[start_offset, size_bytes)`
+of the revision; a client that resumes asks for a new grant from the
+bytes it holds. Must be below the revision's size, except 0 for a
+revision of zero bytes.
     
 </dd>
 </dl>
@@ -1669,7 +1681,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 </dd>
 </dl>
 </dd>
@@ -1728,6 +1740,14 @@ client.inodes.create_download(
 <dd>
 
 **snapshot_id:** `typing.Optional[PinId]` — Use the file revision captured by this snapshot
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start_offset:** `typing.Optional[int]` — First byte the capability reads. Defaults to 0 and must be below the file's size, except 0 for a file of zero bytes
     
 </dd>
 </dl>
@@ -1946,7 +1966,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
+Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 </dd>
 </dl>
 </dd>
@@ -2005,6 +2025,14 @@ client.inodes.create_revision_download(
 <dd>
 
 **revision_no:** `RevisionNo` — Revision number
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start_offset:** `typing.Optional[int]` — First byte the capability reads. Defaults to 0 and must be below the revision's size, except 0 for a revision of zero bytes
     
 </dd>
 </dl>

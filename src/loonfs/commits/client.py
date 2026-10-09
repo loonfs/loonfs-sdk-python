@@ -74,7 +74,7 @@ class CommitsClient:
 
         Examples
         --------
-        from loonfs.server import FilesystemOperation_CopyByInode, LoonFS
+        from loonfs.server import FilesystemOperation_AppendFile, LoonFS
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
@@ -88,10 +88,9 @@ class CommitsClient:
             namespace_id="namespace_id",
             commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
             operations=[
-                FilesystemOperation_CopyByInode(
-                    destination_display_name="report.txt",
-                    destination_parent_inode_id="ino_123",
-                    inode_id="ino_123",
+                FilesystemOperation_AppendFile(
+                    inline_content="inline_content",
+                    path="/docs/report.txt",
                 )
             ],
         )
@@ -169,7 +168,7 @@ class AsyncCommitsClient:
         --------
         import asyncio
 
-        from loonfs.server import AsyncLoonFS, FilesystemOperation_CopyByInode
+        from loonfs.server import AsyncLoonFS, FilesystemOperation_AppendFile
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
@@ -186,10 +185,9 @@ class AsyncCommitsClient:
                 namespace_id="namespace_id",
                 commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
                 operations=[
-                    FilesystemOperation_CopyByInode(
-                        destination_display_name="report.txt",
-                        destination_parent_inode_id="ino_123",
-                        inode_id="ino_123",
+                    FilesystemOperation_AppendFile(
+                        inline_content="inline_content",
+                        path="/docs/report.txt",
                     )
                 ],
             )
