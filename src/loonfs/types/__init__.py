@@ -118,6 +118,8 @@ if typing.TYPE_CHECKING:
     from .filesystem_change_undeleted import FilesystemChangeUndeleted
     from .filesystem_operation import (
         FilesystemOperation,
+        FilesystemOperation_AppendFile,
+        FilesystemOperation_AppendFileByInode,
         FilesystemOperation_CopyByInode,
         FilesystemOperation_CopyPath,
         FilesystemOperation_CreateDirectory,
@@ -137,6 +139,8 @@ if typing.TYPE_CHECKING:
         FilesystemOperation_UpdateAttributes,
         FilesystemOperation_UpdateAttributesByInode,
     )
+    from .filesystem_operation_append_file import FilesystemOperationAppendFile
+    from .filesystem_operation_append_file_by_inode import FilesystemOperationAppendFileByInode
     from .filesystem_operation_copy_by_inode import FilesystemOperationCopyByInode
     from .filesystem_operation_copy_path import FilesystemOperationCopyPath
     from .filesystem_operation_create_directory import FilesystemOperationCreateDirectory
@@ -374,6 +378,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemChange_Moved": ".filesystem_change",
     "FilesystemChange_Undeleted": ".filesystem_change",
     "FilesystemOperation": ".filesystem_operation",
+    "FilesystemOperationAppendFile": ".filesystem_operation_append_file",
+    "FilesystemOperationAppendFileByInode": ".filesystem_operation_append_file_by_inode",
     "FilesystemOperationCopyByInode": ".filesystem_operation_copy_by_inode",
     "FilesystemOperationCopyPath": ".filesystem_operation_copy_path",
     "FilesystemOperationCreateDirectory": ".filesystem_operation_create_directory",
@@ -392,6 +398,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperationUpdateAccessByInode": ".filesystem_operation_update_access_by_inode",
     "FilesystemOperationUpdateAttributes": ".filesystem_operation_update_attributes",
     "FilesystemOperationUpdateAttributesByInode": ".filesystem_operation_update_attributes_by_inode",
+    "FilesystemOperation_AppendFile": ".filesystem_operation",
+    "FilesystemOperation_AppendFileByInode": ".filesystem_operation",
     "FilesystemOperation_CopyByInode": ".filesystem_operation",
     "FilesystemOperation_CopyPath": ".filesystem_operation",
     "FilesystemOperation_CreateDirectory": ".filesystem_operation",
@@ -658,6 +666,8 @@ __all__ = [
     "FilesystemChange_Moved",
     "FilesystemChange_Undeleted",
     "FilesystemOperation",
+    "FilesystemOperationAppendFile",
+    "FilesystemOperationAppendFileByInode",
     "FilesystemOperationCopyByInode",
     "FilesystemOperationCopyPath",
     "FilesystemOperationCreateDirectory",
@@ -676,6 +686,8 @@ __all__ = [
     "FilesystemOperationUpdateAccessByInode",
     "FilesystemOperationUpdateAttributes",
     "FilesystemOperationUpdateAttributesByInode",
+    "FilesystemOperation_AppendFile",
+    "FilesystemOperation_AppendFileByInode",
     "FilesystemOperation_CopyByInode",
     "FilesystemOperation_CopyPath",
     "FilesystemOperation_CreateDirectory",
