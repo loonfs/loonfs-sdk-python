@@ -9,6 +9,7 @@ from .change_seq import ChangeSeq
 from .namespace_access_mode import NamespaceAccessMode
 from .namespace_fork_basis import NamespaceForkBasis
 from .namespace_id import NamespaceId
+from .namespace_naming import NamespaceNaming
 
 
 class NamespaceMetadata(UniversalBaseModel):
@@ -44,6 +45,11 @@ class NamespaceMetadata(UniversalBaseModel):
     namespace_id: NamespaceId = pydantic.Field()
     """
     Namespace ID.
+    """
+
+    naming: NamespaceNaming = pydantic.Field()
+    """
+    How sibling names compare in the namespace.
     """
 
     retention_floor_seq: ChangeSeq = pydantic.Field()

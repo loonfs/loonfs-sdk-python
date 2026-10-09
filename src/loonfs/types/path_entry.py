@@ -25,6 +25,8 @@ class PathEntry_Dir(UniversalBaseModel):
     Metadata for one path returned by stat and directory listings.
 
     Attribute fields are included only when requested.
+
+    Newer servers may report other inode kinds; clients read only the fields every entry carries.
     """
 
     inode_kind: typing.Literal["dir"] = "dir"
@@ -57,6 +59,8 @@ class PathEntry_File(UniversalBaseModel):
     Metadata for one path returned by stat and directory listings.
 
     Attribute fields are included only when requested.
+
+    Newer servers may report other inode kinds; clients read only the fields every entry carries.
     """
 
     inode_kind: typing.Literal["file"] = "file"

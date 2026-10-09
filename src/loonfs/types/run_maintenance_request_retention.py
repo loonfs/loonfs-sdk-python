@@ -4,11 +4,27 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .change_seq import ChangeSeq
 
 
 class RunMaintenanceRequestRetention(UniversalBaseModel):
     """
-    Advances the retention floor to the folded manifest head.
+    Advances the retention floor, to the folded manifest head unless the
+    request names a target.
+    """
+
+    cutoff_at_ms: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    Advance the floor to the last commit committed at or before this Unix
+    time in milliseconds. Commits are read upward from the floor, and the
+    first one committed after this time ends the advance. Cannot be
+    combined with `to_seq`.
+    """
+
+    to_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    Advance the floor to this sequence, or to the folded manifest head
+    when that is lower. Cannot be combined with `cutoff_at_ms`.
     """
 
     if IS_PYDANTIC_V2:

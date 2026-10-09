@@ -24,6 +24,31 @@ from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
+class FilesystemOperation_CopyByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected, and fieldless variants require empty objects.
+    """
+
+    kind: typing.Literal["copy_by_inode"] = "copy_by_inode"
+    behavior: typing.Optional[DestinationBehavior] = None
+    destination_display_name: DisplayName
+    destination_parent_inode_id: InodeId
+    expected_destination_inode_id: typing.Optional[InodeId] = None
+    expected_destination_revision_no: typing.Optional[RevisionNo] = None
+    inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_CopyPath(UniversalBaseModel):
     """
     One filesystem operation.
@@ -276,6 +301,27 @@ class FilesystemOperation_RestoreRevision(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_RestoreRevisionByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected, and fieldless variants require empty objects.
+    """
+
+    kind: typing.Literal["restore_revision_by_inode"] = "restore_revision_by_inode"
+    inode_id: InodeId
+    source_revision_no: RevisionNo
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_Undelete(UniversalBaseModel):
     """
     One filesystem operation.
@@ -285,6 +331,8 @@ class FilesystemOperation_Undelete(UniversalBaseModel):
 
     kind: typing.Literal["undelete"] = "undelete"
     deletion_seq: ChangeSeq
+    destination_display_name: typing.Optional[DisplayName] = None
+    destination_parent_inode_id: typing.Optional[InodeId] = None
     destination_path: typing.Optional[AbsolutePath] = None
     inode_id: InodeId
 
@@ -322,6 +370,29 @@ class FilesystemOperation_UpdateAccess(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_UpdateAccessByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected, and fieldless variants require empty objects.
+    """
+
+    kind: typing.Literal["update_access_by_inode"] = "update_access_by_inode"
+    boundary: bool
+    expected_access_revision_no: typing.Optional[AccessRevisionNo] = None
+    grants: AccessGrants
+    inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_UpdateAttributes(UniversalBaseModel):
     """
     One filesystem operation.
@@ -348,8 +419,34 @@ class FilesystemOperation_UpdateAttributes(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_UpdateAttributesByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected, and fieldless variants require empty objects.
+    """
+
+    kind: typing.Literal["update_attributes_by_inode"] = "update_attributes_by_inode"
+    expected_attributes_revision_no: typing.Optional[AttributesRevisionNo] = None
+    inode_id: InodeId
+    remove: typing.Optional[typing.List[AttributeKey]] = None
+    set_: typing_extensions.Annotated[
+        typing.Optional[typing.Dict[str, AttributeValue]], FieldMetadata(alias="set"), pydantic.Field(alias="set")
+    ] = None
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 FilesystemOperation = typing_extensions.Annotated[
     typing.Union[
+        FilesystemOperation_CopyByInode,
         FilesystemOperation_CopyPath,
         FilesystemOperation_CreateDirectory,
         FilesystemOperation_CreateDirectoryByInode,
@@ -361,9 +458,12 @@ FilesystemOperation = typing_extensions.Annotated[
         FilesystemOperation_PutFile,
         FilesystemOperation_PutFileRevisionByInode,
         FilesystemOperation_RestoreRevision,
+        FilesystemOperation_RestoreRevisionByInode,
         FilesystemOperation_Undelete,
         FilesystemOperation_UpdateAccess,
+        FilesystemOperation_UpdateAccessByInode,
         FilesystemOperation_UpdateAttributes,
+        FilesystemOperation_UpdateAttributesByInode,
     ],
     pydantic.Field(discriminator="kind"),
 ]

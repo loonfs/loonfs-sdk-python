@@ -288,6 +288,281 @@ class RawInodesClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    @contextlib.contextmanager
+    def content(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        snapshot_id: typing.Optional[PinId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> typing.Iterator[HttpResponse[typing.Iterator[bytes]]]:
+        """
+        Reads and verifies the current revision of a visible file inode, wherever it is bound, or the revision a live snapshot captured. Unknown or hidden inodes answer `inode_not_found`.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            File inode ID
+
+        snapshot_id : typing.Optional[PinId]
+            Use the file revision captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
+
+        Returns
+        -------
+        typing.Iterator[HttpResponse[typing.Iterator[bytes]]]
+            File bytes
+        """
+        with self._client_wrapper.httpx_client.stream(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/content",
+            method="GET",
+            params={
+                "snapshot_id": snapshot_id,
+            },
+            request_options=request_options,
+        ) as _response:
+
+            def _stream() -> HttpResponse[typing.Iterator[bytes]]:
+                try:
+                    if 200 <= _response.status_code < 300:
+                        _chunk_size = request_options.get("chunk_size", None) if request_options is not None else None
+                        return HttpResponse(
+                            response=_response, data=(_chunk for _chunk in _response.iter_bytes(chunk_size=_chunk_size))
+                        )
+                    _response.read()
+                    if _response.status_code == 400:
+                        raise BadRequestError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 401:
+                        raise UnauthorizedError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 404:
+                        raise NotFoundError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 409:
+                        raise ConflictError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 410:
+                        raise GoneError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 413:
+                        raise ContentTooLargeError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 503:
+                        raise ServiceUnavailableError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                typing.Any,
+                                parse_obj_as(
+                                    type_=typing.Any,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    _response_json = _response.json()
+                except JSONDecodeError:
+                    raise ApiError(
+                        status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+                    )
+                except ValidationError as e:
+                    raise ParsingError(
+                        status_code=_response.status_code,
+                        headers=dict(_response.headers),
+                        body=_response.json(),
+                        cause=e,
+                    )
+                raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+            yield _stream()
+
+    def create_download(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        snapshot_id: typing.Optional[PinId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[CreateDownloadByInodeResponse]:
+        """
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            File inode ID
+
+        snapshot_id : typing.Optional[PinId]
+            Use the file revision captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[CreateDownloadByInodeResponse]
+            Download authorized
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/downloads",
+            method="POST",
+            params={
+                "snapshot_id": snapshot_id,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreateDownloadByInodeResponse,
+                    parse_obj_as(
+                        type_=CreateDownloadByInodeResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     def list_revisions(
         self,
         namespace_id: str,
@@ -417,7 +692,7 @@ class RawInodesClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     @contextlib.contextmanager
-    def content(
+    def revision_content(
         self,
         namespace_id: str,
         inode_id: str,
@@ -554,7 +829,7 @@ class RawInodesClient:
 
             yield _stream()
 
-    def create_download(
+    def create_revision_download(
         self,
         namespace_id: str,
         inode_id: str,
@@ -945,6 +1220,282 @@ class AsyncRawInodesClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    @contextlib.asynccontextmanager
+    async def content(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        snapshot_id: typing.Optional[PinId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> typing.AsyncIterator[AsyncHttpResponse[typing.AsyncIterator[bytes]]]:
+        """
+        Reads and verifies the current revision of a visible file inode, wherever it is bound, or the revision a live snapshot captured. Unknown or hidden inodes answer `inode_not_found`.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            File inode ID
+
+        snapshot_id : typing.Optional[PinId]
+            Use the file revision captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
+
+        Returns
+        -------
+        typing.AsyncIterator[AsyncHttpResponse[typing.AsyncIterator[bytes]]]
+            File bytes
+        """
+        async with self._client_wrapper.httpx_client.stream(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/content",
+            method="GET",
+            params={
+                "snapshot_id": snapshot_id,
+            },
+            request_options=request_options,
+        ) as _response:
+
+            async def _stream() -> AsyncHttpResponse[typing.AsyncIterator[bytes]]:
+                try:
+                    if 200 <= _response.status_code < 300:
+                        _chunk_size = request_options.get("chunk_size", None) if request_options is not None else None
+                        return AsyncHttpResponse(
+                            response=_response,
+                            data=(_chunk async for _chunk in _response.aiter_bytes(chunk_size=_chunk_size)),
+                        )
+                    await _response.aread()
+                    if _response.status_code == 400:
+                        raise BadRequestError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 401:
+                        raise UnauthorizedError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 404:
+                        raise NotFoundError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 409:
+                        raise ConflictError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 410:
+                        raise GoneError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 413:
+                        raise ContentTooLargeError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 503:
+                        raise ServiceUnavailableError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                typing.Any,
+                                parse_obj_as(
+                                    type_=typing.Any,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    _response_json = _response.json()
+                except JSONDecodeError:
+                    raise ApiError(
+                        status_code=_response.status_code, headers=dict(_response.headers), body=_response.text
+                    )
+                except ValidationError as e:
+                    raise ParsingError(
+                        status_code=_response.status_code,
+                        headers=dict(_response.headers),
+                        body=_response.json(),
+                        cause=e,
+                    )
+                raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+            yield await _stream()
+
+    async def create_download(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        snapshot_id: typing.Optional[PinId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
+        """
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            File inode ID
+
+        snapshot_id : typing.Optional[PinId]
+            Use the file revision captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[CreateDownloadByInodeResponse]
+            Download authorized
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/downloads",
+            method="POST",
+            params={
+                "snapshot_id": snapshot_id,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    CreateDownloadByInodeResponse,
+                    parse_obj_as(
+                        type_=CreateDownloadByInodeResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     async def list_revisions(
         self,
         namespace_id: str,
@@ -1074,7 +1625,7 @@ class AsyncRawInodesClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     @contextlib.asynccontextmanager
-    async def content(
+    async def revision_content(
         self,
         namespace_id: str,
         inode_id: str,
@@ -1212,7 +1763,7 @@ class AsyncRawInodesClient:
 
             yield await _stream()
 
-    async def create_download(
+    async def create_revision_download(
         self,
         namespace_id: str,
         inode_id: str,

@@ -248,7 +248,7 @@ class RawGrepIndexClient:
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[GrepIndex]:
         """
-        Enables the namespace's grep index. A deployment that runs maintenance builds the backfill on its next maintenance pass. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+        Enables the namespace's grep index. A deployment that runs maintenance starts the backfill on its next session tick and continues until it is active. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------
@@ -591,7 +591,7 @@ class AsyncRawGrepIndexClient:
         self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[GrepIndex]:
         """
-        Enables the namespace's grep index. A deployment that runs maintenance builds the backfill on its next maintenance pass. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+        Enables the namespace's grep index. A deployment that runs maintenance starts the backfill on its next session tick and continues until it is active. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
 
         Parameters
         ----------

@@ -160,6 +160,111 @@ class InodesClient:
         )
         return _response.data
 
+    def content(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        snapshot_id: typing.Optional[PinId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> typing.Iterator[bytes]:
+        """
+        Reads and verifies the current revision of a visible file inode, wherever it is bound, or the revision a live snapshot captured. Unknown or hidden inodes answer `inode_not_found`.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            File inode ID
+
+        snapshot_id : typing.Optional[PinId]
+            Use the file revision captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
+
+        Returns
+        -------
+        typing.Iterator[bytes]
+            File bytes
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.inodes.content(
+            namespace_id="namespace_id",
+            inode_id="inode_id",
+        )
+        """
+        with self._raw_client.content(
+            namespace_id, inode_id, snapshot_id=snapshot_id, request_options=request_options
+        ) as r:
+            yield from r.data
+
+    def create_download(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        snapshot_id: typing.Optional[PinId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CreateDownloadByInodeResponse:
+        """
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            File inode ID
+
+        snapshot_id : typing.Optional[PinId]
+            Use the file revision captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreateDownloadByInodeResponse
+            Download authorized
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.inodes.create_download(
+            namespace_id="namespace_id",
+            inode_id="ino_123",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
+        )
+        """
+        _response = self._raw_client.create_download(
+            namespace_id, inode_id, snapshot_id=snapshot_id, request_options=request_options
+        )
+        return _response.data
+
     def list_revisions(
         self,
         namespace_id: str,
@@ -216,7 +321,7 @@ class InodesClient:
         )
         return _response.data
 
-    def content(
+    def revision_content(
         self,
         namespace_id: str,
         inode_id: str,
@@ -258,16 +363,18 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.content(
+        client.inodes.revision_content(
             namespace_id="namespace_id",
             inode_id="inode_id",
             revision_no=1000000,
         )
         """
-        with self._raw_client.content(namespace_id, inode_id, revision_no, request_options=request_options) as r:
+        with self._raw_client.revision_content(
+            namespace_id, inode_id, revision_no, request_options=request_options
+        ) as r:
             yield from r.data
 
-    def create_download(
+    def create_revision_download(
         self,
         namespace_id: str,
         inode_id: str,
@@ -309,13 +416,13 @@ class InodesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.inodes.create_download(
+        client.inodes.create_revision_download(
             namespace_id="namespace_id",
             inode_id="ino_123",
             revision_no=1000000,
         )
         """
-        _response = self._raw_client.create_download(
+        _response = self._raw_client.create_revision_download(
             namespace_id, inode_id, revision_no, request_options=request_options
         )
         return _response.data
@@ -484,6 +591,128 @@ class AsyncInodesClient:
         )
         return _response.data
 
+    async def content(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        snapshot_id: typing.Optional[PinId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> typing.AsyncIterator[bytes]:
+        """
+        Reads and verifies the current revision of a visible file inode, wherever it is bound, or the revision a live snapshot captured. Unknown or hidden inodes answer `inode_not_found`.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            File inode ID
+
+        snapshot_id : typing.Optional[PinId]
+            Use the file revision captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
+
+        Returns
+        -------
+        typing.AsyncIterator[bytes]
+            File bytes
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.inodes.content(
+                namespace_id="namespace_id",
+                inode_id="inode_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        async with self._raw_client.content(
+            namespace_id, inode_id, snapshot_id=snapshot_id, request_options=request_options
+        ) as r:
+            async for _chunk in r.data:
+                yield _chunk
+
+    async def create_download(
+        self,
+        namespace_id: str,
+        inode_id: str,
+        *,
+        snapshot_id: typing.Optional[PinId] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> CreateDownloadByInodeResponse:
+        """
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        inode_id : str
+            File inode ID
+
+        snapshot_id : typing.Optional[PinId]
+            Use the file revision captured by this snapshot
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        CreateDownloadByInodeResponse
+            Download authorized
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.inodes.create_download(
+                namespace_id="namespace_id",
+                inode_id="ino_123",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.create_download(
+            namespace_id, inode_id, snapshot_id=snapshot_id, request_options=request_options
+        )
+        return _response.data
+
     async def list_revisions(
         self,
         namespace_id: str,
@@ -548,7 +777,7 @@ class AsyncInodesClient:
         )
         return _response.data
 
-    async def content(
+    async def revision_content(
         self,
         namespace_id: str,
         inode_id: str,
@@ -595,7 +824,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.content(
+            await client.inodes.revision_content(
                 namespace_id="namespace_id",
                 inode_id="inode_id",
                 revision_no=1000000,
@@ -604,11 +833,13 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        async with self._raw_client.content(namespace_id, inode_id, revision_no, request_options=request_options) as r:
+        async with self._raw_client.revision_content(
+            namespace_id, inode_id, revision_no, request_options=request_options
+        ) as r:
             async for _chunk in r.data:
                 yield _chunk
 
-    async def create_download(
+    async def create_revision_download(
         self,
         namespace_id: str,
         inode_id: str,
@@ -655,7 +886,7 @@ class AsyncInodesClient:
 
 
         async def main() -> None:
-            await client.inodes.create_download(
+            await client.inodes.create_revision_download(
                 namespace_id="namespace_id",
                 inode_id="ino_123",
                 revision_no=1000000,
@@ -664,7 +895,7 @@ class AsyncInodesClient:
 
         asyncio.run(main())
         """
-        _response = await self._raw_client.create_download(
+        _response = await self._raw_client.create_revision_download(
             namespace_id, inode_id, revision_no, request_options=request_options
         )
         return _response.data

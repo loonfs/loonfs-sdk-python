@@ -342,6 +342,7 @@ class FilesClient:
         pattern: str,
         case_insensitive: typing.Optional[bool] = None,
         path_prefix: typing.Optional[str] = None,
+        inode_id: typing.Optional[str] = None,
         allow_scan: typing.Optional[bool] = None,
         allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
@@ -363,7 +364,10 @@ class FilesClient:
             Match case-insensitively (`true` or `false`). Defaults to `false`.
 
         path_prefix : typing.Optional[str]
-            Complete absolute path used to restrict matches.
+            Complete absolute path used to restrict matches. Cannot be combined with `inode_id`.
+
+        inode_id : typing.Optional[str]
+            Inode whose descendants restrict matches. Cannot be combined with `path_prefix`.
 
         allow_scan : typing.Optional[bool]
             Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
@@ -400,6 +404,7 @@ class FilesClient:
         client.files.grep(
             namespace_id="namespace_id",
             pattern="pattern",
+            inode_id="ino_123",
         )
         """
         _response = self._raw_client.grep(
@@ -407,6 +412,7 @@ class FilesClient:
             pattern=pattern,
             case_insensitive=case_insensitive,
             path_prefix=path_prefix,
+            inode_id=inode_id,
             allow_scan=allow_scan,
             allow_stale=allow_stale,
             limit=limit,
@@ -781,6 +787,7 @@ class AsyncFilesClient:
         pattern: str,
         case_insensitive: typing.Optional[bool] = None,
         path_prefix: typing.Optional[str] = None,
+        inode_id: typing.Optional[str] = None,
         allow_scan: typing.Optional[bool] = None,
         allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
@@ -802,7 +809,10 @@ class AsyncFilesClient:
             Match case-insensitively (`true` or `false`). Defaults to `false`.
 
         path_prefix : typing.Optional[str]
-            Complete absolute path used to restrict matches.
+            Complete absolute path used to restrict matches. Cannot be combined with `inode_id`.
+
+        inode_id : typing.Optional[str]
+            Inode whose descendants restrict matches. Cannot be combined with `path_prefix`.
 
         allow_scan : typing.Optional[bool]
             Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
@@ -844,6 +854,7 @@ class AsyncFilesClient:
             await client.files.grep(
                 namespace_id="namespace_id",
                 pattern="pattern",
+                inode_id="ino_123",
             )
 
 
@@ -854,6 +865,7 @@ class AsyncFilesClient:
             pattern=pattern,
             case_insensitive=case_insensitive,
             path_prefix=path_prefix,
+            inode_id=inode_id,
             allow_scan=allow_scan,
             allow_stale=allow_stale,
             limit=limit,

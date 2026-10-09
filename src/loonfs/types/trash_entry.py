@@ -43,7 +43,7 @@ class TrashEntry(UniversalBaseModel):
 
     inode_kind: InodeKind = pydantic.Field()
     """
-    Whether the deleted root is a file or a directory.
+    Whether the deleted root is a file or a directory; a newer server may report another kind.
     """
 
     if IS_PYDANTIC_V2:

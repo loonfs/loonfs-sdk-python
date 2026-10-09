@@ -12,6 +12,7 @@ from .access_revision_no import AccessRevisionNo
 from .attributes_revision_no import AttributesRevisionNo
 from .binding_version import BindingVersion
 from .change_seq import ChangeSeq
+from .display_name import DisplayName
 from .inode_id import InodeId
 from .revision_no import RevisionNo
 
@@ -68,6 +69,48 @@ class CommitPrecondition_FileRevision(UniversalBaseModel):
     kind: typing.Literal["file_revision"] = "file_revision"
     expected_revision_no: RevisionNo
     inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class CommitPrecondition_InodeBinding(UniversalBaseModel):
+    """
+    Admission conditions checked against the candidate's pre-state before its operations.
+    The pre-state head sequence is the last admitted commit's sequence in the batch,
+    or the batch's base head sequence when no earlier candidate was admitted.
+    """
+
+    kind: typing.Literal["inode_binding"] = "inode_binding"
+    expected_binding_version: BindingVersion
+    inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class CommitPrecondition_NameAbsence(UniversalBaseModel):
+    """
+    Admission conditions checked against the candidate's pre-state before its operations.
+    The pre-state head sequence is the last admitted commit's sequence in the batch,
+    or the batch's base head sequence when no earlier candidate was admitted.
+    """
+
+    kind: typing.Literal["name_absence"] = "name_absence"
+    display_name: DisplayName
+    parent_inode_id: InodeId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -146,6 +189,8 @@ CommitPrecondition = typing_extensions.Annotated[
         CommitPrecondition_AccessRevision,
         CommitPrecondition_AttributesRevision,
         CommitPrecondition_FileRevision,
+        CommitPrecondition_InodeBinding,
+        CommitPrecondition_NameAbsence,
         CommitPrecondition_NamespaceHead,
         CommitPrecondition_PathAbsence,
         CommitPrecondition_PathBinding,

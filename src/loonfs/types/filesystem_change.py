@@ -24,6 +24,8 @@ class FilesystemChange_AccessChanged(UniversalBaseModel):
     One filesystem change within a commit.
 
     One request operation can produce multiple changes.
+
+    Newer servers may report other event kinds; clients ignore them.
     """
 
     kind: typing.Literal["access_changed"] = "access_changed"
@@ -47,6 +49,8 @@ class FilesystemChange_AttributesChanged(UniversalBaseModel):
     One filesystem change within a commit.
 
     One request operation can produce multiple changes.
+
+    Newer servers may report other event kinds; clients ignore them.
     """
 
     kind: typing.Literal["attributes_changed"] = "attributes_changed"
@@ -69,6 +73,8 @@ class FilesystemChange_ContentChanged(UniversalBaseModel):
     One filesystem change within a commit.
 
     One request operation can produce multiple changes.
+
+    Newer servers may report other event kinds; clients ignore them.
     """
 
     kind: typing.Literal["content_changed"] = "content_changed"
@@ -91,6 +97,8 @@ class FilesystemChange_Deleted(UniversalBaseModel):
     One filesystem change within a commit.
 
     One request operation can produce multiple changes.
+
+    Newer servers may report other event kinds; clients ignore them.
     """
 
     kind: typing.Literal["deleted"] = "deleted"
@@ -112,6 +120,8 @@ class FilesystemChange_DirectoryCreated(UniversalBaseModel):
     One filesystem change within a commit.
 
     One request operation can produce multiple changes.
+
+    Newer servers may report other event kinds; clients ignore them.
     """
 
     kind: typing.Literal["directory_created"] = "directory_created"
@@ -135,6 +145,8 @@ class FilesystemChange_FileCreated(UniversalBaseModel):
     One filesystem change within a commit.
 
     One request operation can produce multiple changes.
+
+    Newer servers may report other event kinds; clients ignore them.
     """
 
     kind: typing.Literal["file_created"] = "file_created"
@@ -160,6 +172,8 @@ class FilesystemChange_Moved(UniversalBaseModel):
     One filesystem change within a commit.
 
     One request operation can produce multiple changes.
+
+    Newer servers may report other event kinds; clients ignore them.
     """
 
     kind: typing.Literal["moved"] = "moved"
@@ -185,6 +199,8 @@ class FilesystemChange_Undeleted(UniversalBaseModel):
     One filesystem change within a commit.
 
     One request operation can produce multiple changes.
+
+    Newer servers may report other event kinds; clients ignore them.
     """
 
     kind: typing.Literal["undeleted"] = "undeleted"
