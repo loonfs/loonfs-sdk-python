@@ -12,16 +12,12 @@ from .namespace_id import NamespaceId
 
 class ContentRef(UniversalBaseModel):
     """
-    Identifies one piece of immutable file content.
-
-    The owner namespace and content id name the content object that holds the
-    bytes. A reference is not proof that the object exists: content committed
-    inline has no object until a fold writes it.
+    Identifies a chain prefix by its owner, content id, size, and checksum.
     """
 
     checksum: Checksum = pydantic.Field()
     """
-    Mandatory checksum over the complete object.
+    Mandatory checksum over the referenced bytes.
     """
 
     content_id: ContentId = pydantic.Field()
@@ -41,7 +37,7 @@ class ContentRef(UniversalBaseModel):
 
     size_bytes: int = pydantic.Field()
     """
-    Complete byte length of the referenced content.
+    Byte length of the referenced bytes, a prefix of the content object.
     """
 
     if IS_PYDANTIC_V2:

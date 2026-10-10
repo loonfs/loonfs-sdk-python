@@ -218,10 +218,11 @@ class InodesClient:
         inode_id: str,
         *,
         snapshot_id: typing.Optional[PinId] = None,
+        start_offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -233,6 +234,9 @@ class InodesClient:
 
         snapshot_id : typing.Optional[PinId]
             Use the file revision captured by this snapshot
+
+        start_offset : typing.Optional[int]
+            First byte the capability reads. Defaults to 0 and must be below the file's size, except 0 for a file of zero bytes
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -261,7 +265,7 @@ class InodesClient:
         )
         """
         _response = self._raw_client.create_download(
-            namespace_id, inode_id, snapshot_id=snapshot_id, request_options=request_options
+            namespace_id, inode_id, snapshot_id=snapshot_id, start_offset=start_offset, request_options=request_options
         )
         return _response.data
 
@@ -380,10 +384,11 @@ class InodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        start_offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -395,6 +400,9 @@ class InodesClient:
 
         revision_no : RevisionNo
             Revision number
+
+        start_offset : typing.Optional[int]
+            First byte the capability reads. Defaults to 0 and must be below the revision's size, except 0 for a revision of zero bytes
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -423,7 +431,7 @@ class InodesClient:
         )
         """
         _response = self._raw_client.create_revision_download(
-            namespace_id, inode_id, revision_no, request_options=request_options
+            namespace_id, inode_id, revision_no, start_offset=start_offset, request_options=request_options
         )
         return _response.data
 
@@ -658,10 +666,11 @@ class AsyncInodesClient:
         inode_id: str,
         *,
         snapshot_id: typing.Optional[PinId] = None,
+        start_offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -673,6 +682,9 @@ class AsyncInodesClient:
 
         snapshot_id : typing.Optional[PinId]
             Use the file revision captured by this snapshot
+
+        start_offset : typing.Optional[int]
+            First byte the capability reads. Defaults to 0 and must be below the file's size, except 0 for a file of zero bytes
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -709,7 +721,7 @@ class AsyncInodesClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.create_download(
-            namespace_id, inode_id, snapshot_id=snapshot_id, request_options=request_options
+            namespace_id, inode_id, snapshot_id=snapshot_id, start_offset=start_offset, request_options=request_options
         )
         return _response.data
 
@@ -845,10 +857,11 @@ class AsyncInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        start_offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -860,6 +873,9 @@ class AsyncInodesClient:
 
         revision_no : RevisionNo
             Revision number
+
+        start_offset : typing.Optional[int]
+            First byte the capability reads. Defaults to 0 and must be below the revision's size, except 0 for a revision of zero bytes
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -896,6 +912,6 @@ class AsyncInodesClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.create_revision_download(
-            namespace_id, inode_id, revision_no, request_options=request_options
+            namespace_id, inode_id, revision_no, start_offset=start_offset, request_options=request_options
         )
         return _response.data

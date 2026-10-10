@@ -208,7 +208,7 @@ class UploadsClient:
             request=CompleteUploadBody_DirectMultipart(
                 content=UploadContentClaim(
                     checksum=Checksum(
-                        algorithm="sha256",
+                        algorithm="crc64nvme",
                         value="value",
                     ),
                     size_bytes=1000000,
@@ -216,7 +216,7 @@ class UploadsClient:
                 parts=[
                     CompletedUploadPart(
                         checksum=Checksum(
-                            algorithm="sha256",
+                            algorithm="crc64nvme",
                             value="value",
                         ),
                         etag="etag",
@@ -311,7 +311,7 @@ class UploadsClient:
             parts=[
                 UploadPartChecksumClaim(
                     checksum=Checksum(
-                        algorithm="sha256",
+                        algorithm="crc64nvme",
                         value="value",
                     ),
                     part_number=1,
@@ -545,7 +545,7 @@ class AsyncUploadsClient:
                 request=CompleteUploadBody_DirectMultipart(
                     content=UploadContentClaim(
                         checksum=Checksum(
-                            algorithm="sha256",
+                            algorithm="crc64nvme",
                             value="value",
                         ),
                         size_bytes=1000000,
@@ -553,7 +553,7 @@ class AsyncUploadsClient:
                     parts=[
                         CompletedUploadPart(
                             checksum=Checksum(
-                                algorithm="sha256",
+                                algorithm="crc64nvme",
                                 value="value",
                             ),
                             etag="etag",
@@ -658,7 +658,7 @@ class AsyncUploadsClient:
                 parts=[
                     UploadPartChecksumClaim(
                         checksum=Checksum(
-                            algorithm="sha256",
+                            algorithm="crc64nvme",
                             value="value",
                         ),
                         part_number=1,

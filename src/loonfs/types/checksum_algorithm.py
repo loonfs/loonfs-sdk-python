@@ -2,4 +2,4 @@
 
 import typing
 
-ChecksumAlgorithm = typing.Union[typing.Literal["sha256", "crc64nvme", "crc32c"], typing.Any]
+ChecksumAlgorithm = typing.Union[typing.Literal["crc64nvme", "crc32c"], typing.Any]

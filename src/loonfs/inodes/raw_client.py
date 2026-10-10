@@ -435,10 +435,11 @@ class RawInodesClient:
         inode_id: str,
         *,
         snapshot_id: typing.Optional[PinId] = None,
+        start_offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -450,6 +451,9 @@ class RawInodesClient:
 
         snapshot_id : typing.Optional[PinId]
             Use the file revision captured by this snapshot
+
+        start_offset : typing.Optional[int]
+            First byte the capability reads. Defaults to 0 and must be below the file's size, except 0 for a file of zero bytes
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -464,6 +468,7 @@ class RawInodesClient:
             method="POST",
             params={
                 "snapshot_id": snapshot_id,
+                "start_offset": start_offset,
             },
             request_options=request_options,
         )
@@ -835,10 +840,11 @@ class RawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        start_offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -851,6 +857,9 @@ class RawInodesClient:
         revision_no : RevisionNo
             Revision number
 
+        start_offset : typing.Optional[int]
+            First byte the capability reads. Defaults to 0 and must be below the revision's size, except 0 for a revision of zero bytes
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -862,6 +871,9 @@ class RawInodesClient:
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/downloads",
             method="POST",
+            params={
+                "start_offset": start_offset,
+            },
             request_options=request_options,
         )
         try:
@@ -1368,10 +1380,11 @@ class AsyncRawInodesClient:
         inode_id: str,
         *,
         snapshot_id: typing.Optional[PinId] = None,
+        start_offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -1383,6 +1396,9 @@ class AsyncRawInodesClient:
 
         snapshot_id : typing.Optional[PinId]
             Use the file revision captured by this snapshot
+
+        start_offset : typing.Optional[int]
+            First byte the capability reads. Defaults to 0 and must be below the file's size, except 0 for a file of zero bytes
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1397,6 +1413,7 @@ class AsyncRawInodesClient:
             method="POST",
             params={
                 "snapshot_id": snapshot_id,
+                "start_offset": start_offset,
             },
             request_options=request_options,
         )
@@ -1769,10 +1786,11 @@ class AsyncRawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        start_offset: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The request has no body and the response does not include a path.
 
         Parameters
         ----------
@@ -1785,6 +1803,9 @@ class AsyncRawInodesClient:
         revision_no : RevisionNo
             Revision number
 
+        start_offset : typing.Optional[int]
+            First byte the capability reads. Defaults to 0 and must be below the revision's size, except 0 for a revision of zero bytes
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1796,6 +1817,9 @@ class AsyncRawInodesClient:
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/downloads",
             method="POST",
+            params={
+                "start_offset": start_offset,
+            },
             request_options=request_options,
         )
         try:

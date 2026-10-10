@@ -22,9 +22,9 @@ class UploadSessionStatusOpen(UniversalBaseModel):
     Present for `direct_put` sessions; minted fresh on every read.
     """
 
-    checksum_algorithm: typing.Optional[ChecksumAlgorithm] = pydantic.Field(default=None)
+    checksum_algorithm: ChecksumAlgorithm = pydantic.Field()
     """
-    Present for `direct_put` and `direct_multipart` sessions.
+    The store's content checksum algorithm.
     """
 
     content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
