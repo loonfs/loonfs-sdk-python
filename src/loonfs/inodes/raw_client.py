@@ -28,6 +28,9 @@ from ..types.pin_id import PinId
 from ..types.revision_no import RevisionNo
 from pydantic import ValidationError
 
+# this is used as the default value for optional parameters
+OMIT = typing.cast(typing.Any, ...)
+
 
 class RawInodesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
@@ -434,11 +437,12 @@ class RawInodesClient:
         namespace_id: str,
         inode_id: str,
         *,
-        snapshot_id: typing.Optional[PinId] = None,
+        snapshot_id: typing.Optional[PinId] = OMIT,
+        start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
 
         Parameters
         ----------
@@ -449,7 +453,11 @@ class RawInodesClient:
             File inode ID
 
         snapshot_id : typing.Optional[PinId]
-            Use the file revision captured by this snapshot
+            Read the file revision captured by this snapshot.
+
+        start_offset : typing.Optional[int]
+            The first byte the grant reads. Defaults to 0 and must be below the
+            file's size, except 0 for a file of zero bytes.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -462,10 +470,15 @@ class RawInodesClient:
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/downloads",
             method="POST",
-            params={
+            json={
                 "snapshot_id": snapshot_id,
+                "start_offset": start_offset,
+            },
+            headers={
+                "content-type": "application/json",
             },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -523,6 +536,17 @@ class RawInodesClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -835,10 +859,11 @@ class RawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
 
         Parameters
         ----------
@@ -851,6 +876,10 @@ class RawInodesClient:
         revision_no : RevisionNo
             Revision number
 
+        start_offset : typing.Optional[int]
+            The first byte the grant reads. Defaults to 0 and must be below the
+            revision's size, except 0 for a revision of zero bytes.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -862,7 +891,14 @@ class RawInodesClient:
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/downloads",
             method="POST",
+            json={
+                "start_offset": start_offset,
+            },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -920,6 +956,17 @@ class RawInodesClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1367,11 +1414,12 @@ class AsyncRawInodesClient:
         namespace_id: str,
         inode_id: str,
         *,
-        snapshot_id: typing.Optional[PinId] = None,
+        snapshot_id: typing.Optional[PinId] = OMIT,
+        start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
 
         Parameters
         ----------
@@ -1382,7 +1430,11 @@ class AsyncRawInodesClient:
             File inode ID
 
         snapshot_id : typing.Optional[PinId]
-            Use the file revision captured by this snapshot
+            Read the file revision captured by this snapshot.
+
+        start_offset : typing.Optional[int]
+            The first byte the grant reads. Defaults to 0 and must be below the
+            file's size, except 0 for a file of zero bytes.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1395,10 +1447,15 @@ class AsyncRawInodesClient:
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/downloads",
             method="POST",
-            params={
+            json={
                 "snapshot_id": snapshot_id,
+                "start_offset": start_offset,
+            },
+            headers={
+                "content-type": "application/json",
             },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1456,6 +1513,17 @@ class AsyncRawInodesClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1769,10 +1837,11 @@ class AsyncRawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
+        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
 
         Parameters
         ----------
@@ -1785,6 +1854,10 @@ class AsyncRawInodesClient:
         revision_no : RevisionNo
             Revision number
 
+        start_offset : typing.Optional[int]
+            The first byte the grant reads. Defaults to 0 and must be below the
+            revision's size, except 0 for a revision of zero bytes.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1796,7 +1869,14 @@ class AsyncRawInodesClient:
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/downloads",
             method="POST",
+            json={
+                "start_offset": start_offset,
+            },
+            headers={
+                "content-type": "application/json",
+            },
             request_options=request_options,
+            omit=OMIT,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1854,6 +1934,17 @@ class AsyncRawInodesClient:
                 )
             if _response.status_code == 410:
                 raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

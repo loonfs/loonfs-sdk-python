@@ -11,7 +11,7 @@ from .pin_id import PinId
 from .run_no import RunNo
 
 
-class GrepIndexLifecycleBackfilling(UniversalBaseModel):
+class GrepIndexStatusBackfilling(UniversalBaseModel):
     """
     An initial scan of a pinned checkpoint that is not yet searchable.
     """

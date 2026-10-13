@@ -4,30 +4,18 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
 from .namespace_id import NamespaceId
 from .run_no import RunNo
 
 
-class GrepIndexLifecycleActive(UniversalBaseModel):
+class GrepIndexStatusDisabled(UniversalBaseModel):
     """
-    An index following the change feed through its searchable watermark.
-    """
-
-    built_through_seq: ChangeSeq = pydantic.Field()
-    """
-    Sequence of the commit at the index cursor.
+    No index is maintained for this namespace.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
     Namespace the status describes.
-    """
-
-    next_event_index: typing.Optional[int] = pydantic.Field(default=None)
-    """
-    The next change-event offset within `built_through_seq`, or zero when the
-    whole commit is indexed.
     """
 
     next_run_no: RunNo = pydantic.Field()

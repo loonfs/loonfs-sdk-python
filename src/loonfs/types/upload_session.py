@@ -67,7 +67,7 @@ class UploadSession_Open(UniversalBaseModel):
 
     status: typing.Literal["open"] = "open"
     access: typing.Optional[ObjectTransferAccess] = None
-    checksum_algorithm: typing.Optional[ChecksumAlgorithm] = None
+    checksum_algorithm: ChecksumAlgorithm
     content_ref: typing.Optional[ContentRef] = None
     expires_at_ms: int
     mode: UploadMode

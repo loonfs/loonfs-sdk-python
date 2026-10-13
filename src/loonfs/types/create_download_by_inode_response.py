@@ -5,20 +5,15 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .content_ref import ContentRef
+from .download_range import DownloadRange
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
-from .object_transfer_access import ObjectTransferAccess
 from .revision_no import RevisionNo
 
 
 class CreateDownloadByInodeResponse(UniversalBaseModel):
     """
     A short-lived capability to read one inode revision.
-    """
-
-    access: ObjectTransferAccess = pydantic.Field()
-    """
-    Short-lived provider access without the raw object key.
     """
 
     content_ref: ContentRef = pydantic.Field()
@@ -34,6 +29,11 @@ class CreateDownloadByInodeResponse(UniversalBaseModel):
     namespace_id: NamespaceId = pydantic.Field()
     """
     Namespace that was read.
+    """
+
+    ranges: typing.List[DownloadRange] = pydantic.Field()
+    """
+    The revision's bytes from the requested offset, in order.
     """
 
     revision_no: RevisionNo = pydantic.Field()

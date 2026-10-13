@@ -22,7 +22,7 @@ class GrepIndex_Active(UniversalBaseModel):
     status: typing.Literal["active"] = "active"
     built_through_seq: ChangeSeq
     namespace_id: NamespaceId
-    next_event_index: typing.Optional[int] = None
+    next_event_index: int
     next_run_no: RunNo
     reorganize_pending: bool
 

@@ -6,26 +6,19 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
 from .content_ref import ContentRef
+from .download_range import DownloadRange
 from .namespace_id import NamespaceId
-from .object_transfer_access import ObjectTransferAccess
 from .revision_no import RevisionNo
 
 
 class CreateDownloadResponse(UniversalBaseModel):
     """
-    A presigned URL for one content object.
-
-    The URL expires at `access.expires_at_ms`; later path changes do not change the object.
-    """
-
-    access: ObjectTransferAccess = pydantic.Field()
-    """
-    Short-lived read capability the client uses without learning the raw object key.
+    Signed object ranges for one revision.
     """
 
     content_ref: ContentRef = pydantic.Field()
     """
-    The identity, byte length, and checksum of the object to download.
+    The identity, byte length, and checksum of the revision's bytes.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -36,6 +29,11 @@ class CreateDownloadResponse(UniversalBaseModel):
     path: AbsolutePath = pydantic.Field()
     """
     Absolute path as rendered from stored display names.
+    """
+
+    ranges: typing.List[DownloadRange] = pydantic.Field()
+    """
+    The revision's bytes from the requested offset, in order.
     """
 
     revision_no: RevisionNo = pydantic.Field()

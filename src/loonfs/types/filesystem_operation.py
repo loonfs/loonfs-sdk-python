@@ -24,6 +24,51 @@ from .inode_id import InodeId
 from .revision_no import RevisionNo
 
 
+class FilesystemOperation_AppendFile(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected, and fieldless variants require empty objects.
+    """
+
+    kind: typing.Literal["append_file"] = "append_file"
+    expected_inode_id: typing.Optional[InodeId] = None
+    expected_revision_no: typing.Optional[RevisionNo] = None
+    inline_content: str
+    path: AbsolutePath
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+class FilesystemOperation_AppendFileByInode(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    Unknown fields are rejected, and fieldless variants require empty objects.
+    """
+
+    kind: typing.Literal["append_file_by_inode"] = "append_file_by_inode"
+    expected_revision_no: typing.Optional[RevisionNo] = None
+    inline_content: str
+    inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_CopyByInode(UniversalBaseModel):
     """
     One filesystem operation.
@@ -446,6 +491,8 @@ class FilesystemOperation_UpdateAttributesByInode(UniversalBaseModel):
 
 FilesystemOperation = typing_extensions.Annotated[
     typing.Union[
+        FilesystemOperation_AppendFile,
+        FilesystemOperation_AppendFileByInode,
         FilesystemOperation_CopyByInode,
         FilesystemOperation_CopyPath,
         FilesystemOperation_CreateDirectory,

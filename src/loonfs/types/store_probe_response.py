@@ -4,6 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .probe_run_id import ProbeRunId
 from .store_probe_check_result import StoreProbeCheckResult
 
 
@@ -17,7 +18,7 @@ class StoreProbeResponse(UniversalBaseModel):
     The check results in execution order.
     """
 
-    run_id: str = pydantic.Field()
+    run_id: ProbeRunId = pydantic.Field()
     """
     The server-generated label for this probe run and its objects.
     """
