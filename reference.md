@@ -525,7 +525,7 @@ Applies one commit: an ordered, non-empty list of path operations that commit to
 <dd>
 
 ```python
-from loonfs.server import LoonFS, FilesystemOperation_CopyByInode
+from loonfs.server import LoonFS, FilesystemOperation_AppendFile
 
 client = LoonFS(
     token="<token>",
@@ -536,10 +536,9 @@ client.commits.create(
     namespace_id="namespace_id",
     commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
     operations=[
-        FilesystemOperation_CopyByInode(
-            destination_display_name="report.txt",
-            destination_parent_inode_id="ino_123",
-            inode_id="ino_123",
+        FilesystemOperation_AppendFile(
+            inline_content="inline_content",
+            path="/docs/report.txt",
         )
     ],
 )
@@ -728,7 +727,7 @@ client.files.content(
 <dl>
 <dd>
 
-Authorizes one direct read of a file's content object and returns a short-lived presigned GET capability, the resolved revision, and the content reference the client checks the arriving bytes against. `Range` is outside the signature, so one grant serves ranged, resumed, and parallel reads. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
+Returns ordered signed object ranges covering exactly `[start_offset, size_bytes)` of the selected revision. Each range carries its signed headers in `access.headers`, which the client sends unchanged. The client checks each range's length and the complete revision's checksum. A client that resumes asks for a new grant from its offset. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
 </dd>
 </dl>
 </dd>
@@ -800,6 +799,19 @@ Cannot be combined with `snapshot_id`.
 
 Read the file revision captured by this snapshot.
 Cannot be combined with `revision_no`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start_offset:** `typing.Optional[int]` 
+
+The first byte the grant reads. It names `[start_offset, size_bytes)`
+of the revision; a client that resumes asks for a new grant from the
+bytes it holds. Must be below the revision's size, except 0 for a
+revision of zero bytes.
     
 </dd>
 </dl>
@@ -1669,7 +1681,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The request has no body and the response does not include a path.
+Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
 </dd>
 </dl>
 </dd>
@@ -1694,7 +1706,6 @@ client = LoonFS(
 client.inodes.create_download(
     namespace_id="namespace_id",
     inode_id="ino_123",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
 )
 
 ```
@@ -1727,7 +1738,18 @@ client.inodes.create_download(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Use the file revision captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — Read the file revision captured by this snapshot.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start_offset:** `typing.Optional[int]` 
+
+The first byte the grant reads. Defaults to 0 and must be below the
+file's size, except 0 for a file of zero bytes.
     
 </dd>
 </dl>
@@ -1946,7 +1968,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-Authorizes a direct read of one retained inode revision. The request has no body and the response does not include a path.
+Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
 </dd>
 </dl>
 </dd>
@@ -2005,6 +2027,17 @@ client.inodes.create_revision_download(
 <dd>
 
 **revision_no:** `RevisionNo` — Revision number
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**start_offset:** `typing.Optional[int]` 
+
+The first byte the grant reads. Defaults to 0 and must be below the
+revision's size, except 0 for a revision of zero bytes.
     
 </dd>
 </dl>
@@ -2184,6 +2217,87 @@ client.snapshots.create(
 <dd>
 
 **ttl_ms:** `int` — Snapshot lifetime from the current server time, in milliseconds.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.snapshots.<a href="src/loonfs/snapshots/client.py">retrieve</a>(...) -> Snapshot</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns one live snapshot, as the snapshot listing returns it. A missing id, or the id of a pin that isn't a snapshot, returns snapshot_not_found, and an expired snapshot returns snapshot_gone.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.snapshots.retrieve(
+    namespace_id="namespace_id",
+    snapshot_id="pin_00000000000000000001-0000000000000002",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `PinId` — Snapshot id
     
 </dd>
 </dl>
@@ -2658,7 +2772,7 @@ client.uploads.complete(
     request=CompleteUploadBody_DirectMultipart(
         content=UploadContentClaim(
             checksum=Checksum(
-                algorithm="sha256",
+                algorithm="crc64nvme",
                 value="value",
             ),
             size_bytes=1000000,
@@ -2666,7 +2780,7 @@ client.uploads.complete(
         parts=[
             CompletedUploadPart(
                 checksum=Checksum(
-                    algorithm="sha256",
+                    algorithm="crc64nvme",
                     value="value",
                 ),
                 etag="etag",
@@ -2844,7 +2958,7 @@ client.uploads.sign_parts(
     parts=[
         UploadPartChecksumClaim(
             checksum=Checksum(
-                algorithm="sha256",
+                algorithm="crc64nvme",
                 value="value",
             ),
             part_number=1,
@@ -3061,6 +3175,87 @@ client.maintenance.checkpoints.create(
 <dd>
 
 **ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds. Omit it to keep the checkpoint until it is deleted.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">retrieve</a>(...) -> Checkpoint</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns one existing pin as the checkpoint listing returns it, including an expired pin that collection has not deleted. A missing id returns checkpoint_not_found.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.maintenance.checkpoints.retrieve(
+    namespace_id="namespace_id",
+    checkpoint_id="checkpoint_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — Namespace id
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**checkpoint_id:** `str` — Checkpoint id
     
 </dd>
 </dl>

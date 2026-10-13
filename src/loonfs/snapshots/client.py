@@ -124,6 +124,48 @@ class SnapshotsClient:
         _response = self._raw_client.create(namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options)
         return _response.data
 
+    def retrieve(
+        self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> Snapshot:
+        """
+        Returns one live snapshot, as the snapshot listing returns it. A missing id, or the id of a pin that isn't a snapshot, returns snapshot_not_found, and an expired snapshot returns snapshot_gone.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : PinId
+            Snapshot id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Snapshot
+            Live snapshot
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.snapshots.retrieve(
+            namespace_id="namespace_id",
+            snapshot_id="pin_00000000000000000001-0000000000000002",
+        )
+        """
+        _response = self._raw_client.retrieve(namespace_id, snapshot_id, request_options=request_options)
+        return _response.data
+
     def delete(
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
@@ -346,6 +388,56 @@ class AsyncSnapshotsClient:
         _response = await self._raw_client.create(
             namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options
         )
+        return _response.data
+
+    async def retrieve(
+        self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> Snapshot:
+        """
+        Returns one live snapshot, as the snapshot listing returns it. A missing id, or the id of a pin that isn't a snapshot, returns snapshot_not_found, and an expired snapshot returns snapshot_gone.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        snapshot_id : PinId
+            Snapshot id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Snapshot
+            Live snapshot
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.snapshots.retrieve(
+                namespace_id="namespace_id",
+                snapshot_id="pin_00000000000000000001-0000000000000002",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.retrieve(namespace_id, snapshot_id, request_options=request_options)
         return _response.data
 
     async def delete(

@@ -9,6 +9,23 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
+class CompactionStepOutcome_BoundedMergePublished(UniversalBaseModel):
+    """
+    What the bounded compaction part of a maintenance pass did.
+    """
+
+    outcome: typing.Literal["bounded_merge_published"] = "bounded_merge_published"
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class CompactionStepOutcome_Fenced(UniversalBaseModel):
     """
     What the bounded compaction part of a maintenance pass did.
@@ -77,30 +94,13 @@ class CompactionStepOutcome_NotNeeded(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class CompactionStepOutcome_UnitPublished(UniversalBaseModel):
-    """
-    What the bounded compaction part of a maintenance pass did.
-    """
-
-    outcome: typing.Literal["unit_published"] = "unit_published"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 CompactionStepOutcome = typing_extensions.Annotated[
     typing.Union[
+        CompactionStepOutcome_BoundedMergePublished,
         CompactionStepOutcome_Fenced,
         CompactionStepOutcome_ManifestAdvanced,
         CompactionStepOutcome_MetadataCompactionRequired,
         CompactionStepOutcome_NotNeeded,
-        CompactionStepOutcome_UnitPublished,
     ],
     pydantic.Field(discriminator="outcome"),
 ]

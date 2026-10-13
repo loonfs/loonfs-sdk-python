@@ -127,6 +127,48 @@ class CheckpointsClient:
         _response = self._raw_client.create(namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options)
         return _response.data
 
+    def retrieve(
+        self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> Checkpoint:
+        """
+        Returns one existing pin as the checkpoint listing returns it, including an expired pin that collection has not deleted. A missing id returns checkpoint_not_found.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        checkpoint_id : str
+            Checkpoint id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Checkpoint
+            Existing checkpoint
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.maintenance.checkpoints.retrieve(
+            namespace_id="namespace_id",
+            checkpoint_id="checkpoint_id",
+        )
+        """
+        _response = self._raw_client.retrieve(namespace_id, checkpoint_id, request_options=request_options)
+        return _response.data
+
     def delete(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteCheckpointResponse:
@@ -302,6 +344,56 @@ class AsyncCheckpointsClient:
         _response = await self._raw_client.create(
             namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options
         )
+        return _response.data
+
+    async def retrieve(
+        self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> Checkpoint:
+        """
+        Returns one existing pin as the checkpoint listing returns it, including an expired pin that collection has not deleted. A missing id returns checkpoint_not_found.
+
+        Parameters
+        ----------
+        namespace_id : str
+            Namespace id
+
+        checkpoint_id : str
+            Checkpoint id
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Checkpoint
+            Existing checkpoint
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.maintenance.checkpoints.retrieve(
+                namespace_id="namespace_id",
+                checkpoint_id="checkpoint_id",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.retrieve(namespace_id, checkpoint_id, request_options=request_options)
         return _response.data
 
     async def delete(

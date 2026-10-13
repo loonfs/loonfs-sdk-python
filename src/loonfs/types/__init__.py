@@ -49,17 +49,17 @@ if typing.TYPE_CHECKING:
     from .commit_precondition_path_binding import CommitPreconditionPathBinding
     from .compaction_step_outcome import (
         CompactionStepOutcome,
+        CompactionStepOutcome_BoundedMergePublished,
         CompactionStepOutcome_Fenced,
         CompactionStepOutcome_ManifestAdvanced,
         CompactionStepOutcome_MetadataCompactionRequired,
         CompactionStepOutcome_NotNeeded,
-        CompactionStepOutcome_UnitPublished,
     )
+    from .compaction_step_outcome_bounded_merge_published import CompactionStepOutcomeBoundedMergePublished
     from .compaction_step_outcome_fenced import CompactionStepOutcomeFenced
     from .compaction_step_outcome_manifest_advanced import CompactionStepOutcomeManifestAdvanced
     from .compaction_step_outcome_metadata_compaction_required import CompactionStepOutcomeMetadataCompactionRequired
     from .compaction_step_outcome_not_needed import CompactionStepOutcomeNotNeeded
-    from .compaction_step_outcome_unit_published import CompactionStepOutcomeUnitPublished
     from .complete_upload_body import (
         CompleteUploadBody,
         CompleteUploadBody_DirectMultipart,
@@ -94,6 +94,7 @@ if typing.TYPE_CHECKING:
     from .destination_behavior import DestinationBehavior
     from .directory_binding import DirectoryBinding
     from .display_name import DisplayName
+    from .download_range import DownloadRange
     from .error_details import ErrorDetails
     from .error_response import ErrorResponse
     from .file_revision import FileRevision
@@ -118,6 +119,8 @@ if typing.TYPE_CHECKING:
     from .filesystem_change_undeleted import FilesystemChangeUndeleted
     from .filesystem_operation import (
         FilesystemOperation,
+        FilesystemOperation_AppendFile,
+        FilesystemOperation_AppendFileByInode,
         FilesystemOperation_CopyByInode,
         FilesystemOperation_CopyPath,
         FilesystemOperation_CreateDirectory,
@@ -137,6 +140,8 @@ if typing.TYPE_CHECKING:
         FilesystemOperation_UpdateAttributes,
         FilesystemOperation_UpdateAttributesByInode,
     )
+    from .filesystem_operation_append_file import FilesystemOperationAppendFile
+    from .filesystem_operation_append_file_by_inode import FilesystemOperationAppendFileByInode
     from .filesystem_operation_copy_by_inode import FilesystemOperationCopyByInode
     from .filesystem_operation_copy_path import FilesystemOperationCopyPath
     from .filesystem_operation_create_directory import FilesystemOperationCreateDirectory
@@ -156,9 +161,9 @@ if typing.TYPE_CHECKING:
     from .filesystem_operation_update_attributes import FilesystemOperationUpdateAttributes
     from .filesystem_operation_update_attributes_by_inode import FilesystemOperationUpdateAttributesByInode
     from .grep_index import GrepIndex, GrepIndex_Active, GrepIndex_Backfilling, GrepIndex_Disabled
-    from .grep_index_lifecycle_active import GrepIndexLifecycleActive
-    from .grep_index_lifecycle_backfilling import GrepIndexLifecycleBackfilling
-    from .grep_index_lifecycle_disabled import GrepIndexLifecycleDisabled
+    from .grep_index_status_active import GrepIndexStatusActive
+    from .grep_index_status_backfilling import GrepIndexStatusBackfilling
+    from .grep_index_status_disabled import GrepIndexStatusDisabled
     from .grep_match import GrepMatch
     from .grep_response import GrepResponse
     from .inode_id import InodeId
@@ -206,6 +211,7 @@ if typing.TYPE_CHECKING:
     from .pin_id import PinId
     from .principal_id import PrincipalId
     from .principal_scope import PrincipalScope
+    from .probe_run_id import ProbeRunId
     from .retained_candidates import RetainedCandidates
     from .revision_no import RevisionNo
     from .run_maintenance_request import (
@@ -313,16 +319,16 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CommitPrecondition_PathAbsence": ".commit_precondition",
     "CommitPrecondition_PathBinding": ".commit_precondition",
     "CompactionStepOutcome": ".compaction_step_outcome",
+    "CompactionStepOutcomeBoundedMergePublished": ".compaction_step_outcome_bounded_merge_published",
     "CompactionStepOutcomeFenced": ".compaction_step_outcome_fenced",
     "CompactionStepOutcomeManifestAdvanced": ".compaction_step_outcome_manifest_advanced",
     "CompactionStepOutcomeMetadataCompactionRequired": ".compaction_step_outcome_metadata_compaction_required",
     "CompactionStepOutcomeNotNeeded": ".compaction_step_outcome_not_needed",
-    "CompactionStepOutcomeUnitPublished": ".compaction_step_outcome_unit_published",
+    "CompactionStepOutcome_BoundedMergePublished": ".compaction_step_outcome",
     "CompactionStepOutcome_Fenced": ".compaction_step_outcome",
     "CompactionStepOutcome_ManifestAdvanced": ".compaction_step_outcome",
     "CompactionStepOutcome_MetadataCompactionRequired": ".compaction_step_outcome",
     "CompactionStepOutcome_NotNeeded": ".compaction_step_outcome",
-    "CompactionStepOutcome_UnitPublished": ".compaction_step_outcome",
     "CompleteUploadBody": ".complete_upload_body",
     "CompleteUploadBodyDirectMultipart": ".complete_upload_body_direct_multipart",
     "CompleteUploadBodyDirectPut": ".complete_upload_body_direct_put",
@@ -353,6 +359,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DestinationBehavior": ".destination_behavior",
     "DirectoryBinding": ".directory_binding",
     "DisplayName": ".display_name",
+    "DownloadRange": ".download_range",
     "ErrorDetails": ".error_details",
     "ErrorResponse": ".error_response",
     "FileRevision": ".file_revision",
@@ -374,6 +381,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemChange_Moved": ".filesystem_change",
     "FilesystemChange_Undeleted": ".filesystem_change",
     "FilesystemOperation": ".filesystem_operation",
+    "FilesystemOperationAppendFile": ".filesystem_operation_append_file",
+    "FilesystemOperationAppendFileByInode": ".filesystem_operation_append_file_by_inode",
     "FilesystemOperationCopyByInode": ".filesystem_operation_copy_by_inode",
     "FilesystemOperationCopyPath": ".filesystem_operation_copy_path",
     "FilesystemOperationCreateDirectory": ".filesystem_operation_create_directory",
@@ -392,6 +401,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperationUpdateAccessByInode": ".filesystem_operation_update_access_by_inode",
     "FilesystemOperationUpdateAttributes": ".filesystem_operation_update_attributes",
     "FilesystemOperationUpdateAttributesByInode": ".filesystem_operation_update_attributes_by_inode",
+    "FilesystemOperation_AppendFile": ".filesystem_operation",
+    "FilesystemOperation_AppendFileByInode": ".filesystem_operation",
     "FilesystemOperation_CopyByInode": ".filesystem_operation",
     "FilesystemOperation_CopyPath": ".filesystem_operation",
     "FilesystemOperation_CreateDirectory": ".filesystem_operation",
@@ -411,9 +422,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperation_UpdateAttributes": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributesByInode": ".filesystem_operation",
     "GrepIndex": ".grep_index",
-    "GrepIndexLifecycleActive": ".grep_index_lifecycle_active",
-    "GrepIndexLifecycleBackfilling": ".grep_index_lifecycle_backfilling",
-    "GrepIndexLifecycleDisabled": ".grep_index_lifecycle_disabled",
+    "GrepIndexStatusActive": ".grep_index_status_active",
+    "GrepIndexStatusBackfilling": ".grep_index_status_backfilling",
+    "GrepIndexStatusDisabled": ".grep_index_status_disabled",
     "GrepIndex_Active": ".grep_index",
     "GrepIndex_Backfilling": ".grep_index",
     "GrepIndex_Disabled": ".grep_index",
@@ -469,6 +480,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PinId": ".pin_id",
     "PrincipalId": ".principal_id",
     "PrincipalScope": ".principal_scope",
+    "ProbeRunId": ".probe_run_id",
     "RetainedCandidates": ".retained_candidates",
     "RevisionNo": ".revision_no",
     "RunMaintenanceRequest": ".run_maintenance_request",
@@ -597,16 +609,16 @@ __all__ = [
     "CommitPrecondition_PathAbsence",
     "CommitPrecondition_PathBinding",
     "CompactionStepOutcome",
+    "CompactionStepOutcomeBoundedMergePublished",
     "CompactionStepOutcomeFenced",
     "CompactionStepOutcomeManifestAdvanced",
     "CompactionStepOutcomeMetadataCompactionRequired",
     "CompactionStepOutcomeNotNeeded",
-    "CompactionStepOutcomeUnitPublished",
+    "CompactionStepOutcome_BoundedMergePublished",
     "CompactionStepOutcome_Fenced",
     "CompactionStepOutcome_ManifestAdvanced",
     "CompactionStepOutcome_MetadataCompactionRequired",
     "CompactionStepOutcome_NotNeeded",
-    "CompactionStepOutcome_UnitPublished",
     "CompleteUploadBody",
     "CompleteUploadBodyDirectMultipart",
     "CompleteUploadBodyDirectPut",
@@ -637,6 +649,7 @@ __all__ = [
     "DestinationBehavior",
     "DirectoryBinding",
     "DisplayName",
+    "DownloadRange",
     "ErrorDetails",
     "ErrorResponse",
     "FileRevision",
@@ -658,6 +671,8 @@ __all__ = [
     "FilesystemChange_Moved",
     "FilesystemChange_Undeleted",
     "FilesystemOperation",
+    "FilesystemOperationAppendFile",
+    "FilesystemOperationAppendFileByInode",
     "FilesystemOperationCopyByInode",
     "FilesystemOperationCopyPath",
     "FilesystemOperationCreateDirectory",
@@ -676,6 +691,8 @@ __all__ = [
     "FilesystemOperationUpdateAccessByInode",
     "FilesystemOperationUpdateAttributes",
     "FilesystemOperationUpdateAttributesByInode",
+    "FilesystemOperation_AppendFile",
+    "FilesystemOperation_AppendFileByInode",
     "FilesystemOperation_CopyByInode",
     "FilesystemOperation_CopyPath",
     "FilesystemOperation_CreateDirectory",
@@ -695,9 +712,9 @@ __all__ = [
     "FilesystemOperation_UpdateAttributes",
     "FilesystemOperation_UpdateAttributesByInode",
     "GrepIndex",
-    "GrepIndexLifecycleActive",
-    "GrepIndexLifecycleBackfilling",
-    "GrepIndexLifecycleDisabled",
+    "GrepIndexStatusActive",
+    "GrepIndexStatusBackfilling",
+    "GrepIndexStatusDisabled",
     "GrepIndex_Active",
     "GrepIndex_Backfilling",
     "GrepIndex_Disabled",
@@ -753,6 +770,7 @@ __all__ = [
     "PinId",
     "PrincipalId",
     "PrincipalScope",
+    "ProbeRunId",
     "RetainedCandidates",
     "RevisionNo",
     "RunMaintenanceRequest",

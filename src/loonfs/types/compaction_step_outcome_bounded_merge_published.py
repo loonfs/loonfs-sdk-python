@@ -6,7 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class CompactionStepOutcomeUnitPublished(UniversalBaseModel):
+class CompactionStepOutcomeBoundedMergePublished(UniversalBaseModel):
     """
     One family group was merged and a manifest published.
     """

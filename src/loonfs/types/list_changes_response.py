@@ -24,6 +24,11 @@ class ListChangesResponse(UniversalBaseModel):
     Logical commits after `after_seq`, ordered by ascending namespace sequence.
     """
 
+    head_seq: ChangeSeq = pydantic.Field()
+    """
+    Namespace head sequence this page was read at.
+    """
+
     namespace_id: NamespaceId = pydantic.Field()
     """
     Namespace whose ordered commit stream was read.
@@ -31,12 +36,8 @@ class ListChangesResponse(UniversalBaseModel):
 
     next_after_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Cursor to request when another page remains, absent at `through_seq`.
-    """
-
-    through_seq: ChangeSeq = pydantic.Field()
-    """
-    Namespace head through which this page was evaluated.
+    Cursor to request when another page remains, absent on the page that
+    reaches `head_seq`.
     """
 
     if IS_PYDANTIC_V2:

@@ -15,7 +15,7 @@ class ObjectTransferAccess_PresignedUrl(UniversalBaseModel):
 
     kind: typing.Literal["presigned_url"] = "presigned_url"
     expires_at_ms: int
-    headers: typing.Optional[typing.Dict[str, str]] = None
+    headers: typing.Dict[str, str]
     method: str
     url: str
 

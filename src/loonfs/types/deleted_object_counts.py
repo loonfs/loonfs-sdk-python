@@ -13,7 +13,7 @@ class DeletedObjectCounts(UniversalBaseModel):
 
     content_objects: int = pydantic.Field()
     """
-    Content reclaimed through completed upload sessions.
+    Content objects no retained view names, deleted once older than the grace window.
     """
 
     manifests: int = pydantic.Field()
@@ -29,6 +29,11 @@ class DeletedObjectCounts(UniversalBaseModel):
     retired_content_objects: int = pydantic.Field()
     """
     Listed content objects deleted from a retired namespace.
+    """
+
+    temporary_objects: int = pydantic.Field()
+    """
+    Store temporary objects deleted once older than the grace window.
     """
 
     upload_sessions: int = pydantic.Field()
