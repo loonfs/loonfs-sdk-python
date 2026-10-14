@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RunMaintenanceRequestGrepGc(UniversalBaseModel):
     """
-    Collects aged, unreferenced grep index objects.
+    A garbage collection job for aged, unreferenced grep index objects.
     """
 
     if IS_PYDANTIC_V2:

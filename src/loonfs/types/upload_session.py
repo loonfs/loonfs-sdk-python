@@ -18,7 +18,7 @@ from .upload_mode import UploadMode
 
 class UploadSession_Aborted(UniversalBaseModel):
     """
-    Current view of one upload session.
+    The current state of one upload session.
     """
 
     status: typing.Literal["aborted"] = "aborted"
@@ -39,7 +39,7 @@ class UploadSession_Aborted(UniversalBaseModel):
 
 class UploadSession_Completed(UniversalBaseModel):
     """
-    Current view of one upload session.
+    The current state of one upload session.
     """
 
     status: typing.Literal["completed"] = "completed"
@@ -62,7 +62,7 @@ class UploadSession_Completed(UniversalBaseModel):
 
 class UploadSession_Open(UniversalBaseModel):
     """
-    Current view of one upload session.
+    The current state of one upload session.
     """
 
     status: typing.Literal["open"] = "open"

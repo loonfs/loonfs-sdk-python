@@ -10,7 +10,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class ObjectTransferAccess_PresignedUrl(UniversalBaseModel):
     """
-    Client-facing direct transfer capability.
+    A capability that lets a client transfer bytes directly to or from object storage.
     """
 
     kind: typing.Literal["presigned_url"] = "presigned_url"

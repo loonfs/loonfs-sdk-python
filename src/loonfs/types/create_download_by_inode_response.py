@@ -13,32 +13,32 @@ from .revision_no import RevisionNo
 
 class CreateDownloadByInodeResponse(UniversalBaseModel):
     """
-    A short-lived capability to read one inode revision.
+    A short-lived capability to read one revision of an inode.
     """
 
     content_ref: ContentRef = pydantic.Field()
     """
-    Content identity, size, and checksum.
+    The content's identity, size, and checksum.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    File inode being read.
+    The file inode being read.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that was read.
+    The namespace that was read.
     """
 
     ranges: typing.List[DownloadRange] = pydantic.Field()
     """
-    The revision's bytes from the requested offset, in order.
+    The ranges that cover the revision's bytes from the requested offset, in order.
     """
 
     revision_no: RevisionNo = pydantic.Field()
     """
-    Revision being read.
+    The revision being read.
     """
 
     if IS_PYDANTIC_V2:

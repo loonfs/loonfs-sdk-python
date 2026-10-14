@@ -8,27 +8,27 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class ObjectTransferAccessPresignedUrl(UniversalBaseModel):
     """
-    Short-lived URL plus required headers for one object-store read or write.
+    A short-lived URL, with the headers that one object store read or write requires.
     """
 
     expires_at_ms: int = pydantic.Field()
     """
-    Expiration timestamp in Unix milliseconds.
+    The time the URL expires, in Unix milliseconds.
     """
 
     headers: typing.Dict[str, str] = pydantic.Field()
     """
-    Headers that are covered by the signature and must be sent.
+    The headers that the signature covers, which the client must send.
     """
 
     method: str = pydantic.Field()
     """
-    HTTP method the client must use.
+    The HTTP method that the client must use.
     """
 
     url: str = pydantic.Field()
     """
-    Full presigned URL.
+    The full presigned URL.
     """
 
     if IS_PYDANTIC_V2:

@@ -2,5 +2,5 @@
 
 DisplayName = str
 """
-User-facing spelling of one path component.
+One path component, spelled as users see it.
 """

@@ -14,7 +14,7 @@ class WalFoldStepOutcomeRetriesExhausted(UniversalBaseModel):
 
     observed_head_seq: ChangeSeq = pydantic.Field()
     """
-    Head sequence observed before the step ran.
+    The head sequence observed before the step ran.
     """
 
     if IS_PYDANTIC_V2:

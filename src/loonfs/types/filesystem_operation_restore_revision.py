@@ -10,17 +10,18 @@ from .revision_no import RevisionNo
 
 class FilesystemOperationRestoreRevision(UniversalBaseModel):
     """
-    Restore an older revision as the current revision for a path.
+    An operation that restores an older revision as the current revision of the file at a path.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute path that must resolve to a visible file.
+    The absolute path, which must resolve to a visible file.
     """
 
     source_revision_no: RevisionNo = pydantic.Field()
     """
-    Existing historical revision whose content will be copied into a new current revision.
+    An existing older revision. The operation copies its content into a new current
+    revision.
     """
 
     if IS_PYDANTIC_V2:

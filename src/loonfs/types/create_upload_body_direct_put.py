@@ -8,12 +8,12 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CreateUploadBodyDirectPut(UniversalBaseModel):
     """
-    Write the whole object through one presigned request.
+    A transport in which the client writes the whole object through one presigned request.
     """
 
     size_bytes: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Advisory byte length for an early provider-limit check.
+    An advisory byte length, which the server uses to check the provider's size limit early.
     """
 
     if IS_PYDANTIC_V2:

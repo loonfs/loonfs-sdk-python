@@ -39,12 +39,12 @@ class RawUploadsClient:
         self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadSession]:
         """
-        Starts an upload session for content that may later be attached to a file. Service-proxied uploads send bytes through the server; direct-put uploads return object-store presigned credentials.
+        Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned upload capability.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         request : CreateUploadBody
 
@@ -171,15 +171,15 @@ class RawUploadsClient:
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadSession]:
         """
-        Returns an upload session. An open direct_put session includes freshly signed access. A completed session includes a new content token so the client can retry the commit without uploading the content again.
+        Returns an upload session. An open `direct_put` session includes a newly signed upload capability. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -272,15 +272,15 @@ class RawUploadsClient:
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadSession]:
         """
-        Ends an upload session without selecting content and deletes the object it was writing. Repeating it succeeds; a session that already completed cannot be aborted.
+        Aborts an open upload session and deletes the object that the session was writing. Repeating the request succeeds, but a completed session can't be aborted.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -389,15 +389,15 @@ class RawUploadsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[UploadSession]:
         """
-        Completes an upload. The request mode must match the mode used to start the session. Direct uploads include a content claim; multipart also includes completed parts.
+        Completes an upload. The request mode must match the mode that started the session. A direct upload includes a content claim, and a multipart upload also includes the completed parts.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         request : CompleteUploadBody
 
@@ -531,10 +531,10 @@ class RawUploadsClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         request : typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]]
 
@@ -661,18 +661,18 @@ class RawUploadsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SignUploadPartsResponse]:
         """
-        Returns one short-lived, checksum-bound upload capability per requested part of an open direct_multipart session. Asking again for a part is how a client retries it.
+        Returns one short-lived upload capability for each requested part of an open `direct_multipart` session. Each capability is bound to the part's checksum. To retry a part, a client asks for its capability again.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         parts : typing.Sequence[UploadPartChecksumClaim]
-            The parts to authorize; repeated part numbers replace their previous uploads.
+            The parts to authorize. A repeated part number replaces the earlier upload of that part.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -812,12 +812,12 @@ class AsyncRawUploadsClient:
         self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadSession]:
         """
-        Starts an upload session for content that may later be attached to a file. Service-proxied uploads send bytes through the server; direct-put uploads return object-store presigned credentials.
+        Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned upload capability.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         request : CreateUploadBody
 
@@ -944,15 +944,15 @@ class AsyncRawUploadsClient:
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadSession]:
         """
-        Returns an upload session. An open direct_put session includes freshly signed access. A completed session includes a new content token so the client can retry the commit without uploading the content again.
+        Returns an upload session. An open `direct_put` session includes a newly signed upload capability. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1045,15 +1045,15 @@ class AsyncRawUploadsClient:
         self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadSession]:
         """
-        Ends an upload session without selecting content and deletes the object it was writing. Repeating it succeeds; a session that already completed cannot be aborted.
+        Aborts an open upload session and deletes the object that the session was writing. Repeating the request succeeds, but a completed session can't be aborted.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1162,15 +1162,15 @@ class AsyncRawUploadsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[UploadSession]:
         """
-        Completes an upload. The request mode must match the mode used to start the session. Direct uploads include a content claim; multipart also includes completed parts.
+        Completes an upload. The request mode must match the mode that started the session. A direct upload includes a content claim, and a multipart upload also includes the completed parts.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         request : CompleteUploadBody
 
@@ -1304,10 +1304,10 @@ class AsyncRawUploadsClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         request : typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]]
 
@@ -1434,18 +1434,18 @@ class AsyncRawUploadsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SignUploadPartsResponse]:
         """
-        Returns one short-lived, checksum-bound upload capability per requested part of an open direct_multipart session. Asking again for a part is how a client retries it.
+        Returns one short-lived upload capability for each requested part of an open `direct_multipart` session. Each capability is bound to the part's checksum. To retry a part, a client asks for its capability again.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         upload_id : str
-            Upload session id
+            The upload session ID.
 
         parts : typing.Sequence[UploadPartChecksumClaim]
-            The parts to authorize; repeated part numbers replace their previous uploads.
+            The parts to authorize. A repeated part number replaces the earlier upload of that part.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

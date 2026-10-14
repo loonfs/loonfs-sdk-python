@@ -16,18 +16,18 @@ class FilesystemChangeAttributesChanged(UniversalBaseModel):
 
     attributes: Attributes = pydantic.Field()
     """
-    The inode's complete attribute map after the update, including an empty map
-    when all attributes were cleared.
+    The inode's complete attribute map after the update. The map is empty when the update
+    removed every attribute.
     """
 
     attributes_revision_no: AttributesRevisionNo = pydantic.Field()
     """
-    New attribute revision for that inode.
+    The inode's new attribute revision.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode whose attributes advanced.
+    The inode whose attributes changed.
     """
 
     if IS_PYDANTIC_V2:

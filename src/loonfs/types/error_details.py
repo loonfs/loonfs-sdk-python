@@ -18,122 +18,127 @@ from .writer_id import WriterId
 
 class ErrorDetails(UniversalBaseModel):
     """
-    Optional machine-readable identifiers and state for an `ErrorResponse`.
+    The machine-readable identifiers and state that explain an error response.
+
+    Every field is optional.
     """
 
     active_acquired_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The Unix-millisecond time when the current writer acquired its epoch, when available.
+    The time the current writer acquired its epoch, in Unix milliseconds. It's present when the
+    current manifest records a writer.
     """
 
     active_writer_epoch: typing.Optional[WriterEpoch] = pydantic.Field(default=None)
     """
-    Epoch that currently owns the namespace.
+    The namespace's current writer epoch.
     """
 
     active_writer_id: typing.Optional[WriterId] = pydantic.Field(default=None)
     """
-    The writer ID recorded for the current epoch, when available.
+    The writer of the current epoch. It's present when the current manifest records a writer.
     """
 
     actual_access_revision_no: typing.Optional[AccessRevisionNo] = pydantic.Field(default=None)
     """
-    Access revision that is actually current for the inode.
+    The access revision that is actually current for the inode.
     """
 
     actual_attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
     """
-    Attribute revision that is actually current for the inode.
+    The attribute revision that is actually current for the inode.
     """
 
     actual_binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
-    Current binding token.
+    The current binding token.
     """
 
     actual_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Deletion sequence actually active for the inode.
+    The deletion sequence that is actually active for the inode.
     """
 
     actual_head_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    The actual namespace head sequence.
+    The namespace's actual head sequence.
     """
 
     actual_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    The path actually contained this inode.
+    The inode that the path actually contained.
     """
 
     actual_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    Revision that is actually current; absent when the inode has none.
+    The revision that is actually current. It's absent when the inode has no current revision.
     """
 
     after_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Change-feed cursor the request asked to resume after.
+    The `after_seq` value from the change feed request.
     """
 
     commit_id: typing.Optional[CommitId] = pydantic.Field(default=None)
     """
-    Idempotency key of the commit the error concerns.
+    The idempotency key of the commit that the error is about.
     """
 
     committed_fingerprint: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The fingerprint of the mutation that landed under `commit_id`, present with `committed_seq`.
+    The fingerprint of the mutation that was committed under `commit_id`. This field is present
+    exactly when `committed_seq` is present.
     """
 
     committed_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    The sequence where this commit ID already landed, when recorded by a durable receipt.
+    The sequence that `commit_id` was already committed at. The server includes it when a
+    durable commit receipt records that commit.
     """
 
     expected_access_revision_no: typing.Optional[AccessRevisionNo] = pydantic.Field(default=None)
     """
-    Access revision the request expected to be current.
+    The access revision that the request expected to be current.
     """
 
     expected_attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
     """
-    Attribute revision the request expected to be current.
+    The attribute revision that the request expected to be current.
     """
 
     expected_binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
-    Opaque binding token supplied by the request.
+    The opaque binding token that the request supplied.
     """
 
     expected_deletion_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Deletion sequence the undelete expected to be active.
+    The deletion sequence that the undelete expected to be active.
     """
 
     expected_head_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    The head sequence required by the request.
+    The head sequence that the request required.
     """
 
     expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    The request expected the path to contain this inode.
+    The inode that the request expected the path to contain.
     """
 
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    Revision the request expected to be current.
+    The revision that the request expected to be current.
     """
 
     fenced_writer_epoch: typing.Optional[WriterEpoch] = pydantic.Field(default=None)
     """
-    Epoch the failing writer session held when it was displaced.
+    The epoch of the failed writer session at the time another writer displaced it.
     """
 
     inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Inode the failed precondition or operation targeted.
+    The inode that the failed precondition or operation targeted.
     """
 
     namespace_id: typing.Optional[NamespaceId] = pydantic.Field(default=None)
@@ -148,13 +153,13 @@ class ErrorDetails(UniversalBaseModel):
 
     precondition_index: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Zero-based position of the failed request precondition.
+    The zero-based position of the failed request precondition.
     """
 
     retention_floor_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
-    Oldest position a change feed can resume after. The feed returns
-    changes above it.
+    The namespace's retention floor. A change feed request can set `after_seq` to this sequence
+    or any later one, and the feed returns the changes committed after it.
     """
 
     if IS_PYDANTIC_V2:

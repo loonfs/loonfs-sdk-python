@@ -4,5 +4,5 @@ import typing
 
 StoreProbeRequest = typing.Dict[str, typing.Any]
 """
-An empty request for one store contract probe.
+A request for one run of the store contract probe, with an empty body.
 """

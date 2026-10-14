@@ -10,17 +10,17 @@ from .upload_content_claim import UploadContentClaim
 
 class CompleteUploadBodyDirectMultipart(UniversalBaseModel):
     """
-    Complete a direct multipart upload.
+    The completion of a direct multipart upload.
     """
 
     content: UploadContentClaim = pydantic.Field()
     """
-    Expected length and checksum of the assembled object.
+    The expected length and checksum of the assembled object.
     """
 
     parts: typing.List[CompletedUploadPart] = pydantic.Field()
     """
-    Uploaded parts in ascending part order.
+    The uploaded parts, in ascending part order.
     """
 
     if IS_PYDANTIC_V2:

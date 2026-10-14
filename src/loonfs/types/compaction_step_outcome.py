@@ -11,7 +11,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CompactionStepOutcome_BoundedMergePublished(UniversalBaseModel):
     """
-    What the bounded compaction part of a maintenance pass did.
+    What the bounded compaction step of a maintenance pass did.
     """
 
     outcome: typing.Literal["bounded_merge_published"] = "bounded_merge_published"
@@ -28,7 +28,7 @@ class CompactionStepOutcome_BoundedMergePublished(UniversalBaseModel):
 
 class CompactionStepOutcome_Fenced(UniversalBaseModel):
     """
-    What the bounded compaction part of a maintenance pass did.
+    What the bounded compaction step of a maintenance pass did.
     """
 
     outcome: typing.Literal["fenced"] = "fenced"
@@ -45,7 +45,7 @@ class CompactionStepOutcome_Fenced(UniversalBaseModel):
 
 class CompactionStepOutcome_ManifestAdvanced(UniversalBaseModel):
     """
-    What the bounded compaction part of a maintenance pass did.
+    What the bounded compaction step of a maintenance pass did.
     """
 
     outcome: typing.Literal["manifest_advanced"] = "manifest_advanced"
@@ -62,7 +62,7 @@ class CompactionStepOutcome_ManifestAdvanced(UniversalBaseModel):
 
 class CompactionStepOutcome_MetadataCompactionRequired(UniversalBaseModel):
     """
-    What the bounded compaction part of a maintenance pass did.
+    What the bounded compaction step of a maintenance pass did.
     """
 
     outcome: typing.Literal["metadata_compaction_required"] = "metadata_compaction_required"
@@ -79,7 +79,7 @@ class CompactionStepOutcome_MetadataCompactionRequired(UniversalBaseModel):
 
 class CompactionStepOutcome_NotNeeded(UniversalBaseModel):
     """
-    What the bounded compaction part of a maintenance pass did.
+    What the bounded compaction step of a maintenance pass did.
     """
 
     outcome: typing.Literal["not_needed"] = "not_needed"

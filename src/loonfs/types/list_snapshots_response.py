@@ -10,22 +10,22 @@ from .snapshot import Snapshot
 
 class ListSnapshotsResponse(UniversalBaseModel):
     """
-    One page of live read snapshots.
+    One page of live snapshots.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the snapshots belong to.
+    The namespace that the snapshots belong to.
     """
 
     next_cursor: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Opaque cursor for the next page.
+    An opaque cursor for the next page.
     """
 
     snapshots: typing.List[Snapshot] = pydantic.Field()
     """
-    Live snapshot records in ascending snapshot-id order.
+    The live snapshot records, in ascending snapshot ID order.
     """
 
     if IS_PYDANTIC_V2:

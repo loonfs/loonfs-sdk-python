@@ -10,17 +10,17 @@ from .pin_id import PinId
 
 class DeleteCheckpointResponse(UniversalBaseModel):
     """
-    Identifies the checkpoint record that was deleted.
+    The checkpoint record that was deleted.
     """
 
     checkpoint_id: PinId = pydantic.Field()
     """
-    Deleted checkpoint record.
+    The ID of the deleted checkpoint record.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the checkpoint belonged to.
+    The namespace that the checkpoint belonged to.
     """
 
     if IS_PYDANTIC_V2:

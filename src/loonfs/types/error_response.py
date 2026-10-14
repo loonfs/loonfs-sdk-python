@@ -9,37 +9,37 @@ from .error_details import ErrorDetails
 
 class ErrorResponse(UniversalBaseModel):
     """
-    HTTP error body used by LoonFS APIs.
+    The JSON body that LoonFS APIs return with an HTTP error status.
     """
 
     code: str = pydantic.Field()
     """
-    The stable machine-readable error code as a string.
+    The stable, machine-readable error code.
     """
 
     details: typing.Optional[ErrorDetails] = pydantic.Field(default=None)
     """
-    The optional machine-readable context for the error code.
+    Optional machine-readable context for the error code.
     """
 
     feature: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The capability feature key for a `not_supported` error.
+    The capability feature that isn't supported, when the code is `not_supported`.
     """
 
     message: str = pydantic.Field()
     """
-    Human-readable error message.
+    A human-readable description of the error.
     """
 
     param: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The invalid JSON Pointer, parameter name, CLI flag, or CLI argument.
+    The invalid input, as a JSON Pointer, a parameter name, a CLI flag, or a CLI argument.
     """
 
     request_id: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The request correlation ID also sent in the `x-request-id` response header.
+    The request ID. The server also sends this ID in the `x-request-id` response header.
     """
 
     if IS_PYDANTIC_V2:

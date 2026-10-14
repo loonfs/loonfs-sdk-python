@@ -11,22 +11,23 @@ from .inode_id import InodeId
 
 class FilesystemOperationDeleteByInode(UniversalBaseModel):
     """
-    Delete an inode if its current binding matches.
+    An operation that deletes an inode if its current binding version is
+    `expected_binding_version`.
     """
 
     behavior: typing.Optional[DeleteDirectoryBehavior] = pydantic.Field(default=None)
     """
-    Whether a non-empty directory may be tombstoned recursively.
+    Whether the operation can recursively delete a non-empty directory.
     """
 
     expected_binding_version: BindingVersion = pydantic.Field()
     """
-    Binding version required for the delete.
+    The binding version that the inode must currently have for the delete to succeed.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode to delete.
+    The inode to delete.
     """
 
     if IS_PYDANTIC_V2:

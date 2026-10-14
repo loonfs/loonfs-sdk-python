@@ -12,22 +12,22 @@ from .retained_candidates import RetainedCandidates
 
 class RunMaintenanceResponseGc(UniversalBaseModel):
     """
-    Counts and deadlines from one collection call.
+    The counts and deadlines from one garbage collection call.
     """
 
     deleted: DeletedObjectCounts = pydantic.Field()
     """
-    Objects the pass deleted, split by object family.
+    The objects that the pass deleted, counted by object family.
     """
 
     deleted_checkpoints_by_owner: DeletedCheckpointsByOwner = pydantic.Field()
     """
-    The checkpoint records deleted by the pass, grouped by owner.
+    The checkpoint records that the pass deleted, counted by owner.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the pass ran against.
+    The namespace that the pass ran against.
     """
 
     next_reclamation_at_ms: typing.Optional[int] = pydantic.Field(default=None)
@@ -37,12 +37,12 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
 
     reclaimable_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The current tombstone's deletion time plus the configured retirement grace.
+    The deletion time of the current tombstone plus the configured retirement grace.
     """
 
     retained: RetainedCandidates = pydantic.Field()
     """
-    Candidates retained at deletion time, grouped by reason.
+    The candidates that the pass kept at deletion time, counted by reason.
     """
 
     if IS_PYDANTIC_V2:

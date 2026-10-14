@@ -12,32 +12,32 @@ from .namespace_id import NamespaceId
 
 class ListFileRevisionsResponse(UniversalBaseModel):
     """
-    Response for listing file revisions.
+    One page of a file's revisions.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    Namespace head sequence used for the read.
+    The namespace head sequence that the read used.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    File inode whose revisions were returned.
+    The file inode whose revisions were returned.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that was read.
+    The namespace that was read.
     """
 
     next_cursor: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Opaque cursor for the next page, if more revisions are available.
+    An opaque cursor for the next page, if more revisions are available.
     """
 
     revisions: typing.List[FileRevision] = pydantic.Field()
     """
-    Retained revisions in order.
+    The retained revisions, in order.
     """
 
     if IS_PYDANTIC_V2:

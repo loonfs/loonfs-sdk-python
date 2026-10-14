@@ -13,37 +13,38 @@ from .upload_mode import UploadMode
 
 class UploadSessionStatusCompleted(UniversalBaseModel):
     """
-    Final: the content is durable and verified.
+    A session that ended with durable, verified content.
     """
 
     completed_at_ms: int = pydantic.Field()
     """
-    Unix-millisecond stamp of the completion.
+    The time the session completed, in Unix milliseconds.
     """
 
     content_ref: ContentRef = pydantic.Field()
     """
-    Verified content selected by this session.
+    The verified content that the session completed with.
     """
 
     content_token: typing.Optional[ContentToken] = pydantic.Field(default=None)
     """
-    Fresh proof for a later commit, absent after the token minting window closes.
+    A new content token, which a later commit can use to reference the content. It's absent
+    after the window for issuing tokens closes.
     """
 
     mode: UploadMode = pydantic.Field()
     """
-    Transport selected when the session began.
+    The transport that was selected when the session began.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that owns the session.
+    The namespace that the session belongs to.
     """
 
     upload_id: UploadId = pydantic.Field()
     """
-    Session represented by this view.
+    The upload session ID.
     """
 
     if IS_PYDANTIC_V2:

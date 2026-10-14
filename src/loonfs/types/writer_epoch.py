@@ -2,5 +2,5 @@
 
 WriterEpoch = int
 """
-Counter used to reject writes from an older writer.
+The counter that LoonFS uses to reject writes from an older writer.
 """

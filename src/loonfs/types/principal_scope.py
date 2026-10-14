@@ -2,5 +2,5 @@
 
 PrincipalScope = str
 """
-Opaque identity-domain id containing 1 to 256 visible ASCII characters other than the comma.
+An opaque identity domain ID of 1 to 256 visible ASCII characters other than the comma.
 """

@@ -8,13 +8,13 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RunMaintenanceRequestGc(UniversalBaseModel):
     """
-    Collects aged, unreferenced objects.
+    A garbage collection job for aged, unreferenced objects.
     """
 
     grace_window_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The minimum object age for deletion in milliseconds, which must meet the
-    server's advertised safety floor.
+    The minimum age, in milliseconds, that an object must reach before the pass can delete it.
+    The value must be at least the server's advertised safety floor.
     """
 
     if IS_PYDANTIC_V2:

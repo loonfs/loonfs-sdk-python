@@ -2,5 +2,5 @@
 
 BindingVersion = str
 """
-Opaque token identifying one parent and name binding version.
+An opaque token for one version of a parent and name binding.
 """

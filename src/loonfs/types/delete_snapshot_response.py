@@ -10,17 +10,17 @@ from .pin_id import PinId
 
 class DeleteSnapshotResponse(UniversalBaseModel):
     """
-    Identifies the snapshot record that was deleted.
+    The snapshot record that was deleted.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the snapshot belonged to.
+    The namespace that the snapshot belonged to.
     """
 
     snapshot_id: PinId = pydantic.Field()
     """
-    Deleted snapshot record.
+    The ID of the deleted snapshot record.
     """
 
     if IS_PYDANTIC_V2:

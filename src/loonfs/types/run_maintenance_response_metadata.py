@@ -11,7 +11,7 @@ from .wal_fold_step_outcome import WalFoldStepOutcome
 
 class RunMaintenanceResponseMetadata(UniversalBaseModel):
     """
-    Result of the WAL fold and one bounded compaction step.
+    The result of the WAL fold and one bounded compaction step.
     """
 
     compaction: CompactionStepOutcome = pydantic.Field()
@@ -21,7 +21,7 @@ class RunMaintenanceResponseMetadata(UniversalBaseModel):
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace maintained by this run.
+    The namespace that this run maintained.
     """
 
     wal_fold: WalFoldStepOutcome = pydantic.Field()

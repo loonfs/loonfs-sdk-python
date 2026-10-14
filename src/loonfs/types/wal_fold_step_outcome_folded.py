@@ -14,7 +14,7 @@ class WalFoldStepOutcomeFolded(UniversalBaseModel):
 
     manifest_head_seq: ChangeSeq = pydantic.Field()
     """
-    Sequence covered by the published manifest.
+    The last sequence that the published manifest includes.
     """
 
     if IS_PYDANTIC_V2:

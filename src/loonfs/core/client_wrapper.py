@@ -5,6 +5,14 @@ import typing
 import httpx
 from .http_client import AsyncHttpClient, HttpClient
 from .logging import LogConfig, Logger
+from importlib.metadata import PackageNotFoundError, version
+
+
+def _sdk_version() -> str:
+    try:
+        return version("loonfs")
+    except PackageNotFoundError:
+        return "unknown"
 
 
 class BaseClientWrapper:
@@ -37,7 +45,7 @@ class BaseClientWrapper:
         import platform
 
         headers: typing.Dict[str, str] = {
-            "User-Agent": "loonfs/0.5.0",
+            "User-Agent": f"loonfs/{_sdk_version()}",
             "X-Fern-Language": "Python",
             "X-Fern-Runtime": f"python/{platform.python_version()}",
             "X-Fern-Platform": f"{platform.system().lower()}/{platform.release()}",

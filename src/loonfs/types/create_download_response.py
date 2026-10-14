@@ -13,7 +13,7 @@ from .revision_no import RevisionNo
 
 class CreateDownloadResponse(UniversalBaseModel):
     """
-    Signed object ranges for one revision.
+    The signed object ranges for one revision.
     """
 
     content_ref: ContentRef = pydantic.Field()
@@ -23,22 +23,22 @@ class CreateDownloadResponse(UniversalBaseModel):
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that was read.
+    The namespace that was read.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute path as rendered from stored display names.
+    The absolute path, built from the stored display names.
     """
 
     ranges: typing.List[DownloadRange] = pydantic.Field()
     """
-    The revision's bytes from the requested offset, in order.
+    The ranges that cover the revision's bytes from the requested offset, in order.
     """
 
     revision_no: RevisionNo = pydantic.Field()
     """
-    Revision the capability reads, resolved from the request.
+    The revision that the capability reads, as resolved from the request.
     """
 
     if IS_PYDANTIC_V2:

@@ -2,5 +2,5 @@
 
 ActorId = str
 """
-Stable opaque actor id containing 1 to 256 visible ASCII characters.
+A stable, opaque actor ID of 1 to 256 visible ASCII characters.
 """

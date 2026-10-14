@@ -11,22 +11,22 @@ from .inode_id import InodeId
 
 class FilesystemOperationDeletePath(UniversalBaseModel):
     """
-    Delete one path.
+    An operation that deletes the file or directory at one path.
     """
 
     behavior: typing.Optional[DeleteDirectoryBehavior] = pydantic.Field(default=None)
     """
-    Whether a non-empty directory may be tombstoned recursively.
+    Whether the operation can recursively delete a non-empty directory.
     """
 
     expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    The inode that the path must still resolve to before deletion.
+    The inode that the path must still resolve to before the delete.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute path that must resolve to a visible inode.
+    The absolute path, which must resolve to a visible inode.
     """
 
     if IS_PYDANTIC_V2:

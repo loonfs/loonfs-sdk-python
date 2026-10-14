@@ -15,12 +15,12 @@ class FilesystemChangeDeleted(UniversalBaseModel):
 
     deleted_binding: DirectoryBinding = pydantic.Field()
     """
-    Directory binding removed by the deletion.
+    The directory binding that the deletion removed.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode at the root of the deleted subtree.
+    The inode at the root of the deleted subtree.
     """
 
     if IS_PYDANTIC_V2:

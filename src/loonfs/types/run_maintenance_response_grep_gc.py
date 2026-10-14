@@ -9,32 +9,35 @@ from .namespace_id import NamespaceId
 
 class RunMaintenanceResponseGrepGc(UniversalBaseModel):
     """
-    Counts from one grep index collection pass.
+    The counts from one garbage collection pass over the grep index.
     """
 
     deleted_other_objects: int = pydantic.Field()
     """
-    Other unreferenced grep objects deleted after the grace window.
+    The other unreferenced grep objects that the pass deleted after the grace window.
     """
 
     deleted_segments: int = pydantic.Field()
     """
-    Unreferenced grep segments older than the minimum segment age.
+    The unreferenced grep segments that the pass deleted because they were older than the
+    minimum segment age.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace whose grep-owned keyspace was inspected.
+    The namespace whose grep keyspace the pass inspected.
     """
 
     namespace_reaped: bool = pydantic.Field()
     """
-    Whether an absent or tombstoned namespace had extension state reaped.
+    Whether the pass deleted the grep extension state of a namespace that is missing or
+    deleted.
     """
 
     retained_candidates: int = pydantic.Field()
     """
-    Referenced, young, or unrecognized candidates retained by the pass.
+    The candidates that the pass kept because they were referenced, too young, or
+    unrecognized.
     """
 
     if IS_PYDANTIC_V2:

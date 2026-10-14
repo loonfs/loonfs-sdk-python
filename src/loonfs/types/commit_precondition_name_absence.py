@@ -10,17 +10,17 @@ from .inode_id import InodeId
 
 class CommitPreconditionNameAbsence(UniversalBaseModel):
     """
-    Requires no visible entry with the name under the parent inode.
+    A requirement that no visible entry with this name exists under the parent inode.
     """
 
     display_name: DisplayName = pydantic.Field()
     """
-    Name to check.
+    The name to check.
     """
 
     parent_inode_id: InodeId = pydantic.Field()
     """
-    Directory to check.
+    The directory to check.
     """
 
     if IS_PYDANTIC_V2:

@@ -50,15 +50,15 @@ class RawNamespacesClient:
         Parameters
         ----------
         namespace_id : NamespaceId
-            Durable namespace id to create.
+            The durable ID of the new namespace.
 
         access : typing.Optional[NamespaceAccess]
-            The access mode, fixed for the namespace's life. Defaults to
-            unrestricted.
+            The namespace's access mode, which can't be changed after the namespace is created. The
+            default is unrestricted.
 
         naming : typing.Optional[NamespaceNaming]
-            How sibling names compare, fixed for the namespace's life. Defaults
-            to `case_insensitive`.
+            How the namespace compares sibling names. The mode can't be changed after the namespace is
+            created, and it defaults to `case_insensitive`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -181,7 +181,7 @@ class RawNamespacesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -278,15 +278,15 @@ class RawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[DeleteNamespaceResponse]:
         """
-        Marks a namespace as deleted. The id can never be created or forked into again.
+        Marks a namespace as deleted. The namespace ID can never be used again to create or fork a namespace.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         expected_head_seq : typing.Optional[ChangeSeq]
-            Delete only if the namespace head is still at this sequence
+            The head sequence that the namespace must still have for the delete to succeed.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -401,18 +401,18 @@ class RawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[NamespaceMetadata]:
         """
-        Creates a new namespace from the source current head or a live snapshot.
+        Creates a new namespace from the source namespace's current head or from a live snapshot.
 
         Parameters
         ----------
         namespace_id : str
-            Source namespace id
+            The source namespace ID.
 
         new_namespace_id : NamespaceId
-            Durable namespace id for the fork target.
+            The durable ID of the new namespace that the fork creates.
 
         snapshot_id : typing.Optional[PinId]
-            Fork from this live snapshot instead of the current head.
+            A live snapshot to fork from. Without it, the fork starts from the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -553,15 +553,15 @@ class AsyncRawNamespacesClient:
         Parameters
         ----------
         namespace_id : NamespaceId
-            Durable namespace id to create.
+            The durable ID of the new namespace.
 
         access : typing.Optional[NamespaceAccess]
-            The access mode, fixed for the namespace's life. Defaults to
-            unrestricted.
+            The namespace's access mode, which can't be changed after the namespace is created. The
+            default is unrestricted.
 
         naming : typing.Optional[NamespaceNaming]
-            How sibling names compare, fixed for the namespace's life. Defaults
-            to `case_insensitive`.
+            How the namespace compares sibling names. The mode can't be changed after the namespace is
+            created, and it defaults to `case_insensitive`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -684,7 +684,7 @@ class AsyncRawNamespacesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -781,15 +781,15 @@ class AsyncRawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[DeleteNamespaceResponse]:
         """
-        Marks a namespace as deleted. The id can never be created or forked into again.
+        Marks a namespace as deleted. The namespace ID can never be used again to create or fork a namespace.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         expected_head_seq : typing.Optional[ChangeSeq]
-            Delete only if the namespace head is still at this sequence
+            The head sequence that the namespace must still have for the delete to succeed.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -904,18 +904,18 @@ class AsyncRawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[NamespaceMetadata]:
         """
-        Creates a new namespace from the source current head or a live snapshot.
+        Creates a new namespace from the source namespace's current head or from a live snapshot.
 
         Parameters
         ----------
         namespace_id : str
-            Source namespace id
+            The source namespace ID.
 
         new_namespace_id : NamespaceId
-            Durable namespace id for the fork target.
+            The durable ID of the new namespace that the fork creates.
 
         snapshot_id : typing.Optional[PinId]
-            Fork from this live snapshot instead of the current head.
+            A live snapshot to fork from. Without it, the fork starts from the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

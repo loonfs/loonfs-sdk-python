@@ -13,42 +13,44 @@ from .revision_no import RevisionNo
 
 class FilesystemOperationMoveByInode(UniversalBaseModel):
     """
-    Move an inode if its current binding matches.
+    An operation that moves an inode if its current binding version is
+    `expected_binding_version`.
     """
 
     behavior: typing.Optional[DestinationBehavior] = pydantic.Field(default=None)
     """
-    Whether an existing destination file may be replaced.
+    Whether the operation can replace an existing destination file.
     """
 
     destination_display_name: DisplayName = pydantic.Field()
     """
-    New name.
+    The inode's new name.
     """
 
     destination_parent_inode_id: InodeId = pydantic.Field()
     """
-    Destination directory.
+    The destination directory.
     """
 
     expected_binding_version: BindingVersion = pydantic.Field()
     """
-    Binding version required for the move.
+    The binding version that the inode must currently have for the move to succeed.
     """
 
     expected_destination_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    With `replace` behavior, the destination inode required by the request.
+    The inode that the destination path must contain. It applies only with `replace` behavior.
     """
 
     expected_destination_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    With `replace` behavior and an inode precondition, the required content revision.
+    The content revision that must be the destination file's current revision. It applies only
+    with `replace` behavior and requires `expected_destination_inode_id`.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode to move.
+    The inode to move.
     """
 
     if IS_PYDANTIC_V2:

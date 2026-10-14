@@ -2,5 +2,5 @@
 
 AbsolutePath = str
 """
-Validated complete absolute namespace path, serialized as a plain string.
+A complete absolute path in the namespace, validated and serialized as a plain string.
 """

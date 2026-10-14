@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class MetadataCompactionOutcomeBoundedMergePublished(UniversalBaseModel):
     """
-    The selected window fit a bounded step and this run published it.
+    The selected window fit in a bounded step, and this run published it.
     """
 
     if IS_PYDANTIC_V2:
