@@ -8,12 +8,12 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CheckpointOwnerUser(UniversalBaseModel):
     """
-    An operator-created pin, deleted by id or by its own expiry.
+    A pin that an operator created. It's deleted by its ID or after it expires.
     """
 
     name: str = pydantic.Field()
     """
-    The non-unique label recorded by the creator.
+    The label that the creator recorded. Labels don't need to be unique.
     """
 
     if IS_PYDANTIC_V2:

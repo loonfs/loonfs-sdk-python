@@ -17,22 +17,22 @@ class RunMaintenanceResponseRecoverAdministrator(UniversalBaseModel):
 
     access_revision_no: AccessRevisionNo = pydantic.Field()
     """
-    Root access revision after recovery.
+    The root's access revision after the recovery.
     """
 
     commit_id: CommitId = pydantic.Field()
     """
-    Recovery commit id.
+    The ID of the recovery commit.
     """
 
     committed_seq: ChangeSeq = pydantic.Field()
     """
-    Sequence assigned to the recovery commit.
+    The sequence of the recovery commit.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace whose root grants changed.
+    The namespace whose root grants changed.
     """
 
     if IS_PYDANTIC_V2:

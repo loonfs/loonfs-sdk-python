@@ -11,13 +11,14 @@ from .inode_id import InodeId
 
 class FilesystemOperationUpdateAccessByInode(UniversalBaseModel):
     """
-    Replace the access row of a visible inode. The root inode is a valid
-    target.
+    An operation that replaces the access row of a visible inode.
+
+    The root inode is a valid target.
     """
 
     boundary: bool = pydantic.Field()
     """
-    Whether the directory stops inheritance from its ancestors.
+    Whether the directory stops inheriting grants from its ancestors.
     """
 
     expected_access_revision_no: typing.Optional[AccessRevisionNo] = pydantic.Field(default=None)
@@ -27,12 +28,12 @@ class FilesystemOperationUpdateAccessByInode(UniversalBaseModel):
 
     grants: AccessGrants = pydantic.Field()
     """
-    The inode's complete direct grants after this update.
+    Every direct grant that the inode has after this update.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Visible file or directory to update.
+    The visible file or directory to update.
     """
 
     if IS_PYDANTIC_V2:

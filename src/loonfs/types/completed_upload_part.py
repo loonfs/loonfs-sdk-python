@@ -9,22 +9,22 @@ from .checksum import Checksum
 
 class CompletedUploadPart(UniversalBaseModel):
     """
-    One uploaded part accepted by the object-store provider.
+    One uploaded part that the object store provider accepted.
     """
 
     checksum: Checksum = pydantic.Field()
     """
-    Checksum the part was signed and accepted with.
+    The checksum that the part was signed and accepted with.
     """
 
     etag: str = pydantic.Field()
     """
-    Entity tag the provider returned for the accepted part.
+    The entity tag that the provider returned for the accepted part.
     """
 
     part_number: int = pydantic.Field()
     """
-    One-based part number.
+    The part number, counting from 1.
     """
 
     if IS_PYDANTIC_V2:

@@ -16,17 +16,17 @@ class DirectoryBinding(UniversalBaseModel):
 
     display_name: DisplayName = pydantic.Field()
     """
-    Name shown to users.
+    The name that users see.
     """
 
     name_key: NameKey = pydantic.Field()
     """
-    Name used to look up the entry.
+    The name key that lookups use to find the entry.
     """
 
     parent_inode_id: InodeId = pydantic.Field()
     """
-    Parent directory containing the entry.
+    The parent directory that contains the entry.
     """
 
     if IS_PYDANTIC_V2:

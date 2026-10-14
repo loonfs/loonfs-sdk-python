@@ -11,22 +11,22 @@ from .upload_id import UploadId
 
 class SignUploadPartsResponse(UniversalBaseModel):
     """
-    Response carrying one capability per requested part.
+    One capability for each requested part.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that owns the upload session.
+    The namespace that the upload session belongs to.
     """
 
     parts: typing.List[SignedUploadPart] = pydantic.Field()
     """
-    Capabilities in the order the request asked for them.
+    The capabilities, in the order that the request asked for them.
     """
 
     upload_id: UploadId = pydantic.Field()
     """
-    Session the parts belong to.
+    The session that the parts belong to.
     """
 
     if IS_PYDANTIC_V2:

@@ -8,12 +8,12 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CheckpointOwnerSnapshot(UniversalBaseModel):
     """
-    An application-created read view.
+    A pin that an application created as a snapshot. It's readable until it expires.
     """
 
     name: str = pydantic.Field()
     """
-    A label that does not need to be unique.
+    The snapshot's label, which doesn't need to be unique.
     """
 
     if IS_PYDANTIC_V2:

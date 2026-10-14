@@ -10,23 +10,23 @@ from .namespace_id import NamespaceId
 
 class ListCheckpointsResponse(UniversalBaseModel):
     """
-    One page of existing checkpoint records, including expired records that
-    collection has not yet deleted.
+    One page of checkpoint records, including expired records that garbage collection hasn't deleted
+    yet.
     """
 
     checkpoints: typing.List[Checkpoint] = pydantic.Field()
     """
-    The records in ascending checkpoint ID order.
+    The records, in ascending checkpoint ID order.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the records belong to.
+    The namespace that the records belong to.
     """
 
     next_cursor: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Opaque cursor for the next page.
+    An opaque cursor for the next page.
     """
 
     if IS_PYDANTIC_V2:

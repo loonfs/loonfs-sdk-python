@@ -11,7 +11,7 @@ from .revision_no import RevisionNo
 
 class FilesystemOperationAppendFile(UniversalBaseModel):
     """
-    Add bytes to the end of a file as its next revision.
+    An operation that adds bytes to the end of a file as its next revision.
     """
 
     expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
@@ -21,17 +21,17 @@ class FilesystemOperationAppendFile(UniversalBaseModel):
 
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    With an inode precondition, the content revision that must still be current.
+    The content revision that must still be current. It requires `expected_inode_id`.
     """
 
     inline_content: str = pydantic.Field()
     """
-    The bytes to add as base64, from 1 byte to 256 KiB.
+    The bytes to add, as base64, from 1 byte to 256 KiB.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute path that must resolve to a visible file.
+    The absolute path, which must resolve to a visible file.
     """
 
     if IS_PYDANTIC_V2:

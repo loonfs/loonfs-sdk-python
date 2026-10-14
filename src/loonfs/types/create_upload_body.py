@@ -11,7 +11,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CreateUploadBody_DirectMultipart(UniversalBaseModel):
     """
-    Selects the transport for a new upload session.
+    The transport for a new upload session.
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
@@ -29,7 +29,7 @@ class CreateUploadBody_DirectMultipart(UniversalBaseModel):
 
 class CreateUploadBody_DirectPut(UniversalBaseModel):
     """
-    Selects the transport for a new upload session.
+    The transport for a new upload session.
     """
 
     mode: typing.Literal["direct_put"] = "direct_put"
@@ -47,7 +47,7 @@ class CreateUploadBody_DirectPut(UniversalBaseModel):
 
 class CreateUploadBody_ServiceProxied(UniversalBaseModel):
     """
-    Selects the transport for a new upload session.
+    The transport for a new upload session.
     """
 
     mode: typing.Literal["service_proxied"] = "service_proxied"

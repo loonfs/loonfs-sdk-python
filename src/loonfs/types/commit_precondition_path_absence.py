@@ -9,12 +9,12 @@ from .absolute_path import AbsolutePath
 
 class CommitPreconditionPathAbsence(UniversalBaseModel):
     """
-    Requires no visible entry at the full path.
+    A requirement that no visible entry exists at the full path.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute path to check, including the root.
+    The absolute path to check, which can be the root.
     """
 
     if IS_PYDANTIC_V2:

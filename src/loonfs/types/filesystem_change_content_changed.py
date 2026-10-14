@@ -16,17 +16,18 @@ class FilesystemChangeContentChanged(UniversalBaseModel):
 
     content_ref: ContentRef = pydantic.Field()
     """
-    Immutable content published by the revision.
+    The immutable content that the revision published.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    File inode whose history advanced.
+    The file inode whose history advanced.
     """
 
     revision_no: RevisionNo = pydantic.Field()
     """
-    New monotonic position in that file's revision history.
+    The file's new revision number, which is higher than the number of every earlier
+    revision.
     """
 
     if IS_PYDANTIC_V2:

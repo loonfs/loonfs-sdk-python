@@ -13,58 +13,60 @@ from .namespace_id import NamespaceId
 
 class NamespaceDiagnostics(UniversalBaseModel):
     """
-    Namespace state and storage details used by maintenance.
+    A namespace's state and the storage details that maintenance uses.
     """
 
     created_at_ms: int = pydantic.Field()
     """
-    Time the namespace was created, in Unix milliseconds.
+    The time the namespace was created, in Unix milliseconds.
     """
 
     created_by: ActorId = pydantic.Field()
     """
-    Actor that created the namespace, as supplied by the application.
+    The actor that created the namespace, as the application supplied it.
     """
 
     current_manifest_no: typing.Optional[ManifestNo] = pydantic.Field(default=None)
     """
-    The namespace's current manifest number.
+    The number of the namespace's current manifest.
     """
 
     fork_basis: typing.Optional[NamespaceForkBasis] = pydantic.Field(default=None)
     """
-    Present only for a fork: the source it was forked from.
+    The namespace and sequence this namespace was forked from. Only a forked namespace has this
+    field.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    Current visible namespace sequence.
+    The sequence of the namespace's newest visible commit.
     """
 
     live_checkpoints: int = pydantic.Field()
     """
-    Number of user checkpoints, including expired records awaiting collection.
+    The number of user checkpoints, including expired records that garbage collection hasn't
+    deleted yet.
     """
 
     live_snapshots: int = pydantic.Field()
     """
-    Number of snapshots that had not expired when diagnostics began.
+    The number of snapshots that hadn't expired when the diagnostics read began.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace ID.
+    The namespace ID.
     """
 
     retention_floor_seq: ChangeSeq = pydantic.Field()
     """
-    Oldest position a change feed can resume after. The feed returns
-    changes above it.
+    The namespace's retention floor. A change feed request can set `after_seq` to this sequence
+    or any later one, and the feed returns the changes committed after it.
     """
 
     wal_tail_objects: int = pydantic.Field()
     """
-    Number of visible WAL objects after the current manifest.
+    The number of visible WAL objects after the current manifest.
     """
 
     if IS_PYDANTIC_V2:

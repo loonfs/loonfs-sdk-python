@@ -14,7 +14,7 @@ from .namespace_naming import NamespaceNaming
 
 class NamespaceMetadata(UniversalBaseModel):
     """
-    Current state for one namespace.
+    The current state of one namespace.
     """
 
     access: NamespaceAccessMode = pydantic.Field()
@@ -24,38 +24,39 @@ class NamespaceMetadata(UniversalBaseModel):
 
     created_at_ms: int = pydantic.Field()
     """
-    Time the namespace was created, in Unix milliseconds.
+    The time the namespace was created, in Unix milliseconds.
     """
 
     created_by: ActorId = pydantic.Field()
     """
-    Actor that created the namespace, as supplied by the application.
+    The actor that created the namespace, as the application supplied it.
     """
 
     fork_basis: typing.Optional[NamespaceForkBasis] = pydantic.Field(default=None)
     """
-    Present only for a fork: the source it was forked from.
+    The namespace and sequence this namespace was forked from. Only a forked namespace has this
+    field.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    Current visible namespace sequence.
+    The sequence of the namespace's newest visible commit.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace ID.
+    The namespace ID.
     """
 
     naming: NamespaceNaming = pydantic.Field()
     """
-    How sibling names compare in the namespace.
+    How the namespace compares sibling names.
     """
 
     retention_floor_seq: ChangeSeq = pydantic.Field()
     """
-    Oldest position a change feed can resume after. The feed returns
-    changes above it.
+    The namespace's retention floor. A change feed request can set `after_seq` to this sequence
+    or any later one, and the feed returns the changes committed after it.
     """
 
     if IS_PYDANTIC_V2:

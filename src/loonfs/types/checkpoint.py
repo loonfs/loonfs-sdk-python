@@ -13,42 +13,43 @@ from .pin_id import PinId
 
 class Checkpoint(UniversalBaseModel):
     """
-    One checkpoint resource described by its durable record.
+    One checkpoint, as its durable record stores it.
     """
 
     captured_seq: ChangeSeq = pydantic.Field()
     """
-    Namespace sequence captured by the checkpoint.
+    The namespace sequence that the checkpoint captured.
     """
 
     checkpoint_id: PinId = pydantic.Field()
     """
-    Durable checkpoint id used to address the checkpoint for deletion.
+    The checkpoint's durable ID. Use it to delete the checkpoint.
     """
 
     created_at_ms: int = pydantic.Field()
     """
-    Time the checkpoint record was created, in Unix milliseconds.
+    The time the checkpoint record was created, in Unix milliseconds.
     """
 
     expires_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Expiry in Unix milliseconds; collection waits one further grace window.
+    The time the checkpoint expires, in Unix milliseconds. Garbage collection waits one more
+    grace window before it deletes the record.
     """
 
     manifest_no: ManifestNo = pydantic.Field()
     """
-    Manifest pinned by the checkpoint.
+    The manifest that the checkpoint pins.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that owns the checkpoint.
+    The namespace that the checkpoint belongs to.
     """
 
     owner: CheckpointOwner = pydantic.Field()
     """
-    Who owns the checkpoint, including the label carried by a user pin.
+    The checkpoint's owner. For a user pin, the owner includes the label.
     """
 
     if IS_PYDANTIC_V2:

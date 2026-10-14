@@ -21,7 +21,9 @@ from .wal_fold_step_outcome import WalFoldStepOutcome
 
 class RunMaintenanceResponse_Gc(UniversalBaseModel):
     """
-    The result of one maintenance job. The `kind` matches the request.
+    The result of one maintenance job.
+
+    The `kind` matches the request.
     """
 
     kind: typing.Literal["gc"] = "gc"
@@ -44,7 +46,9 @@ class RunMaintenanceResponse_Gc(UniversalBaseModel):
 
 class RunMaintenanceResponse_GrepGc(UniversalBaseModel):
     """
-    The result of one maintenance job. The `kind` matches the request.
+    The result of one maintenance job.
+
+    The `kind` matches the request.
     """
 
     kind: typing.Literal["grep_gc"] = "grep_gc"
@@ -66,7 +70,9 @@ class RunMaintenanceResponse_GrepGc(UniversalBaseModel):
 
 class RunMaintenanceResponse_Metadata(UniversalBaseModel):
     """
-    The result of one maintenance job. The `kind` matches the request.
+    The result of one maintenance job.
+
+    The `kind` matches the request.
     """
 
     kind: typing.Literal["metadata"] = "metadata"
@@ -86,7 +92,9 @@ class RunMaintenanceResponse_Metadata(UniversalBaseModel):
 
 class RunMaintenanceResponse_MetadataCompaction(UniversalBaseModel):
     """
-    The result of one maintenance job. The `kind` matches the request.
+    The result of one maintenance job.
+
+    The `kind` matches the request.
     """
 
     kind: typing.Literal["metadata_compaction"] = "metadata_compaction"
@@ -105,7 +113,9 @@ class RunMaintenanceResponse_MetadataCompaction(UniversalBaseModel):
 
 class RunMaintenanceResponse_RecoverAdministrator(UniversalBaseModel):
     """
-    The result of one maintenance job. The `kind` matches the request.
+    The result of one maintenance job.
+
+    The `kind` matches the request.
     """
 
     kind: typing.Literal["recover_administrator"] = "recover_administrator"
@@ -126,7 +136,9 @@ class RunMaintenanceResponse_RecoverAdministrator(UniversalBaseModel):
 
 class RunMaintenanceResponse_Retention(UniversalBaseModel):
     """
-    The result of one maintenance job. The `kind` matches the request.
+    The result of one maintenance job.
+
+    The `kind` matches the request.
     """
 
     kind: typing.Literal["retention"] = "retention"

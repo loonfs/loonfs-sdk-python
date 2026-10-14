@@ -11,22 +11,23 @@ from .inode_id import InodeId
 
 class CommitPreconditionPathBinding(UniversalBaseModel):
     """
-    Requires the path to retain the binding the caller read.
+    A requirement that the path still has the binding that the caller read.
     """
 
     expected_binding_version: typing.Optional[BindingVersion] = pydantic.Field(default=None)
     """
-    Detects moves away and back.
+    The binding version that the path must also have, if set. This check detects an inode
+    that was moved away from the path and then back.
     """
 
     expected_inode_id: InodeId = pydantic.Field()
     """
-    Inode required at the path.
+    The inode that the path must be bound to.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute path to check, including the root.
+    The absolute path to check, which can be the root.
     """
 
     if IS_PYDANTIC_V2:

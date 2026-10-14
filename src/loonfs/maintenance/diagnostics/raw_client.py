@@ -33,7 +33,7 @@ class RawDiagnosticsClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -136,7 +136,7 @@ class AsyncRawDiagnosticsClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

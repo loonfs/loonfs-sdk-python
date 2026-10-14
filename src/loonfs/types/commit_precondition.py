@@ -19,9 +19,11 @@ from .revision_no import RevisionNo
 
 class CommitPrecondition_AccessRevision(UniversalBaseModel):
     """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
+    A condition that a commit must meet before its operations run.
+
+    The server checks each condition against the state before the commit. When several commits are
+    applied as one batch, that state's head sequence is the sequence of the last commit admitted
+    earlier in the batch, or the batch's starting head sequence if no earlier commit was admitted.
     """
 
     kind: typing.Literal["access_revision"] = "access_revision"
@@ -40,9 +42,11 @@ class CommitPrecondition_AccessRevision(UniversalBaseModel):
 
 class CommitPrecondition_AttributesRevision(UniversalBaseModel):
     """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
+    A condition that a commit must meet before its operations run.
+
+    The server checks each condition against the state before the commit. When several commits are
+    applied as one batch, that state's head sequence is the sequence of the last commit admitted
+    earlier in the batch, or the batch's starting head sequence if no earlier commit was admitted.
     """
 
     kind: typing.Literal["attributes_revision"] = "attributes_revision"
@@ -61,9 +65,11 @@ class CommitPrecondition_AttributesRevision(UniversalBaseModel):
 
 class CommitPrecondition_FileRevision(UniversalBaseModel):
     """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
+    A condition that a commit must meet before its operations run.
+
+    The server checks each condition against the state before the commit. When several commits are
+    applied as one batch, that state's head sequence is the sequence of the last commit admitted
+    earlier in the batch, or the batch's starting head sequence if no earlier commit was admitted.
     """
 
     kind: typing.Literal["file_revision"] = "file_revision"
@@ -82,9 +88,11 @@ class CommitPrecondition_FileRevision(UniversalBaseModel):
 
 class CommitPrecondition_InodeBinding(UniversalBaseModel):
     """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
+    A condition that a commit must meet before its operations run.
+
+    The server checks each condition against the state before the commit. When several commits are
+    applied as one batch, that state's head sequence is the sequence of the last commit admitted
+    earlier in the batch, or the batch's starting head sequence if no earlier commit was admitted.
     """
 
     kind: typing.Literal["inode_binding"] = "inode_binding"
@@ -103,9 +111,11 @@ class CommitPrecondition_InodeBinding(UniversalBaseModel):
 
 class CommitPrecondition_NameAbsence(UniversalBaseModel):
     """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
+    A condition that a commit must meet before its operations run.
+
+    The server checks each condition against the state before the commit. When several commits are
+    applied as one batch, that state's head sequence is the sequence of the last commit admitted
+    earlier in the batch, or the batch's starting head sequence if no earlier commit was admitted.
     """
 
     kind: typing.Literal["name_absence"] = "name_absence"
@@ -124,9 +134,11 @@ class CommitPrecondition_NameAbsence(UniversalBaseModel):
 
 class CommitPrecondition_NamespaceHead(UniversalBaseModel):
     """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
+    A condition that a commit must meet before its operations run.
+
+    The server checks each condition against the state before the commit. When several commits are
+    applied as one batch, that state's head sequence is the sequence of the last commit admitted
+    earlier in the batch, or the batch's starting head sequence if no earlier commit was admitted.
     """
 
     kind: typing.Literal["namespace_head"] = "namespace_head"
@@ -144,9 +156,11 @@ class CommitPrecondition_NamespaceHead(UniversalBaseModel):
 
 class CommitPrecondition_PathAbsence(UniversalBaseModel):
     """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
+    A condition that a commit must meet before its operations run.
+
+    The server checks each condition against the state before the commit. When several commits are
+    applied as one batch, that state's head sequence is the sequence of the last commit admitted
+    earlier in the batch, or the batch's starting head sequence if no earlier commit was admitted.
     """
 
     kind: typing.Literal["path_absence"] = "path_absence"
@@ -164,9 +178,11 @@ class CommitPrecondition_PathAbsence(UniversalBaseModel):
 
 class CommitPrecondition_PathBinding(UniversalBaseModel):
     """
-    Admission conditions checked against the candidate's pre-state before its operations.
-    The pre-state head sequence is the last admitted commit's sequence in the batch,
-    or the batch's base head sequence when no earlier candidate was admitted.
+    A condition that a commit must meet before its operations run.
+
+    The server checks each condition against the state before the commit. When several commits are
+    applied as one batch, that state's head sequence is the sequence of the last commit admitted
+    earlier in the batch, or the batch's starting head sequence if no earlier commit was admitted.
     """
 
     kind: typing.Literal["path_binding"] = "path_binding"

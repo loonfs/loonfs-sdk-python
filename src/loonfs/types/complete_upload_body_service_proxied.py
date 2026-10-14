@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CompleteUploadBodyServiceProxied(UniversalBaseModel):
     """
-    Complete a service-proxied upload.
+    The completion of a service-proxied upload.
     """
 
     if IS_PYDANTIC_V2:

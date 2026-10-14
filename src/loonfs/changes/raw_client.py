@@ -42,16 +42,16 @@ class RawChangesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         after_seq : ChangeSeq
-            Return committed changes after this sequence
+            The sequence after which to return committed changes.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         snapshot_id : typing.Optional[PinId]
-            End the feed at this snapshot's captured sequence
+            A snapshot to read the feed from. The feed ends at the sequence that the snapshot captured.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -176,16 +176,16 @@ class AsyncRawChangesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         after_seq : ChangeSeq
-            Return committed changes after this sequence
+            The sequence after which to return committed changes.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         snapshot_id : typing.Optional[PinId]
-            End the feed at this snapshot's captured sequence
+            A snapshot to read the feed from. The feed ends at the sequence that the snapshot captured.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

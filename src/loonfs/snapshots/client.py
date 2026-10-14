@@ -38,18 +38,18 @@ class SnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListSnapshotsResponse:
         """
-        Lists live snapshots in snapshot-id order. Deleted and expired snapshots are omitted.
+        Lists live snapshots in snapshot ID order. The list leaves out deleted and expired snapshots.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque snapshot-list page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -87,13 +87,13 @@ class SnapshotsClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         name : str
-            A label that does not need to be unique.
+            The snapshot's label, which doesn't need to be unique.
 
         ttl_ms : int
-            Snapshot lifetime from the current server time, in milliseconds.
+            The snapshot's lifetime in milliseconds, counted from the server's current time.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -128,15 +128,15 @@ class SnapshotsClient:
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Snapshot:
         """
-        Returns one live snapshot, as the snapshot listing returns it. A missing id, or the id of a pin that isn't a snapshot, returns snapshot_not_found, and an expired snapshot returns snapshot_gone.
+        Returns one live snapshot, as the snapshot listing returns it. A missing ID, or the ID of a pin that isn't a snapshot, returns `snapshot_not_found`, and an expired snapshot returns `snapshot_gone`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         snapshot_id : PinId
-            Snapshot id
+            The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -170,15 +170,15 @@ class SnapshotsClient:
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
         """
-        Deletes a snapshot pin. A missing id returns snapshot_not_found.
+        Deletes a snapshot pin. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         snapshot_id : PinId
-            Snapshot id
+            The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -222,13 +222,13 @@ class SnapshotsClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         snapshot_id : PinId
-            Snapshot id
+            The snapshot ID.
 
         ttl_ms : int
-            Requested lifetime from the server's current time, in milliseconds.
+            The new lifetime in milliseconds, counted from the server's current time.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -284,18 +284,18 @@ class AsyncSnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListSnapshotsResponse:
         """
-        Lists live snapshots in snapshot-id order. Deleted and expired snapshots are omitted.
+        Lists live snapshots in snapshot ID order. The list leaves out deleted and expired snapshots.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque snapshot-list page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -343,13 +343,13 @@ class AsyncSnapshotsClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         name : str
-            A label that does not need to be unique.
+            The snapshot's label, which doesn't need to be unique.
 
         ttl_ms : int
-            Snapshot lifetime from the current server time, in milliseconds.
+            The snapshot's lifetime in milliseconds, counted from the server's current time.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -394,15 +394,15 @@ class AsyncSnapshotsClient:
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Snapshot:
         """
-        Returns one live snapshot, as the snapshot listing returns it. A missing id, or the id of a pin that isn't a snapshot, returns snapshot_not_found, and an expired snapshot returns snapshot_gone.
+        Returns one live snapshot, as the snapshot listing returns it. A missing ID, or the ID of a pin that isn't a snapshot, returns `snapshot_not_found`, and an expired snapshot returns `snapshot_gone`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         snapshot_id : PinId
-            Snapshot id
+            The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -444,15 +444,15 @@ class AsyncSnapshotsClient:
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
         """
-        Deletes a snapshot pin. A missing id returns snapshot_not_found.
+        Deletes a snapshot pin. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         snapshot_id : PinId
-            Snapshot id
+            The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -504,13 +504,13 @@ class AsyncSnapshotsClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         snapshot_id : PinId
-            Snapshot id
+            The snapshot ID.
 
         ttl_ms : int
-            Requested lifetime from the server's current time, in milliseconds.
+            The new lifetime in milliseconds, counted from the server's current time.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

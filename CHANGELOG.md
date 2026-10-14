@@ -1,6 +1,6 @@
 # SDK 0.5.0
 
-Regenerated from LoonFS main 76ba9db01.
+Regenerated from LoonFS main 9c6b0419a.
 
 Breaking changes on the wire:
 
@@ -121,6 +121,8 @@ Other changes:
   `PathEntry` and `TrashEntry`. Only the documentation changed. The generated
   unions are unchanged.
 - Documentation strings follow the current specification wording.
+- The `User-Agent` header reports the version of the installed package.
+  Earlier releases reported the previous release's version.
 
 Handwritten layers:
 

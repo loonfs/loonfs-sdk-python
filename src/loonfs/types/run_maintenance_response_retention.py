@@ -10,17 +10,17 @@ from .namespace_id import NamespaceId
 
 class RunMaintenanceResponseRetention(UniversalBaseModel):
     """
-    Result of advancing the retention floor.
+    The result of advancing the retention floor.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace whose retention floor was advanced.
+    The namespace whose retention floor was advanced.
     """
 
     retention_floor_seq: ChangeSeq = pydantic.Field()
     """
-    New minimum sequence for incremental replay.
+    The new retention floor, which is the minimum sequence for incremental replay.
     """
 
     if IS_PYDANTIC_V2:

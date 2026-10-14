@@ -2,5 +2,5 @@
 
 WriterId = str
 """
-Stable writer label supplied by the embedding process.
+A stable writer label that the embedding process supplies.
 """

@@ -9,7 +9,7 @@ from .store_probe_check_outcome import StoreProbeCheckOutcome
 
 class StoreProbeCheckResult(UniversalBaseModel):
     """
-    One named contract check and what the store did with it.
+    The result of one contract check.
     """
 
     message: typing.Optional[str] = pydantic.Field(default=None)
@@ -19,12 +19,12 @@ class StoreProbeCheckResult(UniversalBaseModel):
 
     name: str = pydantic.Field()
     """
-    Stable check name.
+    The check's stable name.
     """
 
     outcome: StoreProbeCheckOutcome = pydantic.Field()
     """
-    What the store did.
+    Whether the store passed the check, failed it, or doesn't support the capability.
     """
 
     if IS_PYDANTIC_V2:

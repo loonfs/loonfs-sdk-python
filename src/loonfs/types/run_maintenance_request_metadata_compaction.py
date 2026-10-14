@@ -8,8 +8,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RunMaintenanceRequestMetadataCompaction(UniversalBaseModel):
     """
-    Runs one metadata compaction unit: one bounded merge, or one streaming
-    compaction of a family group.
+    A job that runs one unit of metadata compaction, which is either one bounded merge or one
+    streaming compaction of a family group.
     """
 
     if IS_PYDANTIC_V2:

@@ -2,5 +2,5 @@
 
 ContentId = str
 """
-Random identity of one immutable content object.
+The random identity of one immutable content object.
 """

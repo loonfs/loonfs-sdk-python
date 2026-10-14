@@ -10,17 +10,18 @@ from .store_probe_check_result import StoreProbeCheckResult
 
 class StoreProbeResponse(UniversalBaseModel):
     """
-    The ordered results from one store contract probe.
+    The results of one store contract probe, in order.
     """
 
     checks: typing.List[StoreProbeCheckResult] = pydantic.Field()
     """
-    The check results in execution order.
+    The check results, in the order that the checks ran.
     """
 
     run_id: ProbeRunId = pydantic.Field()
     """
-    The server-generated label for this probe run and its objects.
+    The ID of this probe run. The server generates the ID and writes the probe's temporary
+    objects under it.
     """
 
     if IS_PYDANTIC_V2:

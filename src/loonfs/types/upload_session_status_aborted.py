@@ -11,27 +11,27 @@ from .upload_mode import UploadMode
 
 class UploadSessionStatusAborted(UniversalBaseModel):
     """
-    Final: the session selected no content and its object is gone.
+    A session that was aborted before it completed. Its object no longer exists.
     """
 
     aborted_at_ms: int = pydantic.Field()
     """
-    Unix-millisecond stamp of the abort.
+    The time the session was aborted, in Unix milliseconds.
     """
 
     mode: UploadMode = pydantic.Field()
     """
-    Transport selected when the session began.
+    The transport that was selected when the session began.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that owns the session.
+    The namespace that the session belongs to.
     """
 
     upload_id: UploadId = pydantic.Field()
     """
-    Session represented by this view.
+    The upload session ID.
     """
 
     if IS_PYDANTIC_V2:

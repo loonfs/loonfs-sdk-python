@@ -9,12 +9,12 @@ from .principal_scope import PrincipalScope
 
 class NamespaceAccessModeAcl(UniversalBaseModel):
     """
-    Access rows govern operations in this identity domain.
+    Access rows control the operations that principals in this identity domain can perform.
     """
 
     principal_scope: PrincipalScope = pydantic.Field()
     """
-    Identity domain the namespace's principal ids belong to.
+    The identity domain that the namespace's principal IDs belong to.
     """
 
     if IS_PYDANTIC_V2:

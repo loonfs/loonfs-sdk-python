@@ -10,17 +10,17 @@ from .namespace_id import NamespaceId
 
 class NamespaceForkBasis(UniversalBaseModel):
     """
-    The source a forked namespace started from.
+    The source namespace and sequence that a forked namespace started from.
     """
 
     source_head_seq: ChangeSeq = pydantic.Field()
     """
-    Source sequence the fork captured.
+    The source namespace's sequence that the fork captured.
     """
 
     source_namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the fork was taken from.
+    The namespace that the fork was taken from.
     """
 
     if IS_PYDANTIC_V2:

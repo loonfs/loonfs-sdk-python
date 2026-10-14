@@ -10,17 +10,17 @@ from .inode_id import InodeId
 
 class FilesystemOperationCreateDirectoryByInode(UniversalBaseModel):
     """
-    Create a directory under an existing parent inode.
+    An operation that creates a directory under an existing parent inode.
     """
 
     display_name: DisplayName = pydantic.Field()
     """
-    New directory name.
+    The name of the new directory.
     """
 
     parent_inode_id: InodeId = pydantic.Field()
     """
-    Parent directory.
+    The parent directory.
     """
 
     if IS_PYDANTIC_V2:

@@ -28,7 +28,7 @@ class FilesystemOperation_AppendFile(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["append_file"] = "append_file"
@@ -51,7 +51,7 @@ class FilesystemOperation_AppendFileByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["append_file_by_inode"] = "append_file_by_inode"
@@ -73,7 +73,7 @@ class FilesystemOperation_CopyByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["copy_by_inode"] = "copy_by_inode"
@@ -98,7 +98,7 @@ class FilesystemOperation_CopyPath(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["copy_path"] = "copy_path"
@@ -122,7 +122,7 @@ class FilesystemOperation_CreateDirectory(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["create_directory"] = "create_directory"
@@ -143,7 +143,7 @@ class FilesystemOperation_CreateDirectoryByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["create_directory_by_inode"] = "create_directory_by_inode"
@@ -164,7 +164,7 @@ class FilesystemOperation_CreateFileByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["create_file_by_inode"] = "create_file_by_inode"
@@ -187,7 +187,7 @@ class FilesystemOperation_DeleteByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["delete_by_inode"] = "delete_by_inode"
@@ -209,7 +209,7 @@ class FilesystemOperation_DeletePath(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["delete_path"] = "delete_path"
@@ -231,7 +231,7 @@ class FilesystemOperation_MoveByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["move_by_inode"] = "move_by_inode"
@@ -257,7 +257,7 @@ class FilesystemOperation_MovePath(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["move_path"] = "move_path"
@@ -281,7 +281,7 @@ class FilesystemOperation_PutFile(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["put_file"] = "put_file"
@@ -306,7 +306,7 @@ class FilesystemOperation_PutFileRevisionByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["put_file_revision_by_inode"] = "put_file_revision_by_inode"
@@ -329,7 +329,7 @@ class FilesystemOperation_RestoreRevision(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["restore_revision"] = "restore_revision"
@@ -350,7 +350,7 @@ class FilesystemOperation_RestoreRevisionByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["restore_revision_by_inode"] = "restore_revision_by_inode"
@@ -371,7 +371,7 @@ class FilesystemOperation_Undelete(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["undelete"] = "undelete"
@@ -395,7 +395,7 @@ class FilesystemOperation_UpdateAccess(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["update_access"] = "update_access"
@@ -419,7 +419,7 @@ class FilesystemOperation_UpdateAccessByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["update_access_by_inode"] = "update_access_by_inode"
@@ -442,7 +442,7 @@ class FilesystemOperation_UpdateAttributes(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["update_attributes"] = "update_attributes"
@@ -468,7 +468,7 @@ class FilesystemOperation_UpdateAttributesByInode(UniversalBaseModel):
     """
     One filesystem operation.
 
-    Unknown fields are rejected, and fieldless variants require empty objects.
+    The server rejects unknown fields, and a variant without fields requires an empty object.
     """
 
     kind: typing.Literal["update_attributes_by_inode"] = "update_attributes_by_inode"

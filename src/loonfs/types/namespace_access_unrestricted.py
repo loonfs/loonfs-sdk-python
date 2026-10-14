@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class NamespaceAccessUnrestricted(UniversalBaseModel):
     """
-    Every caller holding the deployment credential may do everything.
+    Every caller with the deployment credential can perform every operation.
     """
 
     if IS_PYDANTIC_V2:

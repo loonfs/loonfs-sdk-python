@@ -10,17 +10,17 @@ from .inode_id import InodeId
 
 class CommitPreconditionAttributesRevision(UniversalBaseModel):
     """
-    Requires a visible inode with the attribute revision the caller read.
+    A requirement that the inode is visible and has the attribute revision that the caller read.
     """
 
     expected_attributes_revision_no: AttributesRevisionNo = pydantic.Field()
     """
-    Attribute revision observed by the caller.
+    The attribute revision that the caller observed.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode whose state the caller read.
+    The inode whose state the caller read.
     """
 
     if IS_PYDANTIC_V2:

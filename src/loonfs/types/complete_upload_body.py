@@ -13,7 +13,7 @@ from .upload_content_claim import UploadContentClaim
 
 class CompleteUploadBody_DirectMultipart(UniversalBaseModel):
     """
-    Completes an upload using the mode that started it.
+    A request to complete an upload, in the mode that started it.
     """
 
     mode: typing.Literal["direct_multipart"] = "direct_multipart"
@@ -32,7 +32,7 @@ class CompleteUploadBody_DirectMultipart(UniversalBaseModel):
 
 class CompleteUploadBody_DirectPut(UniversalBaseModel):
     """
-    Completes an upload using the mode that started it.
+    A request to complete an upload, in the mode that started it.
     """
 
     mode: typing.Literal["direct_put"] = "direct_put"
@@ -50,7 +50,7 @@ class CompleteUploadBody_DirectPut(UniversalBaseModel):
 
 class CompleteUploadBody_ServiceProxied(UniversalBaseModel):
     """
-    Completes an upload using the mode that started it.
+    A request to complete an upload, in the mode that started it.
     """
 
     mode: typing.Literal["service_proxied"] = "service_proxied"

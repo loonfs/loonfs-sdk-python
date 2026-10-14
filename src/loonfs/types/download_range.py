@@ -9,22 +9,22 @@ from .object_transfer_access import ObjectTransferAccess
 
 class DownloadRange(UniversalBaseModel):
     """
-    One contiguous run of a revision's bytes, read from one object.
+    One contiguous run of a revision's bytes, which the client reads from one object.
     """
 
     access: ObjectTransferAccess = pydantic.Field()
     """
-    Short-lived read capability for exactly those bytes.
+    A short-lived read capability for exactly this range's bytes.
     """
 
     length: int = pydantic.Field()
     """
-    Bytes in the run.
+    The number of bytes in the run.
     """
 
     start_offset: int = pydantic.Field()
     """
-    Offset of the run's first byte in the revision.
+    The offset of the run's first byte in the revision.
     """
 
     if IS_PYDANTIC_V2:

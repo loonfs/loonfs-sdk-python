@@ -11,37 +11,38 @@ from .namespace_id import NamespaceId
 
 class GrepResponse(UniversalBaseModel):
     """
-    One content-search page.
+    One page of content search results.
     """
 
     built_through_seq: ChangeSeq = pydantic.Field()
     """
-    Commits at or below this sequence were answered from the index.
+    The last sequence that the index covers. The server searched the commits at or below this
+    sequence through the index.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    The namespace head sequence used to evaluate this page.
+    The namespace head sequence that the server used to evaluate this page.
     """
 
     matches: typing.List[GrepMatch] = pydantic.Field()
     """
-    The matches in ascending `(inode_id, byte_offset)` order.
+    The matches, in ascending `(inode_id, byte_offset)` order.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace searched.
+    The namespace that was searched.
     """
 
     next_cursor: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Present when another page follows.
+    The cursor for the next page. It's present when another page follows.
     """
 
     tail_scanned: bool = pydantic.Field()
     """
-    Whether revisions after `built_through_seq` were scanned exhaustively.
+    Whether the server scanned every revision after `built_through_seq`.
     """
 
     if IS_PYDANTIC_V2:

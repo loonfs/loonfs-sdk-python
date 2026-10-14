@@ -8,8 +8,9 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CompactionStepOutcomeMetadataCompactionRequired(UniversalBaseModel):
     """
-    A family group's window is too large for one bounded merge. Run the
-    `metadata_compaction` job, which compacts it by streaming.
+    A family group's window is too large for one bounded merge.
+
+    Run the `metadata_compaction` job, which compacts the group by streaming.
     """
 
     if IS_PYDANTIC_V2:

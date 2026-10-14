@@ -10,18 +10,18 @@ from .principal_scope import PrincipalScope
 
 class NamespaceAccessAcl(UniversalBaseModel):
     """
-    Access rows govern every operation.
+    Access rows control every operation.
     """
 
     principal_scope: PrincipalScope = pydantic.Field()
     """
-    Identity domain the namespace's principal ids belong to.
+    The identity domain that the namespace's principal IDs belong to.
     """
 
     root_grants: AccessGrants = pydantic.Field()
     """
-    The root inode's grants at genesis, normally `admin` for each
-    initial administrator.
+    The root inode's grants when the namespace is created. Usually each initial
+    administrator has `admin`.
     """
 
     if IS_PYDANTIC_V2:

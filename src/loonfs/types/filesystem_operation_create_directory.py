@@ -9,18 +9,19 @@ from .absolute_path import AbsolutePath
 
 class FilesystemOperationCreateDirectory(UniversalBaseModel):
     """
-    Create one directory.
+    An operation that creates one directory.
     """
 
     parents: typing.Optional[bool] = pydantic.Field(default=None)
     """
-    Whether to create missing ancestor directories while requiring the final
-    component to be new.
+    Whether the operation creates any missing ancestor directories. The final path component
+    must still be new.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute destination path, rejected when invalid or already bound.
+    The absolute path of the new directory. The operation fails if the path is invalid or
+    already bound.
     """
 
     if IS_PYDANTIC_V2:

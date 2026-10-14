@@ -10,17 +10,18 @@ from .revision_no import RevisionNo
 
 class FilesystemOperationRestoreRevisionByInode(UniversalBaseModel):
     """
-    Restore an older revision as the current revision of a file inode.
+    An operation that restores an older revision as the current revision of a file inode.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Visible file to restore.
+    The visible file to restore.
     """
 
     source_revision_no: RevisionNo = pydantic.Field()
     """
-    Existing historical revision whose content will be copied into a new current revision.
+    An existing older revision. The operation copies its content into a new current
+    revision.
     """
 
     if IS_PYDANTIC_V2:

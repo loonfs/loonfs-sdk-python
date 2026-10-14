@@ -13,7 +13,7 @@ from .principal_scope import PrincipalScope
 
 class NamespaceAccess_Acl(UniversalBaseModel):
     """
-    A namespace's access mode, fixed at creation.
+    A namespace's access mode, which can't be changed after the namespace is created.
     """
 
     kind: typing.Literal["acl"] = "acl"
@@ -32,7 +32,7 @@ class NamespaceAccess_Acl(UniversalBaseModel):
 
 class NamespaceAccess_Unrestricted(UniversalBaseModel):
     """
-    A namespace's access mode, fixed at creation.
+    A namespace's access mode, which can't be changed after the namespace is created.
     """
 
     kind: typing.Literal["unrestricted"] = "unrestricted"

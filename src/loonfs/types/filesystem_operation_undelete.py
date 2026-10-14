@@ -12,35 +12,38 @@ from .inode_id import InodeId
 
 class FilesystemOperationUndelete(UniversalBaseModel):
     """
-    Restore the deletion identified by `inode_id` and `deletion_seq`.
-    Name the destination with `destination_path`, or with
-    `destination_parent_inode_id` and `destination_display_name`; omit
-    both to use the recorded binding.
+    An operation that restores the deletion that `inode_id` and `deletion_seq` identify.
+
+    To choose the destination, set `destination_path`, or set `destination_parent_inode_id` and
+    `destination_display_name`. If you set neither, the undelete uses the parent and name
+    recorded with the deletion.
     """
 
     deletion_seq: ChangeSeq = pydantic.Field()
     """
-    Observed deletion sequence, which prevents cancelling a newer tombstone sequence.
+    The deletion sequence that the caller observed. It prevents the undelete from cancelling
+    a newer deletion of the inode.
     """
 
     destination_display_name: typing.Optional[DisplayName] = pydantic.Field(default=None)
     """
-    Name to restore under `destination_parent_inode_id`.
+    The inode's name in `destination_parent_inode_id`.
     """
 
     destination_parent_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    Directory to restore into; requires `destination_display_name`.
+    The directory to restore the inode into. It requires `destination_display_name`.
     """
 
     destination_path: typing.Optional[AbsolutePath] = pydantic.Field(default=None)
     """
-    Absolute restore destination; cannot be combined with a parent inode destination.
+    The absolute path to restore the inode to. It can't be combined with
+    `destination_parent_inode_id`.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Deleted inode to make reachable again.
+    The deleted inode to make reachable again.
     """
 
     if IS_PYDANTIC_V2:

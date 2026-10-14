@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CompactionStepOutcomeBoundedMergePublished(UniversalBaseModel):
     """
-    One family group was merged and a manifest published.
+    One family group was merged, and a new manifest was published.
     """
 
     if IS_PYDANTIC_V2:

@@ -10,17 +10,17 @@ from .namespace_id import NamespaceId
 
 class RunMaintenanceResponseMetadataCompaction(UniversalBaseModel):
     """
-    Result of one metadata compaction unit.
+    The result of one unit of metadata compaction.
     """
 
     compaction: MetadataCompactionOutcome = pydantic.Field()
     """
-    The compaction outcome.
+    The outcome of the compaction.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace compacted by this run.
+    The namespace that this run compacted.
     """
 
     if IS_PYDANTIC_V2:

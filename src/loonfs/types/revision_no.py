@@ -2,5 +2,5 @@
 
 RevisionNo = int
 """
-Revision number for a file's content. It increases whenever the content is replaced or restored.
+The number of one revision of a file's content. It increases with every new revision of the file, whether from a put, an append, a replacing copy, or a restore.
 """

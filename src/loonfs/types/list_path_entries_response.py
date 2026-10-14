@@ -12,32 +12,32 @@ from .path_entry import PathEntry
 
 class ListPathEntriesResponse(UniversalBaseModel):
     """
-    One directory listing and the namespace head used to read it.
+    One page of a directory's entries, with the namespace head that the read used.
     """
 
     entries: typing.List[PathEntry] = pydantic.Field()
     """
-    The directory entries in canonical name-key order.
+    The directory entries, in canonical name key order.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    Namespace head sequence this listing was read from.
+    The namespace head sequence that this listing was read at.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that was read.
+    The namespace that was read.
     """
 
     next_cursor: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Cursor for the next page, if more entries remain.
+    The cursor for the next page, if more entries remain.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute path of the listed directory.
+    The absolute path of the listed directory.
     """
 
     if IS_PYDANTIC_V2:

@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class MetadataCompactionOutcomeCancelled(UniversalBaseModel):
     """
-    The run was cancelled; the manifest did not move.
+    The run was cancelled, so the current manifest didn't change.
     """
 
     if IS_PYDANTIC_V2:

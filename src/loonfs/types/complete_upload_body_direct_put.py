@@ -9,12 +9,12 @@ from .upload_content_claim import UploadContentClaim
 
 class CompleteUploadBodyDirectPut(UniversalBaseModel):
     """
-    Complete a direct-PUT upload.
+    The completion of a direct PUT upload.
     """
 
     content: UploadContentClaim = pydantic.Field()
     """
-    Expected length and checksum of the stored object.
+    The expected length and checksum of the stored object.
     """
 
     if IS_PYDANTIC_V2:

@@ -10,17 +10,18 @@ from .manifest_no import ManifestNo
 
 class WalFoldStepOutcomeAlreadyPublished(UniversalBaseModel):
     """
-    The current manifest already covered the captured WAL tail; this step published no manifest.
+    The current manifest already included the captured WAL tail, so this step didn't publish a
+    manifest.
     """
 
     attempted_seq: ChangeSeq = pydantic.Field()
     """
-    Sequence this step attempted to fold through.
+    The sequence that this step tried to fold through.
     """
 
     current_manifest_no: ManifestNo = pydantic.Field()
     """
-    The namespace's current manifest number.
+    The number of the namespace's current manifest.
     """
 
     if IS_PYDANTIC_V2:
