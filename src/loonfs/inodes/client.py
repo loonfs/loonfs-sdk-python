@@ -41,21 +41,21 @@ class InodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PathEntry:
         """
-        Returns the path entry for a visible inode from the current state or a live snapshot. Unknown or hidden inodes answer `inode_not_found`.
+        Returns the path entry for a visible inode, from the current state or a live snapshot. An unknown or hidden inode returns `inode_not_found`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            Inode ID
+            The inode ID.
 
         include_attributes : typing.Optional[bool]
-            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+            Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
-            Use the path state captured by this snapshot
+            The snapshot whose captured path state to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -63,7 +63,7 @@ class InodesClient:
         Returns
         -------
         PathEntry
-            Authoritative current inode entry
+            Path entry for the inode
 
         Examples
         --------
@@ -104,27 +104,27 @@ class InodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListInodeChildrenResponse:
         """
-        Lists one page of a directory's children from the current state or a live snapshot, addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+        Lists one page of a directory's children, in canonical name key order, from the current state or a live snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            Directory inode ID
+            The directory's inode ID.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque directory page cursor
+            The opaque cursor that the previous page returned.
 
         include_attributes : typing.Optional[bool]
-            Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+            Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
-            Use the directory state captured by this snapshot
+            The snapshot whose captured directory state to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -172,18 +172,18 @@ class InodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
-        Reads and verifies the current revision of a visible file inode, wherever it is bound, or the revision a live snapshot captured. Unknown or hidden inodes answer `inode_not_found`.
+        Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that a live snapshot captured. An unknown or hidden inode returns `inode_not_found`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         snapshot_id : typing.Optional[PinId]
-            Use the file revision captured by this snapshot
+            The snapshot whose captured file revision to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -225,22 +225,23 @@ class InodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         snapshot_id : typing.Optional[PinId]
-            Read the file revision captured by this snapshot.
+            A snapshot to read the file from. The download reads the revision that the snapshot
+            captured.
 
         start_offset : typing.Optional[int]
-            The first byte the grant reads. Defaults to 0 and must be below the
-            file's size, except 0 for a file of zero bytes.
+            The first byte that the grant reads. It defaults to 0 and must be less than the file's size.
+            For a file of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -282,21 +283,21 @@ class InodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListFileRevisionsResponse:
         """
-        Returns retained revisions for a file inode without requiring a current path.
+        Returns the retained revisions of a file inode. The file doesn't need a current path.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque file-revisions page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -342,13 +343,13 @@ class InodesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         revision_no : RevisionNo
-            Revision number
+            The revision number.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -391,22 +392,22 @@ class InodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
+        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         revision_no : RevisionNo
-            Revision number
+            The revision number.
 
         start_offset : typing.Optional[int]
-            The first byte the grant reads. Defaults to 0 and must be below the
-            revision's size, except 0 for a revision of zero bytes.
+            The first byte that the grant reads. It defaults to 0 and must be less than the revision's
+            size. For a revision of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -465,21 +466,21 @@ class AsyncInodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PathEntry:
         """
-        Returns the path entry for a visible inode from the current state or a live snapshot. Unknown or hidden inodes answer `inode_not_found`.
+        Returns the path entry for a visible inode, from the current state or a live snapshot. An unknown or hidden inode returns `inode_not_found`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            Inode ID
+            The inode ID.
 
         include_attributes : typing.Optional[bool]
-            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+            Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
-            Use the path state captured by this snapshot
+            The snapshot whose captured path state to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -487,7 +488,7 @@ class AsyncInodesClient:
         Returns
         -------
         PathEntry
-            Authoritative current inode entry
+            Path entry for the inode
 
         Examples
         --------
@@ -536,27 +537,27 @@ class AsyncInodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListInodeChildrenResponse:
         """
-        Lists one page of a directory's children from the current state or a live snapshot, addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+        Lists one page of a directory's children, in canonical name key order, from the current state or a live snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            Directory inode ID
+            The directory's inode ID.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque directory page cursor
+            The opaque cursor that the previous page returned.
 
         include_attributes : typing.Optional[bool]
-            Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+            Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
-            Use the directory state captured by this snapshot
+            The snapshot whose captured directory state to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -612,18 +613,18 @@ class AsyncInodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
-        Reads and verifies the current revision of a visible file inode, wherever it is bound, or the revision a live snapshot captured. Unknown or hidden inodes answer `inode_not_found`.
+        Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that a live snapshot captured. An unknown or hidden inode returns `inode_not_found`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         snapshot_id : typing.Optional[PinId]
-            Use the file revision captured by this snapshot
+            The snapshot whose captured file revision to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -674,22 +675,23 @@ class AsyncInodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         snapshot_id : typing.Optional[PinId]
-            Read the file revision captured by this snapshot.
+            A snapshot to read the file from. The download reads the revision that the snapshot
+            captured.
 
         start_offset : typing.Optional[int]
-            The first byte the grant reads. Defaults to 0 and must be below the
-            file's size, except 0 for a file of zero bytes.
+            The first byte that the grant reads. It defaults to 0 and must be less than the file's size.
+            For a file of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -739,21 +741,21 @@ class AsyncInodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListFileRevisionsResponse:
         """
-        Returns retained revisions for a file inode without requiring a current path.
+        Returns the retained revisions of a file inode. The file doesn't need a current path.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque file-revisions page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -807,13 +809,13 @@ class AsyncInodesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         revision_no : RevisionNo
-            Revision number
+            The revision number.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -865,22 +867,22 @@ class AsyncInodesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
+        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         inode_id : str
-            File inode ID
+            The file's inode ID.
 
         revision_no : RevisionNo
-            Revision number
+            The revision number.
 
         start_offset : typing.Optional[int]
-            The first byte the grant reads. Defaults to 0 and must be below the
-            revision's size, except 0 for a revision of zero bytes.
+            The first byte that the grant reads. It defaults to 0 and must be less than the revision's
+            size. For a revision of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

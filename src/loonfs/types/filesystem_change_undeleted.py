@@ -16,22 +16,22 @@ class FilesystemChangeUndeleted(UniversalBaseModel):
 
     binding_version: BindingVersion = pydantic.Field()
     """
-    Opaque identifier for the binding created by this event.
+    The binding that this event created. The value is opaque.
     """
 
     display_name: DisplayName = pydantic.Field()
     """
-    Spelling of the recovered binding.
+    The display name of the recovered binding.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Recovered inode.
+    The recovered inode.
     """
 
     parent_inode_id: InodeId = pydantic.Field()
     """
-    Directory the recovered entry was bound under.
+    The directory that the recovered entry was bound under.
     """
 
     if IS_PYDANTIC_V2:

@@ -12,37 +12,38 @@ from .revision_no import RevisionNo
 
 class FilesystemOperationCopyByInode(UniversalBaseModel):
     """
-    Copy a file inode to a name under a parent inode.
+    An operation that copies a file inode to a new name under a parent inode.
     """
 
     behavior: typing.Optional[DestinationBehavior] = pydantic.Field(default=None)
     """
-    Whether an existing destination file may be replaced.
+    Whether the operation can replace an existing destination file.
     """
 
     destination_display_name: DisplayName = pydantic.Field()
     """
-    Name of the copy.
+    The name of the copy.
     """
 
     destination_parent_inode_id: InodeId = pydantic.Field()
     """
-    Destination directory.
+    The destination directory.
     """
 
     expected_destination_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    With `replace` behavior, the destination inode required by the request.
+    The inode that the destination path must contain. It applies only with `replace` behavior.
     """
 
     expected_destination_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
     """
-    With `replace` behavior and an inode precondition, the required content revision.
+    The content revision that must be the destination file's current revision. It applies only
+    with `replace` behavior and requires `expected_destination_inode_id`.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    File to copy.
+    The file to copy.
     """
 
     if IS_PYDANTIC_V2:

@@ -8,22 +8,24 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CapabilityDocument(UniversalBaseModel):
     """
-    The API groups, features, and limits advertised by a deployment.
+    The API groups, features, and limits that a deployment advertises.
     """
 
     api_groups: typing.List[str] = pydantic.Field()
     """
-    The advertised `group/version` API groups, each with every required operation implemented.
+    The advertised API groups, as `group/version`. The deployment implements every required
+    operation in each group.
     """
 
     features: typing.Optional[typing.Dict[str, bool]] = pydantic.Field(default=None)
     """
-    The named features supported by this deployment, with absent keys treated as unsupported.
+    Feature keys, and whether this deployment supports each one. An absent key means the feature
+    isn't supported.
     """
 
     limits: typing.Optional[typing.Dict[str, int]] = pydantic.Field(default=None)
     """
-    Advisory numeric limits clients may use to pre-validate requests.
+    Advisory numeric limits that clients can use to check requests before sending them.
     """
 
     protocol_version: str = pydantic.Field()

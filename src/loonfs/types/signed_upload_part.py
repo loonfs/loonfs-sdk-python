@@ -14,12 +14,12 @@ class SignedUploadPart(UniversalBaseModel):
 
     access: ObjectTransferAccess = pydantic.Field()
     """
-    Short-lived write capability for that part.
+    A short-lived write capability for this part.
     """
 
     part_number: int = pydantic.Field()
     """
-    Part number this capability writes.
+    The part number that this capability writes.
     """
 
     if IS_PYDANTIC_V2:

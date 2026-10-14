@@ -11,33 +11,33 @@ from .run_no import RunNo
 
 class GrepIndexStatusActive(UniversalBaseModel):
     """
-    An index following the change feed through its searchable watermark.
+    An index that follows the change feed and can be searched through its watermark.
     """
 
     built_through_seq: ChangeSeq = pydantic.Field()
     """
-    Sequence of the commit at the index cursor.
+    The sequence of the commit at the index cursor.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the status describes.
+    The namespace that the status describes.
     """
 
     next_event_index: int = pydantic.Field()
     """
-    The next change-event offset within `built_through_seq`, or zero when the
-    whole commit is indexed.
+    The offset of the next change event within `built_through_seq`. It's zero when the whole
+    commit is indexed.
     """
 
     next_run_no: RunNo = pydantic.Field()
     """
-    Run number the index allocates next.
+    The next run number that the index allocates.
     """
 
     reorganize_pending: bool = pydantic.Field()
     """
-    True while a partitioned segment reorganization is in progress.
+    Whether a partitioned segment reorganization is in progress.
     """
 
     if IS_PYDANTIC_V2:

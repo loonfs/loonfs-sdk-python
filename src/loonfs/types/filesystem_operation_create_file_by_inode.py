@@ -11,28 +11,30 @@ from .inode_id import InodeId
 
 class FilesystemOperationCreateFileByInode(UniversalBaseModel):
     """
-    Create a file with an unused name under an existing parent inode.
-    Requires exactly one of `content_ref` and `inline_content`.
+    An operation that creates a file with an unused name under an existing parent inode.
+
+    The operation requires exactly one of `content_ref` and `inline_content`.
     """
 
     content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
     """
-    Uploaded content covered by a token; mutually exclusive with `inline_content`.
+    The uploaded content, which a content token must cover. Set this field or
+    `inline_content`, but not both.
     """
 
     display_name: DisplayName = pydantic.Field()
     """
-    New file name.
+    The name of the new file.
     """
 
     inline_content: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Complete file bytes as base64; mutually exclusive with `content_ref`.
+    The complete file bytes as base64. Set this field or `content_ref`, but not both.
     """
 
     parent_inode_id: InodeId = pydantic.Field()
     """
-    Parent directory.
+    The parent directory.
     """
 
     if IS_PYDANTIC_V2:

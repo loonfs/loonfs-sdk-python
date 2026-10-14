@@ -10,17 +10,17 @@ from .revision_no import RevisionNo
 
 class CommitPreconditionFileRevision(UniversalBaseModel):
     """
-    Requires a visible inode with the content revision the caller read.
+    A requirement that the inode is visible and has the content revision that the caller read.
     """
 
     expected_revision_no: RevisionNo = pydantic.Field()
     """
-    Content revision observed by the caller.
+    The content revision that the caller observed.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode whose state the caller read.
+    The inode whose state the caller read.
     """
 
     if IS_PYDANTIC_V2:

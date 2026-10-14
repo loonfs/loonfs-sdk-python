@@ -9,12 +9,12 @@ from .change_seq import ChangeSeq
 
 class CommitPreconditionNamespaceHead(UniversalBaseModel):
     """
-    Requires the pre-state head sequence to equal `expected_head_seq`.
+    A requirement that the head sequence before the commit equals `expected_head_seq`.
     """
 
     expected_head_seq: ChangeSeq = pydantic.Field()
     """
-    Sequence observed when the caller read its inputs.
+    The head sequence that the caller observed when it read its inputs.
     """
 
     if IS_PYDANTIC_V2:

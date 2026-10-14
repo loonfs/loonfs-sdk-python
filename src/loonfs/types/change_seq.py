@@ -2,5 +2,5 @@
 
 ChangeSeq = int
 """
-Sequence number assigned to a namespace commit. It determines the order in which commits become visible.
+The sequence number of one namespace commit. Commits become visible in the order of these numbers.
 """

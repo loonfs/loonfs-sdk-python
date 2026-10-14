@@ -39,18 +39,18 @@ class RawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListCheckpointsResponse]:
         """
-        Lists existing pins in checkpoint-id order. Expired pins remain visible until collection deletes them after expiry plus grace. The cursor resumes a live listing.
+        Lists existing pins in checkpoint ID order. An expired pin stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque checkpoint-list page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -141,18 +141,19 @@ class RawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Checkpoint]:
         """
-        Creates a user-owned checkpoint record pinning the current namespace view. It first folds any WAL tail after the current manifest. Every call creates a new record under a new id; the name is a label, not a key. The record retains its manifest until it is deleted, either explicitly or by collection after expiry plus grace, so routine maintenance should fold the WAL instead. This is a maintenance operation, not a file mutation.
+        Creates a user checkpoint record that pins the current namespace view. The server first folds any WAL tail after the current manifest. Every call creates a new record with a new ID, and the name is a label, not a key. The record keeps its manifest until the record is deleted, either explicitly or by garbage collection after the record expires and its grace window passes. Because of that, routine maintenance should fold the WAL instead of creating checkpoints. This is a maintenance operation, not a file change.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         name : str
-            The non-unique label recorded on the checkpoint.
+            A label to record on the checkpoint. Labels don't need to be unique.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds. Omit it to keep the checkpoint until it is deleted.
+            The checkpoint's lifetime in milliseconds. Omit it to keep the checkpoint until it's
+            deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -267,15 +268,15 @@ class RawCheckpointsClient:
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Checkpoint]:
         """
-        Returns one existing pin as the checkpoint listing returns it, including an expired pin that collection has not deleted. A missing id returns checkpoint_not_found.
+        Returns one existing pin, as the checkpoint listing returns it, including an expired pin that garbage collection hasn't deleted. A missing ID returns `checkpoint_not_found`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         checkpoint_id : str
-            Checkpoint id
+            The checkpoint ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -357,15 +358,15 @@ class RawCheckpointsClient:
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[DeleteCheckpointResponse]:
         """
-        Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
+        Deletes a user checkpoint pin. A missing ID returns `checkpoint_not_found`. Garbage collection can then reclaim the pin's unreferenced manifest and runs.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         checkpoint_id : str
-            Checkpoint id
+            The checkpoint ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -460,18 +461,18 @@ class AsyncRawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListCheckpointsResponse]:
         """
-        Lists existing pins in checkpoint-id order. Expired pins remain visible until collection deletes them after expiry plus grace. The cursor resumes a live listing.
+        Lists existing pins in checkpoint ID order. An expired pin stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque checkpoint-list page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -562,18 +563,19 @@ class AsyncRawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Checkpoint]:
         """
-        Creates a user-owned checkpoint record pinning the current namespace view. It first folds any WAL tail after the current manifest. Every call creates a new record under a new id; the name is a label, not a key. The record retains its manifest until it is deleted, either explicitly or by collection after expiry plus grace, so routine maintenance should fold the WAL instead. This is a maintenance operation, not a file mutation.
+        Creates a user checkpoint record that pins the current namespace view. The server first folds any WAL tail after the current manifest. Every call creates a new record with a new ID, and the name is a label, not a key. The record keeps its manifest until the record is deleted, either explicitly or by garbage collection after the record expires and its grace window passes. Because of that, routine maintenance should fold the WAL instead of creating checkpoints. This is a maintenance operation, not a file change.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         name : str
-            The non-unique label recorded on the checkpoint.
+            A label to record on the checkpoint. Labels don't need to be unique.
 
         ttl_ms : typing.Optional[int]
-            The checkpoint lifetime in milliseconds. Omit it to keep the checkpoint until it is deleted.
+            The checkpoint's lifetime in milliseconds. Omit it to keep the checkpoint until it's
+            deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -688,15 +690,15 @@ class AsyncRawCheckpointsClient:
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Checkpoint]:
         """
-        Returns one existing pin as the checkpoint listing returns it, including an expired pin that collection has not deleted. A missing id returns checkpoint_not_found.
+        Returns one existing pin, as the checkpoint listing returns it, including an expired pin that garbage collection hasn't deleted. A missing ID returns `checkpoint_not_found`.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         checkpoint_id : str
-            Checkpoint id
+            The checkpoint ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -778,15 +780,15 @@ class AsyncRawCheckpointsClient:
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[DeleteCheckpointResponse]:
         """
-        Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
+        Deletes a user checkpoint pin. A missing ID returns `checkpoint_not_found`. Garbage collection can then reclaim the pin's unreferenced manifest and runs.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         checkpoint_id : str
-            Checkpoint id
+            The checkpoint ID.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

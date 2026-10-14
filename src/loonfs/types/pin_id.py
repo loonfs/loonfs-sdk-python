@@ -2,5 +2,7 @@
 
 PinId = str
 """
-Durable pin identifier. The manifest number determines which namespace manifest it pins.
+The durable ID of one pin.
+
+The manifest number in the ID determines which namespace manifest the pin protects.
 """

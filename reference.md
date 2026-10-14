@@ -115,7 +115,7 @@ client.namespaces.create(
 <dl>
 <dd>
 
-**namespace_id:** `NamespaceId` — Durable namespace id to create.
+**namespace_id:** `NamespaceId` — The durable ID of the new namespace.
     
 </dd>
 </dl>
@@ -125,8 +125,8 @@ client.namespaces.create(
 
 **access:** `typing.Optional[NamespaceAccess]` 
 
-The access mode, fixed for the namespace's life. Defaults to
-unrestricted.
+The namespace's access mode, which can't be changed after the namespace is created. The
+default is unrestricted.
     
 </dd>
 </dl>
@@ -136,8 +136,8 @@ unrestricted.
 
 **naming:** `typing.Optional[NamespaceNaming]` 
 
-How sibling names compare, fixed for the namespace's life. Defaults
-to `case_insensitive`.
+How the namespace compares sibling names. The mode can't be changed after the namespace is
+created, and it defaults to `case_insensitive`.
     
 </dd>
 </dl>
@@ -209,7 +209,7 @@ client.namespaces.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -241,7 +241,7 @@ client.namespaces.retrieve(
 <dl>
 <dd>
 
-Marks a namespace as deleted. The id can never be created or forked into again.
+Marks a namespace as deleted. The namespace ID can never be used again to create or fork a namespace.
 </dd>
 </dl>
 </dd>
@@ -281,7 +281,7 @@ client.namespaces.delete(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -289,7 +289,7 @@ client.namespaces.delete(
 <dl>
 <dd>
 
-**expected_head_seq:** `typing.Optional[ChangeSeq]` — Delete only if the namespace head is still at this sequence
+**expected_head_seq:** `typing.Optional[ChangeSeq]` — The head sequence that the namespace must still have for the delete to succeed.
     
 </dd>
 </dl>
@@ -321,7 +321,7 @@ client.namespaces.delete(
 <dl>
 <dd>
 
-Creates a new namespace from the source current head or a live snapshot.
+Creates a new namespace from the source namespace's current head or from a live snapshot.
 </dd>
 </dl>
 </dd>
@@ -362,7 +362,7 @@ client.namespaces.fork(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Source namespace id
+**namespace_id:** `str` — The source namespace ID.
     
 </dd>
 </dl>
@@ -370,7 +370,7 @@ client.namespaces.fork(
 <dl>
 <dd>
 
-**new_namespace_id:** `NamespaceId` — Durable namespace id for the fork target.
+**new_namespace_id:** `NamespaceId` — The durable ID of the new namespace that the fork creates.
     
 </dd>
 </dl>
@@ -378,7 +378,7 @@ client.namespaces.fork(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Fork from this live snapshot instead of the current head.
+**snapshot_id:** `typing.Optional[PinId]` — A live snapshot to fork from. Without it, the fork starts from the current head.
     
 </dd>
 </dl>
@@ -453,7 +453,7 @@ client.changes.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -461,7 +461,7 @@ client.changes.list(
 <dl>
 <dd>
 
-**after_seq:** `ChangeSeq` — Return committed changes after this sequence
+**after_seq:** `ChangeSeq` — The sequence after which to return committed changes.
     
 </dd>
 </dl>
@@ -469,7 +469,7 @@ client.changes.list(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum page size
+**limit:** `typing.Optional[int]` — The maximum page size.
     
 </dd>
 </dl>
@@ -477,7 +477,7 @@ client.changes.list(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — End the feed at this snapshot's captured sequence
+**snapshot_id:** `typing.Optional[PinId]` — A snapshot to read the feed from. The feed ends at the sequence that the snapshot captured.
     
 </dd>
 </dl>
@@ -510,7 +510,7 @@ client.changes.list(
 <dl>
 <dd>
 
-Applies one commit: an ordered, non-empty list of path operations that commit together as one logical commit, under one commit id that makes retries idempotent. Request preconditions check the pre-state after receipt resolution and before operations; a failed precondition names its position in `details.precondition_index`. A single-operation call is the one-element case. The first operation that fails aborts the whole request, and a request carrying more than one operation names that operation's position in `details.operation_index`.
+Applies one commit, which is an ordered, non-empty list of path operations that are committed together. The commit ID makes retries idempotent. The server checks the request's preconditions against the state before the commit, after it resolves any commit receipt and before it runs the operations. A failed precondition's position is reported in `details.precondition_index`. A request can contain a single operation. If an operation fails, the whole request fails, and for a request with more than one operation, `details.operation_index` reports the failed operation's position.
 </dd>
 </dl>
 </dd>
@@ -557,7 +557,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -565,7 +565,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**commit_id:** `CommitId` — Caller-supplied idempotency key for the whole request.
+**commit_id:** `CommitId` — The caller's idempotency key for the whole request.
     
 </dd>
 </dl>
@@ -573,7 +573,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**operations:** `typing.List[FilesystemOperation]` — The non-empty ordered operations to commit atomically.
+**operations:** `typing.List[FilesystemOperation]` — The operations to commit atomically, in order. The list can't be empty.
     
 </dd>
 </dl>
@@ -581,7 +581,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**content_tokens:** `typing.Optional[typing.List[ContentToken]]` — The proofs for new external content references in this request.
+**content_tokens:** `typing.Optional[typing.List[ContentToken]]` — One content token for each uploaded `content_ref` that the request uses.
     
 </dd>
 </dl>
@@ -589,7 +589,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**message:** `typing.Optional[str]` — The caller annotation that forms part of the commit identity.
+**message:** `typing.Optional[str]` — An annotation from the caller. The message is part of the commit's identity.
     
 </dd>
 </dl>
@@ -597,7 +597,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**preconditions:** `typing.Optional[typing.List[CommitPrecondition]]` — Ordered admission conditions evaluated before any operations.
+**preconditions:** `typing.Optional[typing.List[CommitPrecondition]]` — The conditions that the server checks, in order, before it runs any operation.
     
 </dd>
 </dl>
@@ -671,7 +671,7 @@ client.files.content(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -679,7 +679,7 @@ client.files.content(
 <dl>
 <dd>
 
-**path:** `str` — Absolute file path
+**path:** `str` — The absolute path of the file to read.
     
 </dd>
 </dl>
@@ -687,7 +687,7 @@ client.files.content(
 <dl>
 <dd>
 
-**revision_no:** `typing.Optional[RevisionNo]` — Optional prior revision number; cannot be combined with snapshot_id
+**revision_no:** `typing.Optional[RevisionNo]` — An earlier revision to read. It can't be combined with `snapshot_id`.
     
 </dd>
 </dl>
@@ -695,7 +695,7 @@ client.files.content(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Use the file revision captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured file revision to read.
     
 </dd>
 </dl>
@@ -727,7 +727,7 @@ client.files.content(
 <dl>
 <dd>
 
-Returns ordered signed object ranges covering exactly `[start_offset, size_bytes)` of the selected revision. Each range carries its signed headers in `access.headers`, which the client sends unchanged. The client checks each range's length and the complete revision's checksum. A client that resumes asks for a new grant from its offset. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
+Returns ordered, signed object ranges that cover exactly `[start_offset, size_bytes)` of the selected revision. Each range includes its signed headers in `access.headers`, and the client sends them unchanged. The client checks each range's length and the complete revision's checksum. To resume a download, a client asks for a new grant from its current offset. A deployment that can't presign URLs returns 501 `not_supported`. The proxied `GET /filesystem/content` route is still available, up to the `download.service_proxied.max_content_bytes` limit.
 </dd>
 </dl>
 </dd>
@@ -768,7 +768,7 @@ client.files.create_download(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -776,7 +776,7 @@ client.files.create_download(
 <dl>
 <dd>
 
-**path:** `AbsolutePath` — Absolute path of the file to read.
+**path:** `AbsolutePath` — The absolute path of the file to read.
     
 </dd>
 </dl>
@@ -786,8 +786,8 @@ client.files.create_download(
 
 **revision_no:** `typing.Optional[RevisionNo]` 
 
-Revision to read. Omit it for the path's current revision.
-Cannot be combined with `snapshot_id`.
+The revision to read. Omit it to read the path's current revision. It can't be combined with
+`snapshot_id`.
     
 </dd>
 </dl>
@@ -797,8 +797,8 @@ Cannot be combined with `snapshot_id`.
 
 **snapshot_id:** `typing.Optional[PinId]` 
 
-Read the file revision captured by this snapshot.
-Cannot be combined with `revision_no`.
+A snapshot to read the file from. The download reads the revision that the snapshot
+captured. It can't be combined with `revision_no`.
     
 </dd>
 </dl>
@@ -808,10 +808,10 @@ Cannot be combined with `revision_no`.
 
 **start_offset:** `typing.Optional[int]` 
 
-The first byte the grant reads. It names `[start_offset, size_bytes)`
-of the revision; a client that resumes asks for a new grant from the
-bytes it holds. Must be below the revision's size, except 0 for a
-revision of zero bytes.
+The first byte that the grant reads. The grant covers the revision's bytes from
+`start_offset` up to `size_bytes`, so a client that resumes a download asks for a new grant
+that starts after the bytes it already has. The offset must be less than the revision's
+size. For a revision of zero bytes, it must be 0.
     
 </dd>
 </dl>
@@ -885,7 +885,7 @@ client.files.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -893,7 +893,7 @@ client.files.list(
 <dl>
 <dd>
 
-**path:** `str` — Absolute filesystem path
+**path:** `str` — The absolute path of the directory to list.
     
 </dd>
 </dl>
@@ -901,7 +901,7 @@ client.files.list(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum page size
+**limit:** `typing.Optional[int]` — The maximum page size.
     
 </dd>
 </dl>
@@ -909,7 +909,7 @@ client.files.list(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Opaque directory-list page cursor
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
     
 </dd>
 </dl>
@@ -917,7 +917,7 @@ client.files.list(
 <dl>
 <dd>
 
-**include_attributes:** `typing.Optional[bool]` — Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+**include_attributes:** `typing.Optional[bool]` — Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
     
 </dd>
 </dl>
@@ -925,7 +925,7 @@ client.files.list(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Use the directory state captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured directory state to read.
     
 </dd>
 </dl>
@@ -999,7 +999,7 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1007,7 +1007,7 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**path:** `str` — Absolute filesystem path
+**path:** `str` — The absolute path to read.
     
 </dd>
 </dl>
@@ -1015,7 +1015,7 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**include_attributes:** `typing.Optional[bool]` — Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+**include_attributes:** `typing.Optional[bool]` — Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
     
 </dd>
 </dl>
@@ -1023,7 +1023,7 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Use the path state captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured path state to read.
     
 </dd>
 </dl>
@@ -1055,7 +1055,7 @@ client.files.retrieve(
 <dl>
 <dd>
 
-Resolves the current path to a file inode and returns revisions for that file. If the file could be renamed, use the inode revision API for stable identity.
+Resolves the current path to a file inode and returns that file's revisions. If the file might be renamed, use the inode revisions route, which identifies the file by a stable ID.
 </dd>
 </dl>
 </dd>
@@ -1096,7 +1096,7 @@ client.files.list_revisions(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1104,7 +1104,7 @@ client.files.list_revisions(
 <dl>
 <dd>
 
-**path:** `str` — Absolute file path
+**path:** `str` — The absolute path of the file.
     
 </dd>
 </dl>
@@ -1112,7 +1112,7 @@ client.files.list_revisions(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum page size
+**limit:** `typing.Optional[int]` — The maximum page size.
     
 </dd>
 </dl>
@@ -1120,7 +1120,7 @@ client.files.list_revisions(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Opaque file-revisions page cursor
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
     
 </dd>
 </dl>
@@ -1152,7 +1152,7 @@ client.files.list_revisions(
 <dl>
 <dd>
 
-Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep index.
+Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches in ascending `(inode_id, byte_offset)` order. It scans every revision committed after the index watermark, unless `allow_stale` skips them. The deployment must serve grep, and the namespace must have a materialized, active grep index.
 </dd>
 </dl>
 </dd>
@@ -1194,7 +1194,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1202,7 +1202,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**pattern:** `str` — Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
+**pattern:** `str` — The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most 1024 bytes.
     
 </dd>
 </dl>
@@ -1210,7 +1210,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**case_insensitive:** `typing.Optional[bool]` — Match case-insensitively (`true` or `false`). Defaults to `false`.
+**case_insensitive:** `typing.Optional[bool]` — Whether matching ignores case. The default is `false`.
     
 </dd>
 </dl>
@@ -1218,7 +1218,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**path_prefix:** `typing.Optional[str]` — Complete absolute path used to restrict matches. Cannot be combined with `inode_id`.
+**path_prefix:** `typing.Optional[str]` — A complete absolute path that limits matches to its descendants. It can't be combined with `inode_id`.
     
 </dd>
 </dl>
@@ -1226,7 +1226,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**inode_id:** `typing.Optional[str]` — Inode whose descendants restrict matches. Cannot be combined with `path_prefix`.
+**inode_id:** `typing.Optional[str]` — An inode that limits matches to its descendants. It can't be combined with `path_prefix`.
     
 </dd>
 </dl>
@@ -1234,7 +1234,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**allow_scan:** `typing.Optional[bool]` — Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+**allow_scan:** `typing.Optional[bool]` — Whether a pattern with no required literal bytes can use a capped exhaustive scan. The default is `false`.
     
 </dd>
 </dl>
@@ -1242,7 +1242,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**allow_stale:** `typing.Optional[bool]` — Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
+**allow_stale:** `typing.Optional[bool]` — Whether the server returns results from the index alone when the unindexed tail exceeds the scan budget. The default is `false`.
     
 </dd>
 </dl>
@@ -1250,7 +1250,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum matches per page
+**limit:** `typing.Optional[int]` — The maximum number of matches per page.
     
 </dd>
 </dl>
@@ -1258,7 +1258,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Opaque grep page cursor
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
     
 </dd>
 </dl>
@@ -1291,7 +1291,7 @@ client.files.grep(
 <dl>
 <dd>
 
-Returns the namespace's recoverable deletions, oldest deletion first. Entries never age out at the retention floor; each carries the inode id and deletion sequence undelete needs, plus the deleted name when the delete recorded one.
+Returns the namespace's recoverable deletions, oldest first. Advancing the retention floor doesn't remove entries. Each entry includes the inode ID and deletion sequence that an undelete needs, and the deleted name when the delete recorded one.
 </dd>
 </dl>
 </dd>
@@ -1331,7 +1331,7 @@ client.trash.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1339,7 +1339,7 @@ client.trash.list(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum page size
+**limit:** `typing.Optional[int]` — The maximum page size.
     
 </dd>
 </dl>
@@ -1347,7 +1347,7 @@ client.trash.list(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Opaque trash page cursor
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
     
 </dd>
 </dl>
@@ -1380,7 +1380,7 @@ client.trash.list(
 <dl>
 <dd>
 
-Returns the path entry for a visible inode from the current state or a live snapshot. Unknown or hidden inodes answer `inode_not_found`.
+Returns the path entry for a visible inode, from the current state or a live snapshot. An unknown or hidden inode returns `inode_not_found`.
 </dd>
 </dl>
 </dd>
@@ -1422,7 +1422,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1430,7 +1430,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**inode_id:** `str` — Inode ID
+**inode_id:** `str` — The inode ID.
     
 </dd>
 </dl>
@@ -1438,7 +1438,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**include_attributes:** `typing.Optional[bool]` — Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+**include_attributes:** `typing.Optional[bool]` — Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
     
 </dd>
 </dl>
@@ -1446,7 +1446,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Use the path state captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured path state to read.
     
 </dd>
 </dl>
@@ -1478,7 +1478,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-Lists one page of a directory's children from the current state or a live snapshot, addressed by parent inode ID, in canonical name-key order. Inode addressing keeps a listing and its resumption on the same directory across concurrent renames or moves of the parent.
+Lists one page of a directory's children, in canonical name key order, from the current state or a live snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
 </dd>
 </dl>
 </dd>
@@ -1520,7 +1520,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1528,7 +1528,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**inode_id:** `str` — Directory inode ID
+**inode_id:** `str` — The directory's inode ID.
     
 </dd>
 </dl>
@@ -1536,7 +1536,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum page size
+**limit:** `typing.Optional[int]` — The maximum page size.
     
 </dd>
 </dl>
@@ -1544,7 +1544,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Opaque directory page cursor
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
     
 </dd>
 </dl>
@@ -1552,7 +1552,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**include_attributes:** `typing.Optional[bool]` — Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+**include_attributes:** `typing.Optional[bool]` — Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
     
 </dd>
 </dl>
@@ -1560,7 +1560,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Use the directory state captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured directory state to read.
     
 </dd>
 </dl>
@@ -1592,7 +1592,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-Reads and verifies the current revision of a visible file inode, wherever it is bound, or the revision a live snapshot captured. Unknown or hidden inodes answer `inode_not_found`.
+Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that a live snapshot captured. An unknown or hidden inode returns `inode_not_found`.
 </dd>
 </dl>
 </dd>
@@ -1633,7 +1633,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1641,7 +1641,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-**inode_id:** `str` — File inode ID
+**inode_id:** `str` — The file's inode ID.
     
 </dd>
 </dl>
@@ -1649,7 +1649,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Use the file revision captured by this snapshot
+**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured file revision to read.
     
 </dd>
 </dl>
@@ -1681,7 +1681,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-Authorizes a direct read of the current revision of a visible file inode, wherever it is bound, or of the revision a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
+Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 </dd>
 </dl>
 </dd>
@@ -1722,7 +1722,7 @@ client.inodes.create_download(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1730,7 +1730,7 @@ client.inodes.create_download(
 <dl>
 <dd>
 
-**inode_id:** `str` — File inode ID
+**inode_id:** `str` — The file's inode ID.
     
 </dd>
 </dl>
@@ -1738,7 +1738,10 @@ client.inodes.create_download(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — Read the file revision captured by this snapshot.
+**snapshot_id:** `typing.Optional[PinId]` 
+
+A snapshot to read the file from. The download reads the revision that the snapshot
+captured.
     
 </dd>
 </dl>
@@ -1748,8 +1751,8 @@ client.inodes.create_download(
 
 **start_offset:** `typing.Optional[int]` 
 
-The first byte the grant reads. Defaults to 0 and must be below the
-file's size, except 0 for a file of zero bytes.
+The first byte that the grant reads. It defaults to 0 and must be less than the file's size.
+For a file of zero bytes, it must be 0.
     
 </dd>
 </dl>
@@ -1781,7 +1784,7 @@ file's size, except 0 for a file of zero bytes.
 <dl>
 <dd>
 
-Returns retained revisions for a file inode without requiring a current path.
+Returns the retained revisions of a file inode. The file doesn't need a current path.
 </dd>
 </dl>
 </dd>
@@ -1822,7 +1825,7 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1830,7 +1833,7 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
-**inode_id:** `str` — File inode ID
+**inode_id:** `str` — The file's inode ID.
     
 </dd>
 </dl>
@@ -1838,7 +1841,7 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum page size
+**limit:** `typing.Optional[int]` — The maximum page size.
     
 </dd>
 </dl>
@@ -1846,7 +1849,7 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Opaque file-revisions page cursor
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
     
 </dd>
 </dl>
@@ -1920,7 +1923,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -1928,7 +1931,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-**inode_id:** `str` — File inode ID
+**inode_id:** `str` — The file's inode ID.
     
 </dd>
 </dl>
@@ -1936,7 +1939,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-**revision_no:** `RevisionNo` — Revision number
+**revision_no:** `RevisionNo` — The revision number.
     
 </dd>
 </dl>
@@ -1968,7 +1971,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response does not include a path.
+Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 </dd>
 </dl>
 </dd>
@@ -2010,7 +2013,7 @@ client.inodes.create_revision_download(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2018,7 +2021,7 @@ client.inodes.create_revision_download(
 <dl>
 <dd>
 
-**inode_id:** `str` — File inode ID
+**inode_id:** `str` — The file's inode ID.
     
 </dd>
 </dl>
@@ -2026,7 +2029,7 @@ client.inodes.create_revision_download(
 <dl>
 <dd>
 
-**revision_no:** `RevisionNo` — Revision number
+**revision_no:** `RevisionNo` — The revision number.
     
 </dd>
 </dl>
@@ -2036,8 +2039,8 @@ client.inodes.create_revision_download(
 
 **start_offset:** `typing.Optional[int]` 
 
-The first byte the grant reads. Defaults to 0 and must be below the
-revision's size, except 0 for a revision of zero bytes.
+The first byte that the grant reads. It defaults to 0 and must be less than the revision's
+size. For a revision of zero bytes, it must be 0.
     
 </dd>
 </dl>
@@ -2070,7 +2073,7 @@ revision's size, except 0 for a revision of zero bytes.
 <dl>
 <dd>
 
-Lists live snapshots in snapshot-id order. Deleted and expired snapshots are omitted.
+Lists live snapshots in snapshot ID order. The list leaves out deleted and expired snapshots.
 </dd>
 </dl>
 </dd>
@@ -2110,7 +2113,7 @@ client.snapshots.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2118,7 +2121,7 @@ client.snapshots.list(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum page size
+**limit:** `typing.Optional[int]` — The maximum page size.
     
 </dd>
 </dl>
@@ -2126,7 +2129,7 @@ client.snapshots.list(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Opaque snapshot-list page cursor
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
     
 </dd>
 </dl>
@@ -2200,7 +2203,7 @@ client.snapshots.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2208,7 +2211,7 @@ client.snapshots.create(
 <dl>
 <dd>
 
-**name:** `str` — A label that does not need to be unique.
+**name:** `str` — The snapshot's label, which doesn't need to be unique.
     
 </dd>
 </dl>
@@ -2216,7 +2219,7 @@ client.snapshots.create(
 <dl>
 <dd>
 
-**ttl_ms:** `int` — Snapshot lifetime from the current server time, in milliseconds.
+**ttl_ms:** `int` — The snapshot's lifetime in milliseconds, counted from the server's current time.
     
 </dd>
 </dl>
@@ -2248,7 +2251,7 @@ client.snapshots.create(
 <dl>
 <dd>
 
-Returns one live snapshot, as the snapshot listing returns it. A missing id, or the id of a pin that isn't a snapshot, returns snapshot_not_found, and an expired snapshot returns snapshot_gone.
+Returns one live snapshot, as the snapshot listing returns it. A missing ID, or the ID of a pin that isn't a snapshot, returns `snapshot_not_found`, and an expired snapshot returns `snapshot_gone`.
 </dd>
 </dl>
 </dd>
@@ -2289,7 +2292,7 @@ client.snapshots.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2297,7 +2300,7 @@ client.snapshots.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `PinId` — Snapshot id
+**snapshot_id:** `PinId` — The snapshot ID.
     
 </dd>
 </dl>
@@ -2329,7 +2332,7 @@ client.snapshots.retrieve(
 <dl>
 <dd>
 
-Deletes a snapshot pin. A missing id returns snapshot_not_found.
+Deletes a snapshot pin. A missing ID returns `snapshot_not_found`.
 </dd>
 </dl>
 </dd>
@@ -2370,7 +2373,7 @@ client.snapshots.delete(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2378,7 +2381,7 @@ client.snapshots.delete(
 <dl>
 <dd>
 
-**snapshot_id:** `PinId` — Snapshot id
+**snapshot_id:** `PinId` — The snapshot ID.
     
 </dd>
 </dl>
@@ -2452,7 +2455,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2460,7 +2463,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-**snapshot_id:** `PinId` — Snapshot id
+**snapshot_id:** `PinId` — The snapshot ID.
     
 </dd>
 </dl>
@@ -2468,7 +2471,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-**ttl_ms:** `int` — Requested lifetime from the server's current time, in milliseconds.
+**ttl_ms:** `int` — The new lifetime in milliseconds, counted from the server's current time.
     
 </dd>
 </dl>
@@ -2501,7 +2504,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-Starts an upload session for content that may later be attached to a file. Service-proxied uploads send bytes through the server; direct-put uploads return object-store presigned credentials.
+Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned upload capability.
 </dd>
 </dl>
 </dd>
@@ -2542,7 +2545,7 @@ client.uploads.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2582,7 +2585,7 @@ client.uploads.create(
 <dl>
 <dd>
 
-Returns an upload session. An open direct_put session includes freshly signed access. A completed session includes a new content token so the client can retry the commit without uploading the content again.
+Returns an upload session. An open `direct_put` session includes a newly signed upload capability. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
 </dd>
 </dl>
 </dd>
@@ -2623,7 +2626,7 @@ client.uploads.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2631,7 +2634,7 @@ client.uploads.retrieve(
 <dl>
 <dd>
 
-**upload_id:** `str` — Upload session id
+**upload_id:** `str` — The upload session ID.
     
 </dd>
 </dl>
@@ -2663,7 +2666,7 @@ client.uploads.retrieve(
 <dl>
 <dd>
 
-Ends an upload session without selecting content and deletes the object it was writing. Repeating it succeeds; a session that already completed cannot be aborted.
+Aborts an open upload session and deletes the object that the session was writing. Repeating the request succeeds, but a completed session can't be aborted.
 </dd>
 </dl>
 </dd>
@@ -2704,7 +2707,7 @@ client.uploads.abort(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2712,7 +2715,7 @@ client.uploads.abort(
 <dl>
 <dd>
 
-**upload_id:** `str` — Upload session id
+**upload_id:** `str` — The upload session ID.
     
 </dd>
 </dl>
@@ -2744,7 +2747,7 @@ client.uploads.abort(
 <dl>
 <dd>
 
-Completes an upload. The request mode must match the mode used to start the session. Direct uploads include a content claim; multipart also includes completed parts.
+Completes an upload. The request mode must match the mode that started the session. A direct upload includes a content claim, and a multipart upload also includes the completed parts.
 </dd>
 </dl>
 </dd>
@@ -2804,7 +2807,7 @@ client.uploads.complete(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2812,7 +2815,7 @@ client.uploads.complete(
 <dl>
 <dd>
 
-**upload_id:** `str` — Upload session id
+**upload_id:** `str` — The upload session ID.
     
 </dd>
 </dl>
@@ -2882,7 +2885,7 @@ client.uploads.put_content(...)
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2890,7 +2893,7 @@ client.uploads.put_content(...)
 <dl>
 <dd>
 
-**upload_id:** `str` — Upload session id
+**upload_id:** `str` — The upload session ID.
     
 </dd>
 </dl>
@@ -2930,7 +2933,7 @@ client.uploads.put_content(...)
 <dl>
 <dd>
 
-Returns one short-lived, checksum-bound upload capability per requested part of an open direct_multipart session. Asking again for a part is how a client retries it.
+Returns one short-lived upload capability for each requested part of an open `direct_multipart` session. Each capability is bound to the part's checksum. To retry a part, a client asks for its capability again.
 </dd>
 </dl>
 </dd>
@@ -2980,7 +2983,7 @@ client.uploads.sign_parts(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -2988,7 +2991,7 @@ client.uploads.sign_parts(
 <dl>
 <dd>
 
-**upload_id:** `str` — Upload session id
+**upload_id:** `str` — The upload session ID.
     
 </dd>
 </dl>
@@ -2996,7 +2999,7 @@ client.uploads.sign_parts(
 <dl>
 <dd>
 
-**parts:** `typing.List[UploadPartChecksumClaim]` — The parts to authorize; repeated part numbers replace their previous uploads.
+**parts:** `typing.List[UploadPartChecksumClaim]` — The parts to authorize. A repeated part number replaces the earlier upload of that part.
     
 </dd>
 </dl>
@@ -3029,7 +3032,7 @@ client.uploads.sign_parts(
 <dl>
 <dd>
 
-Lists existing pins in checkpoint-id order. Expired pins remain visible until collection deletes them after expiry plus grace. The cursor resumes a live listing.
+Lists existing pins in checkpoint ID order. An expired pin stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
 </dd>
 </dl>
 </dd>
@@ -3069,7 +3072,7 @@ client.maintenance.checkpoints.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3077,7 +3080,7 @@ client.maintenance.checkpoints.list(
 <dl>
 <dd>
 
-**limit:** `typing.Optional[int]` — Maximum page size
+**limit:** `typing.Optional[int]` — The maximum page size.
     
 </dd>
 </dl>
@@ -3085,7 +3088,7 @@ client.maintenance.checkpoints.list(
 <dl>
 <dd>
 
-**cursor:** `typing.Optional[str]` — Opaque checkpoint-list page cursor
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
     
 </dd>
 </dl>
@@ -3117,7 +3120,7 @@ client.maintenance.checkpoints.list(
 <dl>
 <dd>
 
-Creates a user-owned checkpoint record pinning the current namespace view. It first folds any WAL tail after the current manifest. Every call creates a new record under a new id; the name is a label, not a key. The record retains its manifest until it is deleted, either explicitly or by collection after expiry plus grace, so routine maintenance should fold the WAL instead. This is a maintenance operation, not a file mutation.
+Creates a user checkpoint record that pins the current namespace view. The server first folds any WAL tail after the current manifest. Every call creates a new record with a new ID, and the name is a label, not a key. The record keeps its manifest until the record is deleted, either explicitly or by garbage collection after the record expires and its grace window passes. Because of that, routine maintenance should fold the WAL instead of creating checkpoints. This is a maintenance operation, not a file change.
 </dd>
 </dl>
 </dd>
@@ -3158,7 +3161,7 @@ client.maintenance.checkpoints.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3166,7 +3169,7 @@ client.maintenance.checkpoints.create(
 <dl>
 <dd>
 
-**name:** `str` — The non-unique label recorded on the checkpoint.
+**name:** `str` — A label to record on the checkpoint. Labels don't need to be unique.
     
 </dd>
 </dl>
@@ -3174,7 +3177,10 @@ client.maintenance.checkpoints.create(
 <dl>
 <dd>
 
-**ttl_ms:** `typing.Optional[int]` — The checkpoint lifetime in milliseconds. Omit it to keep the checkpoint until it is deleted.
+**ttl_ms:** `typing.Optional[int]` 
+
+The checkpoint's lifetime in milliseconds. Omit it to keep the checkpoint until it's
+deleted.
     
 </dd>
 </dl>
@@ -3206,7 +3212,7 @@ client.maintenance.checkpoints.create(
 <dl>
 <dd>
 
-Returns one existing pin as the checkpoint listing returns it, including an expired pin that collection has not deleted. A missing id returns checkpoint_not_found.
+Returns one existing pin, as the checkpoint listing returns it, including an expired pin that garbage collection hasn't deleted. A missing ID returns `checkpoint_not_found`.
 </dd>
 </dl>
 </dd>
@@ -3247,7 +3253,7 @@ client.maintenance.checkpoints.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3255,7 +3261,7 @@ client.maintenance.checkpoints.retrieve(
 <dl>
 <dd>
 
-**checkpoint_id:** `str` — Checkpoint id
+**checkpoint_id:** `str` — The checkpoint ID.
     
 </dd>
 </dl>
@@ -3287,7 +3293,7 @@ client.maintenance.checkpoints.retrieve(
 <dl>
 <dd>
 
-Deletes a user-owned checkpoint pin. A missing id returns checkpoint_not_found. Garbage collection can reclaim its unreferenced manifest and runs.
+Deletes a user checkpoint pin. A missing ID returns `checkpoint_not_found`. Garbage collection can then reclaim the pin's unreferenced manifest and runs.
 </dd>
 </dl>
 </dd>
@@ -3328,7 +3334,7 @@ client.maintenance.checkpoints.delete(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3336,7 +3342,7 @@ client.maintenance.checkpoints.delete(
 <dl>
 <dd>
 
-**checkpoint_id:** `str` — Checkpoint id
+**checkpoint_id:** `str` — The checkpoint ID.
     
 </dd>
 </dl>
@@ -3409,7 +3415,7 @@ client.maintenance.diagnostics.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3442,7 +3448,7 @@ client.maintenance.diagnostics.retrieve(
 <dl>
 <dd>
 
-Returns whether the namespace's grep index is `disabled`, `backfilling`, or `active`, including build progress when available. A namespace that has never enabled the index is `disabled`. This operation requires a deployment that maintains grep indexes and does not change the index.
+Reports whether the namespace's grep index is `disabled`, `backfilling`, or `active`, with build progress when it's available. A namespace that has never enabled the index is `disabled`. A deployment that doesn't maintain grep indexes returns `not_supported`, and this operation doesn't change the index.
 </dd>
 </dl>
 </dd>
@@ -3482,7 +3488,7 @@ client.maintenance.grep_index.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3514,7 +3520,7 @@ client.maintenance.grep_index.retrieve(
 <dl>
 <dd>
 
-Disables the namespace's grep index by publishing the next manifest number with no segment references. Index maintenance stops when a step reads the disabled manifest. Explicit grep garbage collection later reclaims the segments. Idempotent. Requires this deployment to maintain the grep index.
+Disables the namespace's grep index by publishing a manifest with the next number and no segment references. Index maintenance stops when a step reads the disabled manifest, and an explicit grep garbage collection run reclaims the segments later. Repeating the request has the same result. A deployment that doesn't maintain the grep index returns `not_supported`.
 </dd>
 </dl>
 </dd>
@@ -3554,7 +3560,7 @@ client.maintenance.grep_index.disable(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3586,7 +3592,7 @@ client.maintenance.grep_index.disable(
 <dl>
 <dd>
 
-Enables the namespace's grep index. A deployment that runs maintenance starts the backfill on its next session tick and continues until it is active. The response reports the lifecycle and bookkeeping read after the transition: a fresh enable is `backfilling` with the sequence its checkpoint captured, while an already-enabled namespace answers with its current status. Idempotent. Requires this deployment to maintain the grep index.
+Enables the namespace's grep index. A deployment that runs maintenance starts the backfill on its next session tick and continues until the index is active. The response reports the index state read after the change. A new enable reports `backfilling`, with the sequence that its checkpoint captured, and an index that was already enabled reports its current status. Repeating the request has the same result. A deployment that doesn't maintain the grep index returns `not_supported`.
 </dd>
 </dl>
 </dd>
@@ -3626,7 +3632,7 @@ client.maintenance.grep_index.enable(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3659,7 +3665,7 @@ client.maintenance.grep_index.enable(
 <dl>
 <dd>
 
-Runs one maintenance job for the namespace. The body names the job with `kind`: `metadata`, `metadata_compaction`, `gc`, `grep_gc`, `retention`, or `recover_administrator`. The response carries the same `kind` and that job's result. A deleted namespace accepts only `gc` or `grep_gc`. A `grep_gc` call collects aged, unreferenced grep index objects and requires `maintenance.grep.index`. A `gc` call reads the current manifest and lists pins, then sweeps every family to the end. Each listing starts at the beginning. The call keeps no continuation. A `retention` call advances the retention floor to the folded manifest head, or to the one target that `to_seq` or `cutoff_at_ms` names.
+Runs one maintenance job for the namespace. The body's `kind` selects the job, which is one of `metadata`, `metadata_compaction`, `gc`, `grep_gc`, `retention`, or `recover_administrator`. The response includes the same `kind` and the job's result. A deleted namespace accepts only `gc` and `grep_gc`. A `grep_gc` job deletes aged, unreferenced grep index objects, and it requires `maintenance.grep.index`. A `gc` job reads the current manifest, lists the pins, and then sweeps every object family to the end. Each listing starts at the beginning, and the job doesn't keep a position to continue from. A `retention` job advances the retention floor to the folded manifest head, or to the one target that `to_seq` or `cutoff_at_ms` sets.
 </dd>
 </dl>
 </dd>
@@ -3700,7 +3706,7 @@ client.maintenance.runs.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — Namespace id
+**namespace_id:** `str` — The namespace ID.
     
 </dd>
 </dl>
@@ -3741,7 +3747,7 @@ client.maintenance.runs.create(
 <dl>
 <dd>
 
-Proves the configured object store honours the create-if-absent, compare-and-swap, visibility, listing, and ranged-read semantics LoonFS depends on, and reports what it found check by check. Nothing runs this implicitly: a probe writes and deletes objects, all of them under a scratch prefix that is not a durable object family, and its last check deletes them and proves the prefix empty. A store that fails a check answers 200 with that check reported `failed` — the probe ran, and the answer is that the store is wrong. Optional capabilities a store declares it lacks answer `unsupported`, which is an answer rather than a fault. This route does not decide whether the deployment may serve presigned direct uploads: that trust comes from the endpoint allowlist, because a probe exercises the server's own request path and never a presigned capability handed to a client.
+Checks that the configured object store supports the create-if-absent, compare-and-swap, visibility, listing, and ranged-read behavior that LoonFS depends on, and reports the result of each check. The probe runs only when a client calls this route, because it writes and deletes objects. It writes them all under a scratch prefix that isn't a durable object family, and its last check deletes them and confirms that the prefix is empty. If the store fails a check, the response is still 200, and it reports that check as `failed`. If the store declares that it doesn't support an optional capability, the response reports that check as `unsupported`, which isn't a failure. The probe doesn't control whether the deployment can serve presigned direct uploads. The endpoint allowlist controls that, because the probe tests only the server's own requests and never a presigned capability issued to a client.
 </dd>
 </dl>
 </dd>

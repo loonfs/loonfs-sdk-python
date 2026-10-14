@@ -14,42 +14,43 @@ from .revision_no import RevisionNo
 
 class FileRevision(UniversalBaseModel):
     """
-    One immutable file revision.
+    One immutable revision of a file.
     """
 
     commit_id: CommitId = pydantic.Field()
     """
-    Commit ID for this revision.
+    The ID of the commit that created this revision.
     """
 
     committed_at_ms: int = pydantic.Field()
     """
-    The commit time in Unix milliseconds; `committed_seq` defines commit order.
+    The time the revision was committed, in Unix milliseconds. Commit order comes from
+    `committed_seq`, not from this time.
     """
 
     committed_by: ActorId = pydantic.Field()
     """
-    Actor responsible for this revision, as supplied by the application.
+    The actor responsible for this revision, as the application supplied it.
     """
 
     committed_seq: ChangeSeq = pydantic.Field()
     """
-    Namespace sequence that created this revision.
+    The namespace sequence of the commit that created this revision.
     """
 
     content_ref: ContentRef = pydantic.Field()
     """
-    Content stored for this revision.
+    The content stored for this revision.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    File inode that owns this revision.
+    The file inode that this revision belongs to.
     """
 
     revision_no: RevisionNo = pydantic.Field()
     """
-    Revision number within the file inode.
+    The revision number within the file inode.
     """
 
     if IS_PYDANTIC_V2:

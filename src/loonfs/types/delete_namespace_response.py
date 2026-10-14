@@ -10,17 +10,17 @@ from .namespace_id import NamespaceId
 
 class DeleteNamespaceResponse(UniversalBaseModel):
     """
-    Result of deleting a namespace.
+    The result of deleting a namespace.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    The final committed sequence before the namespace was deleted.
+    The last committed sequence before the namespace was deleted.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace whose history ended.
+    The deleted namespace.
     """
 
     if IS_PYDANTIC_V2:

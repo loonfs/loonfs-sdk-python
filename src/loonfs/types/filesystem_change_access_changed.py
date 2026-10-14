@@ -11,28 +11,29 @@ from .inode_id import InodeId
 
 class FilesystemChangeAccessChanged(UniversalBaseModel):
     """
-    An inode's access row was replaced. `grants` is the complete
-    direct grant map after the update.
+    An inode's access row was replaced.
+
+    `grants` is the complete direct grant map after the update.
     """
 
     access_revision_no: AccessRevisionNo = pydantic.Field()
     """
-    Revision published by the update.
+    The access revision that the update published.
     """
 
     boundary: bool = pydantic.Field()
     """
-    Whether the directory stops inheritance from its ancestors.
+    Whether the directory stops inheriting grants from its ancestors.
     """
 
     grants: AccessGrants = pydantic.Field()
     """
-    The inode's complete direct grants after this update.
+    Every direct grant that the inode has after this update.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode whose access state advanced.
+    The inode whose access row changed.
     """
 
     if IS_PYDANTIC_V2:

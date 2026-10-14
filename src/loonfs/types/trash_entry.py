@@ -13,37 +13,37 @@ from .inode_kind import InodeKind
 
 class TrashEntry(UniversalBaseModel):
     """
-    One recoverable deletion and its removed directory binding.
+    One recoverable deletion and the directory binding that it removed.
     """
 
     deleted_at_ms: int = pydantic.Field()
     """
-    Time of the deletion, in Unix milliseconds.
+    The time of the deletion, in Unix milliseconds.
     """
 
     deleted_binding: DirectoryBinding = pydantic.Field()
     """
-    Directory binding removed by the deletion.
+    The directory binding that the deletion removed.
     """
 
     deleted_by: ActorId = pydantic.Field()
     """
-    Actor responsible for the deletion.
+    The actor responsible for the deletion.
     """
 
     deletion_seq: ChangeSeq = pydantic.Field()
     """
-    Commit sequence that identifies this deletion.
+    The commit sequence that identifies this deletion.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode hidden by the deletion.
+    The inode that the deletion hides.
     """
 
     inode_kind: InodeKind = pydantic.Field()
     """
-    Whether the deleted root is a file or a directory; a newer server may report another kind.
+    Whether the deleted root is a file or a directory. A newer server can return another kind.
     """
 
     if IS_PYDANTIC_V2:

@@ -14,12 +14,13 @@ class UploadPartChecksumClaim(UniversalBaseModel):
 
     checksum: Checksum = pydantic.Field()
     """
-    Checksum over this part's bytes.
+    The checksum of this part's bytes.
     """
 
     part_number: int = pydantic.Field()
     """
-    One-based part number, at most the provider's 10,000-part limit.
+    The part number, counting from 1. The number can't exceed the provider's limit of 10,000
+    parts.
     """
 
     if IS_PYDANTIC_V2:

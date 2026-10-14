@@ -10,7 +10,7 @@ from .revision_no import RevisionNo
 
 class FilesystemOperationAppendFileByInode(UniversalBaseModel):
     """
-    Add bytes to the end of a file inode as its next revision.
+    An operation that adds bytes to the end of a file inode as its next revision.
     """
 
     expected_revision_no: typing.Optional[RevisionNo] = pydantic.Field(default=None)
@@ -20,12 +20,12 @@ class FilesystemOperationAppendFileByInode(UniversalBaseModel):
 
     inline_content: str = pydantic.Field()
     """
-    The bytes to add as base64, from 1 byte to 256 KiB.
+    The bytes to add, as base64, from 1 byte to 256 KiB.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    File to append to.
+    The file to append to.
     """
 
     if IS_PYDANTIC_V2:

@@ -12,7 +12,7 @@ from .principal_scope import PrincipalScope
 
 class NamespaceAccessMode_Acl(UniversalBaseModel):
     """
-    A namespace's access mode as reported, without its genesis grants.
+    A namespace's access mode, without the grants that the namespace was created with.
     """
 
     kind: typing.Literal["acl"] = "acl"
@@ -30,7 +30,7 @@ class NamespaceAccessMode_Acl(UniversalBaseModel):
 
 class NamespaceAccessMode_Unrestricted(UniversalBaseModel):
     """
-    A namespace's access mode as reported, without its genesis grants.
+    A namespace's access mode, without the grants that the namespace was created with.
     """
 
     kind: typing.Literal["unrestricted"] = "unrestricted"

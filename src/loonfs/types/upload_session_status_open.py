@@ -14,47 +14,49 @@ from .upload_mode import UploadMode
 
 class UploadSessionStatusOpen(UniversalBaseModel):
     """
-    Accepting content until its lease passes.
+    A session that accepts content until its lease ends.
     """
 
     access: typing.Optional[ObjectTransferAccess] = pydantic.Field(default=None)
     """
-    Present for `direct_put` sessions; minted fresh on every read.
+    The capability for the direct PUT. It's present for `direct_put` sessions, and the
+    server creates a new one on every read.
     """
 
     checksum_algorithm: ChecksumAlgorithm = pydantic.Field()
     """
-    The store's content checksum algorithm.
+    The checksum algorithm that the store uses for content.
     """
 
     content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
     """
-    Present after content is staged in a `service_proxied` session.
+    The staged content. It's present after content is staged in a `service_proxied` session.
     """
 
     expires_at_ms: int = pydantic.Field()
     """
-    The Unix-millisecond time after which cleanup may abort the session.
+    The time after which cleanup can abort the session, in Unix milliseconds.
     """
 
     mode: UploadMode = pydantic.Field()
     """
-    Transport selected when the session began.
+    The transport that was selected when the session began.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that owns the session.
+    The namespace that the session belongs to.
     """
 
     part_size_bytes: typing.Optional[int] = pydantic.Field(default=None)
     """
-    Present for `direct_multipart` sessions.
+    The size of every part except the last, in bytes. It's present for `direct_multipart`
+    sessions.
     """
 
     upload_id: UploadId = pydantic.Field()
     """
-    Session represented by this view.
+    The upload session ID.
     """
 
     if IS_PYDANTIC_V2:

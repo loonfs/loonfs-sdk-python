@@ -11,27 +11,27 @@ from .trash_entry import TrashEntry
 
 class ListTrashResponse(UniversalBaseModel):
     """
-    One trash listing page: the namespace's recoverable deletions.
+    One page of the namespace's recoverable deletions.
     """
 
     entries: typing.List[TrashEntry] = pydantic.Field()
     """
-    Recoverable deletions, oldest deletion first.
+    The recoverable deletions, oldest first.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
     """
-    Head sequence this page was evaluated at.
+    The head sequence that this page was evaluated at.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that was read.
+    The namespace that was read.
     """
 
     next_cursor: typing.Optional[str] = pydantic.Field(default=None)
     """
-    Present when another page follows.
+    The cursor for the next page. It's present when another page follows.
     """
 
     if IS_PYDANTIC_V2:

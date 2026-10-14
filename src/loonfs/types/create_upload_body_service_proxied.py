@@ -8,7 +8,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CreateUploadBodyServiceProxied(UniversalBaseModel):
     """
-    Send the bytes to the service, which writes the content object.
+    A transport in which the client sends the bytes to the service, which writes the content
+    object.
     """
 
     if IS_PYDANTIC_V2:

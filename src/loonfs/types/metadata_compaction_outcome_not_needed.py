@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class MetadataCompactionOutcomeNotNeeded(UniversalBaseModel):
     """
-    No eligible family group was available and nothing was published.
+    No eligible family group was available, so nothing was published.
     """
 
     if IS_PYDANTIC_V2:

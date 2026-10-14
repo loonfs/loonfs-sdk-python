@@ -15,17 +15,17 @@ class GrepIndexStatusDisabled(UniversalBaseModel):
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the status describes.
+    The namespace that the status describes.
     """
 
     next_run_no: RunNo = pydantic.Field()
     """
-    Run number the index allocates next.
+    The next run number that the index allocates.
     """
 
     reorganize_pending: bool = pydantic.Field()
     """
-    True while a partitioned segment reorganization is in progress.
+    Whether a partitioned segment reorganization is in progress.
     """
 
     if IS_PYDANTIC_V2:

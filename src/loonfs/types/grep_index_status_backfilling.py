@@ -13,37 +13,37 @@ from .run_no import RunNo
 
 class GrepIndexStatusBackfilling(UniversalBaseModel):
     """
-    An initial scan of a pinned checkpoint that is not yet searchable.
+    An index that is running its initial scan of a pinned checkpoint and can't be searched yet.
     """
 
     captured_seq: ChangeSeq = pydantic.Field()
     """
-    The namespace sequence that completes the backfill when reached.
+    The namespace sequence that completes the backfill when the index reaches it.
     """
 
     checkpoint_id: PinId = pydantic.Field()
     """
-    Checkpoint pinning the state being walked.
+    The checkpoint that pins the state being scanned.
     """
 
     cursor_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
-    The inode after which the scan resumes, absent before the first page.
+    The inode that the scan resumes after. It's absent before the first page.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace the status describes.
+    The namespace that the status describes.
     """
 
     next_run_no: RunNo = pydantic.Field()
     """
-    Run number the index allocates next.
+    The next run number that the index allocates.
     """
 
     reorganize_pending: bool = pydantic.Field()
     """
-    True while a partitioned segment reorganization is in progress.
+    Whether a partitioned segment reorganization is in progress.
     """
 
     if IS_PYDANTIC_V2:

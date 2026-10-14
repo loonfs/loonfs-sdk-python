@@ -16,32 +16,32 @@ class Snapshot(UniversalBaseModel):
 
     captured_seq: ChangeSeq = pydantic.Field()
     """
-    Namespace sequence captured by the snapshot.
+    The namespace sequence that the snapshot captured.
     """
 
     created_at_ms: int = pydantic.Field()
     """
-    Time the snapshot record was created, in Unix milliseconds.
+    The time the snapshot record was created, in Unix milliseconds.
     """
 
     expires_at_ms: int = pydantic.Field()
     """
-    When the snapshot expires, in Unix milliseconds.
+    The time the snapshot expires, in Unix milliseconds.
     """
 
     name: str = pydantic.Field()
     """
-    Snapshot label.
+    The snapshot's label.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace whose state the snapshot captured.
+    The namespace whose state the snapshot captured.
     """
 
     snapshot_id: PinId = pydantic.Field()
     """
-    Snapshot id.
+    The snapshot ID.
     """
 
     if IS_PYDANTIC_V2:

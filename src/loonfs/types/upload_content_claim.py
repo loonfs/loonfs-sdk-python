@@ -9,17 +9,17 @@ from .checksum import Checksum
 
 class UploadContentClaim(UniversalBaseModel):
     """
-    The size and checksum reported for a complete direct-upload payload.
+    The size and checksum of a complete direct upload payload.
     """
 
     checksum: Checksum = pydantic.Field()
     """
-    Whole-payload checksum in the algorithm required by this operation.
+    The checksum of the whole payload, in the algorithm that this operation requires.
     """
 
     size_bytes: int = pydantic.Field()
     """
-    Complete payload size in bytes.
+    The size of the complete payload in bytes.
     """
 
     if IS_PYDANTIC_V2:

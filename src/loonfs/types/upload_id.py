@@ -2,5 +2,5 @@
 
 UploadId = str
 """
-Durable id for one upload session.
+The durable ID of one upload session.
 """

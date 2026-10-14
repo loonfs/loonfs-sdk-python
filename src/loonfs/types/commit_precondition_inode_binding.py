@@ -10,17 +10,17 @@ from .inode_id import InodeId
 
 class CommitPreconditionInodeBinding(UniversalBaseModel):
     """
-    Requires a visible inode to retain the binding the caller read.
+    A requirement that a visible inode still has the binding that the caller read.
     """
 
     expected_binding_version: BindingVersion = pydantic.Field()
     """
-    Binding version observed by the caller.
+    The binding version that the caller observed.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Inode whose binding the caller read.
+    The inode whose binding the caller read.
     """
 
     if IS_PYDANTIC_V2:

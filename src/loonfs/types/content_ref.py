@@ -12,32 +12,33 @@ from .namespace_id import NamespaceId
 
 class ContentRef(UniversalBaseModel):
     """
-    Identifies a chain prefix by its owner, content id, size, and checksum.
+    A reference to a prefix of one content chain, by its owner, content ID, size, and checksum.
     """
 
     checksum: Checksum = pydantic.Field()
     """
-    Mandatory checksum over the referenced bytes.
+    The required checksum of the referenced bytes.
     """
 
     content_id: ContentId = pydantic.Field()
     """
-    Immutable identity of the content; with the owner, it determines the object key.
+    The immutable identity of the content. The content ID and the owner together determine the
+    object key.
     """
 
     kind: ContentRefKind = pydantic.Field()
     """
-    Content strategy used by the referenced content.
+    The kind of content reference. The format defines one kind, `blob_v1`.
     """
 
     owner_namespace_id: NamespaceId = pydantic.Field()
     """
-    Namespace that originally wrote the bytes.
+    The namespace that originally wrote the bytes.
     """
 
     size_bytes: int = pydantic.Field()
     """
-    Byte length of the referenced bytes, a prefix of the content object.
+    The length of the referenced bytes, which are a prefix of the content object.
     """
 
     if IS_PYDANTIC_V2:

@@ -22,11 +22,12 @@ from .revision_no import RevisionNo
 
 class PathEntry_Dir(UniversalBaseModel):
     """
-    Metadata for one path returned by stat and directory listings.
+    The metadata for one path, as stat and directory listings return it.
 
-    Attribute fields are included only when requested.
+    The response includes attribute fields only when the request asks for them.
 
-    Newer servers may report other inode kinds; clients read only the fields every entry carries.
+    A newer server can return an inode kind that isn't listed here. Clients should read only the
+    fields that every entry includes.
     """
 
     inode_kind: typing.Literal["dir"] = "dir"
@@ -56,11 +57,12 @@ class PathEntry_Dir(UniversalBaseModel):
 
 class PathEntry_File(UniversalBaseModel):
     """
-    Metadata for one path returned by stat and directory listings.
+    The metadata for one path, as stat and directory listings return it.
 
-    Attribute fields are included only when requested.
+    The response includes attribute fields only when the request asks for them.
 
-    Newer servers may report other inode kinds; clients read only the fields every entry carries.
+    A newer server can return an inode kind that isn't listed here. Clients should read only the
+    fields that every entry includes.
     """
 
     inode_kind: typing.Literal["file"] = "file"

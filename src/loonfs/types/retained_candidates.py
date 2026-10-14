@@ -8,42 +8,46 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RetainedCandidates(UniversalBaseModel):
     """
-    The candidates inspected but not deleted by one garbage-collection pass.
+    The candidates that one garbage collection pass inspected but didn't delete, counted by reason.
     """
 
     checkpoint_not_deletable: int = pydantic.Field()
     """
-    Checkpoint records whose owner or grace window prevents deletion.
+    The checkpoint records that the pass couldn't delete because of their owner or their grace
+    window.
     """
 
     no_provider_timestamp: int = pydantic.Field()
     """
-    Unreachable candidates without provider timestamps.
+    The unreferenced candidates that had no provider timestamp, so their age was unknown.
     """
 
     referenced: int = pydantic.Field()
     """
-    Candidates protected by current references or manifest discovery.
+    The candidates that a current root or the shared base filter protected, or that manifest
+    discovery needed.
     """
 
     unrecognized_key: int = pydantic.Field()
     """
-    Unrecognized keys retained from object families scanned by garbage collection.
+    The keys that garbage collection didn't recognize in the object families it scanned. The
+    pass keeps these objects.
     """
 
     upload_session_undecided: int = pydantic.Field()
     """
-    Upload sessions whose deletion safety could not be determined.
+    The upload sessions that the pass couldn't prove safe to delete.
     """
 
     upload_session_window: int = pydantic.Field()
     """
-    Upload sessions still protected by a lease or grace window.
+    The upload sessions that a lease or grace window still protected.
     """
 
     within_grace_window: int = pydantic.Field()
     """
-    Unreachable candidates younger than the grace window by their provider timestamps.
+    The unreferenced candidates that were younger than the grace window, according to their
+    provider timestamps.
     """
 
     if IS_PYDANTIC_V2:

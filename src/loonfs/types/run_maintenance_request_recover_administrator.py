@@ -9,12 +9,12 @@ from .principal_id import PrincipalId
 
 class RunMaintenanceRequestRecoverAdministrator(UniversalBaseModel):
     """
-    Restores a root administrator.
+    A job that restores a root administrator.
     """
 
     principal_id: PrincipalId = pydantic.Field()
     """
-    Principal receiving administrator rights.
+    The principal that receives administrator rights.
     """
 
     if IS_PYDANTIC_V2:

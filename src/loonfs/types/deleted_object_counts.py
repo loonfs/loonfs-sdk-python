@@ -8,42 +8,44 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class DeletedObjectCounts(UniversalBaseModel):
     """
-    Object counts deleted by one garbage-collection pass, grouped by family.
+    The number of objects that one garbage collection pass deleted, grouped by object family.
     """
 
     content_objects: int = pydantic.Field()
     """
-    Content objects no retained view names, deleted once older than the grace window.
+    The content objects the pass deleted because no retained view referenced them and they were
+    older than the grace window.
     """
 
     manifests: int = pydantic.Field()
     """
-    Unreferenced manifests deleted.
+    The unreferenced manifests that the pass deleted.
     """
 
     metadata_segments: int = pydantic.Field()
     """
-    Unreferenced metadata segments deleted.
+    The unreferenced metadata segments that the pass deleted.
     """
 
     retired_content_objects: int = pydantic.Field()
     """
-    Listed content objects deleted from a retired namespace.
+    The content objects that the pass listed under a retired namespace and deleted.
     """
 
     temporary_objects: int = pydantic.Field()
     """
-    Store temporary objects deleted once older than the grace window.
+    The store's temporary objects that the pass deleted because they were older than the grace
+    window.
     """
 
     upload_sessions: int = pydantic.Field()
     """
-    Upload-session control objects deleted after the reap window.
+    The upload session records that the pass deleted after their grace windows passed.
     """
 
     wal_objects: int = pydantic.Field()
     """
-    Unreferenced WAL objects deleted.
+    The unreferenced WAL objects that the pass deleted.
     """
 
     if IS_PYDANTIC_V2:

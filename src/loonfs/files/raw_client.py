@@ -54,16 +54,16 @@ class RawFilesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : str
-            Absolute file path
+            The absolute path of the file to read.
 
         revision_no : typing.Optional[RevisionNo]
-            Optional prior revision number; cannot be combined with snapshot_id
+            An earlier revision to read. It can't be combined with `snapshot_id`.
 
         snapshot_id : typing.Optional[PinId]
-            Use the file revision captured by this snapshot
+            The snapshot whose captured file revision to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -185,29 +185,29 @@ class RawFilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadResponse]:
         """
-        Returns ordered signed object ranges covering exactly `[start_offset, size_bytes)` of the selected revision. Each range carries its signed headers in `access.headers`, which the client sends unchanged. The client checks each range's length and the complete revision's checksum. A client that resumes asks for a new grant from its offset. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
+        Returns ordered, signed object ranges that cover exactly `[start_offset, size_bytes)` of the selected revision. Each range includes its signed headers in `access.headers`, and the client sends them unchanged. The client checks each range's length and the complete revision's checksum. To resume a download, a client asks for a new grant from its current offset. A deployment that can't presign URLs returns 501 `not_supported`. The proxied `GET /filesystem/content` route is still available, up to the `download.service_proxied.max_content_bytes` limit.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : AbsolutePath
-            Absolute path of the file to read.
+            The absolute path of the file to read.
 
         revision_no : typing.Optional[RevisionNo]
-            Revision to read. Omit it for the path's current revision.
-            Cannot be combined with `snapshot_id`.
+            The revision to read. Omit it to read the path's current revision. It can't be combined with
+            `snapshot_id`.
 
         snapshot_id : typing.Optional[PinId]
-            Read the file revision captured by this snapshot.
-            Cannot be combined with `revision_no`.
+            A snapshot to read the file from. The download reads the revision that the snapshot
+            captured. It can't be combined with `revision_no`.
 
         start_offset : typing.Optional[int]
-            The first byte the grant reads. It names `[start_offset, size_bytes)`
-            of the revision; a client that resumes asks for a new grant from the
-            bytes it holds. Must be below the revision's size, except 0 for a
-            revision of zero bytes.
+            The first byte that the grant reads. The grant covers the revision's bytes from
+            `start_offset` up to `size_bytes`, so a client that resumes a download asks for a new grant
+            that starts after the bytes it already has. The offset must be less than the revision's
+            size. For a revision of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -345,22 +345,22 @@ class RawFilesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : str
-            Absolute filesystem path
+            The absolute path of the directory to list.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque directory-list page cursor
+            The opaque cursor that the previous page returned.
 
         include_attributes : typing.Optional[bool]
-            Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+            Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
-            Use the directory state captured by this snapshot
+            The snapshot whose captured directory state to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -471,16 +471,16 @@ class RawFilesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : str
-            Absolute filesystem path
+            The absolute path to read.
 
         include_attributes : typing.Optional[bool]
-            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+            Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
-            Use the path state captured by this snapshot
+            The snapshot whose captured path state to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -488,7 +488,7 @@ class RawFilesClient:
         Returns
         -------
         HttpResponse[PathEntry]
-            Authoritative path entry
+            Path entry
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/entry",
@@ -584,21 +584,21 @@ class RawFilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListFileRevisionsResponse]:
         """
-        Resolves the current path to a file inode and returns revisions for that file. If the file could be renamed, use the inode revision API for stable identity.
+        Resolves the current path to a file inode and returns that file's revisions. If the file might be renamed, use the inode revisions route, which identifies the file by a stable ID.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : str
-            Absolute file path
+            The absolute path of the file.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque file-revisions page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -707,36 +707,36 @@ class RawFilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[GrepResponse]:
         """
-        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep index.
+        Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches in ascending `(inode_id, byte_offset)` order. It scans every revision committed after the index watermark, unless `allow_stale` skips them. The deployment must serve grep, and the namespace must have a materialized, active grep index.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         pattern : str
-            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
+            The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most 1024 bytes.
 
         case_insensitive : typing.Optional[bool]
-            Match case-insensitively (`true` or `false`). Defaults to `false`.
+            Whether matching ignores case. The default is `false`.
 
         path_prefix : typing.Optional[str]
-            Complete absolute path used to restrict matches. Cannot be combined with `inode_id`.
+            A complete absolute path that limits matches to its descendants. It can't be combined with `inode_id`.
 
         inode_id : typing.Optional[str]
-            Inode whose descendants restrict matches. Cannot be combined with `path_prefix`.
+            An inode that limits matches to its descendants. It can't be combined with `path_prefix`.
 
         allow_scan : typing.Optional[bool]
-            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+            Whether a pattern with no required literal bytes can use a capped exhaustive scan. The default is `false`.
 
         allow_stale : typing.Optional[bool]
-            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
+            Whether the server returns results from the index alone when the unindexed tail exceeds the scan budget. The default is `false`.
 
         limit : typing.Optional[int]
-            Maximum matches per page
+            The maximum number of matches per page.
 
         cursor : typing.Optional[str]
-            Opaque grep page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -878,16 +878,16 @@ class AsyncRawFilesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : str
-            Absolute file path
+            The absolute path of the file to read.
 
         revision_no : typing.Optional[RevisionNo]
-            Optional prior revision number; cannot be combined with snapshot_id
+            An earlier revision to read. It can't be combined with `snapshot_id`.
 
         snapshot_id : typing.Optional[PinId]
-            Use the file revision captured by this snapshot
+            The snapshot whose captured file revision to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -1010,29 +1010,29 @@ class AsyncRawFilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadResponse]:
         """
-        Returns ordered signed object ranges covering exactly `[start_offset, size_bytes)` of the selected revision. Each range carries its signed headers in `access.headers`, which the client sends unchanged. The client checks each range's length and the complete revision's checksum. A client that resumes asks for a new grant from its offset. Deployments that cannot presign answer 501 `not_supported`; the proxied `GET /filesystem/content` route stays available and is capped by `download.service_proxied.max_content_bytes`.
+        Returns ordered, signed object ranges that cover exactly `[start_offset, size_bytes)` of the selected revision. Each range includes its signed headers in `access.headers`, and the client sends them unchanged. The client checks each range's length and the complete revision's checksum. To resume a download, a client asks for a new grant from its current offset. A deployment that can't presign URLs returns 501 `not_supported`. The proxied `GET /filesystem/content` route is still available, up to the `download.service_proxied.max_content_bytes` limit.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : AbsolutePath
-            Absolute path of the file to read.
+            The absolute path of the file to read.
 
         revision_no : typing.Optional[RevisionNo]
-            Revision to read. Omit it for the path's current revision.
-            Cannot be combined with `snapshot_id`.
+            The revision to read. Omit it to read the path's current revision. It can't be combined with
+            `snapshot_id`.
 
         snapshot_id : typing.Optional[PinId]
-            Read the file revision captured by this snapshot.
-            Cannot be combined with `revision_no`.
+            A snapshot to read the file from. The download reads the revision that the snapshot
+            captured. It can't be combined with `revision_no`.
 
         start_offset : typing.Optional[int]
-            The first byte the grant reads. It names `[start_offset, size_bytes)`
-            of the revision; a client that resumes asks for a new grant from the
-            bytes it holds. Must be below the revision's size, except 0 for a
-            revision of zero bytes.
+            The first byte that the grant reads. The grant covers the revision's bytes from
+            `start_offset` up to `size_bytes`, so a client that resumes a download asks for a new grant
+            that starts after the bytes it already has. The offset must be less than the revision's
+            size. For a revision of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1170,22 +1170,22 @@ class AsyncRawFilesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : str
-            Absolute filesystem path
+            The absolute path of the directory to list.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque directory-list page cursor
+            The opaque cursor that the previous page returned.
 
         include_attributes : typing.Optional[bool]
-            Project each entry's attribute map and revision (`true` or `false`). Defaults to `false`: a page holds many entries and each map may be 64 KiB, so a listing does not carry them unless asked.
+            Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
-            Use the directory state captured by this snapshot
+            The snapshot whose captured directory state to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1296,16 +1296,16 @@ class AsyncRawFilesClient:
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : str
-            Absolute filesystem path
+            The absolute path to read.
 
         include_attributes : typing.Optional[bool]
-            Project the inode's attribute map and revision (`true` or `false`). Defaults to `true`: a stat answers for one path and a map is capped at 64 KiB.
+            Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
-            Use the path state captured by this snapshot
+            The snapshot whose captured path state to read.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1313,7 +1313,7 @@ class AsyncRawFilesClient:
         Returns
         -------
         AsyncHttpResponse[PathEntry]
-            Authoritative path entry
+            Path entry
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/filesystem/entry",
@@ -1409,21 +1409,21 @@ class AsyncRawFilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListFileRevisionsResponse]:
         """
-        Resolves the current path to a file inode and returns revisions for that file. If the file could be renamed, use the inode revision API for stable identity.
+        Resolves the current path to a file inode and returns that file's revisions. If the file might be renamed, use the inode revisions route, which identifies the file by a stable ID.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         path : str
-            Absolute file path
+            The absolute path of the file.
 
         limit : typing.Optional[int]
-            Maximum page size
+            The maximum page size.
 
         cursor : typing.Optional[str]
-            Opaque file-revisions page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1532,36 +1532,36 @@ class AsyncRawFilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[GrepResponse]:
         """
-        Searches file content with a regular expression, accelerated by the namespace's grep index. Matches are verified against the real pattern and returned in ascending `(inode_id, byte_offset)` order; revisions committed after the index watermark are scanned exhaustively unless `allow_stale` skips them. Requires this deployment to serve grep and the namespace to carry a materialized active grep index.
+        Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches in ascending `(inode_id, byte_offset)` order. It scans every revision committed after the index watermark, unless `allow_stale` skips them. The deployment must serve grep, and the namespace must have a materialized, active grep index.
 
         Parameters
         ----------
         namespace_id : str
-            Namespace id
+            The namespace ID.
 
         pattern : str
-            Pattern in the Rust `regex` crate's dialect. Its UTF-8 encoding must be at most 1024 bytes.
+            The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most 1024 bytes.
 
         case_insensitive : typing.Optional[bool]
-            Match case-insensitively (`true` or `false`). Defaults to `false`.
+            Whether matching ignores case. The default is `false`.
 
         path_prefix : typing.Optional[str]
-            Complete absolute path used to restrict matches. Cannot be combined with `inode_id`.
+            A complete absolute path that limits matches to its descendants. It can't be combined with `inode_id`.
 
         inode_id : typing.Optional[str]
-            Inode whose descendants restrict matches. Cannot be combined with `path_prefix`.
+            An inode that limits matches to its descendants. It can't be combined with `path_prefix`.
 
         allow_scan : typing.Optional[bool]
-            Permit a capped exhaustive scan when the pattern has no required grams (`true` or `false`). Defaults to `false`.
+            Whether a pattern with no required literal bytes can use a capped exhaustive scan. The default is `false`.
 
         allow_stale : typing.Optional[bool]
-            Return indexed-only results when the unindexed tail exceeds the scan budget (`true` or `false`). Defaults to `false`.
+            Whether the server returns results from the index alone when the unindexed tail exceeds the scan budget. The default is `false`.
 
         limit : typing.Optional[int]
-            Maximum matches per page
+            The maximum number of matches per page.
 
         cursor : typing.Optional[str]
-            Opaque grep page cursor
+            The opaque cursor that the previous page returned.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.

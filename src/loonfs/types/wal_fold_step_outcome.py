@@ -13,7 +13,7 @@ from .manifest_no import ManifestNo
 
 class WalFoldStepOutcome_AlreadyPublished(UniversalBaseModel):
     """
-    What the WAL fold part of a maintenance pass did.
+    What the WAL fold step of a maintenance pass did.
     """
 
     outcome: typing.Literal["already_published"] = "already_published"
@@ -32,7 +32,7 @@ class WalFoldStepOutcome_AlreadyPublished(UniversalBaseModel):
 
 class WalFoldStepOutcome_Folded(UniversalBaseModel):
     """
-    What the WAL fold part of a maintenance pass did.
+    What the WAL fold step of a maintenance pass did.
     """
 
     outcome: typing.Literal["folded"] = "folded"
@@ -50,7 +50,7 @@ class WalFoldStepOutcome_Folded(UniversalBaseModel):
 
 class WalFoldStepOutcome_NotNeeded(UniversalBaseModel):
     """
-    What the WAL fold part of a maintenance pass did.
+    What the WAL fold step of a maintenance pass did.
     """
 
     outcome: typing.Literal["not_needed"] = "not_needed"
@@ -67,7 +67,7 @@ class WalFoldStepOutcome_NotNeeded(UniversalBaseModel):
 
 class WalFoldStepOutcome_RetriesExhausted(UniversalBaseModel):
     """
-    What the WAL fold part of a maintenance pass did.
+    What the WAL fold step of a maintenance pass did.
     """
 
     outcome: typing.Literal["retries_exhausted"] = "retries_exhausted"

@@ -18,32 +18,32 @@ class FilesystemChangeFileCreated(UniversalBaseModel):
 
     binding_version: BindingVersion = pydantic.Field()
     """
-    Opaque identifier for the binding created by this event.
+    The binding that this event created. The value is opaque.
     """
 
     content_ref: ContentRef = pydantic.Field()
     """
-    Content of the first revision.
+    The content of the first revision.
     """
 
     display_name: DisplayName = pydantic.Field()
     """
-    User-facing spelling of the new entry.
+    The display name of the new entry.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Newly allocated namespace-scoped inode identity.
+    The newly allocated inode, unique within the namespace.
     """
 
     parent_inode_id: InodeId = pydantic.Field()
     """
-    Directory the new entry was bound under.
+    The directory that the new entry was bound under.
     """
 
     revision_no: RevisionNo = pydantic.Field()
     """
-    First revision number.
+    The file's first revision number.
     """
 
     if IS_PYDANTIC_V2:

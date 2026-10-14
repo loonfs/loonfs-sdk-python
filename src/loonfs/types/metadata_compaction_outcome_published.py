@@ -9,37 +9,37 @@ from .manifest_no import ManifestNo
 
 class MetadataCompactionOutcomePublished(UniversalBaseModel):
     """
-    The selected run window was replaced in a published manifest.
+    A streaming compaction merged the selected window and published the next manifest.
     """
 
     input_bytes: int = pydantic.Field()
     """
-    Input bytes read by the compaction.
+    The input bytes that the compaction read.
     """
 
     manifest_no: ManifestNo = pydantic.Field()
     """
-    Manifest published by the compaction.
+    The manifest that the compaction published.
     """
 
     output_bytes: int = pydantic.Field()
     """
-    Output bytes written by the compaction.
+    The output bytes that the compaction wrote.
     """
 
     output_segments: int = pydantic.Field()
     """
-    Output segments written by the compaction.
+    The output segments that the compaction wrote.
     """
 
     rows_read: int = pydantic.Field()
     """
-    Rows read by the compaction.
+    The rows that the compaction read.
     """
 
     rows_written: int = pydantic.Field()
     """
-    Rows written by the compaction.
+    The rows that the compaction wrote.
     """
 
     if IS_PYDANTIC_V2:

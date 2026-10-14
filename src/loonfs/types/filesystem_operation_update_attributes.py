@@ -15,12 +15,12 @@ from .inode_id import InodeId
 
 class FilesystemOperationUpdateAttributes(UniversalBaseModel):
     """
-    Write and remove attributes on the inode one path resolves to.
+    An operation that writes and removes attributes on the inode that a path resolves to.
     """
 
     expected_attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
     """
-    With an inode precondition, the attribute revision that must still be current.
+    The attribute revision that must still be current. It requires `expected_inode_id`.
     """
 
     expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
@@ -30,12 +30,12 @@ class FilesystemOperationUpdateAttributes(UniversalBaseModel):
 
     path: AbsolutePath = pydantic.Field()
     """
-    Absolute path that must resolve to a visible file or directory.
+    The absolute path, which must resolve to a visible file or directory.
     """
 
     remove: typing.Optional[typing.List[AttributeKey]] = pydantic.Field(default=None)
     """
-    The attribute keys to remove, including duplicates that validation must reject.
+    The attribute keys to remove. The server rejects a list that repeats a key.
     """
 
     set_: typing_extensions.Annotated[
@@ -43,12 +43,12 @@ class FilesystemOperationUpdateAttributes(UniversalBaseModel):
         FieldMetadata(alias="set"),
         pydantic.Field(
             alias="set",
-            description="The attributes to write, replacing values for matching keys and leaving\nother keys unchanged.",
+            description="The attributes to write. A new value replaces the current value of the same key, and\nother keys don't change.",
         ),
     ] = None
     """
-    The attributes to write, replacing values for matching keys and leaving
-    other keys unchanged.
+    The attributes to write. A new value replaces the current value of the same key, and
+    other keys don't change.
     """
 
     if IS_PYDANTIC_V2:

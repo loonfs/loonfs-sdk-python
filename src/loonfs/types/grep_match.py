@@ -11,42 +11,42 @@ from .revision_no import RevisionNo
 
 class GrepMatch(UniversalBaseModel):
     """
-    One line-oriented match.
+    One match and the line that contains it.
     """
 
     byte_offset: int = pydantic.Field()
     """
-    Byte offset of the match within the file.
+    The match's byte offset within the file.
     """
 
     inode_id: InodeId = pydantic.Field()
     """
-    Durable identity of the matched file.
+    The matched file's durable inode ID.
     """
 
     line: str = pydantic.Field()
     """
-    The matching line, truncated to the server's line cap.
+    The matching line, truncated to the server's maximum line length.
     """
 
     line_number: int = pydantic.Field()
     """
-    One-based line number of the match.
+    The match's line number, counting from 1.
     """
 
     line_truncated: bool = pydantic.Field()
     """
-    True when `line` was truncated.
+    Whether the server truncated `line`.
     """
 
     path: AbsolutePath = pydantic.Field()
     """
-    The file's absolute path, derived at the snapshot.
+    The file's absolute path in the view that the search read.
     """
 
     revision_no: RevisionNo = pydantic.Field()
     """
-    The matched revision (the newest visible one at the snapshot).
+    The matched revision, which is the file's newest revision visible to the search.
     """
 
     if IS_PYDANTIC_V2:

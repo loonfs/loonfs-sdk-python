@@ -8,7 +8,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class MetadataCompactionOutcomeAbandoned(UniversalBaseModel):
     """
-    Inputs changed, time ran out, or publication retries were exhausted.
+    The run stopped because its inputs changed, time ran out, or publication retries were
+    exhausted.
     """
 
     if IS_PYDANTIC_V2:

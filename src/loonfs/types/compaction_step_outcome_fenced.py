@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CompactionStepOutcomeFenced(UniversalBaseModel):
     """
-    A newer runtime holds the compactor epoch.
+    A newer runtime claimed the namespace's compactor epoch, so this step published nothing.
     """
 
     if IS_PYDANTIC_V2:

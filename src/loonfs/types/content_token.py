@@ -9,17 +9,18 @@ from .content_ref import ContentRef
 
 class ContentToken(UniversalBaseModel):
     """
-    Proof that a specific `content_ref` may be used in a later commit.
+    A signed token that shows a `content_ref` was verified in a completed upload, so a later
+    commit can use that reference.
     """
 
     content_ref: ContentRef = pydantic.Field()
     """
-    Content authorized by this token.
+    The content that this token authorizes.
     """
 
     token: str = pydantic.Field()
     """
-    The opaque server-signed token that clients must not parse.
+    The opaque token that the server signed. Clients must not parse it.
     """
 
     if IS_PYDANTIC_V2:

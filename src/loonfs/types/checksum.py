@@ -9,17 +9,17 @@ from .checksum_algorithm import ChecksumAlgorithm
 
 class Checksum(UniversalBaseModel):
     """
-    A checksum algorithm and its canonical lowercase hexadecimal value.
+    A checksum algorithm and the checksum's canonical lowercase hexadecimal value.
     """
 
     algorithm: ChecksumAlgorithm = pydantic.Field()
     """
-    Algorithm that produced `value`.
+    The algorithm that produced `value`.
     """
 
     value: str = pydantic.Field()
     """
-    The canonical lowercase hexadecimal checksum without a prefix.
+    The checksum in canonical lowercase hexadecimal, without a prefix.
     """
 
     if IS_PYDANTIC_V2:
