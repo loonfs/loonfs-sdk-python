@@ -24,8 +24,9 @@ class RetainedCandidates(UniversalBaseModel):
 
     referenced: int = pydantic.Field()
     """
-    The candidates that a current root or the shared base filter protected, or that manifest
-    discovery needed.
+    The candidates that a current root protected, or that manifest discovery needed. A content
+    object is protected when an extent filter of a rooted layout segment matches it, and a false
+    match keeps the object until no rooted view lists that segment.
     """
 
     unrecognized_key: int = pydantic.Field()

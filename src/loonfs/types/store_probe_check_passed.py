@@ -6,9 +6,14 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class MetadataCompactionOutcomeBoundedMergePublished(UniversalBaseModel):
+class StoreProbeCheckPassed(UniversalBaseModel):
     """
-    The selected window fit in a bounded step, and this run published it.
+    The store behaved as the contract requires.
+    """
+
+    name: str = pydantic.Field()
+    """
+    The check's stable name.
     """
 
     if IS_PYDANTIC_V2:

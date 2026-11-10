@@ -10,13 +10,13 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .access_revision_no import AccessRevisionNo
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
-from .compaction_step_outcome import CompactionStepOutcome
 from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
 from .deleted_object_counts import DeletedObjectCounts
-from .metadata_compaction_outcome import MetadataCompactionOutcome
+from .gc_skipped_work import GcSkippedWork
+from .metadata_maintenance_outcome import MetadataMaintenanceOutcome
+from .metadata_skipped_work import MetadataSkippedWork
 from .namespace_id import NamespaceId
 from .retained_candidates import RetainedCandidates
-from .wal_fold_step_outcome import WalFoldStepOutcome
 
 
 class RunMaintenanceResponse_Gc(UniversalBaseModel):
@@ -29,34 +29,12 @@ class RunMaintenanceResponse_Gc(UniversalBaseModel):
     kind: typing.Literal["gc"] = "gc"
     deleted: DeletedObjectCounts
     deleted_checkpoints_by_owner: DeletedCheckpointsByOwner
+    listed_bytes: int
     namespace_id: NamespaceId
     next_reclamation_at_ms: typing.Optional[int] = None
     reclaimable_at_ms: typing.Optional[int] = None
     retained: RetainedCandidates
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class RunMaintenanceResponse_GrepGc(UniversalBaseModel):
-    """
-    The result of one maintenance job.
-
-    The `kind` matches the request.
-    """
-
-    kind: typing.Literal["grep_gc"] = "grep_gc"
-    deleted_other_objects: int
-    deleted_segments: int
-    namespace_id: NamespaceId
-    namespace_reaped: bool
-    retained_candidates: int
+    skipped: typing.Optional[typing.List[GcSkippedWork]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -76,30 +54,10 @@ class RunMaintenanceResponse_Metadata(UniversalBaseModel):
     """
 
     kind: typing.Literal["metadata"] = "metadata"
-    compaction: CompactionStepOutcome
+    compaction_units: int
     namespace_id: NamespaceId
-    wal_fold: WalFoldStepOutcome
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class RunMaintenanceResponse_MetadataCompaction(UniversalBaseModel):
-    """
-    The result of one maintenance job.
-
-    The `kind` matches the request.
-    """
-
-    kind: typing.Literal["metadata_compaction"] = "metadata_compaction"
-    compaction: MetadataCompactionOutcome
-    namespace_id: NamespaceId
+    outcome: MetadataMaintenanceOutcome
+    skipped: typing.Optional[typing.List[MetadataSkippedWork]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -155,14 +113,34 @@ class RunMaintenanceResponse_Retention(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class RunMaintenanceResponse_RetentionWindow(UniversalBaseModel):
+    """
+    The result of one maintenance job.
+
+    The `kind` matches the request.
+    """
+
+    kind: typing.Literal["retention_window"] = "retention_window"
+    namespace_id: NamespaceId
+    retention_window_ms: typing.Optional[int] = None
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 RunMaintenanceResponse = typing_extensions.Annotated[
     typing.Union[
         RunMaintenanceResponse_Gc,
-        RunMaintenanceResponse_GrepGc,
         RunMaintenanceResponse_Metadata,
-        RunMaintenanceResponse_MetadataCompaction,
         RunMaintenanceResponse_RecoverAdministrator,
         RunMaintenanceResponse_Retention,
+        RunMaintenanceResponse_RetentionWindow,
     ],
     pydantic.Field(discriminator="kind"),
 ]

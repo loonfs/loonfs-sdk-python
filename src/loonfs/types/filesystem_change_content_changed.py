@@ -11,7 +11,19 @@ from .revision_no import RevisionNo
 
 class FilesystemChangeContentChanged(UniversalBaseModel):
     """
-    A file received a new current revision from a put or revision restore.
+    A file received a new current revision from a put, a copy, an append, or a revision
+    restore.
+    """
+
+    append_offset: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    The offset where the appended bytes begin, present when an append published the
+    revision.
+    
+    It equals the base revision's `size_bytes`, so the new revision's bytes are the base
+    revision's bytes followed by the bytes from this offset to `size_bytes`. It's
+    present for every append, including one that starts a new content ID, and absent for
+    a put, a copy, or a revision restore.
     """
 
     content_ref: ContentRef = pydantic.Field()

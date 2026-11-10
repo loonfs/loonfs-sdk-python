@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
 from .deleted_object_counts import DeletedObjectCounts
+from .gc_skipped_work import GcSkippedWork
 from .namespace_id import NamespaceId
 from .retained_candidates import RetainedCandidates
 
@@ -23,6 +24,12 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     deleted_checkpoints_by_owner: DeletedCheckpointsByOwner = pydantic.Field()
     """
     The checkpoint records that the pass deleted, counted by owner.
+    """
+
+    listed_bytes: int = pydantic.Field()
+    """
+    The bytes of every object that the pass listed under the namespace, each object once, before
+    the pass's deletes.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -43,6 +50,11 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     retained: RetainedCandidates = pydantic.Field()
     """
     The candidates that the pass kept at deletion time, counted by reason.
+    """
+
+    skipped: typing.Optional[typing.List[GcSkippedWork]] = pydantic.Field(default=None)
+    """
+    The work that this pass skipped at a limit, by reason. Empty when the pass skipped nothing.
     """
 
     if IS_PYDANTIC_V2:

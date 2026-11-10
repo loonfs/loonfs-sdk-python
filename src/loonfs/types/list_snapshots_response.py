@@ -10,7 +10,7 @@ from .snapshot import Snapshot
 
 class ListSnapshotsResponse(UniversalBaseModel):
     """
-    One page of live snapshots.
+    One page of snapshots, including expired snapshots that garbage collection hasn't deleted yet.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -25,7 +25,7 @@ class ListSnapshotsResponse(UniversalBaseModel):
 
     snapshots: typing.List[Snapshot] = pydantic.Field()
     """
-    The live snapshot records, in ascending snapshot ID order.
+    The snapshot records, in ascending snapshot ID order.
     """
 
     if IS_PYDANTIC_V2:

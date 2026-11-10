@@ -38,7 +38,7 @@ class SnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListSnapshotsResponse:
         """
-        Lists live snapshots in snapshot ID order. The list leaves out deleted and expired snapshots.
+        Lists snapshots in snapshot ID order. An expired snapshot stays in the list until garbage collection deletes it, after its expiry plus the grace window. The list leaves out fork pins, which the maintenance checkpoint inventory lists.
 
         Parameters
         ----------
@@ -57,7 +57,7 @@ class SnapshotsClient:
         Returns
         -------
         ListSnapshotsResponse
-            Live snapshots
+            Snapshots
 
         Examples
         --------
@@ -79,10 +79,15 @@ class SnapshotsClient:
         return _response.data
 
     def create(
-        self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: str,
+        *,
+        name: str,
+        ttl_ms: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> Snapshot:
         """
-        Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
+        Creates a snapshot of the current namespace state. The server first folds any WAL tail after the current manifest. Every accepted call creates a new snapshot with a new ID, and the name is a label, not a key. A snapshot with `ttl_ms` expires that many milliseconds from the server's current time, and a snapshot without it doesn't expire. The snapshot keeps its manifest until it's deleted, either explicitly or by garbage collection after it expires and its grace window passes.
 
         Parameters
         ----------
@@ -92,8 +97,9 @@ class SnapshotsClient:
         name : str
             The snapshot's label, which doesn't need to be unique.
 
-        ttl_ms : int
-            The snapshot's lifetime in milliseconds, counted from the server's current time.
+        ttl_ms : typing.Optional[int]
+            The snapshot's lifetime in milliseconds, counted from the server's current time. Omit it to
+            keep the snapshot until it's deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -118,7 +124,6 @@ class SnapshotsClient:
         client.snapshots.create(
             namespace_id="namespace_id",
             name="name",
-            ttl_ms=1000000,
         )
         """
         _response = self._raw_client.create(namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options)
@@ -128,7 +133,7 @@ class SnapshotsClient:
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Snapshot:
         """
-        Returns one live snapshot, as the snapshot listing returns it. A missing ID, or the ID of a pin that isn't a snapshot, returns `snapshot_not_found`, and an expired snapshot returns `snapshot_gone`.
+        Returns one snapshot, as the snapshot listing returns it, including an expired snapshot that garbage collection hasn't deleted. A missing ID, or the ID of a fork pin, returns `snapshot_not_found`.
 
         Parameters
         ----------
@@ -144,7 +149,7 @@ class SnapshotsClient:
         Returns
         -------
         Snapshot
-            Live snapshot
+            Snapshot
 
         Examples
         --------
@@ -170,7 +175,7 @@ class SnapshotsClient:
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
         """
-        Deletes a snapshot pin. A missing ID returns `snapshot_not_found`.
+        Deletes a snapshot. Garbage collection can then reclaim its unreferenced manifest and runs. Deleting a missing snapshot succeeds, so repeating the request has the same result. The ID of a fork pin returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
 
         Parameters
         ----------
@@ -186,7 +191,7 @@ class SnapshotsClient:
         Returns
         -------
         DeleteSnapshotResponse
-            Snapshot record deleted
+            Snapshot deleted, or already absent
 
         Examples
         --------
@@ -217,7 +222,7 @@ class SnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Snapshot:
         """
-        Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+        Moves an unexpired snapshot's expiry to `ttl_ms` from the server's current time. The expiry never moves earlier, so a snapshot without an expiry is returned unchanged. A missing or expired snapshot returns `snapshot_not_found`. Repeating the request has the same result.
 
         Parameters
         ----------
@@ -284,7 +289,7 @@ class AsyncSnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListSnapshotsResponse:
         """
-        Lists live snapshots in snapshot ID order. The list leaves out deleted and expired snapshots.
+        Lists snapshots in snapshot ID order. An expired snapshot stays in the list until garbage collection deletes it, after its expiry plus the grace window. The list leaves out fork pins, which the maintenance checkpoint inventory lists.
 
         Parameters
         ----------
@@ -303,7 +308,7 @@ class AsyncSnapshotsClient:
         Returns
         -------
         ListSnapshotsResponse
-            Live snapshots
+            Snapshots
 
         Examples
         --------
@@ -335,10 +340,15 @@ class AsyncSnapshotsClient:
         return _response.data
 
     async def create(
-        self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: str,
+        *,
+        name: str,
+        ttl_ms: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> Snapshot:
         """
-        Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
+        Creates a snapshot of the current namespace state. The server first folds any WAL tail after the current manifest. Every accepted call creates a new snapshot with a new ID, and the name is a label, not a key. A snapshot with `ttl_ms` expires that many milliseconds from the server's current time, and a snapshot without it doesn't expire. The snapshot keeps its manifest until it's deleted, either explicitly or by garbage collection after it expires and its grace window passes.
 
         Parameters
         ----------
@@ -348,8 +358,9 @@ class AsyncSnapshotsClient:
         name : str
             The snapshot's label, which doesn't need to be unique.
 
-        ttl_ms : int
-            The snapshot's lifetime in milliseconds, counted from the server's current time.
+        ttl_ms : typing.Optional[int]
+            The snapshot's lifetime in milliseconds, counted from the server's current time. Omit it to
+            keep the snapshot until it's deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -379,7 +390,6 @@ class AsyncSnapshotsClient:
             await client.snapshots.create(
                 namespace_id="namespace_id",
                 name="name",
-                ttl_ms=1000000,
             )
 
 
@@ -394,7 +404,7 @@ class AsyncSnapshotsClient:
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Snapshot:
         """
-        Returns one live snapshot, as the snapshot listing returns it. A missing ID, or the ID of a pin that isn't a snapshot, returns `snapshot_not_found`, and an expired snapshot returns `snapshot_gone`.
+        Returns one snapshot, as the snapshot listing returns it, including an expired snapshot that garbage collection hasn't deleted. A missing ID, or the ID of a fork pin, returns `snapshot_not_found`.
 
         Parameters
         ----------
@@ -410,7 +420,7 @@ class AsyncSnapshotsClient:
         Returns
         -------
         Snapshot
-            Live snapshot
+            Snapshot
 
         Examples
         --------
@@ -444,7 +454,7 @@ class AsyncSnapshotsClient:
         self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> DeleteSnapshotResponse:
         """
-        Deletes a snapshot pin. A missing ID returns `snapshot_not_found`.
+        Deletes a snapshot. Garbage collection can then reclaim its unreferenced manifest and runs. Deleting a missing snapshot succeeds, so repeating the request has the same result. The ID of a fork pin returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
 
         Parameters
         ----------
@@ -460,7 +470,7 @@ class AsyncSnapshotsClient:
         Returns
         -------
         DeleteSnapshotResponse
-            Snapshot record deleted
+            Snapshot deleted, or already absent
 
         Examples
         --------
@@ -499,7 +509,7 @@ class AsyncSnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> Snapshot:
         """
-        Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+        Moves an unexpired snapshot's expiry to `ttl_ms` from the server's current time. The expiry never moves earlier, so a snapshot without an expiry is returned unchanged. A missing or expired snapshot returns `snapshot_not_found`. Repeating the request has the same result.
 
         Parameters
         ----------

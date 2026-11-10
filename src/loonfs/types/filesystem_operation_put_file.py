@@ -25,8 +25,7 @@ class FilesystemOperationPutFile(UniversalBaseModel):
 
     content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
     """
-    The uploaded content, which a content token must cover. Set this field or
-    `inline_content`, but not both.
+    The content reference. Set this field or `inline_content`, but not both.
     """
 
     expected_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)

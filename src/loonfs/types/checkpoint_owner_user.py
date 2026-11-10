@@ -8,7 +8,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class CheckpointOwnerUser(UniversalBaseModel):
     """
-    A pin that an operator created. It's deleted by its ID or after it expires.
+    A snapshot, which a caller created. It's deleted by its ID or after it expires.
     """
 
     name: str = pydantic.Field()

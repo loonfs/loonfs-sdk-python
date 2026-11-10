@@ -8,7 +8,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RunMaintenanceRequestMetadata(UniversalBaseModel):
     """
-    A job that folds the WAL tail and runs one bounded compaction step.
+    A job that folds the WAL tail and compacts metadata until nothing is due, or until the job
+    reaches its work limit.
     """
 
     max_wal_tail_objects: typing.Optional[int] = pydantic.Field(default=None)

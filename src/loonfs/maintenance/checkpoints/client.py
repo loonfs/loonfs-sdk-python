@@ -5,12 +5,8 @@ import typing
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.request_options import RequestOptions
 from ...types.checkpoint import Checkpoint
-from ...types.delete_checkpoint_response import DeleteCheckpointResponse
 from ...types.list_checkpoints_response import ListCheckpointsResponse
 from .raw_client import AsyncRawCheckpointsClient, RawCheckpointsClient
-
-# this is used as the default value for optional parameters
-OMIT = typing.cast(typing.Any, ...)
 
 
 class CheckpointsClient:
@@ -37,7 +33,7 @@ class CheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListCheckpointsResponse:
         """
-        Lists existing pins in checkpoint ID order. An expired pin stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
+        Lists every pin, snapshots and fork pins, in checkpoint ID order. This is the inventory of what keeps manifests from garbage collection. An expired snapshot stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
 
         Parameters
         ----------
@@ -77,62 +73,11 @@ class CheckpointsClient:
         _response = self._raw_client.list(namespace_id, limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
-    def create(
-        self,
-        namespace_id: str,
-        *,
-        name: str,
-        ttl_ms: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> Checkpoint:
-        """
-        Creates a user checkpoint record that pins the current namespace view. The server first folds any WAL tail after the current manifest. Every call creates a new record with a new ID, and the name is a label, not a key. The record keeps its manifest until the record is deleted, either explicitly or by garbage collection after the record expires and its grace window passes. Because of that, routine maintenance should fold the WAL instead of creating checkpoints. This is a maintenance operation, not a file change.
-
-        Parameters
-        ----------
-        namespace_id : str
-            The namespace ID.
-
-        name : str
-            A label to record on the checkpoint. Labels don't need to be unique.
-
-        ttl_ms : typing.Optional[int]
-            The checkpoint's lifetime in milliseconds. Omit it to keep the checkpoint until it's
-            deleted.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Checkpoint
-            The created checkpoint
-
-        Examples
-        --------
-        from loonfs.server import LoonFS
-
-        client = LoonFS(
-            actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
-            principals="YOUR_PRINCIPALS",
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-        client.maintenance.checkpoints.create(
-            namespace_id="namespace_id",
-            name="name",
-        )
-        """
-        _response = self._raw_client.create(namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options)
-        return _response.data
-
     def retrieve(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Checkpoint:
         """
-        Returns one existing pin, as the checkpoint listing returns it, including an expired pin that garbage collection hasn't deleted. A missing ID returns `checkpoint_not_found`.
+        Returns one existing pin, as the checkpoint listing returns it, including an expired snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
@@ -170,48 +115,6 @@ class CheckpointsClient:
         _response = self._raw_client.retrieve(namespace_id, checkpoint_id, request_options=request_options)
         return _response.data
 
-    def delete(
-        self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteCheckpointResponse:
-        """
-        Deletes a user checkpoint pin. A missing ID returns `checkpoint_not_found`. Garbage collection can then reclaim the pin's unreferenced manifest and runs.
-
-        Parameters
-        ----------
-        namespace_id : str
-            The namespace ID.
-
-        checkpoint_id : str
-            The checkpoint ID.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeleteCheckpointResponse
-            Checkpoint pin deleted
-
-        Examples
-        --------
-        from loonfs.server import LoonFS
-
-        client = LoonFS(
-            actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
-            principals="YOUR_PRINCIPALS",
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-        client.maintenance.checkpoints.delete(
-            namespace_id="namespace_id",
-            checkpoint_id="checkpoint_id",
-        )
-        """
-        _response = self._raw_client.delete(namespace_id, checkpoint_id, request_options=request_options)
-        return _response.data
-
 
 class AsyncCheckpointsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -237,7 +140,7 @@ class AsyncCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListCheckpointsResponse:
         """
-        Lists existing pins in checkpoint ID order. An expired pin stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
+        Lists every pin, snapshots and fork pins, in checkpoint ID order. This is the inventory of what keeps manifests from garbage collection. An expired snapshot stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
 
         Parameters
         ----------
@@ -287,72 +190,11 @@ class AsyncCheckpointsClient:
         )
         return _response.data
 
-    async def create(
-        self,
-        namespace_id: str,
-        *,
-        name: str,
-        ttl_ms: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> Checkpoint:
-        """
-        Creates a user checkpoint record that pins the current namespace view. The server first folds any WAL tail after the current manifest. Every call creates a new record with a new ID, and the name is a label, not a key. The record keeps its manifest until the record is deleted, either explicitly or by garbage collection after the record expires and its grace window passes. Because of that, routine maintenance should fold the WAL instead of creating checkpoints. This is a maintenance operation, not a file change.
-
-        Parameters
-        ----------
-        namespace_id : str
-            The namespace ID.
-
-        name : str
-            A label to record on the checkpoint. Labels don't need to be unique.
-
-        ttl_ms : typing.Optional[int]
-            The checkpoint's lifetime in milliseconds. Omit it to keep the checkpoint until it's
-            deleted.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        Checkpoint
-            The created checkpoint
-
-        Examples
-        --------
-        import asyncio
-
-        from loonfs.server import AsyncLoonFS
-
-        client = AsyncLoonFS(
-            actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
-            principals="YOUR_PRINCIPALS",
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-
-
-        async def main() -> None:
-            await client.maintenance.checkpoints.create(
-                namespace_id="namespace_id",
-                name="name",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.create(
-            namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options
-        )
-        return _response.data
-
     async def retrieve(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> Checkpoint:
         """
-        Returns one existing pin, as the checkpoint listing returns it, including an expired pin that garbage collection hasn't deleted. A missing ID returns `checkpoint_not_found`.
+        Returns one existing pin, as the checkpoint listing returns it, including an expired snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
@@ -396,54 +238,4 @@ class AsyncCheckpointsClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.retrieve(namespace_id, checkpoint_id, request_options=request_options)
-        return _response.data
-
-    async def delete(
-        self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> DeleteCheckpointResponse:
-        """
-        Deletes a user checkpoint pin. A missing ID returns `checkpoint_not_found`. Garbage collection can then reclaim the pin's unreferenced manifest and runs.
-
-        Parameters
-        ----------
-        namespace_id : str
-            The namespace ID.
-
-        checkpoint_id : str
-            The checkpoint ID.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        DeleteCheckpointResponse
-            Checkpoint pin deleted
-
-        Examples
-        --------
-        import asyncio
-
-        from loonfs.server import AsyncLoonFS
-
-        client = AsyncLoonFS(
-            actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
-            principals="YOUR_PRINCIPALS",
-            token="YOUR_TOKEN",
-            base_url="https://yourhost.com/path/to/api",
-        )
-
-
-        async def main() -> None:
-            await client.maintenance.checkpoints.delete(
-                namespace_id="namespace_id",
-                checkpoint_id="checkpoint_id",
-            )
-
-
-        asyncio.run(main())
-        """
-        _response = await self._raw_client.delete(namespace_id, checkpoint_id, request_options=request_options)
         return _response.data

@@ -11,7 +11,7 @@ from .pin_id import PinId
 
 class Snapshot(UniversalBaseModel):
     """
-    A live snapshot.
+    A snapshot, which keeps one version of a namespace readable until it's deleted or expires.
     """
 
     captured_seq: ChangeSeq = pydantic.Field()
@@ -24,9 +24,10 @@ class Snapshot(UniversalBaseModel):
     The time the snapshot record was created, in Unix milliseconds.
     """
 
-    expires_at_ms: int = pydantic.Field()
+    expires_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The time the snapshot expires, in Unix milliseconds.
+    The time the snapshot expires, in Unix milliseconds. A snapshot without it doesn't expire.
+    An expired snapshot can't be read, and it's listed until garbage collection deletes it.
     """
 
     name: str = pydantic.Field()

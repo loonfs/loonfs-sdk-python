@@ -4,19 +4,19 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .compaction_step_outcome import CompactionStepOutcome
+from .metadata_maintenance_outcome import MetadataMaintenanceOutcome
+from .metadata_skipped_work import MetadataSkippedWork
 from .namespace_id import NamespaceId
-from .wal_fold_step_outcome import WalFoldStepOutcome
 
 
 class RunMaintenanceResponseMetadata(UniversalBaseModel):
     """
-    The result of the WAL fold and one bounded compaction step.
+    Whether metadata maintenance is caught up, and the compaction units that the job published.
     """
 
-    compaction: CompactionStepOutcome = pydantic.Field()
+    compaction_units: int = pydantic.Field()
     """
-    What the bounded compaction step did.
+    The compaction units that this run published. A unit compacts one family group's window.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -24,9 +24,14 @@ class RunMaintenanceResponseMetadata(UniversalBaseModel):
     The namespace that this run maintained.
     """
 
-    wal_fold: WalFoldStepOutcome = pydantic.Field()
+    outcome: MetadataMaintenanceOutcome = pydantic.Field()
     """
-    What the WAL fold did.
+    Whether work is still due when the run returns.
+    """
+
+    skipped: typing.Optional[typing.List[MetadataSkippedWork]] = pydantic.Field(default=None)
+    """
+    The work that this run skipped at a limit, by reason. Empty when the run skipped nothing.
     """
 
     if IS_PYDANTIC_V2:

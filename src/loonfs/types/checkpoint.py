@@ -23,7 +23,7 @@ class Checkpoint(UniversalBaseModel):
 
     checkpoint_id: PinId = pydantic.Field()
     """
-    The checkpoint's durable ID. Use it to delete the checkpoint.
+    The checkpoint's durable ID. For a user pin, it's also the snapshot's `snapshot_id`.
     """
 
     created_at_ms: int = pydantic.Field()

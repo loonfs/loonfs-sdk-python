@@ -17,6 +17,12 @@ class DeletedObjectCounts(UniversalBaseModel):
     older than the grace window.
     """
 
+    extension_segments: int = pydantic.Field()
+    """
+    The unreferenced extension segments, such as the grep index's segments, that the pass
+    deleted.
+    """
+
     manifests: int = pydantic.Field()
     """
     The unreferenced manifests that the pass deleted.

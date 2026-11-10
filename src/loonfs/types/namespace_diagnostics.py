@@ -42,12 +42,6 @@ class NamespaceDiagnostics(UniversalBaseModel):
     The sequence of the namespace's newest visible commit.
     """
 
-    live_checkpoints: int = pydantic.Field()
-    """
-    The number of user checkpoints, including expired records that garbage collection hasn't
-    deleted yet.
-    """
-
     live_snapshots: int = pydantic.Field()
     """
     The number of snapshots that hadn't expired when the diagnostics read began.

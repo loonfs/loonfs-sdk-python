@@ -4,24 +4,23 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
-from .manifest_no import ManifestNo
+from .namespace_id import NamespaceId
 
 
-class WalFoldStepOutcomeAlreadyPublished(UniversalBaseModel):
+class RunMaintenanceResponseRetentionWindow(UniversalBaseModel):
     """
-    The current manifest already included the captured WAL tail, so this step didn't publish a
-    manifest.
-    """
-
-    attempted_seq: ChangeSeq = pydantic.Field()
-    """
-    The sequence that this step tried to fold through.
+    The namespace's retention window after the job.
     """
 
-    current_manifest_no: ManifestNo = pydantic.Field()
+    namespace_id: NamespaceId = pydantic.Field()
     """
-    The number of the namespace's current manifest.
+    The namespace whose retention window the job set or cleared.
+    """
+
+    retention_window_ms: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    The namespace's retention window, in milliseconds. It's absent when the namespace has no
+    window.
     """
 
     if IS_PYDANTIC_V2:

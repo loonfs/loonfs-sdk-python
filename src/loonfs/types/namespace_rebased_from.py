@@ -4,23 +4,24 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .metadata_compaction_outcome import MetadataCompactionOutcome
+from .change_seq import ChangeSeq
 from .namespace_id import NamespaceId
 
 
-class RunMaintenanceResponseMetadataCompaction(UniversalBaseModel):
+class NamespaceRebasedFrom(UniversalBaseModel):
     """
-    The result of one unit of metadata compaction.
-    """
-
-    compaction: MetadataCompactionOutcome = pydantic.Field()
-    """
-    The outcome of the compaction.
+    The fork whose unmerged commits a rebase replays into the namespace that the rebase created.
     """
 
-    namespace_id: NamespaceId = pydantic.Field()
+    resume_after_seq: ChangeSeq = pydantic.Field()
     """
-    The namespace that this run compacted.
+    The fork sequence that the fork's next merge would have started after when the rebase
+    created the namespace. The namespace's first replay commit starts after it.
+    """
+
+    source_namespace_id: NamespaceId = pydantic.Field()
+    """
+    The fork whose commits the namespace's replay commits apply.
     """
 
     if IS_PYDANTIC_V2:

@@ -6,11 +6,14 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class CompactionStepOutcomeMetadataCompactionRequired(UniversalBaseModel):
+class StoreProbeCheckUnsupported(UniversalBaseModel):
     """
-    A family group's window is too large for one bounded merge.
+    The store doesn't support this optional capability.
+    """
 
-    Run the `metadata_compaction` job, which compacts the group by streaming.
+    name: str = pydantic.Field()
+    """
+    The check's stable name.
     """
 
     if IS_PYDANTIC_V2:

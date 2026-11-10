@@ -81,6 +81,7 @@ class FilesystemChange_ContentChanged(UniversalBaseModel):
     """
 
     kind: typing.Literal["content_changed"] = "content_changed"
+    append_offset: typing.Optional[int] = None
     content_ref: ContentRef
     inode_id: InodeId
     revision_no: RevisionNo

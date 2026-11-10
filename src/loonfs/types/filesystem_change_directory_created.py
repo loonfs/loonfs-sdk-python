@@ -26,7 +26,7 @@ class FilesystemChangeDirectoryCreated(UniversalBaseModel):
 
     inode_id: InodeId = pydantic.Field()
     """
-    The newly allocated inode, unique within the namespace.
+    The new inode, unique within the namespace.
     """
 
     parent_inode_id: InodeId = pydantic.Field()

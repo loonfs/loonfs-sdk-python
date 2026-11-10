@@ -6,9 +6,16 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class CompactionStepOutcomeNotNeeded(UniversalBaseModel):
+class RunMaintenanceRequestRetentionWindow(UniversalBaseModel):
     """
-    No family group had enough delta runs to merge.
+    A job that sets or clears the namespace's retention window.
+    """
+
+    retention_window_ms: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    The namespace's new retention window, in milliseconds, which must be positive. Without it,
+    the job clears the namespace's window, and the reference server's maintenance sweep no
+    longer advances the namespace's floor.
     """
 
     if IS_PYDANTIC_V2:

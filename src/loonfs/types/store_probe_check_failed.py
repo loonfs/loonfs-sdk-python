@@ -6,10 +6,19 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 
-class RunMaintenanceRequestMetadataCompaction(UniversalBaseModel):
+class StoreProbeCheckFailed(UniversalBaseModel):
     """
-    A job that runs one unit of metadata compaction, which is either one bounded merge or one
-    streaming compaction of a family group.
+    The store violated the contract or the operation failed.
+    """
+
+    message: str = pydantic.Field()
+    """
+    The expected and actual behavior for a failed check.
+    """
+
+    name: str = pydantic.Field()
+    """
+    The check's stable name.
     """
 
     if IS_PYDANTIC_V2:
