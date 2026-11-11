@@ -11,19 +11,13 @@ from ...core.parse_error import ParsingError
 from ...core.pydantic_utilities import parse_obj_as
 from ...core.request_options import RequestOptions
 from ...errors.bad_request_error import BadRequestError
-from ...errors.content_too_large_error import ContentTooLargeError
-from ...errors.gone_error import GoneError
 from ...errors.not_found_error import NotFoundError
 from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.checkpoint import Checkpoint
-from ...types.delete_checkpoint_response import DeleteCheckpointResponse
 from ...types.error_response import ErrorResponse
 from ...types.list_checkpoints_response import ListCheckpointsResponse
 from pydantic import ValidationError
-
-# this is used as the default value for optional parameters
-OMIT = typing.cast(typing.Any, ...)
 
 
 class RawCheckpointsClient:
@@ -39,7 +33,7 @@ class RawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListCheckpointsResponse]:
         """
-        Lists existing pins in checkpoint ID order. An expired pin stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
+        Lists every pin, snapshots and fork pins, in checkpoint ID order. This is the inventory of what keeps manifests from garbage collection. An expired snapshot stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
 
         Parameters
         ----------
@@ -132,143 +126,11 @@ class RawCheckpointsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def create(
-        self,
-        namespace_id: str,
-        *,
-        name: str,
-        ttl_ms: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[Checkpoint]:
-        """
-        Creates a user checkpoint record that pins the current namespace view. The server first folds any WAL tail after the current manifest. Every call creates a new record with a new ID, and the name is a label, not a key. The record keeps its manifest until the record is deleted, either explicitly or by garbage collection after the record expires and its grace window passes. Because of that, routine maintenance should fold the WAL instead of creating checkpoints. This is a maintenance operation, not a file change.
-
-        Parameters
-        ----------
-        namespace_id : str
-            The namespace ID.
-
-        name : str
-            A label to record on the checkpoint. Labels don't need to be unique.
-
-        ttl_ms : typing.Optional[int]
-            The checkpoint's lifetime in milliseconds. Omit it to keep the checkpoint until it's
-            deleted.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[Checkpoint]
-            The created checkpoint
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = self._client_wrapper.httpx_client.request(
-            f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints",
-            method="POST",
-            json={
-                "name": name,
-                "ttl_ms": ttl_ms,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=_request_options_with_retries_disabled,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Checkpoint,
-                    parse_obj_as(
-                        type_=Checkpoint,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 413:
-                raise ContentTooLargeError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
     def retrieve(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Checkpoint]:
         """
-        Returns one existing pin, as the checkpoint listing returns it, including an expired pin that garbage collection hasn't deleted. A missing ID returns `checkpoint_not_found`.
+        Returns one existing pin, as the checkpoint listing returns it, including an expired snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
@@ -354,99 +216,6 @@ class RawCheckpointsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    def delete(
-        self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[DeleteCheckpointResponse]:
-        """
-        Deletes a user checkpoint pin. A missing ID returns `checkpoint_not_found`. Garbage collection can then reclaim the pin's unreferenced manifest and runs.
-
-        Parameters
-        ----------
-        namespace_id : str
-            The namespace ID.
-
-        checkpoint_id : str
-            The checkpoint ID.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        HttpResponse[DeleteCheckpointResponse]
-            Checkpoint pin deleted
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = self._client_wrapper.httpx_client.request(
-            f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints/{encode_path_param(checkpoint_id)}",
-            method="DELETE",
-            request_options=_request_options_with_retries_disabled,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DeleteCheckpointResponse,
-                    parse_obj_as(
-                        type_=DeleteCheckpointResponse,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return HttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
 
 class AsyncRawCheckpointsClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -461,7 +230,7 @@ class AsyncRawCheckpointsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListCheckpointsResponse]:
         """
-        Lists existing pins in checkpoint ID order. An expired pin stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
+        Lists every pin, snapshots and fork pins, in checkpoint ID order. This is the inventory of what keeps manifests from garbage collection. An expired snapshot stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
 
         Parameters
         ----------
@@ -554,143 +323,11 @@ class AsyncRawCheckpointsClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
-    async def create(
-        self,
-        namespace_id: str,
-        *,
-        name: str,
-        ttl_ms: typing.Optional[int] = OMIT,
-        request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[Checkpoint]:
-        """
-        Creates a user checkpoint record that pins the current namespace view. The server first folds any WAL tail after the current manifest. Every call creates a new record with a new ID, and the name is a label, not a key. The record keeps its manifest until the record is deleted, either explicitly or by garbage collection after the record expires and its grace window passes. Because of that, routine maintenance should fold the WAL instead of creating checkpoints. This is a maintenance operation, not a file change.
-
-        Parameters
-        ----------
-        namespace_id : str
-            The namespace ID.
-
-        name : str
-            A label to record on the checkpoint. Labels don't need to be unique.
-
-        ttl_ms : typing.Optional[int]
-            The checkpoint's lifetime in milliseconds. Omit it to keep the checkpoint until it's
-            deleted.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[Checkpoint]
-            The created checkpoint
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = await self._client_wrapper.httpx_client.request(
-            f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints",
-            method="POST",
-            json={
-                "name": name,
-                "ttl_ms": ttl_ms,
-            },
-            headers={
-                "content-type": "application/json",
-            },
-            request_options=_request_options_with_retries_disabled,
-            omit=OMIT,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    Checkpoint,
-                    parse_obj_as(
-                        type_=Checkpoint,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 413:
-                raise ContentTooLargeError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
     async def retrieve(
         self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Checkpoint]:
         """
-        Returns one existing pin, as the checkpoint listing returns it, including an expired pin that garbage collection hasn't deleted. A missing ID returns `checkpoint_not_found`.
+        Returns one existing pin, as the checkpoint listing returns it, including an expired snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
@@ -719,99 +356,6 @@ class AsyncRawCheckpointsClient:
                     Checkpoint,
                     parse_obj_as(
                         type_=Checkpoint,  # type: ignore
-                        object_=_response.json(),
-                    ),
-                )
-                return AsyncHttpResponse(response=_response, data=_data)
-            if _response.status_code == 400:
-                raise BadRequestError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 401:
-                raise UnauthorizedError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 404:
-                raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 503:
-                raise ServiceUnavailableError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        typing.Any,
-                        parse_obj_as(
-                            type_=typing.Any,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            _response_json = _response.json()
-        except JSONDecodeError:
-            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
-        except ValidationError as e:
-            raise ParsingError(
-                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
-            )
-        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
-
-    async def delete(
-        self, namespace_id: str, checkpoint_id: str, *, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[DeleteCheckpointResponse]:
-        """
-        Deletes a user checkpoint pin. A missing ID returns `checkpoint_not_found`. Garbage collection can then reclaim the pin's unreferenced manifest and runs.
-
-        Parameters
-        ----------
-        namespace_id : str
-            The namespace ID.
-
-        checkpoint_id : str
-            The checkpoint ID.
-
-        request_options : typing.Optional[RequestOptions]
-            Request-specific configuration.
-
-        Returns
-        -------
-        AsyncHttpResponse[DeleteCheckpointResponse]
-            Checkpoint pin deleted
-        """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
-        _response = await self._client_wrapper.httpx_client.request(
-            f"v0/maintenance/namespaces/{encode_path_param(namespace_id)}/checkpoints/{encode_path_param(checkpoint_id)}",
-            method="DELETE",
-            request_options=_request_options_with_retries_disabled,
-        )
-        try:
-            if 200 <= _response.status_code < 300:
-                _data = typing.cast(
-                    DeleteCheckpointResponse,
-                    parse_obj_as(
-                        type_=DeleteCheckpointResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

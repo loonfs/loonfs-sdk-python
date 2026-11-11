@@ -22,7 +22,8 @@ class ListChangesResponse(UniversalBaseModel):
 
     changes: typing.List[Commit] = pydantic.Field()
     """
-    The logical commits after `after_seq`, in ascending namespace sequence order.
+    The logical commits after `after_seq`, in ascending namespace sequence order. A commit that
+    the page returns in part lists only the page's events.
     """
 
     head_seq: ChangeSeq = pydantic.Field()
@@ -38,7 +39,15 @@ class ListChangesResponse(UniversalBaseModel):
     next_after_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
     The cursor for the next page, when another page remains. It's absent on the page that
-    reaches `head_seq`.
+    reaches `head_seq`. When the page ends inside a commit, it's that commit's sequence.
+    """
+
+    next_event_index: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    The index of the first event of the commit at `next_after_seq` that the page didn't
+    return, when the request set `split_commits` and the page ended inside that commit. The
+    next request passes it as `event_index`. It's absent when the page ended at a commit
+    boundary.
     """
 
     if IS_PYDANTIC_V2:

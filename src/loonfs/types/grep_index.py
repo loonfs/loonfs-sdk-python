@@ -11,7 +11,6 @@ from .change_seq import ChangeSeq
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .pin_id import PinId
-from .run_no import RunNo
 
 
 class GrepIndex_Active(UniversalBaseModel):
@@ -23,7 +22,6 @@ class GrepIndex_Active(UniversalBaseModel):
     built_through_seq: ChangeSeq
     namespace_id: NamespaceId
     next_event_index: int
-    next_run_no: RunNo
     reorganize_pending: bool
 
     if IS_PYDANTIC_V2:
@@ -46,7 +44,6 @@ class GrepIndex_Backfilling(UniversalBaseModel):
     checkpoint_id: PinId
     cursor_inode_id: typing.Optional[InodeId] = None
     namespace_id: NamespaceId
-    next_run_no: RunNo
     reorganize_pending: bool
 
     if IS_PYDANTIC_V2:
@@ -66,7 +63,6 @@ class GrepIndex_Disabled(UniversalBaseModel):
 
     status: typing.Literal["disabled"] = "disabled"
     namespace_id: NamespaceId
-    next_run_no: RunNo
     reorganize_pending: bool
 
     if IS_PYDANTIC_V2:

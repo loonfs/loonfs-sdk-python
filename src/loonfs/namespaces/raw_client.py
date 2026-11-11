@@ -14,18 +14,23 @@ from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
 from ..errors.content_too_large_error import ContentTooLargeError
+from ..errors.forbidden_error import ForbiddenError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
+from ..errors.not_implemented_error import NotImplementedError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.change_seq import ChangeSeq
+from ..types.commit import Commit
+from ..types.commit_id import CommitId
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.error_response import ErrorResponse
 from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
 from ..types.namespace_metadata import NamespaceMetadata
-from ..types.namespace_naming import NamespaceNaming
+from ..types.next_merge_range_response import NextMergeRangeResponse
 from ..types.pin_id import PinId
+from ..types.rebase_fork_response import RebaseForkResponse
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -41,7 +46,7 @@ class RawNamespacesClient:
         *,
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
-        naming: typing.Optional[NamespaceNaming] = OMIT,
+        retention_window_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[NamespaceMetadata]:
         """
@@ -56,9 +61,11 @@ class RawNamespacesClient:
             The namespace's access mode, which can't be changed after the namespace is created. The
             default is unrestricted.
 
-        naming : typing.Optional[NamespaceNaming]
-            How the namespace compares sibling names. The mode can't be changed after the namespace is
-            created, and it defaults to `case_insensitive`.
+        retention_window_ms : typing.Optional[int]
+            The namespace's retention window, in milliseconds, which must be positive. The reference
+            server's maintenance sweep uses this window for the namespace. Without this field, the
+            namespace's window is the server's `retention_window_ms` setting, if the server has that
+            setting. A `retention_window` maintenance run can change or clear the window later.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -79,7 +86,7 @@ class RawNamespacesClient:
                     object_=access, annotation=NamespaceAccess, direction="write"
                 ),
                 "namespace_id": namespace_id,
-                "naming": naming,
+                "retention_window_ms": retention_window_ms,
             },
             headers={
                 "content-type": "application/json",
@@ -401,7 +408,7 @@ class RawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[NamespaceMetadata]:
         """
-        Creates a new namespace from the source namespace's current head or from a live snapshot.
+        Creates a new namespace from the source namespace's current head or from an unexpired snapshot.
 
         Parameters
         ----------
@@ -412,7 +419,7 @@ class RawNamespacesClient:
             The durable ID of the new namespace that the fork creates.
 
         snapshot_id : typing.Optional[PinId]
-            A live snapshot to fork from. Without it, the fork starts from the current head.
+            An unexpired snapshot to fork from. Without it, the fork starts from the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -534,6 +541,485 @@ class RawNamespacesClient:
             )
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
+    def next_merge_range(
+        self, namespace_id: str, *, source: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[NextMergeRangeResponse]:
+        """
+        Returns where the fork's next merge into the namespace starts, without planning the merge: the fork's newest merge into the namespace, the fork sequence that the next merge starts after, the fork point, and the fork's head. When the namespace is a rebase's new fork for the fork, the range continues the new fork's replay commits. When a retention floor would refuse the merge with `rebootstrap_required`, the response's `outcome` says which floor instead of failing.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the fork merges into.
+
+        source : NamespaceId
+            The fork whose next merge into the namespace the query reads. It has to be a fork of the
+            namespace, or the fork that a rebase replays into the namespace.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[NextMergeRangeResponse]
+            The fork's next merge range
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/merges",
+            method="GET",
+            params={
+                "source": source,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    NextMergeRangeResponse,
+                    parse_obj_as(
+                        type_=NextMergeRangeResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def merge(
+        self,
+        namespace_id: str,
+        *,
+        commit_id: CommitId,
+        source_namespace_id: NamespaceId,
+        message: typing.Optional[str] = OMIT,
+        through_seq: typing.Optional[ChangeSeq] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[Commit]:
+        """
+        Merges a fork's commits into the namespace as one commit. The merge applies the fork's net change since its previous merge, or since the fork point, through `through_seq` or the fork's head. A change that conflicts with the namespace returns `merge_conflict`, and nothing is committed. The commit ID makes retries idempotent. The merge's WAL object counts toward the namespace's fold triggers like any commit.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the merge commits into.
+
+        commit_id : CommitId
+            The caller's idempotency key for the merge.
+
+        source_namespace_id : NamespaceId
+            The fork whose commits the merge applies. It has to be a fork of the namespace that the
+            request merges into.
+
+        message : typing.Optional[str]
+            An annotation from the caller. The message is part of the merge's identity.
+
+        through_seq : typing.Optional[ChangeSeq]
+            The fork sequence that the merge applies the fork's commits through. Without it, the merge
+            applies them through the fork's head.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[Commit]
+            Fork merged
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/merges",
+            method="POST",
+            json={
+                "commit_id": commit_id,
+                "message": message,
+                "source_namespace_id": source_namespace_id,
+                "through_seq": through_seq,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    Commit,
+                    parse_obj_as(
+                        type_=Commit,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    def rebase(
+        self,
+        namespace_id: str,
+        *,
+        commit_id: CommitId,
+        new_namespace_id: NamespaceId,
+        source_namespace_id: NamespaceId,
+        message: typing.Optional[str] = OMIT,
+        through_seq: typing.Optional[ChangeSeq] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[RebaseForkResponse]:
+        """
+        Replays a fork's unmerged commits into a new fork of the namespace as one replay commit, which applies the changes that don't conflict with the namespace and reports the ones that do. The first rebase of a fork creates the new fork from the namespace's head, and a later rebase continues into it. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork without the conflict report.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the fork was forked from.
+
+        commit_id : CommitId
+            The caller's idempotency key for the replay commit.
+
+        new_namespace_id : NamespaceId
+            The new fork that the replay commit commits into. The first rebase of the fork creates it
+            from the namespace's head, and a later rebase continues into it.
+
+        source_namespace_id : NamespaceId
+            The fork whose unmerged commits the rebase replays. It has to be a fork of the namespace
+            that the request names in its path.
+
+        message : typing.Optional[str]
+            An annotation from the caller. The message is part of the replay commit's identity.
+
+        through_seq : typing.Optional[ChangeSeq]
+            The fork sequence that the replay commit replays the fork's commits through. Without it,
+            the replay commit replays them through the fork's head.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[RebaseForkResponse]
+            Fork rebased
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/rebases",
+            method="POST",
+            json={
+                "commit_id": commit_id,
+                "message": message,
+                "new_namespace_id": new_namespace_id,
+                "source_namespace_id": source_namespace_id,
+                "through_seq": through_seq,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    RebaseForkResponse,
+                    parse_obj_as(
+                        type_=RebaseForkResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
 
 class AsyncRawNamespacesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -544,7 +1030,7 @@ class AsyncRawNamespacesClient:
         *,
         namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
-        naming: typing.Optional[NamespaceNaming] = OMIT,
+        retention_window_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[NamespaceMetadata]:
         """
@@ -559,9 +1045,11 @@ class AsyncRawNamespacesClient:
             The namespace's access mode, which can't be changed after the namespace is created. The
             default is unrestricted.
 
-        naming : typing.Optional[NamespaceNaming]
-            How the namespace compares sibling names. The mode can't be changed after the namespace is
-            created, and it defaults to `case_insensitive`.
+        retention_window_ms : typing.Optional[int]
+            The namespace's retention window, in milliseconds, which must be positive. The reference
+            server's maintenance sweep uses this window for the namespace. Without this field, the
+            namespace's window is the server's `retention_window_ms` setting, if the server has that
+            setting. A `retention_window` maintenance run can change or clear the window later.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -582,7 +1070,7 @@ class AsyncRawNamespacesClient:
                     object_=access, annotation=NamespaceAccess, direction="write"
                 ),
                 "namespace_id": namespace_id,
-                "naming": naming,
+                "retention_window_ms": retention_window_ms,
             },
             headers={
                 "content-type": "application/json",
@@ -904,7 +1392,7 @@ class AsyncRawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[NamespaceMetadata]:
         """
-        Creates a new namespace from the source namespace's current head or from a live snapshot.
+        Creates a new namespace from the source namespace's current head or from an unexpired snapshot.
 
         Parameters
         ----------
@@ -915,7 +1403,7 @@ class AsyncRawNamespacesClient:
             The durable ID of the new namespace that the fork creates.
 
         snapshot_id : typing.Optional[PinId]
-            A live snapshot to fork from. Without it, the fork starts from the current head.
+            An unexpired snapshot to fork from. Without it, the fork starts from the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1008,6 +1496,485 @@ class AsyncRawNamespacesClient:
                 )
             if _response.status_code == 413:
                 raise ContentTooLargeError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def next_merge_range(
+        self, namespace_id: str, *, source: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[NextMergeRangeResponse]:
+        """
+        Returns where the fork's next merge into the namespace starts, without planning the merge: the fork's newest merge into the namespace, the fork sequence that the next merge starts after, the fork point, and the fork's head. When the namespace is a rebase's new fork for the fork, the range continues the new fork's replay commits. When a retention floor would refuse the merge with `rebootstrap_required`, the response's `outcome` says which floor instead of failing.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the fork merges into.
+
+        source : NamespaceId
+            The fork whose next merge into the namespace the query reads. It has to be a fork of the
+            namespace, or the fork that a rebase replays into the namespace.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[NextMergeRangeResponse]
+            The fork's next merge range
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/merges",
+            method="GET",
+            params={
+                "source": source,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    NextMergeRangeResponse,
+                    parse_obj_as(
+                        type_=NextMergeRangeResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def merge(
+        self,
+        namespace_id: str,
+        *,
+        commit_id: CommitId,
+        source_namespace_id: NamespaceId,
+        message: typing.Optional[str] = OMIT,
+        through_seq: typing.Optional[ChangeSeq] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[Commit]:
+        """
+        Merges a fork's commits into the namespace as one commit. The merge applies the fork's net change since its previous merge, or since the fork point, through `through_seq` or the fork's head. A change that conflicts with the namespace returns `merge_conflict`, and nothing is committed. The commit ID makes retries idempotent. The merge's WAL object counts toward the namespace's fold triggers like any commit.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the merge commits into.
+
+        commit_id : CommitId
+            The caller's idempotency key for the merge.
+
+        source_namespace_id : NamespaceId
+            The fork whose commits the merge applies. It has to be a fork of the namespace that the
+            request merges into.
+
+        message : typing.Optional[str]
+            An annotation from the caller. The message is part of the merge's identity.
+
+        through_seq : typing.Optional[ChangeSeq]
+            The fork sequence that the merge applies the fork's commits through. Without it, the merge
+            applies them through the fork's head.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[Commit]
+            Fork merged
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/merges",
+            method="POST",
+            json={
+                "commit_id": commit_id,
+                "message": message,
+                "source_namespace_id": source_namespace_id,
+                "through_seq": through_seq,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    Commit,
+                    parse_obj_as(
+                        type_=Commit,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
+    async def rebase(
+        self,
+        namespace_id: str,
+        *,
+        commit_id: CommitId,
+        new_namespace_id: NamespaceId,
+        source_namespace_id: NamespaceId,
+        message: typing.Optional[str] = OMIT,
+        through_seq: typing.Optional[ChangeSeq] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[RebaseForkResponse]:
+        """
+        Replays a fork's unmerged commits into a new fork of the namespace as one replay commit, which applies the changes that don't conflict with the namespace and reports the ones that do. The first rebase of a fork creates the new fork from the namespace's head, and a later rebase continues into it. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork without the conflict report.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the fork was forked from.
+
+        commit_id : CommitId
+            The caller's idempotency key for the replay commit.
+
+        new_namespace_id : NamespaceId
+            The new fork that the replay commit commits into. The first rebase of the fork creates it
+            from the namespace's head, and a later rebase continues into it.
+
+        source_namespace_id : NamespaceId
+            The fork whose unmerged commits the rebase replays. It has to be a fork of the namespace
+            that the request names in its path.
+
+        message : typing.Optional[str]
+            An annotation from the caller. The message is part of the replay commit's identity.
+
+        through_seq : typing.Optional[ChangeSeq]
+            The fork sequence that the replay commit replays the fork's commits through. Without it,
+            the replay commit replays them through the fork's head.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[RebaseForkResponse]
+            Fork rebased
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            f"v0/namespaces/{encode_path_param(namespace_id)}/rebases",
+            method="POST",
+            json={
+                "commit_id": commit_id,
+                "message": message,
+                "new_namespace_id": new_namespace_id,
+                "source_namespace_id": source_namespace_id,
+                "through_seq": through_seq,
+            },
+            headers={
+                "content-type": "application/json",
+            },
+            request_options=request_options,
+            omit=OMIT,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    RebaseForkResponse,
+                    parse_obj_as(
+                        type_=RebaseForkResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 404:
+                raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 413:
+                raise ContentTooLargeError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 501:
+                raise NotImplementedError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

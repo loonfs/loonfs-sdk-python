@@ -3,12 +3,24 @@
 import typing
 
 import pydantic
-from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel, universal_field_validator
 from .actor_id import ActorId
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .filesystem_change import FilesystemChange
+from .merge import Merge
 from .namespace_id import NamespaceId
+
+_EVENT_KINDS = frozenset({
+    "access_changed",
+    "attributes_changed",
+    "content_changed",
+    "deleted",
+    "directory_created",
+    "file_created",
+    "moved",
+    "undeleted",
+})
 
 
 class Commit(UniversalBaseModel):
@@ -42,6 +54,12 @@ class Commit(UniversalBaseModel):
     The semantic filesystem changes that the commit applied, in request order.
     """
 
+    merge: typing.Optional[Merge] = pydantic.Field(default=None)
+    """
+    The fork and the range of its commits that the commit applied, when the commit is a merge.
+    It's absent for every other commit.
+    """
+
     message: typing.Optional[str] = pydantic.Field(default=None)
     """
     The caller's optional annotation for the commit.
@@ -51,6 +69,20 @@ class Commit(UniversalBaseModel):
     """
     The namespace that changed.
     """
+
+    @universal_field_validator("events", pre=True)
+    def _skip_unknown_event_kinds(cls, events: typing.Any) -> typing.Any:
+        # A newer server can return an event kind that this SDK doesn't define, and the
+        # API requires a client to skip it. An event without a kind still fails validation.
+        if not isinstance(events, list):
+            return events
+        return [
+            event
+            for event in events
+            if not isinstance(event, dict)
+            or not isinstance(event.get("kind"), str)
+            or event["kind"] in _EVENT_KINDS
+        ]
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

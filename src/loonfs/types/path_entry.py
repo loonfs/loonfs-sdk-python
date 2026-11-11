@@ -6,7 +6,7 @@ import typing
 
 import pydantic
 import typing_extensions
-from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel, universal_field_validator
 from .absolute_path import AbsolutePath
 from .actor_id import ActorId
 from .attributes import Attributes
@@ -18,6 +18,11 @@ from .display_name import DisplayName
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .revision_no import RevisionNo
+
+_INODE_KINDS = frozenset({
+    "dir",
+    "file",
+})
 
 
 class PathEntry_Dir(UniversalBaseModel):
@@ -71,7 +76,7 @@ class PathEntry_File(UniversalBaseModel):
     attributes_updated_at_ms: typing.Optional[int] = None
     attributes_updated_by: typing.Optional[ActorId] = None
     binding_version: typing.Optional[BindingVersion] = None
-    content_ref: ContentRef
+    content_ref: typing.Optional[ContentRef] = None
     created_at_ms: int
     created_by: ActorId
     display_name: typing.Optional[DisplayName] = None
@@ -95,6 +100,48 @@ class PathEntry_File(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-PathEntry = typing_extensions.Annotated[
-    typing.Union[PathEntry_Dir, PathEntry_File], pydantic.Field(discriminator="inode_kind")
+class PathEntry_Unknown(UniversalBaseModel):
+    """
+    An entry of an inode kind that this version of the SDK doesn't define, such as a kind that a
+    newer server added. It has the fields that every entry includes.
+    """
+
+    inode_kind: str
+    attributes: typing.Optional[Attributes] = None
+    attributes_revision_no: typing.Optional[AttributesRevisionNo] = None
+    attributes_updated_at_ms: typing.Optional[int] = None
+    attributes_updated_by: typing.Optional[ActorId] = None
+    binding_version: typing.Optional[BindingVersion] = None
+    created_at_ms: int
+    created_by: ActorId
+    display_name: typing.Optional[DisplayName] = None
+    head_seq: ChangeSeq
+    inode_id: InodeId
+    namespace_id: NamespaceId
+    parent_inode_id: typing.Optional[InodeId] = None
+    path: AbsolutePath
+
+    @universal_field_validator("inode_kind")
+    def _reject_defined_inode_kinds(cls, inode_kind: str) -> str:
+        # A directory or file entry decodes only as its own member, so an entry of a defined
+        # kind that's missing a field fails validation instead of decoding as this member.
+        if inode_kind in _INODE_KINDS:
+            raise ValueError(f"an entry of kind {inode_kind!r} doesn't match that kind's fields")
+        return inode_kind
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
+PathEntry = typing.Union[
+    typing_extensions.Annotated[
+        typing.Union[PathEntry_Dir, PathEntry_File], pydantic.Field(discriminator="inode_kind")
+    ],
+    PathEntry_Unknown,
 ]

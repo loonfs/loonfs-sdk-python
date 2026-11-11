@@ -20,7 +20,9 @@ class RunMaintenanceResponseRetention(UniversalBaseModel):
 
     retention_floor_seq: ChangeSeq = pydantic.Field()
     """
-    The new retention floor, which is the minimum sequence for incremental replay.
+    The retention floor that the advance reached, which is the minimum sequence for incremental
+    replay. It's below the target when LoonFS reads a commit that's less than one hour old
+    before it reaches the target.
     """
 
     if IS_PYDANTIC_V2:

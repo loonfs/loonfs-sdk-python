@@ -25,6 +25,12 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     The checkpoint records that the pass deleted, counted by owner.
     """
 
+    listed_bytes: int = pydantic.Field()
+    """
+    The bytes of every object that the pass listed under the namespace, each object once, before
+    the pass's deletes.
+    """
+
     namespace_id: NamespaceId = pydantic.Field()
     """
     The namespace that the pass ran against.
@@ -32,7 +38,7 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
 
     next_reclamation_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The earliest future retirement deadline, pin deletion time, or upload cleanup time.
+    The earliest future retirement deadline or pin deletion time.
     """
 
     reclaimable_at_ms: typing.Optional[int] = pydantic.Field(default=None)

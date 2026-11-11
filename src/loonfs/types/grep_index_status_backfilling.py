@@ -8,7 +8,6 @@ from .change_seq import ChangeSeq
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
 from .pin_id import PinId
-from .run_no import RunNo
 
 
 class GrepIndexStatusBackfilling(UniversalBaseModel):
@@ -34,11 +33,6 @@ class GrepIndexStatusBackfilling(UniversalBaseModel):
     namespace_id: NamespaceId = pydantic.Field()
     """
     The namespace that the status describes.
-    """
-
-    next_run_no: RunNo = pydantic.Field()
-    """
-    The next run number that the index allocates.
     """
 
     reorganize_pending: bool = pydantic.Field()

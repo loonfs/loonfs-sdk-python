@@ -11,6 +11,7 @@ from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
 from ..types.path_entry import PathEntry
 from ..types.pin_id import PinId
+from ..types.read_consistency import ReadConsistency
 from ..types.revision_no import RevisionNo
 from .raw_client import AsyncRawFilesClient, RawFilesClient
 
@@ -40,10 +41,13 @@ class FilesClient:
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
         snapshot_id: typing.Optional[PinId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        range: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[bytes]:
         """
-        Returns the current file bytes, a retained revision, or the revision captured by a live snapshot.
+        Returns the current file bytes, a retained revision, or the revision captured by an unexpired snapshot. A `Range` header asks for one byte range of the file instead.
 
         Parameters
         ----------
@@ -58,6 +62,19 @@ class FilesClient:
 
         snapshot_id : typing.Optional[PinId]
             The snapshot whose captured file revision to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
+        range : typing.Optional[str]
+            One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -85,7 +102,14 @@ class FilesClient:
         )
         """
         with self._raw_client.content(
-            namespace_id, path=path, revision_no=revision_no, snapshot_id=snapshot_id, request_options=request_options
+            namespace_id,
+            path=path,
+            revision_no=revision_no,
+            snapshot_id=snapshot_id,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
+            range=range,
+            request_options=request_options,
         ) as r:
             yield from r.data
 
@@ -94,6 +118,8 @@ class FilesClient:
         namespace_id: str,
         *,
         path: AbsolutePath,
+        consistency: typing.Optional[ReadConsistency] = OMIT,
+        max_staleness_ms: typing.Optional[int] = OMIT,
         revision_no: typing.Optional[RevisionNo] = OMIT,
         snapshot_id: typing.Optional[PinId] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
@@ -109,6 +135,16 @@ class FilesClient:
 
         path : AbsolutePath
             The absolute path of the file to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+            be, in milliseconds. The default is the server's `max_staleness_ms`.
 
         revision_no : typing.Optional[RevisionNo]
             The revision to read. Omit it to read the path's current revision. It can't be combined with
@@ -152,6 +188,8 @@ class FilesClient:
         _response = self._raw_client.create_download(
             namespace_id,
             path=path,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
             revision_no=revision_no,
             snapshot_id=snapshot_id,
             start_offset=start_offset,
@@ -167,11 +205,14 @@ class FilesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        recursive: typing.Optional[bool] = None,
         snapshot_id: typing.Optional[PinId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListPathEntriesResponse:
         """
-        Lists a directory from the current state or a live snapshot.
+        Lists a directory from the current state or an unexpired snapshot.
 
         Parameters
         ----------
@@ -188,10 +229,26 @@ class FilesClient:
             The opaque cursor that the previous page returned.
 
         include_attributes : typing.Optional[bool]
-            Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
+            Whether the response includes each entry's attribute map and attribute revision. The default
+            is `false`, because a page can have many entries and each map can be up to 64 KiB.
+
+        recursive : typing.Optional[bool]
+            Whether the listing includes the directory's whole subtree, depth first, with each
+            directory's entry before its descendants. The default is `false`, which lists the
+            directory's children only.
 
         snapshot_id : typing.Optional[PinId]
             The snapshot whose captured directory state to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -225,7 +282,10 @@ class FilesClient:
             limit=limit,
             cursor=cursor,
             include_attributes=include_attributes,
+            recursive=recursive,
             snapshot_id=snapshot_id,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
             request_options=request_options,
         )
         return _response.data
@@ -237,10 +297,12 @@ class FilesClient:
         path: str,
         include_attributes: typing.Optional[bool] = None,
         snapshot_id: typing.Optional[PinId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PathEntry:
         """
-        Returns path metadata from the current state or a live snapshot.
+        Returns path metadata from the current state or an unexpired snapshot.
 
         Parameters
         ----------
@@ -251,10 +313,21 @@ class FilesClient:
             The absolute path to read.
 
         include_attributes : typing.Optional[bool]
-            Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
+            Whether the response includes the inode's attribute map and attribute revision. The default
+            is `true`, because a stat reads one path and a map is at most 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
             The snapshot whose captured path state to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -287,6 +360,8 @@ class FilesClient:
             path=path,
             include_attributes=include_attributes,
             snapshot_id=snapshot_id,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
             request_options=request_options,
         )
         return _response.data
@@ -298,6 +373,8 @@ class FilesClient:
         path: str,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListFileRevisionsResponse:
         """
@@ -316,6 +393,16 @@ class FilesClient:
 
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -343,7 +430,13 @@ class FilesClient:
         )
         """
         _response = self._raw_client.list_revisions(
-            namespace_id, path=path, limit=limit, cursor=cursor, request_options=request_options
+            namespace_id,
+            path=path,
+            limit=limit,
+            cursor=cursor,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
+            request_options=request_options,
         )
         return _response.data
 
@@ -362,7 +455,7 @@ class FilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> GrepResponse:
         """
-        Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches in ascending `(inode_id, byte_offset)` order. It scans every revision committed after the index watermark, unless `allow_stale` skips them. The deployment must serve grep, and the namespace must have a materialized, active grep index.
+        Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches ordered by the content value of each file's revision, then by `inode_id`, and then by `byte_offset`. It scans every revision committed after the index watermark, unless `allow_stale` skips them. A first page reads the namespace at its head, and a later page reads at the first page's head. The deployment must serve grep, and the namespace must have a materialized, active grep index.
 
         Parameters
         ----------
@@ -370,22 +463,26 @@ class FilesClient:
             The namespace ID.
 
         pattern : str
-            The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most 1024 bytes.
+            The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most
+            1024 bytes.
 
         case_insensitive : typing.Optional[bool]
             Whether matching ignores case. The default is `false`.
 
         path_prefix : typing.Optional[str]
-            A complete absolute path that limits matches to its descendants. It can't be combined with `inode_id`.
+            A complete absolute path that limits matches to its descendants. It can't be combined with
+            `inode_id`.
 
         inode_id : typing.Optional[str]
             An inode that limits matches to its descendants. It can't be combined with `path_prefix`.
 
         allow_scan : typing.Optional[bool]
-            Whether a pattern with no required literal bytes can use a capped exhaustive scan. The default is `false`.
+            Whether a pattern with no required literal bytes can use a capped exhaustive scan. The
+            default is `false`.
 
         allow_stale : typing.Optional[bool]
-            Whether the server returns results from the index alone when the unindexed tail exceeds the scan budget. The default is `false`.
+            Whether the server returns results from the index alone when the unindexed tail exceeds the
+            scan budget. The default is `false`.
 
         limit : typing.Optional[int]
             The maximum number of matches per page.
@@ -416,7 +513,7 @@ class FilesClient:
         client.files.grep(
             namespace_id="namespace_id",
             pattern="pattern",
-            inode_id="ino_123",
+            inode_id="ino_000000r0000013kje0d47gc8kw",
         )
         """
         _response = self._raw_client.grep(
@@ -456,10 +553,13 @@ class AsyncFilesClient:
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
         snapshot_id: typing.Optional[PinId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        range: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[bytes]:
         """
-        Returns the current file bytes, a retained revision, or the revision captured by a live snapshot.
+        Returns the current file bytes, a retained revision, or the revision captured by an unexpired snapshot. A `Range` header asks for one byte range of the file instead.
 
         Parameters
         ----------
@@ -474,6 +574,19 @@ class AsyncFilesClient:
 
         snapshot_id : typing.Optional[PinId]
             The snapshot whose captured file revision to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
+        range : typing.Optional[str]
+            One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -509,7 +622,14 @@ class AsyncFilesClient:
         asyncio.run(main())
         """
         async with self._raw_client.content(
-            namespace_id, path=path, revision_no=revision_no, snapshot_id=snapshot_id, request_options=request_options
+            namespace_id,
+            path=path,
+            revision_no=revision_no,
+            snapshot_id=snapshot_id,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
+            range=range,
+            request_options=request_options,
         ) as r:
             async for _chunk in r.data:
                 yield _chunk
@@ -519,6 +639,8 @@ class AsyncFilesClient:
         namespace_id: str,
         *,
         path: AbsolutePath,
+        consistency: typing.Optional[ReadConsistency] = OMIT,
+        max_staleness_ms: typing.Optional[int] = OMIT,
         revision_no: typing.Optional[RevisionNo] = OMIT,
         snapshot_id: typing.Optional[PinId] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
@@ -534,6 +656,16 @@ class AsyncFilesClient:
 
         path : AbsolutePath
             The absolute path of the file to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+            be, in milliseconds. The default is the server's `max_staleness_ms`.
 
         revision_no : typing.Optional[RevisionNo]
             The revision to read. Omit it to read the path's current revision. It can't be combined with
@@ -585,6 +717,8 @@ class AsyncFilesClient:
         _response = await self._raw_client.create_download(
             namespace_id,
             path=path,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
             revision_no=revision_no,
             snapshot_id=snapshot_id,
             start_offset=start_offset,
@@ -600,11 +734,14 @@ class AsyncFilesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
+        recursive: typing.Optional[bool] = None,
         snapshot_id: typing.Optional[PinId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListPathEntriesResponse:
         """
-        Lists a directory from the current state or a live snapshot.
+        Lists a directory from the current state or an unexpired snapshot.
 
         Parameters
         ----------
@@ -621,10 +758,26 @@ class AsyncFilesClient:
             The opaque cursor that the previous page returned.
 
         include_attributes : typing.Optional[bool]
-            Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
+            Whether the response includes each entry's attribute map and attribute revision. The default
+            is `false`, because a page can have many entries and each map can be up to 64 KiB.
+
+        recursive : typing.Optional[bool]
+            Whether the listing includes the directory's whole subtree, depth first, with each
+            directory's entry before its descendants. The default is `false`, which lists the
+            directory's children only.
 
         snapshot_id : typing.Optional[PinId]
             The snapshot whose captured directory state to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -666,7 +819,10 @@ class AsyncFilesClient:
             limit=limit,
             cursor=cursor,
             include_attributes=include_attributes,
+            recursive=recursive,
             snapshot_id=snapshot_id,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
             request_options=request_options,
         )
         return _response.data
@@ -678,10 +834,12 @@ class AsyncFilesClient:
         path: str,
         include_attributes: typing.Optional[bool] = None,
         snapshot_id: typing.Optional[PinId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> PathEntry:
         """
-        Returns path metadata from the current state or a live snapshot.
+        Returns path metadata from the current state or an unexpired snapshot.
 
         Parameters
         ----------
@@ -692,10 +850,21 @@ class AsyncFilesClient:
             The absolute path to read.
 
         include_attributes : typing.Optional[bool]
-            Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
+            Whether the response includes the inode's attribute map and attribute revision. The default
+            is `true`, because a stat reads one path and a map is at most 64 KiB.
 
         snapshot_id : typing.Optional[PinId]
             The snapshot whose captured path state to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -736,6 +905,8 @@ class AsyncFilesClient:
             path=path,
             include_attributes=include_attributes,
             snapshot_id=snapshot_id,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
             request_options=request_options,
         )
         return _response.data
@@ -747,6 +918,8 @@ class AsyncFilesClient:
         path: str,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListFileRevisionsResponse:
         """
@@ -765,6 +938,16 @@ class AsyncFilesClient:
 
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -800,7 +983,13 @@ class AsyncFilesClient:
         asyncio.run(main())
         """
         _response = await self._raw_client.list_revisions(
-            namespace_id, path=path, limit=limit, cursor=cursor, request_options=request_options
+            namespace_id,
+            path=path,
+            limit=limit,
+            cursor=cursor,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
+            request_options=request_options,
         )
         return _response.data
 
@@ -819,7 +1008,7 @@ class AsyncFilesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> GrepResponse:
         """
-        Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches in ascending `(inode_id, byte_offset)` order. It scans every revision committed after the index watermark, unless `allow_stale` skips them. The deployment must serve grep, and the namespace must have a materialized, active grep index.
+        Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches ordered by the content value of each file's revision, then by `inode_id`, and then by `byte_offset`. It scans every revision committed after the index watermark, unless `allow_stale` skips them. A first page reads the namespace at its head, and a later page reads at the first page's head. The deployment must serve grep, and the namespace must have a materialized, active grep index.
 
         Parameters
         ----------
@@ -827,22 +1016,26 @@ class AsyncFilesClient:
             The namespace ID.
 
         pattern : str
-            The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most 1024 bytes.
+            The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most
+            1024 bytes.
 
         case_insensitive : typing.Optional[bool]
             Whether matching ignores case. The default is `false`.
 
         path_prefix : typing.Optional[str]
-            A complete absolute path that limits matches to its descendants. It can't be combined with `inode_id`.
+            A complete absolute path that limits matches to its descendants. It can't be combined with
+            `inode_id`.
 
         inode_id : typing.Optional[str]
             An inode that limits matches to its descendants. It can't be combined with `path_prefix`.
 
         allow_scan : typing.Optional[bool]
-            Whether a pattern with no required literal bytes can use a capped exhaustive scan. The default is `false`.
+            Whether a pattern with no required literal bytes can use a capped exhaustive scan. The
+            default is `false`.
 
         allow_stale : typing.Optional[bool]
-            Whether the server returns results from the index alone when the unindexed tail exceeds the scan budget. The default is `false`.
+            Whether the server returns results from the index alone when the unindexed tail exceeds the
+            scan budget. The default is `false`.
 
         limit : typing.Optional[int]
             The maximum number of matches per page.
@@ -878,7 +1071,7 @@ class AsyncFilesClient:
             await client.files.grep(
                 namespace_id="namespace_id",
                 pattern="pattern",
-                inode_id="ino_123",
+                inode_id="ino_000000r0000013kje0d47gc8kw",
             )
 
 

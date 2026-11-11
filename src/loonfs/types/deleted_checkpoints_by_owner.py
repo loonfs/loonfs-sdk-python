@@ -16,11 +16,6 @@ class DeletedCheckpointsByOwner(UniversalBaseModel):
     The fork pins that the pass deleted because their target namespaces no longer exist.
     """
 
-    snapshot: int = pydantic.Field()
-    """
-    The snapshot pins that the pass deleted after they expired or their namespace was deleted.
-    """
-
     user: int = pydantic.Field()
     """
     The user pins that the pass deleted after they expired or their namespace was deleted.

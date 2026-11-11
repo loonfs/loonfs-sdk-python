@@ -9,8 +9,10 @@ from .change_seq import ChangeSeq
 
 class RunMaintenanceRequestRetention(UniversalBaseModel):
     """
-    A job that advances the retention floor to the folded manifest head, or to the target that
-    the request sets.
+    A job that advances the retention floor toward the folded manifest head, or toward the
+    target that the request sets.
+
+    The floor doesn't pass a commit that's less than one hour old.
     """
 
     cutoff_at_ms: typing.Optional[int] = pydantic.Field(default=None)

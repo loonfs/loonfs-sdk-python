@@ -10,6 +10,8 @@ from .binding_version import BindingVersion
 from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .inode_id import InodeId
+from .merge_bound import MergeBound
+from .merge_conflict import MergeConflict
 from .namespace_id import NamespaceId
 from .revision_no import RevisionNo
 from .writer_epoch import WriterEpoch
@@ -42,6 +44,11 @@ class ErrorDetails(UniversalBaseModel):
     actual_access_revision_no: typing.Optional[AccessRevisionNo] = pydantic.Field(default=None)
     """
     The access revision that is actually current for the inode.
+    """
+
+    actual_after_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    The fork sequence that the merge started after.
     """
 
     actual_attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
@@ -96,9 +103,25 @@ class ErrorDetails(UniversalBaseModel):
     durable commit receipt records that commit.
     """
 
+    conflict: typing.Optional[MergeConflict] = pydantic.Field(default=None)
+    """
+    The first inode whose change a refused merge can't apply.
+    """
+
+    conflict_count: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    The number of inodes whose change a refused merge can't apply.
+    """
+
     expected_access_revision_no: typing.Optional[AccessRevisionNo] = pydantic.Field(default=None)
     """
     The access revision that the request expected to be current.
+    """
+
+    expected_after_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    The fork sequence that the merge had to start after: the end of the previous merge's range,
+    or the fork point for the fork's first merge.
     """
 
     expected_attributes_revision_no: typing.Optional[AttributesRevisionNo] = pydantic.Field(default=None)
@@ -136,9 +159,25 @@ class ErrorDetails(UniversalBaseModel):
     The epoch of the failed writer session at the time another writer displaced it.
     """
 
+    fork_point_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    The fork point of the fork whose commits a merge applies, which is the sequence of this
+    namespace that the fork was made at.
+    """
+
+    from_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    The `from_seq` value from the diff request.
+    """
+
     inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
     """
     The inode that the failed precondition or operation targeted.
+    """
+
+    merge_bound: typing.Optional[MergeBound] = pydantic.Field(default=None)
+    """
+    The bound that a merge's size exceeded.
     """
 
     namespace_id: typing.Optional[NamespaceId] = pydantic.Field(default=None)
@@ -159,7 +198,32 @@ class ErrorDetails(UniversalBaseModel):
     retention_floor_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
     """
     The namespace's retention floor. A change feed request can set `after_seq` to this sequence
-    or any later one, and the feed returns the changes committed after it.
+    or any later one, and the feed returns the changes committed after it. A diff request can
+    set `from_seq` to this sequence or any later one.
+    """
+
+    size_bytes: typing.Optional[int] = pydantic.Field(default=None)
+    """
+    For `range_not_satisfiable`, the size in bytes of the file that the range was requested
+    from.
+    """
+
+    source_after_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    The fork sequence that a merge's range starts after, when that start is below the fork's
+    own retention floor.
+    """
+
+    source_namespace_id: typing.Optional[NamespaceId] = pydantic.Field(default=None)
+    """
+    The fork of a refused merge: the fork whose range conflicts, or whose range starts below
+    its own retention floor.
+    """
+
+    split_at_seq: typing.Optional[ChangeSeq] = pydantic.Field(default=None)
+    """
+    The split hint of a merge that exceeded a bound: a fork sequence such that a merge of the
+    fork's commits through it fits. It's absent when no shorter range fits.
     """
 
     if IS_PYDANTIC_V2:

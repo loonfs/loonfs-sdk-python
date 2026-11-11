@@ -29,23 +29,6 @@ class RunMaintenanceRequest_Gc(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class RunMaintenanceRequest_GrepGc(UniversalBaseModel):
-    """
-    One maintenance job for one namespace.
-    """
-
-    kind: typing.Literal["grep_gc"] = "grep_gc"
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class RunMaintenanceRequest_Metadata(UniversalBaseModel):
     """
     One maintenance job for one namespace.
@@ -53,23 +36,6 @@ class RunMaintenanceRequest_Metadata(UniversalBaseModel):
 
     kind: typing.Literal["metadata"] = "metadata"
     max_wal_tail_objects: typing.Optional[int] = None
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class RunMaintenanceRequest_MetadataCompaction(UniversalBaseModel):
-    """
-    One maintenance job for one namespace.
-    """
-
-    kind: typing.Literal["metadata_compaction"] = "metadata_compaction"
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -118,14 +84,31 @@ class RunMaintenanceRequest_Retention(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class RunMaintenanceRequest_RetentionWindow(UniversalBaseModel):
+    """
+    One maintenance job for one namespace.
+    """
+
+    kind: typing.Literal["retention_window"] = "retention_window"
+    retention_window_ms: typing.Optional[int] = None
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 RunMaintenanceRequest = typing_extensions.Annotated[
     typing.Union[
         RunMaintenanceRequest_Gc,
-        RunMaintenanceRequest_GrepGc,
         RunMaintenanceRequest_Metadata,
-        RunMaintenanceRequest_MetadataCompaction,
         RunMaintenanceRequest_RecoverAdministrator,
         RunMaintenanceRequest_Retention,
+        RunMaintenanceRequest_RetentionWindow,
     ],
     pydantic.Field(discriminator="kind"),
 ]
