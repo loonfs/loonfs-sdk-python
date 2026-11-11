@@ -12,7 +12,6 @@ from .change_seq import ChangeSeq
 from .commit_id import CommitId
 from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
 from .deleted_object_counts import DeletedObjectCounts
-from .gc_skipped_work import GcSkippedWork
 from .metadata_maintenance_outcome import MetadataMaintenanceOutcome
 from .metadata_skipped_work import MetadataSkippedWork
 from .namespace_id import NamespaceId
@@ -34,7 +33,6 @@ class RunMaintenanceResponse_Gc(UniversalBaseModel):
     next_reclamation_at_ms: typing.Optional[int] = None
     reclaimable_at_ms: typing.Optional[int] = None
     retained: RetainedCandidates
-    skipped: typing.Optional[typing.List[GcSkippedWork]] = None
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

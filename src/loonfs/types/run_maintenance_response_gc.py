@@ -6,7 +6,6 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
 from .deleted_object_counts import DeletedObjectCounts
-from .gc_skipped_work import GcSkippedWork
 from .namespace_id import NamespaceId
 from .retained_candidates import RetainedCandidates
 
@@ -39,7 +38,7 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
 
     next_reclamation_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The earliest future retirement deadline, pin deletion time, or upload cleanup time.
+    The earliest future retirement deadline or pin deletion time.
     """
 
     reclaimable_at_ms: typing.Optional[int] = pydantic.Field(default=None)
@@ -50,11 +49,6 @@ class RunMaintenanceResponseGc(UniversalBaseModel):
     retained: RetainedCandidates = pydantic.Field()
     """
     The candidates that the pass kept at deletion time, counted by reason.
-    """
-
-    skipped: typing.Optional[typing.List[GcSkippedWork]] = pydantic.Field(default=None)
-    """
-    The work that this pass skipped at a limit, by reason. Empty when the pass skipped nothing.
     """
 
     if IS_PYDANTIC_V2:

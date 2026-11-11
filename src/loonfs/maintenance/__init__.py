@@ -6,11 +6,12 @@ import typing
 from importlib import import_module
 
 if typing.TYPE_CHECKING:
-    from . import checkpoints, diagnostics, grep_index, runs, store
+    from . import checkpoints, diagnostics, grep_index, pools, runs, store
 _dynamic_imports: typing.Dict[str, str] = {
     "checkpoints": ".checkpoints",
     "diagnostics": ".diagnostics",
     "grep_index": ".grep_index",
+    "pools": ".pools",
     "runs": ".runs",
     "store": ".store",
 }
@@ -37,4 +38,4 @@ def __dir__():
     return sorted(lazy_attrs)
 
 
-__all__ = ["checkpoints", "diagnostics", "grep_index", "runs", "store"]
+__all__ = ["checkpoints", "diagnostics", "grep_index", "pools", "runs", "store"]

@@ -199,6 +199,9 @@ if typing.TYPE_CHECKING:
     from .path_entry_directory import PathEntryDirectory
     from .path_entry_file import PathEntryFile
     from .pin_id import PinId
+    from .pool_deleted_object_counts import PoolDeletedObjectCounts
+    from .pool_id import PoolId
+    from .pool_retained_candidates import PoolRetainedCandidates
     from .principal_id import PrincipalId
     from .principal_scope import PrincipalScope
     from .probe_run_id import ProbeRunId
@@ -232,6 +235,10 @@ if typing.TYPE_CHECKING:
     from .run_maintenance_response_recover_administrator import RunMaintenanceResponseRecoverAdministrator
     from .run_maintenance_response_retention import RunMaintenanceResponseRetention
     from .run_maintenance_response_retention_window import RunMaintenanceResponseRetentionWindow
+    from .run_pool_maintenance_request import RunPoolMaintenanceRequest, RunPoolMaintenanceRequest_Gc
+    from .run_pool_maintenance_request_gc import RunPoolMaintenanceRequestGc
+    from .run_pool_maintenance_response import RunPoolMaintenanceResponse, RunPoolMaintenanceResponse_Gc
+    from .run_pool_maintenance_response_gc import RunPoolMaintenanceResponseGc
     from .service_unavailable_error_body import ServiceUnavailableErrorBody
     from .sign_upload_parts_response import SignUploadPartsResponse
     from .signed_upload_part import SignedUploadPart
@@ -453,6 +460,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PathEntry_File": ".path_entry",
     "PathEntry_Unknown": ".path_entry",
     "PinId": ".pin_id",
+    "PoolDeletedObjectCounts": ".pool_deleted_object_counts",
+    "PoolId": ".pool_id",
+    "PoolRetainedCandidates": ".pool_retained_candidates",
     "PrincipalId": ".principal_id",
     "PrincipalScope": ".principal_scope",
     "ProbeRunId": ".probe_run_id",
@@ -482,6 +492,12 @@ _dynamic_imports: typing.Dict[str, str] = {
     "RunMaintenanceResponse_RecoverAdministrator": ".run_maintenance_response",
     "RunMaintenanceResponse_Retention": ".run_maintenance_response",
     "RunMaintenanceResponse_RetentionWindow": ".run_maintenance_response",
+    "RunPoolMaintenanceRequest": ".run_pool_maintenance_request",
+    "RunPoolMaintenanceRequestGc": ".run_pool_maintenance_request_gc",
+    "RunPoolMaintenanceRequest_Gc": ".run_pool_maintenance_request",
+    "RunPoolMaintenanceResponse": ".run_pool_maintenance_response",
+    "RunPoolMaintenanceResponseGc": ".run_pool_maintenance_response_gc",
+    "RunPoolMaintenanceResponse_Gc": ".run_pool_maintenance_response",
     "ServiceUnavailableErrorBody": ".service_unavailable_error_body",
     "SignUploadPartsResponse": ".sign_upload_parts_response",
     "SignedUploadPart": ".signed_upload_part",
@@ -728,6 +744,9 @@ __all__ = [
     "PathEntry_File",
     "PathEntry_Unknown",
     "PinId",
+    "PoolDeletedObjectCounts",
+    "PoolId",
+    "PoolRetainedCandidates",
     "PrincipalId",
     "PrincipalScope",
     "ProbeRunId",
@@ -757,6 +776,12 @@ __all__ = [
     "RunMaintenanceResponse_RecoverAdministrator",
     "RunMaintenanceResponse_Retention",
     "RunMaintenanceResponse_RetentionWindow",
+    "RunPoolMaintenanceRequest",
+    "RunPoolMaintenanceRequestGc",
+    "RunPoolMaintenanceRequest_Gc",
+    "RunPoolMaintenanceResponse",
+    "RunPoolMaintenanceResponseGc",
+    "RunPoolMaintenanceResponse_Gc",
     "ServiceUnavailableErrorBody",
     "SignUploadPartsResponse",
     "SignedUploadPart",

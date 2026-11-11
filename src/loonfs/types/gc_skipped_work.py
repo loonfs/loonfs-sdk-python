@@ -2,6 +2,4 @@
 
 import typing
 
-GcSkippedWork = typing.Union[
-    typing.Literal["content_sweep_family_budget", "content_sweep_unreadable_member"], typing.Any
-]
+GcSkippedWork = typing.Union[typing.Literal["content_sweep_pool_budget", "content_sweep_unreadable_member"], typing.Any]

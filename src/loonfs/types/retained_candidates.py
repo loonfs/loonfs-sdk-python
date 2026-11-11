@@ -8,7 +8,8 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RetainedCandidates(UniversalBaseModel):
     """
-    The candidates that one garbage collection pass inspected but didn't delete, counted by reason.
+    The candidates that one garbage collection pass of a namespace inspected but didn't delete,
+    counted by reason.
     """
 
     checkpoint_not_deletable: int = pydantic.Field()
@@ -24,25 +25,13 @@ class RetainedCandidates(UniversalBaseModel):
 
     referenced: int = pydantic.Field()
     """
-    The candidates that a current root protected, or that manifest discovery needed. A content
-    object is protected when an extent filter of a rooted layout segment matches it, and a false
-    match keeps the object until no rooted view lists that segment.
+    The candidates that a current root protected, or that manifest discovery needed.
     """
 
     unrecognized_key: int = pydantic.Field()
     """
     The keys that garbage collection didn't recognize in the object families it scanned. The
     pass keeps these objects.
-    """
-
-    upload_session_undecided: int = pydantic.Field()
-    """
-    The upload sessions that the pass couldn't prove safe to delete.
-    """
-
-    upload_session_window: int = pydantic.Field()
-    """
-    The upload sessions that a lease or grace window still protected.
     """
 
     within_grace_window: int = pydantic.Field()

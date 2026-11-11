@@ -11,6 +11,7 @@ if typing.TYPE_CHECKING:
     from .checkpoints.client import AsyncCheckpointsClient, CheckpointsClient
     from .diagnostics.client import AsyncDiagnosticsClient, DiagnosticsClient
     from .grep_index.client import AsyncGrepIndexClient, GrepIndexClient
+    from .pools.client import AsyncPoolsClient, PoolsClient
     from .runs.client import AsyncRunsClient, RunsClient
     from .store.client import AsyncStoreClient, StoreClient
 
@@ -24,6 +25,7 @@ class MaintenanceClient:
         self._grep_index: typing.Optional[GrepIndexClient] = None
         self._runs: typing.Optional[RunsClient] = None
         self._store: typing.Optional[StoreClient] = None
+        self._pools: typing.Optional[PoolsClient] = None
 
     @property
     def with_raw_response(self) -> RawMaintenanceClient:
@@ -76,6 +78,14 @@ class MaintenanceClient:
             self._store = StoreClient(client_wrapper=self._client_wrapper)
         return self._store
 
+    @property
+    def pools(self):
+        if self._pools is None:
+            from .pools.client import PoolsClient  # noqa: E402
+
+            self._pools = PoolsClient(client_wrapper=self._client_wrapper)
+        return self._pools
+
 
 class AsyncMaintenanceClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
@@ -86,6 +96,7 @@ class AsyncMaintenanceClient:
         self._grep_index: typing.Optional[AsyncGrepIndexClient] = None
         self._runs: typing.Optional[AsyncRunsClient] = None
         self._store: typing.Optional[AsyncStoreClient] = None
+        self._pools: typing.Optional[AsyncPoolsClient] = None
 
     @property
     def with_raw_response(self) -> AsyncRawMaintenanceClient:
@@ -137,3 +148,11 @@ class AsyncMaintenanceClient:
 
             self._store = AsyncStoreClient(client_wrapper=self._client_wrapper)
         return self._store
+
+    @property
+    def pools(self):
+        if self._pools is None:
+            from .pools.client import AsyncPoolsClient  # noqa: E402
+
+            self._pools = AsyncPoolsClient(client_wrapper=self._client_wrapper)
+        return self._pools

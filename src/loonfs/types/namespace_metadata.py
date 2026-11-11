@@ -9,6 +9,7 @@ from .change_seq import ChangeSeq
 from .namespace_access_mode import NamespaceAccessMode
 from .namespace_fork_basis import NamespaceForkBasis
 from .namespace_id import NamespaceId
+from .pool_id import PoolId
 
 
 class NamespaceMetadata(UniversalBaseModel):
@@ -31,13 +32,6 @@ class NamespaceMetadata(UniversalBaseModel):
     The actor that created the namespace, as the application supplied it.
     """
 
-    family_root_id: NamespaceId = pydantic.Field()
-    """
-    The namespace whose prefix stores the content of this namespace's fork family. For a
-    namespace that wasn't created by a fork, this is the namespace itself. A fork has the same
-    family root as its source.
-    """
-
     fork_basis: typing.Optional[NamespaceForkBasis] = pydantic.Field(default=None)
     """
     The namespace and sequence this namespace was forked from. Only a forked namespace has this
@@ -52,6 +46,12 @@ class NamespaceMetadata(UniversalBaseModel):
     namespace_id: NamespaceId = pydantic.Field()
     """
     The namespace ID.
+    """
+
+    pool_id: PoolId = pydantic.Field()
+    """
+    The pool that stores the namespace's content objects and upload records. A fork has the
+    same pool as its source.
     """
 
     retention_floor_seq: ChangeSeq = pydantic.Field()
