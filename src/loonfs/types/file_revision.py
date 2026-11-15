@@ -5,8 +5,8 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .actor_id import ActorId
-from .change_seq import ChangeSeq
 from .commit_id import CommitId
+from .commit_seq import CommitSeq
 from .content_ref import ContentRef
 from .inode_id import InodeId
 from .revision_no import RevisionNo
@@ -33,7 +33,7 @@ class FileRevision(UniversalBaseModel):
     The actor responsible for this revision, as the application supplied it.
     """
 
-    committed_seq: ChangeSeq = pydantic.Field()
+    committed_seq: CommitSeq = pydantic.Field()
     """
     The namespace sequence of the commit that created this revision.
     """

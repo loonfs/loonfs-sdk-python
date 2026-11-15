@@ -7,7 +7,7 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .checksum_algorithm import ChecksumAlgorithm
 from .content_ref import ContentRef
 from .namespace_id import NamespaceId
-from .object_transfer_access import ObjectTransferAccess
+from .object_transfer import ObjectTransfer
 from .upload_id import UploadId
 from .upload_mode import UploadMode
 
@@ -15,12 +15,6 @@ from .upload_mode import UploadMode
 class UploadSessionStatusOpen(UniversalBaseModel):
     """
     A session that accepts content until its lease ends.
-    """
-
-    access: typing.Optional[ObjectTransferAccess] = pydantic.Field(default=None)
-    """
-    The capability for the direct PUT. It's present for `direct_put` sessions, and the
-    server creates a new one on every read.
     """
 
     checksum_algorithm: ChecksumAlgorithm = pydantic.Field()
@@ -52,6 +46,12 @@ class UploadSessionStatusOpen(UniversalBaseModel):
     """
     The size of every part except the last, in bytes. It's present for `direct_multipart`
     sessions.
+    """
+
+    transfer: typing.Optional[ObjectTransfer] = pydantic.Field(default=None)
+    """
+    The presigned URL for the direct PUT. It's present for `direct_put` sessions, and the
+    server creates a new one on every read.
     """
 
     upload_id: UploadId = pydantic.Field()

@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .actor_id import ActorId
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .directory_binding import DirectoryBinding
 from .inode_id import InodeId
 from .inode_kind import InodeKind
@@ -13,7 +13,7 @@ from .inode_kind import InodeKind
 
 class TrashEntry(UniversalBaseModel):
     """
-    One recoverable deletion and the directory binding that it removed.
+    One trash entry: a deletion and the directory binding that it removed.
     """
 
     deleted_at_ms: int = pydantic.Field()
@@ -31,7 +31,7 @@ class TrashEntry(UniversalBaseModel):
     The actor responsible for the deletion.
     """
 
-    deletion_seq: ChangeSeq = pydantic.Field()
+    deletion_seq: CommitSeq = pydantic.Field()
     """
     The commit sequence that identifies this deletion.
     """

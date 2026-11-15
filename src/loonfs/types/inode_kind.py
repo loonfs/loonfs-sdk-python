@@ -2,4 +2,4 @@
 
 import typing
 
-InodeKind = typing.Union[typing.Literal["file", "dir"], typing.Any]
+InodeKind = typing.Union[typing.Literal["file", "directory"], typing.Any]

@@ -17,6 +17,7 @@ from ..errors.content_too_large_error import ContentTooLargeError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
+from ..errors.range_not_satisfiable_error import RangeNotSatisfiableError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.create_download_by_inode_response import CreateDownloadByInodeResponse
@@ -24,8 +25,9 @@ from ..types.error_response import ErrorResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_inode_children_response import ListInodeChildrenResponse
 from ..types.path_entry import PathEntry
-from ..types.pin_id import PinId
+from ..types.read_consistency import ReadConsistency
 from ..types.revision_no import RevisionNo
+from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -42,11 +44,13 @@ class RawInodesClient:
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[PinId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[PathEntry]:
         """
-        Returns the path entry for a visible inode, from the current state or a live snapshot. An unknown or hidden inode returns `inode_not_found`.
+        Returns the path entry for a visible inode, from the current state or an unexpired snapshot. An unknown or hidden inode returns `inode_not_found`.
 
         Parameters
         ----------
@@ -57,10 +61,21 @@ class RawInodesClient:
             The inode ID.
 
         include_attributes : typing.Optional[bool]
-            Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
+            Whether the response includes the inode's attribute map and attribute revision. The default
+            is `true`, because a stat reads one path and a map is at most 64 KiB.
 
-        snapshot_id : typing.Optional[PinId]
+        snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured path state to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -76,6 +91,8 @@ class RawInodesClient:
             params={
                 "include_attributes": include_attributes,
                 "snapshot_id": snapshot_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -161,11 +178,14 @@ class RawInodesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[PinId] = None,
+        recursive: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListInodeChildrenResponse]:
         """
-        Lists one page of a directory's children, in canonical name key order, from the current state or a live snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
+        Lists one page of a directory's children, in canonical name key order, from the current state or an unexpired snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
 
         Parameters
         ----------
@@ -182,10 +202,26 @@ class RawInodesClient:
             The opaque cursor that the previous page returned.
 
         include_attributes : typing.Optional[bool]
-            Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
+            Whether the response includes each entry's attribute map and attribute revision. The default
+            is `false`, because a page can have many entries and each map can be up to 64 KiB.
 
-        snapshot_id : typing.Optional[PinId]
+        recursive : typing.Optional[bool]
+            Whether the listing includes the directory's whole subtree, depth first, with each
+            directory's entry before its descendants. The default is `false`, which lists the
+            directory's children only.
+
+        snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured directory state to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -202,7 +238,10 @@ class RawInodesClient:
                 "limit": limit,
                 "cursor": cursor,
                 "include_attributes": include_attributes,
+                "recursive": recursive,
                 "snapshot_id": snapshot_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -297,11 +336,14 @@ class RawInodesClient:
         namespace_id: str,
         inode_id: str,
         *,
-        snapshot_id: typing.Optional[PinId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        range: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[HttpResponse[typing.Iterator[bytes]]]:
         """
-        Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that a live snapshot captured. An unknown or hidden inode returns `inode_not_found`.
+        Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that an unexpired snapshot captured. A `Range` header asks for one byte range of the file instead. An unknown or hidden inode returns `inode_not_found`.
 
         Parameters
         ----------
@@ -311,8 +353,21 @@ class RawInodesClient:
         inode_id : str
             The file's inode ID.
 
-        snapshot_id : typing.Optional[PinId]
+        snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured file revision to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
+        range : typing.Optional[str]
+            One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -327,6 +382,11 @@ class RawInodesClient:
             method="GET",
             params={
                 "snapshot_id": snapshot_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
+            },
+            headers={
+                "Range": str(range) if range is not None else None,
             },
             request_options=request_options,
         ) as _response:
@@ -405,6 +465,17 @@ class RawInodesClient:
                                 ),
                             ),
                         )
+                    if _response.status_code == 416:
+                        raise RangeNotSatisfiableError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
                     if _response.status_code == 503:
                         raise ServiceUnavailableError(
                             headers=dict(_response.headers),
@@ -437,12 +508,14 @@ class RawInodesClient:
         namespace_id: str,
         inode_id: str,
         *,
-        snapshot_id: typing.Optional[PinId] = OMIT,
+        consistency: typing.Optional[ReadConsistency] = OMIT,
+        max_staleness_ms: typing.Optional[int] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that an unexpired snapshot captured. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
@@ -452,12 +525,22 @@ class RawInodesClient:
         inode_id : str
             The file's inode ID.
 
-        snapshot_id : typing.Optional[PinId]
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+            be, in milliseconds. The default is the server's `max_staleness_ms`.
+
+        snapshot_id : typing.Optional[SnapshotId]
             A snapshot to read the file from. The download reads the revision that the snapshot
             captured.
 
         start_offset : typing.Optional[int]
-            The first byte that the grant reads. It defaults to 0 and must be less than the file's size.
+            The first byte that the download reads. It defaults to 0 and must be less than the file's size.
             For a file of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
@@ -472,6 +555,8 @@ class RawInodesClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/downloads",
             method="POST",
             json={
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
                 "snapshot_id": snapshot_id,
                 "start_offset": start_offset,
             },
@@ -595,6 +680,8 @@ class RawInodesClient:
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListFileRevisionsResponse]:
         """
@@ -614,6 +701,16 @@ class RawInodesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -628,6 +725,8 @@ class RawInodesClient:
             params={
                 "limit": limit,
                 "cursor": cursor,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -723,10 +822,14 @@ class RawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        range: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.Iterator[HttpResponse[typing.Iterator[bytes]]]:
         """
-        Reads and verifies one retained file revision by inode ID and revision number.
+        Reads and verifies one retained file revision by inode ID and revision number, at the live head or in the state that a snapshot or a fork snapshot keeps. A `Range` header asks for one byte range of the revision instead.
 
         Parameters
         ----------
@@ -739,6 +842,23 @@ class RawInodesClient:
         revision_no : RevisionNo
             The revision number.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            A snapshot, or one of the namespace's fork snapshots, whose state to find the revision
+            in. The snapshot's manifest keeps the revision after the namespace's retention floor passes it.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head that it finds the revision in. `eventual`
+            (the default, unless the server's `consistency` setting is `strong`) reads at the head that
+            the server confirmed last while that confirmation is younger than the maximum staleness, and
+            `strong` confirms the head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
+        range : typing.Optional[str]
+            One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
@@ -750,6 +870,14 @@ class RawInodesClient:
         with self._client_wrapper.httpx_client.stream(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/content",
             method="GET",
+            params={
+                "snapshot_id": snapshot_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
+            },
+            headers={
+                "Range": str(range) if range is not None else None,
+            },
             request_options=request_options,
         ) as _response:
 
@@ -827,6 +955,17 @@ class RawInodesClient:
                                 ),
                             ),
                         )
+                    if _response.status_code == 416:
+                        raise RangeNotSatisfiableError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
                     if _response.status_code == 503:
                         raise ServiceUnavailableError(
                             headers=dict(_response.headers),
@@ -860,11 +999,13 @@ class RawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        consistency: typing.Optional[ReadConsistency] = OMIT,
+        max_staleness_ms: typing.Optional[int] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+        Authorizes a direct read of one retained inode revision. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
@@ -877,8 +1018,18 @@ class RawInodesClient:
         revision_no : RevisionNo
             The revision number.
 
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head that it finds the revision in. `eventual`
+            (the default, unless the server's `consistency` setting is `strong`) reads at the head that
+            the server confirmed last while that confirmation is younger than the maximum staleness,
+            and `strong` confirms the head before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+            be, in milliseconds. The default is the server's `max_staleness_ms`.
+
         start_offset : typing.Optional[int]
-            The first byte that the grant reads. It defaults to 0 and must be less than the revision's
+            The first byte that the download reads. It defaults to 0 and must be less than the revision's
             size. For a revision of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
@@ -893,6 +1044,8 @@ class RawInodesClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/downloads",
             method="POST",
             json={
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
                 "start_offset": start_offset,
             },
             headers={
@@ -1019,11 +1172,13 @@ class AsyncRawInodesClient:
         inode_id: str,
         *,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[PinId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[PathEntry]:
         """
-        Returns the path entry for a visible inode, from the current state or a live snapshot. An unknown or hidden inode returns `inode_not_found`.
+        Returns the path entry for a visible inode, from the current state or an unexpired snapshot. An unknown or hidden inode returns `inode_not_found`.
 
         Parameters
         ----------
@@ -1034,10 +1189,21 @@ class AsyncRawInodesClient:
             The inode ID.
 
         include_attributes : typing.Optional[bool]
-            Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
+            Whether the response includes the inode's attribute map and attribute revision. The default
+            is `true`, because a stat reads one path and a map is at most 64 KiB.
 
-        snapshot_id : typing.Optional[PinId]
+        snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured path state to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1053,6 +1219,8 @@ class AsyncRawInodesClient:
             params={
                 "include_attributes": include_attributes,
                 "snapshot_id": snapshot_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -1138,11 +1306,14 @@ class AsyncRawInodesClient:
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
         include_attributes: typing.Optional[bool] = None,
-        snapshot_id: typing.Optional[PinId] = None,
+        recursive: typing.Optional[bool] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListInodeChildrenResponse]:
         """
-        Lists one page of a directory's children, in canonical name key order, from the current state or a live snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
+        Lists one page of a directory's children, in canonical name key order, from the current state or an unexpired snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
 
         Parameters
         ----------
@@ -1159,10 +1330,26 @@ class AsyncRawInodesClient:
             The opaque cursor that the previous page returned.
 
         include_attributes : typing.Optional[bool]
-            Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
+            Whether the response includes each entry's attribute map and attribute revision. The default
+            is `false`, because a page can have many entries and each map can be up to 64 KiB.
 
-        snapshot_id : typing.Optional[PinId]
+        recursive : typing.Optional[bool]
+            Whether the listing includes the directory's whole subtree, depth first, with each
+            directory's entry before its descendants. The default is `false`, which lists the
+            directory's children only.
+
+        snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured directory state to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1179,7 +1366,10 @@ class AsyncRawInodesClient:
                 "limit": limit,
                 "cursor": cursor,
                 "include_attributes": include_attributes,
+                "recursive": recursive,
                 "snapshot_id": snapshot_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -1274,11 +1464,14 @@ class AsyncRawInodesClient:
         namespace_id: str,
         inode_id: str,
         *,
-        snapshot_id: typing.Optional[PinId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        range: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[AsyncHttpResponse[typing.AsyncIterator[bytes]]]:
         """
-        Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that a live snapshot captured. An unknown or hidden inode returns `inode_not_found`.
+        Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that an unexpired snapshot captured. A `Range` header asks for one byte range of the file instead. An unknown or hidden inode returns `inode_not_found`.
 
         Parameters
         ----------
@@ -1288,8 +1481,21 @@ class AsyncRawInodesClient:
         inode_id : str
             The file's inode ID.
 
-        snapshot_id : typing.Optional[PinId]
+        snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured file revision to read.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
+        range : typing.Optional[str]
+            One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
@@ -1304,6 +1510,11 @@ class AsyncRawInodesClient:
             method="GET",
             params={
                 "snapshot_id": snapshot_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
+            },
+            headers={
+                "Range": str(range) if range is not None else None,
             },
             request_options=request_options,
         ) as _response:
@@ -1383,6 +1594,17 @@ class AsyncRawInodesClient:
                                 ),
                             ),
                         )
+                    if _response.status_code == 416:
+                        raise RangeNotSatisfiableError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
                     if _response.status_code == 503:
                         raise ServiceUnavailableError(
                             headers=dict(_response.headers),
@@ -1415,12 +1637,14 @@ class AsyncRawInodesClient:
         namespace_id: str,
         inode_id: str,
         *,
-        snapshot_id: typing.Optional[PinId] = OMIT,
+        consistency: typing.Optional[ReadConsistency] = OMIT,
+        max_staleness_ms: typing.Optional[int] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+        Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that an unexpired snapshot captured. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
@@ -1430,12 +1654,22 @@ class AsyncRawInodesClient:
         inode_id : str
             The file's inode ID.
 
-        snapshot_id : typing.Optional[PinId]
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+            be, in milliseconds. The default is the server's `max_staleness_ms`.
+
+        snapshot_id : typing.Optional[SnapshotId]
             A snapshot to read the file from. The download reads the revision that the snapshot
             captured.
 
         start_offset : typing.Optional[int]
-            The first byte that the grant reads. It defaults to 0 and must be less than the file's size.
+            The first byte that the download reads. It defaults to 0 and must be less than the file's size.
             For a file of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
@@ -1450,6 +1684,8 @@ class AsyncRawInodesClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/downloads",
             method="POST",
             json={
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
                 "snapshot_id": snapshot_id,
                 "start_offset": start_offset,
             },
@@ -1573,6 +1809,8 @@ class AsyncRawInodesClient:
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListFileRevisionsResponse]:
         """
@@ -1592,6 +1830,16 @@ class AsyncRawInodesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1606,6 +1854,8 @@ class AsyncRawInodesClient:
             params={
                 "limit": limit,
                 "cursor": cursor,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -1701,10 +1951,14 @@ class AsyncRawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        range: typing.Optional[str] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> typing.AsyncIterator[AsyncHttpResponse[typing.AsyncIterator[bytes]]]:
         """
-        Reads and verifies one retained file revision by inode ID and revision number.
+        Reads and verifies one retained file revision by inode ID and revision number, at the live head or in the state that a snapshot or a fork snapshot keeps. A `Range` header asks for one byte range of the revision instead.
 
         Parameters
         ----------
@@ -1717,6 +1971,23 @@ class AsyncRawInodesClient:
         revision_no : RevisionNo
             The revision number.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            A snapshot, or one of the namespace's fork snapshots, whose state to find the revision
+            in. The snapshot's manifest keeps the revision after the namespace's retention floor passes it.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head that it finds the revision in. `eventual`
+            (the default, unless the server's `consistency` setting is `strong`) reads at the head that
+            the server confirmed last while that confirmation is younger than the maximum staleness, and
+            `strong` confirms the head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
+        range : typing.Optional[str]
+            One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration. You can pass in configuration such as `chunk_size`, and more to customize the request and response.
 
@@ -1728,6 +1999,14 @@ class AsyncRawInodesClient:
         async with self._client_wrapper.httpx_client.stream(
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/content",
             method="GET",
+            params={
+                "snapshot_id": snapshot_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
+            },
+            headers={
+                "Range": str(range) if range is not None else None,
+            },
             request_options=request_options,
         ) as _response:
 
@@ -1806,6 +2085,17 @@ class AsyncRawInodesClient:
                                 ),
                             ),
                         )
+                    if _response.status_code == 416:
+                        raise RangeNotSatisfiableError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
                     if _response.status_code == 503:
                         raise ServiceUnavailableError(
                             headers=dict(_response.headers),
@@ -1839,11 +2129,13 @@ class AsyncRawInodesClient:
         inode_id: str,
         revision_no: RevisionNo,
         *,
+        consistency: typing.Optional[ReadConsistency] = OMIT,
+        max_staleness_ms: typing.Optional[int] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+        Authorizes a direct read of one retained inode revision. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
@@ -1856,8 +2148,18 @@ class AsyncRawInodesClient:
         revision_no : RevisionNo
             The revision number.
 
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head that it finds the revision in. `eventual`
+            (the default, unless the server's `consistency` setting is `strong`) reads at the head that
+            the server confirmed last while that confirmation is younger than the maximum staleness,
+            and `strong` confirms the head before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+            be, in milliseconds. The default is the server's `max_staleness_ms`.
+
         start_offset : typing.Optional[int]
-            The first byte that the grant reads. It defaults to 0 and must be less than the revision's
+            The first byte that the download reads. It defaults to 0 and must be less than the revision's
             size. For a revision of zero bytes, it must be 0.
 
         request_options : typing.Optional[RequestOptions]
@@ -1872,6 +2174,8 @@ class AsyncRawInodesClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/inodes/{encode_path_param(inode_id)}/revisions/{encode_path_param(revision_no)}/downloads",
             method="POST",
             json={
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
                 "start_offset": start_offset,
             },
             headers={

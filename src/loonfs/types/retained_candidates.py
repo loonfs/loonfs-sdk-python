@@ -8,13 +8,14 @@ from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 
 class RetainedCandidates(UniversalBaseModel):
     """
-    The candidates that one garbage collection pass inspected but didn't delete, counted by reason.
+    The candidates that one garbage collection of a namespace inspected but didn't delete,
+    counted by reason.
     """
 
-    checkpoint_not_deletable: int = pydantic.Field()
+    fences_and_floor_objects: int = pydantic.Field()
     """
-    The checkpoint records that the pass couldn't delete because of their owner or their grace
-    window.
+    The fences and floor objects, which no collection deletes. The collection tells them from
+    data WAL objects by their listed size.
     """
 
     no_provider_timestamp: int = pydantic.Field()
@@ -24,24 +25,19 @@ class RetainedCandidates(UniversalBaseModel):
 
     referenced: int = pydantic.Field()
     """
-    The candidates that a current root or the shared base filter protected, or that manifest
-    discovery needed.
+    The candidates that a current root protected, or that manifest discovery needed.
+    """
+
+    snapshot_not_deletable: int = pydantic.Field()
+    """
+    The snapshot records that the collection couldn't delete because of their owner or their
+    grace window.
     """
 
     unrecognized_key: int = pydantic.Field()
     """
     The keys that garbage collection didn't recognize in the object families it scanned. The
-    pass keeps these objects.
-    """
-
-    upload_session_undecided: int = pydantic.Field()
-    """
-    The upload sessions that the pass couldn't prove safe to delete.
-    """
-
-    upload_session_window: int = pydantic.Field()
-    """
-    The upload sessions that a lease or grace window still protected.
+    collection keeps these objects.
     """
 
     within_grace_window: int = pydantic.Field()

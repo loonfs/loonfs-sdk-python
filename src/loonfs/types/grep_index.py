@@ -7,11 +7,9 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
-from .pin_id import PinId
-from .run_no import RunNo
 
 
 class GrepIndex_Active(UniversalBaseModel):
@@ -20,10 +18,9 @@ class GrepIndex_Active(UniversalBaseModel):
     """
 
     status: typing.Literal["active"] = "active"
-    built_through_seq: ChangeSeq
+    built_through_seq: CommitSeq
     namespace_id: NamespaceId
     next_event_index: int
-    next_run_no: RunNo
     reorganize_pending: bool
 
     if IS_PYDANTIC_V2:
@@ -42,11 +39,9 @@ class GrepIndex_Backfilling(UniversalBaseModel):
     """
 
     status: typing.Literal["backfilling"] = "backfilling"
-    captured_seq: ChangeSeq
-    checkpoint_id: PinId
+    captured_seq: CommitSeq
     cursor_inode_id: typing.Optional[InodeId] = None
     namespace_id: NamespaceId
-    next_run_no: RunNo
     reorganize_pending: bool
 
     if IS_PYDANTIC_V2:
@@ -66,7 +61,6 @@ class GrepIndex_Disabled(UniversalBaseModel):
 
     status: typing.Literal["disabled"] = "disabled"
     namespace_id: NamespaceId
-    next_run_no: RunNo
     reorganize_pending: bool
 
     if IS_PYDANTIC_V2:

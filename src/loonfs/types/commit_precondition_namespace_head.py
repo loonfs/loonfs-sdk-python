@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 
 
 class CommitPreconditionNamespaceHead(UniversalBaseModel):
@@ -12,7 +12,7 @@ class CommitPreconditionNamespaceHead(UniversalBaseModel):
     A requirement that the head sequence before the commit equals `expected_head_seq`.
     """
 
-    expected_head_seq: ChangeSeq = pydantic.Field()
+    expected_head_seq: CommitSeq = pydantic.Field()
     """
     The head sequence that the caller observed when it read its inputs.
     """

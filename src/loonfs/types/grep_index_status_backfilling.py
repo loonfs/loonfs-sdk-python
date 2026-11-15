@@ -4,26 +4,20 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
-from .pin_id import PinId
-from .run_no import RunNo
 
 
 class GrepIndexStatusBackfilling(UniversalBaseModel):
     """
-    An index that is running its initial scan of a pinned checkpoint and can't be searched yet.
+    An index that is running its initial scan of the files at one sequence and can't be
+    searched yet.
     """
 
-    captured_seq: ChangeSeq = pydantic.Field()
+    captured_seq: CommitSeq = pydantic.Field()
     """
     The namespace sequence that completes the backfill when the index reaches it.
-    """
-
-    checkpoint_id: PinId = pydantic.Field()
-    """
-    The checkpoint that pins the state being scanned.
     """
 
     cursor_inode_id: typing.Optional[InodeId] = pydantic.Field(default=None)
@@ -34,11 +28,6 @@ class GrepIndexStatusBackfilling(UniversalBaseModel):
     namespace_id: NamespaceId = pydantic.Field()
     """
     The namespace that the status describes.
-    """
-
-    next_run_no: RunNo = pydantic.Field()
-    """
-    The next run number that the index allocates.
     """
 
     reorganize_pending: bool = pydantic.Field()

@@ -4,8 +4,8 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .probe_run_id import ProbeRunId
-from .store_probe_check_result import StoreProbeCheckResult
+from .probe_id import ProbeId
+from .store_probe_check import StoreProbeCheck
 
 
 class StoreProbeResponse(UniversalBaseModel):
@@ -13,12 +13,12 @@ class StoreProbeResponse(UniversalBaseModel):
     The results of one store contract probe, in order.
     """
 
-    checks: typing.List[StoreProbeCheckResult] = pydantic.Field()
+    checks: typing.List[StoreProbeCheck] = pydantic.Field()
     """
     The check results, in the order that the checks ran.
     """
 
-    run_id: ProbeRunId = pydantic.Field()
+    probe_id: ProbeId = pydantic.Field()
     """
     The ID of this probe run. The server generates the ID and writes the probe's temporary
     objects under it.

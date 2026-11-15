@@ -4,17 +4,17 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .namespace_id import NamespaceId
-from .pin_id import PinId
+from .snapshot_id import SnapshotId
 
 
 class Snapshot(UniversalBaseModel):
     """
-    A live snapshot.
+    A snapshot, which keeps one version of a namespace readable until it's deleted or expires.
     """
 
-    captured_seq: ChangeSeq = pydantic.Field()
+    captured_seq: CommitSeq = pydantic.Field()
     """
     The namespace sequence that the snapshot captured.
     """
@@ -24,14 +24,15 @@ class Snapshot(UniversalBaseModel):
     The time the snapshot record was created, in Unix milliseconds.
     """
 
-    expires_at_ms: int = pydantic.Field()
+    expires_at_ms: typing.Optional[int] = pydantic.Field(default=None)
     """
-    The time the snapshot expires, in Unix milliseconds.
+    The time the snapshot expires, in Unix milliseconds. A snapshot without it doesn't expire.
+    An expired snapshot can't be read or retrieved, and the snapshot listing leaves it out.
     """
 
-    name: str = pydantic.Field()
+    name: typing.Optional[str] = pydantic.Field(default=None)
     """
-    The snapshot's label.
+    The snapshot's label. The field is left out for a snapshot created without a label.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
@@ -39,7 +40,7 @@ class Snapshot(UniversalBaseModel):
     The namespace whose state the snapshot captured.
     """
 
-    snapshot_id: PinId = pydantic.Field()
+    snapshot_id: SnapshotId = pydantic.Field()
     """
     The snapshot ID.
     """

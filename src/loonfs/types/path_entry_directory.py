@@ -9,7 +9,7 @@ from .actor_id import ActorId
 from .attributes import Attributes
 from .attributes_revision_no import AttributesRevisionNo
 from .binding_version import BindingVersion
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .display_name import DisplayName
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
@@ -63,7 +63,7 @@ class PathEntryDirectory(UniversalBaseModel):
     The stored display name of this path component. It's absent for the root, which has no name.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
+    head_seq: CommitSeq = pydantic.Field()
     """
     The namespace head sequence that this response was read at.
     """

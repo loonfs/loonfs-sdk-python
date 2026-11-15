@@ -11,7 +11,7 @@ from .checksum_algorithm import ChecksumAlgorithm
 from .content_ref import ContentRef
 from .content_token import ContentToken
 from .namespace_id import NamespaceId
-from .object_transfer_access import ObjectTransferAccess
+from .object_transfer import ObjectTransfer
 from .upload_id import UploadId
 from .upload_mode import UploadMode
 
@@ -66,13 +66,13 @@ class UploadSession_Open(UniversalBaseModel):
     """
 
     status: typing.Literal["open"] = "open"
-    access: typing.Optional[ObjectTransferAccess] = None
     checksum_algorithm: ChecksumAlgorithm
     content_ref: typing.Optional[ContentRef] = None
     expires_at_ms: int
     mode: UploadMode
     namespace_id: NamespaceId
     part_size_bytes: typing.Optional[int] = None
+    transfer: typing.Optional[ObjectTransfer] = None
     upload_id: UploadId
 
     if IS_PYDANTIC_V2:

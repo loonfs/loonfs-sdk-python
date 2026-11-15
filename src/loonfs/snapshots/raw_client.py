@@ -11,7 +11,6 @@ from ..core.parse_error import ParsingError
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..errors.bad_request_error import BadRequestError
-from ..errors.conflict_error import ConflictError
 from ..errors.content_too_large_error import ContentTooLargeError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
@@ -20,8 +19,8 @@ from ..errors.unauthorized_error import UnauthorizedError
 from ..types.delete_snapshot_response import DeleteSnapshotResponse
 from ..types.error_response import ErrorResponse
 from ..types.list_snapshots_response import ListSnapshotsResponse
-from ..types.pin_id import PinId
 from ..types.snapshot import Snapshot
+from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -41,7 +40,7 @@ class RawSnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ListSnapshotsResponse]:
         """
-        Lists live snapshots in snapshot ID order. The list leaves out deleted and expired snapshots.
+        Lists snapshots in snapshot ID order. The list leaves out expired snapshots, deleted snapshots, and fork snapshots, which the maintenance snapshot inventory lists. A deleted namespace returns `namespace_deleted`.
 
         Parameters
         ----------
@@ -60,7 +59,7 @@ class RawSnapshotsClient:
         Returns
         -------
         HttpResponse[ListSnapshotsResponse]
-            Live snapshots
+            Snapshots
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots",
@@ -114,6 +113,17 @@ class RawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -135,21 +145,28 @@ class RawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def create(
-        self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        ttl_ms: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Snapshot]:
         """
-        Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
+        Creates a snapshot of the current namespace state. The server first folds any WAL tail after the current manifest. Every accepted call creates a new snapshot with a new ID, and the name is a label, not a key. A snapshot with `ttl_ms` expires that many milliseconds from the server's current time, and a snapshot without it doesn't expire. The snapshot keeps its manifest until garbage collection deletes it, after it expires or is deleted and its grace window passes.
 
         Parameters
         ----------
         namespace_id : str
             The namespace ID.
 
-        name : str
-            The snapshot's label, which doesn't need to be unique.
+        name : typing.Optional[str]
+            The snapshot's label, which doesn't need to be unique. Omit the field for a snapshot with no
+            label.
 
-        ttl_ms : int
-            The snapshot's lifetime in milliseconds, counted from the server's current time.
+        ttl_ms : typing.Optional[int]
+            The snapshot's lifetime in milliseconds, counted from the server's current time. Omit it to
+            keep the snapshot until it's deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -218,17 +235,6 @@ class RawSnapshotsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -272,17 +278,17 @@ class RawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def retrieve(
-        self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[Snapshot]:
         """
-        Returns one live snapshot, as the snapshot listing returns it. A missing ID, or the ID of a pin that isn't a snapshot, returns `snapshot_not_found`, and an expired snapshot returns `snapshot_gone`.
+        Returns one snapshot, as the snapshot listing returns it. A missing ID, the ID of an expired or deleted snapshot, or the ID of a fork snapshot returns `snapshot_not_found`. A deleted namespace returns `namespace_deleted`.
 
         Parameters
         ----------
         namespace_id : str
             The namespace ID.
 
-        snapshot_id : PinId
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -291,7 +297,7 @@ class RawSnapshotsClient:
         Returns
         -------
         HttpResponse[Snapshot]
-            Live snapshot
+            Snapshot
         """
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}",
@@ -373,17 +379,17 @@ class RawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def delete(
-        self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[DeleteSnapshotResponse]:
         """
-        Deletes a snapshot pin. A missing ID returns `snapshot_not_found`.
+        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
 
         Parameters
         ----------
         namespace_id : str
             The namespace ID.
 
-        snapshot_id : PinId
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -392,15 +398,12 @@ class RawSnapshotsClient:
         Returns
         -------
         HttpResponse[DeleteSnapshotResponse]
-            Snapshot record deleted
+            Snapshot deleted, or already absent
         """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}",
             method="DELETE",
-            request_options=_request_options_with_retries_disabled,
+            request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -468,20 +471,20 @@ class RawSnapshotsClient:
     def extend(
         self,
         namespace_id: str,
-        snapshot_id: PinId,
+        snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Snapshot]:
         """
-        Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+        Moves an unexpired snapshot's expiry to `ttl_ms` from the server's current time. The expiry never moves earlier, so a snapshot without an expiry is returned unchanged. A missing, deleted, or expired snapshot returns `snapshot_not_found`. Repeating the request has the same result.
 
         Parameters
         ----------
         namespace_id : str
             The namespace ID.
 
-        snapshot_id : PinId
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         ttl_ms : int
@@ -550,17 +553,6 @@ class RawSnapshotsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 410:
-                raise GoneError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 413:
                 raise ContentTooLargeError(
                     headers=dict(_response.headers),
@@ -606,7 +598,7 @@ class AsyncRawSnapshotsClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ListSnapshotsResponse]:
         """
-        Lists live snapshots in snapshot ID order. The list leaves out deleted and expired snapshots.
+        Lists snapshots in snapshot ID order. The list leaves out expired snapshots, deleted snapshots, and fork snapshots, which the maintenance snapshot inventory lists. A deleted namespace returns `namespace_deleted`.
 
         Parameters
         ----------
@@ -625,7 +617,7 @@ class AsyncRawSnapshotsClient:
         Returns
         -------
         AsyncHttpResponse[ListSnapshotsResponse]
-            Live snapshots
+            Snapshots
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots",
@@ -679,6 +671,17 @@ class AsyncRawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 410:
+                raise GoneError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -700,21 +703,28 @@ class AsyncRawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def create(
-        self, namespace_id: str, *, name: str, ttl_ms: int, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: str,
+        *,
+        name: typing.Optional[str] = OMIT,
+        ttl_ms: typing.Optional[int] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Snapshot]:
         """
-        Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
+        Creates a snapshot of the current namespace state. The server first folds any WAL tail after the current manifest. Every accepted call creates a new snapshot with a new ID, and the name is a label, not a key. A snapshot with `ttl_ms` expires that many milliseconds from the server's current time, and a snapshot without it doesn't expire. The snapshot keeps its manifest until garbage collection deletes it, after it expires or is deleted and its grace window passes.
 
         Parameters
         ----------
         namespace_id : str
             The namespace ID.
 
-        name : str
-            The snapshot's label, which doesn't need to be unique.
+        name : typing.Optional[str]
+            The snapshot's label, which doesn't need to be unique. Omit the field for a snapshot with no
+            label.
 
-        ttl_ms : int
-            The snapshot's lifetime in milliseconds, counted from the server's current time.
+        ttl_ms : typing.Optional[int]
+            The snapshot's lifetime in milliseconds, counted from the server's current time. Omit it to
+            keep the snapshot until it's deleted.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -783,17 +793,6 @@ class AsyncRawSnapshotsClient:
                         ),
                     ),
                 )
-            if _response.status_code == 409:
-                raise ConflictError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
             if _response.status_code == 410:
                 raise GoneError(
                     headers=dict(_response.headers),
@@ -837,17 +836,17 @@ class AsyncRawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def retrieve(
-        self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[Snapshot]:
         """
-        Returns one live snapshot, as the snapshot listing returns it. A missing ID, or the ID of a pin that isn't a snapshot, returns `snapshot_not_found`, and an expired snapshot returns `snapshot_gone`.
+        Returns one snapshot, as the snapshot listing returns it. A missing ID, the ID of an expired or deleted snapshot, or the ID of a fork snapshot returns `snapshot_not_found`. A deleted namespace returns `namespace_deleted`.
 
         Parameters
         ----------
         namespace_id : str
             The namespace ID.
 
-        snapshot_id : PinId
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -856,7 +855,7 @@ class AsyncRawSnapshotsClient:
         Returns
         -------
         AsyncHttpResponse[Snapshot]
-            Live snapshot
+            Snapshot
         """
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}",
@@ -938,17 +937,17 @@ class AsyncRawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def delete(
-        self, namespace_id: str, snapshot_id: PinId, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[DeleteSnapshotResponse]:
         """
-        Deletes a snapshot pin. A missing ID returns `snapshot_not_found`.
+        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
 
         Parameters
         ----------
         namespace_id : str
             The namespace ID.
 
-        snapshot_id : PinId
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -957,15 +956,12 @@ class AsyncRawSnapshotsClient:
         Returns
         -------
         AsyncHttpResponse[DeleteSnapshotResponse]
-            Snapshot record deleted
+            Snapshot deleted, or already absent
         """
-        _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
-            {**request_options, "max_retries": 0} if request_options is not None else {"max_retries": 0}
-        )
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}/snapshots/{encode_path_param(snapshot_id)}",
             method="DELETE",
-            request_options=_request_options_with_retries_disabled,
+            request_options=request_options,
         )
         try:
             if 200 <= _response.status_code < 300:
@@ -1033,20 +1029,20 @@ class AsyncRawSnapshotsClient:
     async def extend(
         self,
         namespace_id: str,
-        snapshot_id: PinId,
+        snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Snapshot]:
         """
-        Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+        Moves an unexpired snapshot's expiry to `ttl_ms` from the server's current time. The expiry never moves earlier, so a snapshot without an expiry is returned unchanged. A missing, deleted, or expired snapshot returns `snapshot_not_found`. Repeating the request has the same result.
 
         Parameters
         ----------
         namespace_id : str
             The namespace ID.
 
-        snapshot_id : PinId
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         ttl_ms : int
@@ -1106,17 +1102,6 @@ class AsyncRawSnapshotsClient:
                 )
             if _response.status_code == 404:
                 raise NotFoundError(
-                    headers=dict(_response.headers),
-                    body=typing.cast(
-                        ErrorResponse,
-                        parse_obj_as(
-                            type_=ErrorResponse,  # type: ignore
-                            object_=_response.json(),
-                        ),
-                    ),
-                )
-            if _response.status_code == 410:
-                raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

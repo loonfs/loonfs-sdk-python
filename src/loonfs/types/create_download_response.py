@@ -38,7 +38,7 @@ class CreateDownloadResponse(UniversalBaseModel):
 
     revision_no: RevisionNo = pydantic.Field()
     """
-    The revision that the capability reads, as resolved from the request.
+    The revision that the download reads, as resolved from the request.
     """
 
     if IS_PYDANTIC_V2:

@@ -4,9 +4,8 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .namespace_id import NamespaceId
-from .run_no import RunNo
 
 
 class GrepIndexStatusActive(UniversalBaseModel):
@@ -14,7 +13,7 @@ class GrepIndexStatusActive(UniversalBaseModel):
     An index that follows the change feed and can be searched through its watermark.
     """
 
-    built_through_seq: ChangeSeq = pydantic.Field()
+    built_through_seq: CommitSeq = pydantic.Field()
     """
     The sequence of the commit at the index cursor.
     """
@@ -28,11 +27,6 @@ class GrepIndexStatusActive(UniversalBaseModel):
     """
     The offset of the next change event within `built_through_seq`. It's zero when the whole
     commit is indexed.
-    """
-
-    next_run_no: RunNo = pydantic.Field()
-    """
-    The next run number that the index allocates.
     """
 
     reorganize_pending: bool = pydantic.Field()

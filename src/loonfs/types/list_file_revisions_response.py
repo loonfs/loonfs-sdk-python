@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .file_revision import FileRevision
 from .inode_id import InodeId
 from .namespace_id import NamespaceId
@@ -15,7 +15,7 @@ class ListFileRevisionsResponse(UniversalBaseModel):
     One page of a file's revisions.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
+    head_seq: CommitSeq = pydantic.Field()
     """
     The namespace head sequence that the read used.
     """
