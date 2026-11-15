@@ -9,7 +9,7 @@ from .actor_id import ActorId
 from .attributes import Attributes
 from .attributes_revision_no import AttributesRevisionNo
 from .binding_version import BindingVersion
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .content_ref import ContentRef
 from .display_name import DisplayName
 from .inode_id import InodeId
@@ -50,9 +50,10 @@ class PathEntryFile(UniversalBaseModel):
     namespace root.
     """
 
-    content_ref: ContentRef = pydantic.Field()
+    content_ref: typing.Optional[ContentRef] = pydantic.Field(default=None)
     """
-    The file's current content.
+    The file's current content. It's present on entry reads (a stat by
+    path or by inode) and absent from directory listings.
     """
 
     created_at_ms: int = pydantic.Field()
@@ -70,7 +71,7 @@ class PathEntryFile(UniversalBaseModel):
     The stored display name of this path component. It's absent for the root, which has no name.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
+    head_seq: CommitSeq = pydantic.Field()
     """
     The namespace head sequence that this response was read at.
     """

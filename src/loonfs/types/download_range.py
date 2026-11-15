@@ -4,17 +4,12 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .object_transfer_access import ObjectTransferAccess
+from .object_transfer import ObjectTransfer
 
 
 class DownloadRange(UniversalBaseModel):
     """
     One contiguous run of a revision's bytes, which the client reads from one object.
-    """
-
-    access: ObjectTransferAccess = pydantic.Field()
-    """
-    A short-lived read capability for exactly this range's bytes.
     """
 
     length: int = pydantic.Field()
@@ -25,6 +20,11 @@ class DownloadRange(UniversalBaseModel):
     start_offset: int = pydantic.Field()
     """
     The offset of the run's first byte in the revision.
+    """
+
+    transfer: ObjectTransfer = pydantic.Field()
+    """
+    A short-lived presigned URL that reads exactly this range's bytes.
     """
 
     if IS_PYDANTIC_V2:

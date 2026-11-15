@@ -33,6 +33,13 @@ explicitly if you may retry. Use
 `request_options={"additional_headers": {"Loonfs-Actor": actor_id}}`
 to override the client default for a request.
 
+A commit's `events`, from a publishing helper or the change feed, leave out any
+event of a kind that this version of the SDK doesn't define. A stat or a
+directory listing keeps an entry of an inode kind that this version doesn't
+define, as a `PathEntry_Unknown` with the fields that every entry includes
+(such as `inode_id`, `path`, `display_name`, and `binding_version`). Both rules
+let a newer server add kinds without breaking older clients.
+
 Use `client.files.download_stream` in a `with` block for bounded download memory:
 
 ```python
@@ -50,20 +57,20 @@ Direct requests do not inherit API authorization, cookies or API headers, and
 never follow redirects. Closing the stream or interrupting its `with` block is
 the synchronous cancellation mechanism.
 
-Direct grants contain ordered `ranges`. Each range has a revision `start_offset`,
-`length`, and signed `access`. Helpers validate the range list before any object
-request and read the ranges in order. They keep up to four range responses
+A download response contains ordered `ranges`. Each range has a revision
+`start_offset`, a `length`, and a presigned URL (`transfer`). Helpers validate
+the range list before any object request and read the ranges in order. They keep up to four range responses
 open: the one being read and up to three requested after it. They check each
 range's length and verify the complete file at the end.
 They send the signed headers unchanged. The object Range header can differ from
 the revision offset. An empty file needs no object request. Successful EOF checks
 the total length, then the checksum of the complete file.
 
-The download helpers read complete files. To resume through the generated grant
-API, pin `revision_no`, retain the bytes already read, and request a new grant
+The download helpers read complete files. To resume through the generated download
+API, pin `revision_no`, retain the bytes already read, and request a new download
 with `start_offset` equal to that prefix's length. Verify prefix plus suffix
 against the content reference. Checking only the suffix cannot verify the file.
-A complete local file needs no new grant.
+A complete local file needs no new download.
 
 `client.files.download` collects the same verified stream into memory.
 `client.files.upload` accepts in-memory bytes through the same transfer path.
@@ -133,11 +140,16 @@ the source.
 ## Proxy
 
 Use `loonfs.proxy` in your backend to forward client requests while keeping the
-LoonFS credential on the server.
+LoonFS credential on the server. The proxy forwards
+`/v0/capabilities` and the namespace routes for files, uploads, snapshots,
+changes, and grep with the path unchanged, and returns 404 for every other
+route.
 
 Set `authorize` to check each request and set `Loonfs-Actor` on forwarded
 requests. The proxy always removes the browser's actor header.
-The `authorize` hook is required; returning `ProxyAuthorization()` forwards as the token holder.
+The `authorize` hook is required. Returning `ProxyAuthorization()` forwards as
+the token holder. Any namespace ID in the path reaches LoonFS, so the hook
+checks that the caller may use `context.namespace_id`.
 Here, `authorized_actor` checks the application's session and namespace access.
 
 ```python
@@ -152,7 +164,6 @@ async def authorize(scope, context):
 app = LoonFSProxy(
     os.environ["LOONFS_URL"],
     os.environ["LOONFS_AUTH_TOKEN"],
-    {"team-files": "demo"},
     authorize=authorize,
 )
 ```

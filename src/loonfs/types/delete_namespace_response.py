@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .namespace_id import NamespaceId
 
 
@@ -13,7 +13,7 @@ class DeleteNamespaceResponse(UniversalBaseModel):
     The result of deleting a namespace.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
+    head_seq: CommitSeq = pydantic.Field()
     """
     The last committed sequence before the namespace was deleted.
     """

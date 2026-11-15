@@ -15,7 +15,7 @@ from .attribute_key import AttributeKey
 from .attribute_value import AttributeValue
 from .attributes_revision_no import AttributesRevisionNo
 from .binding_version import BindingVersion
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .content_ref import ContentRef
 from .delete_directory_behavior import DeleteDirectoryBehavior
 from .destination_behavior import DestinationBehavior
@@ -325,6 +325,30 @@ class FilesystemOperation_PutFileRevisionByInode(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
+class FilesystemOperation_RestoreDeleted(UniversalBaseModel):
+    """
+    One filesystem operation.
+
+    The server rejects unknown fields, and a variant without fields requires an empty object.
+    """
+
+    kind: typing.Literal["restore_deleted"] = "restore_deleted"
+    deletion_seq: CommitSeq
+    destination_display_name: typing.Optional[DisplayName] = None
+    destination_parent_inode_id: typing.Optional[InodeId] = None
+    destination_path: typing.Optional[AbsolutePath] = None
+    inode_id: InodeId
+
+    if IS_PYDANTIC_V2:
+        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
+    else:
+
+        class Config:
+            frozen = True
+            smart_union = True
+            extra = pydantic.Extra.allow
+
+
 class FilesystemOperation_RestoreRevision(UniversalBaseModel):
     """
     One filesystem operation.
@@ -356,30 +380,6 @@ class FilesystemOperation_RestoreRevisionByInode(UniversalBaseModel):
     kind: typing.Literal["restore_revision_by_inode"] = "restore_revision_by_inode"
     inode_id: InodeId
     source_revision_no: RevisionNo
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class FilesystemOperation_Undelete(UniversalBaseModel):
-    """
-    One filesystem operation.
-
-    The server rejects unknown fields, and a variant without fields requires an empty object.
-    """
-
-    kind: typing.Literal["undelete"] = "undelete"
-    deletion_seq: ChangeSeq
-    destination_display_name: typing.Optional[DisplayName] = None
-    destination_parent_inode_id: typing.Optional[InodeId] = None
-    destination_path: typing.Optional[AbsolutePath] = None
-    inode_id: InodeId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -504,9 +504,9 @@ FilesystemOperation = typing_extensions.Annotated[
         FilesystemOperation_MovePath,
         FilesystemOperation_PutFile,
         FilesystemOperation_PutFileRevisionByInode,
+        FilesystemOperation_RestoreDeleted,
         FilesystemOperation_RestoreRevision,
         FilesystemOperation_RestoreRevisionByInode,
-        FilesystemOperation_Undelete,
         FilesystemOperation_UpdateAccess,
         FilesystemOperation_UpdateAccessByInode,
         FilesystemOperation_UpdateAttributes,

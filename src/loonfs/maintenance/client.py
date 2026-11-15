@@ -8,10 +8,11 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from .raw_client import AsyncRawMaintenanceClient, RawMaintenanceClient
 
 if typing.TYPE_CHECKING:
-    from .checkpoints.client import AsyncCheckpointsClient, CheckpointsClient
     from .diagnostics.client import AsyncDiagnosticsClient, DiagnosticsClient
     from .grep_index.client import AsyncGrepIndexClient, GrepIndexClient
-    from .runs.client import AsyncRunsClient, RunsClient
+    from .jobs.client import AsyncJobsClient, JobsClient
+    from .pools.client import AsyncPoolsClient, PoolsClient
+    from .snapshots.client import AsyncSnapshotsClient, SnapshotsClient
     from .store.client import AsyncStoreClient, StoreClient
 
 
@@ -19,11 +20,12 @@ class MaintenanceClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._raw_client = RawMaintenanceClient(client_wrapper=client_wrapper)
         self._client_wrapper = client_wrapper
-        self._checkpoints: typing.Optional[CheckpointsClient] = None
         self._diagnostics: typing.Optional[DiagnosticsClient] = None
         self._grep_index: typing.Optional[GrepIndexClient] = None
-        self._runs: typing.Optional[RunsClient] = None
+        self._jobs: typing.Optional[JobsClient] = None
+        self._snapshots: typing.Optional[SnapshotsClient] = None
         self._store: typing.Optional[StoreClient] = None
+        self._pools: typing.Optional[PoolsClient] = None
 
     @property
     def with_raw_response(self) -> RawMaintenanceClient:
@@ -35,14 +37,6 @@ class MaintenanceClient:
         RawMaintenanceClient
         """
         return self._raw_client
-
-    @property
-    def checkpoints(self):
-        if self._checkpoints is None:
-            from .checkpoints.client import CheckpointsClient  # noqa: E402
-
-            self._checkpoints = CheckpointsClient(client_wrapper=self._client_wrapper)
-        return self._checkpoints
 
     @property
     def diagnostics(self):
@@ -61,12 +55,20 @@ class MaintenanceClient:
         return self._grep_index
 
     @property
-    def runs(self):
-        if self._runs is None:
-            from .runs.client import RunsClient  # noqa: E402
+    def jobs(self):
+        if self._jobs is None:
+            from .jobs.client import JobsClient  # noqa: E402
 
-            self._runs = RunsClient(client_wrapper=self._client_wrapper)
-        return self._runs
+            self._jobs = JobsClient(client_wrapper=self._client_wrapper)
+        return self._jobs
+
+    @property
+    def snapshots(self):
+        if self._snapshots is None:
+            from .snapshots.client import SnapshotsClient  # noqa: E402
+
+            self._snapshots = SnapshotsClient(client_wrapper=self._client_wrapper)
+        return self._snapshots
 
     @property
     def store(self):
@@ -76,16 +78,25 @@ class MaintenanceClient:
             self._store = StoreClient(client_wrapper=self._client_wrapper)
         return self._store
 
+    @property
+    def pools(self):
+        if self._pools is None:
+            from .pools.client import PoolsClient  # noqa: E402
+
+            self._pools = PoolsClient(client_wrapper=self._client_wrapper)
+        return self._pools
+
 
 class AsyncMaintenanceClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._raw_client = AsyncRawMaintenanceClient(client_wrapper=client_wrapper)
         self._client_wrapper = client_wrapper
-        self._checkpoints: typing.Optional[AsyncCheckpointsClient] = None
         self._diagnostics: typing.Optional[AsyncDiagnosticsClient] = None
         self._grep_index: typing.Optional[AsyncGrepIndexClient] = None
-        self._runs: typing.Optional[AsyncRunsClient] = None
+        self._jobs: typing.Optional[AsyncJobsClient] = None
+        self._snapshots: typing.Optional[AsyncSnapshotsClient] = None
         self._store: typing.Optional[AsyncStoreClient] = None
+        self._pools: typing.Optional[AsyncPoolsClient] = None
 
     @property
     def with_raw_response(self) -> AsyncRawMaintenanceClient:
@@ -97,14 +108,6 @@ class AsyncMaintenanceClient:
         AsyncRawMaintenanceClient
         """
         return self._raw_client
-
-    @property
-    def checkpoints(self):
-        if self._checkpoints is None:
-            from .checkpoints.client import AsyncCheckpointsClient  # noqa: E402
-
-            self._checkpoints = AsyncCheckpointsClient(client_wrapper=self._client_wrapper)
-        return self._checkpoints
 
     @property
     def diagnostics(self):
@@ -123,12 +126,20 @@ class AsyncMaintenanceClient:
         return self._grep_index
 
     @property
-    def runs(self):
-        if self._runs is None:
-            from .runs.client import AsyncRunsClient  # noqa: E402
+    def jobs(self):
+        if self._jobs is None:
+            from .jobs.client import AsyncJobsClient  # noqa: E402
 
-            self._runs = AsyncRunsClient(client_wrapper=self._client_wrapper)
-        return self._runs
+            self._jobs = AsyncJobsClient(client_wrapper=self._client_wrapper)
+        return self._jobs
+
+    @property
+    def snapshots(self):
+        if self._snapshots is None:
+            from .snapshots.client import AsyncSnapshotsClient  # noqa: E402
+
+            self._snapshots = AsyncSnapshotsClient(client_wrapper=self._client_wrapper)
+        return self._snapshots
 
     @property
     def store(self):
@@ -137,3 +148,11 @@ class AsyncMaintenanceClient:
 
             self._store = AsyncStoreClient(client_wrapper=self._client_wrapper)
         return self._store
+
+    @property
+    def pools(self):
+        if self._pools is None:
+            from .pools.client import AsyncPoolsClient  # noqa: E402
+
+            self._pools = AsyncPoolsClient(client_wrapper=self._client_wrapper)
+        return self._pools

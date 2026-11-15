@@ -11,7 +11,7 @@ from .absolute_path import AbsolutePath
 from .access_revision_no import AccessRevisionNo
 from .attributes_revision_no import AttributesRevisionNo
 from .binding_version import BindingVersion
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .display_name import DisplayName
 from .inode_id import InodeId
 from .revision_no import RevisionNo
@@ -142,7 +142,7 @@ class CommitPrecondition_NamespaceHead(UniversalBaseModel):
     """
 
     kind: typing.Literal["namespace_head"] = "namespace_head"
-    expected_head_seq: ChangeSeq
+    expected_head_seq: CommitSeq
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

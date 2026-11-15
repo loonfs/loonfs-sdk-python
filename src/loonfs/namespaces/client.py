@@ -4,13 +4,16 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.change_seq import ChangeSeq
+from ..types.commit import Commit
+from ..types.commit_id import CommitId
+from ..types.commit_seq import CommitSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
 from ..types.namespace_metadata import NamespaceMetadata
-from ..types.namespace_naming import NamespaceNaming
-from ..types.pin_id import PinId
+from ..types.next_merge_range_response import NextMergeRangeResponse
+from ..types.replay_fork_response import ReplayForkResponse
+from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawNamespacesClient, RawNamespacesClient
 
 # this is used as the default value for optional parameters
@@ -35,26 +38,30 @@ class NamespacesClient:
     def create(
         self,
         *,
-        namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
-        naming: typing.Optional[NamespaceNaming] = OMIT,
+        namespace_id: typing.Optional[NamespaceId] = OMIT,
+        retention_window_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NamespaceMetadata:
         """
-        Creates a new empty namespace.
+        Creates a new empty namespace. Without `namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new namespace's ID.
 
         Parameters
         ----------
-        namespace_id : NamespaceId
-            The durable ID of the new namespace.
-
         access : typing.Optional[NamespaceAccess]
             The namespace's access mode, which can't be changed after the namespace is created. The
             default is unrestricted.
 
-        naming : typing.Optional[NamespaceNaming]
-            How the namespace compares sibling names. The mode can't be changed after the namespace is
-            created, and it defaults to `case_insensitive`.
+        namespace_id : typing.Optional[NamespaceId]
+            The durable ID of the new namespace. Without this field, LoonFS generates an ID. The
+            response's `namespace_id` is the new namespace's ID.
+
+        retention_window_ms : typing.Optional[int]
+            The namespace's retention window, in milliseconds, which must be at least the grace window
+            (86400000, which is 24 hours). The reference server's maintenance sweep uses this window
+            for the namespace. Without this field, the namespace's window is the server's
+            `retention_window_ms` setting, if the server has that setting. A `retention_window`
+            maintenance job can change or clear the window later.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -76,12 +83,13 @@ class NamespacesClient:
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
-        client.namespaces.create(
-            namespace_id="demo",
-        )
+        client.namespaces.create()
         """
         _response = self._raw_client.create(
-            namespace_id=namespace_id, access=access, naming=naming, request_options=request_options
+            access=access,
+            namespace_id=namespace_id,
+            retention_window_ms=retention_window_ms,
+            request_options=request_options,
         )
         return _response.data
 
@@ -127,7 +135,7 @@ class NamespacesClient:
         self,
         namespace_id: str,
         *,
-        expected_head_seq: typing.Optional[ChangeSeq] = None,
+        expected_head_seq: typing.Optional[CommitSeq] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DeleteNamespaceResponse:
         """
@@ -138,7 +146,7 @@ class NamespacesClient:
         namespace_id : str
             The namespace ID.
 
-        expected_head_seq : typing.Optional[ChangeSeq]
+        expected_head_seq : typing.Optional[CommitSeq]
             The head sequence that the namespace must still have for the delete to succeed.
 
         request_options : typing.Optional[RequestOptions]
@@ -174,23 +182,24 @@ class NamespacesClient:
         self,
         namespace_id: str,
         *,
-        new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[PinId] = OMIT,
+        new_namespace_id: typing.Optional[NamespaceId] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NamespaceMetadata:
         """
-        Creates a new namespace from the source namespace's current head or from a live snapshot.
+        Creates a new namespace from the source namespace's current head or from an unexpired snapshot. Without `new_namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new namespace's ID.
 
         Parameters
         ----------
         namespace_id : str
             The source namespace ID.
 
-        new_namespace_id : NamespaceId
-            The durable ID of the new namespace that the fork creates.
+        new_namespace_id : typing.Optional[NamespaceId]
+            The durable ID of the new namespace that the fork creates. Without this field, LoonFS
+            generates an ID. The response's `namespace_id` is the new namespace's ID.
 
-        snapshot_id : typing.Optional[PinId]
-            A live snapshot to fork from. Without it, the fork starts from the current head.
+        snapshot_id : typing.Optional[SnapshotId]
+            An unexpired snapshot to fork from. Without it, the fork starts from the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -214,11 +223,246 @@ class NamespacesClient:
         )
         client.namespaces.fork(
             namespace_id="namespace_id",
-            new_namespace_id="demo",
         )
         """
         _response = self._raw_client.fork(
             namespace_id, new_namespace_id=new_namespace_id, snapshot_id=snapshot_id, request_options=request_options
+        )
+        return _response.data
+
+    def next_merge_range(
+        self, namespace_id: str, *, source: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+    ) -> NextMergeRangeResponse:
+        """
+        Returns where the fork's next merge into the namespace starts, without planning the merge: the fork's newest merge into the namespace, the fork sequence that the next merge starts after, the fork point, and the fork's head. When the namespace is a rebase's new fork for the fork, the range continues the new fork's replay commits. When a retention floor would refuse the merge with `below_retention_floor`, the response's `outcome` says which floor instead of failing.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the fork merges into.
+
+        source : NamespaceId
+            The fork whose next merge into the namespace the query reads. It has to be a fork of the
+            namespace, or the fork that a rebase replays into the namespace.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        NextMergeRangeResponse
+            The fork's next merge range
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.next_merge_range(
+            namespace_id="namespace_id",
+            source="demo",
+        )
+        """
+        _response = self._raw_client.next_merge_range(namespace_id, source=source, request_options=request_options)
+        return _response.data
+
+    def merge(
+        self,
+        namespace_id: str,
+        *,
+        commit_id: CommitId,
+        source_namespace_id: NamespaceId,
+        message: typing.Optional[str] = OMIT,
+        through_seq: typing.Optional[CommitSeq] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> Commit:
+        """
+        Merges a fork's commits into the namespace as one commit. The merge applies the fork's net change since its previous merge, or since the fork point, through `through_seq` or the fork's head. A change that conflicts with the namespace returns `merge_conflict`, and nothing is committed. The commit ID makes retries idempotent. The merge's WAL object counts toward the namespace's fold triggers like any commit.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the merge commits into.
+
+        commit_id : CommitId
+            The caller's idempotency key for the merge.
+
+        source_namespace_id : NamespaceId
+            The fork whose commits the merge applies. It has to be a fork of the namespace that the
+            request merges into.
+
+        message : typing.Optional[str]
+            An annotation from the caller. The message is part of the merge's identity.
+
+        through_seq : typing.Optional[CommitSeq]
+            The fork sequence that the merge applies the fork's commits through. Without it, the merge
+            applies them through the fork's head.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Commit
+            Fork merged
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.merge(
+            namespace_id="namespace_id",
+            commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
+            source_namespace_id="demo",
+        )
+        """
+        _response = self._raw_client.merge(
+            namespace_id,
+            commit_id=commit_id,
+            source_namespace_id=source_namespace_id,
+            message=message,
+            through_seq=through_seq,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def fork_for_rebase(
+        self,
+        namespace_id: str,
+        *,
+        source_namespace_id: NamespaceId,
+        new_namespace_id: typing.Optional[NamespaceId] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> NamespaceMetadata:
+        """
+        Creates a rebase's new fork from the namespace's head, for a fork of the namespace whose unmerged commits the replay route then replays into the new fork. Without `new_namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new fork's ID, and its `fork_basis.rebased_from` identifies the fork. A request whose new fork already exists returns `namespace_exists`.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the fork was forked from.
+
+        source_namespace_id : NamespaceId
+            The fork whose unmerged commits the new fork's replay commits replay. It has to be a fork
+            of the namespace that the request identifies in its path.
+
+        new_namespace_id : typing.Optional[NamespaceId]
+            The durable ID of the new fork. Without this field, LoonFS generates an ID. The response's
+            `namespace_id` is the new fork's ID.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        NamespaceMetadata
+            New fork created
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.fork_for_rebase(
+            namespace_id="namespace_id",
+            source_namespace_id="demo",
+        )
+        """
+        _response = self._raw_client.fork_for_rebase(
+            namespace_id,
+            source_namespace_id=source_namespace_id,
+            new_namespace_id=new_namespace_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    def replay(
+        self,
+        namespace_id: str,
+        *,
+        commit_id: CommitId,
+        source_namespace_id: NamespaceId,
+        message: typing.Optional[str] = OMIT,
+        through_seq: typing.Optional[CommitSeq] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ReplayForkResponse:
+        """
+        Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork without the conflict report.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The rebase's new fork, which the replay commit commits into.
+
+        commit_id : CommitId
+            The caller's idempotency key for the replay commit.
+
+        source_namespace_id : NamespaceId
+            The fork whose unmerged commits the replay commit replays. The namespace that the request
+            identifies in its path has to be a rebase's new fork for this fork.
+
+        message : typing.Optional[str]
+            An annotation from the caller. The message is part of the replay commit's identity.
+
+        through_seq : typing.Optional[CommitSeq]
+            The fork sequence that the replay commit replays the fork's commits through. Without it,
+            the replay commit replays them through the fork's head.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ReplayForkResponse
+            Fork replayed
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.replay(
+            namespace_id="namespace_id",
+            commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
+            source_namespace_id="demo",
+        )
+        """
+        _response = self._raw_client.replay(
+            namespace_id,
+            commit_id=commit_id,
+            source_namespace_id=source_namespace_id,
+            message=message,
+            through_seq=through_seq,
+            request_options=request_options,
         )
         return _response.data
 
@@ -241,26 +485,30 @@ class AsyncNamespacesClient:
     async def create(
         self,
         *,
-        namespace_id: NamespaceId,
         access: typing.Optional[NamespaceAccess] = OMIT,
-        naming: typing.Optional[NamespaceNaming] = OMIT,
+        namespace_id: typing.Optional[NamespaceId] = OMIT,
+        retention_window_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NamespaceMetadata:
         """
-        Creates a new empty namespace.
+        Creates a new empty namespace. Without `namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new namespace's ID.
 
         Parameters
         ----------
-        namespace_id : NamespaceId
-            The durable ID of the new namespace.
-
         access : typing.Optional[NamespaceAccess]
             The namespace's access mode, which can't be changed after the namespace is created. The
             default is unrestricted.
 
-        naming : typing.Optional[NamespaceNaming]
-            How the namespace compares sibling names. The mode can't be changed after the namespace is
-            created, and it defaults to `case_insensitive`.
+        namespace_id : typing.Optional[NamespaceId]
+            The durable ID of the new namespace. Without this field, LoonFS generates an ID. The
+            response's `namespace_id` is the new namespace's ID.
+
+        retention_window_ms : typing.Optional[int]
+            The namespace's retention window, in milliseconds, which must be at least the grace window
+            (86400000, which is 24 hours). The reference server's maintenance sweep uses this window
+            for the namespace. Without this field, the namespace's window is the server's
+            `retention_window_ms` setting, if the server has that setting. A `retention_window`
+            maintenance job can change or clear the window later.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -287,15 +535,16 @@ class AsyncNamespacesClient:
 
 
         async def main() -> None:
-            await client.namespaces.create(
-                namespace_id="demo",
-            )
+            await client.namespaces.create()
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.create(
-            namespace_id=namespace_id, access=access, naming=naming, request_options=request_options
+            access=access,
+            namespace_id=namespace_id,
+            retention_window_ms=retention_window_ms,
+            request_options=request_options,
         )
         return _response.data
 
@@ -349,7 +598,7 @@ class AsyncNamespacesClient:
         self,
         namespace_id: str,
         *,
-        expected_head_seq: typing.Optional[ChangeSeq] = None,
+        expected_head_seq: typing.Optional[CommitSeq] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> DeleteNamespaceResponse:
         """
@@ -360,7 +609,7 @@ class AsyncNamespacesClient:
         namespace_id : str
             The namespace ID.
 
-        expected_head_seq : typing.Optional[ChangeSeq]
+        expected_head_seq : typing.Optional[CommitSeq]
             The head sequence that the namespace must still have for the delete to succeed.
 
         request_options : typing.Optional[RequestOptions]
@@ -404,23 +653,24 @@ class AsyncNamespacesClient:
         self,
         namespace_id: str,
         *,
-        new_namespace_id: NamespaceId,
-        snapshot_id: typing.Optional[PinId] = OMIT,
+        new_namespace_id: typing.Optional[NamespaceId] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> NamespaceMetadata:
         """
-        Creates a new namespace from the source namespace's current head or from a live snapshot.
+        Creates a new namespace from the source namespace's current head or from an unexpired snapshot. Without `new_namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new namespace's ID.
 
         Parameters
         ----------
         namespace_id : str
             The source namespace ID.
 
-        new_namespace_id : NamespaceId
-            The durable ID of the new namespace that the fork creates.
+        new_namespace_id : typing.Optional[NamespaceId]
+            The durable ID of the new namespace that the fork creates. Without this field, LoonFS
+            generates an ID. The response's `namespace_id` is the new namespace's ID.
 
-        snapshot_id : typing.Optional[PinId]
-            A live snapshot to fork from. Without it, the fork starts from the current head.
+        snapshot_id : typing.Optional[SnapshotId]
+            An unexpired snapshot to fork from. Without it, the fork starts from the current head.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -449,7 +699,6 @@ class AsyncNamespacesClient:
         async def main() -> None:
             await client.namespaces.fork(
                 namespace_id="namespace_id",
-                new_namespace_id="demo",
             )
 
 
@@ -457,5 +706,275 @@ class AsyncNamespacesClient:
         """
         _response = await self._raw_client.fork(
             namespace_id, new_namespace_id=new_namespace_id, snapshot_id=snapshot_id, request_options=request_options
+        )
+        return _response.data
+
+    async def next_merge_range(
+        self, namespace_id: str, *, source: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+    ) -> NextMergeRangeResponse:
+        """
+        Returns where the fork's next merge into the namespace starts, without planning the merge: the fork's newest merge into the namespace, the fork sequence that the next merge starts after, the fork point, and the fork's head. When the namespace is a rebase's new fork for the fork, the range continues the new fork's replay commits. When a retention floor would refuse the merge with `below_retention_floor`, the response's `outcome` says which floor instead of failing.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the fork merges into.
+
+        source : NamespaceId
+            The fork whose next merge into the namespace the query reads. It has to be a fork of the
+            namespace, or the fork that a rebase replays into the namespace.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        NextMergeRangeResponse
+            The fork's next merge range
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.next_merge_range(
+                namespace_id="namespace_id",
+                source="demo",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.next_merge_range(
+            namespace_id, source=source, request_options=request_options
+        )
+        return _response.data
+
+    async def merge(
+        self,
+        namespace_id: str,
+        *,
+        commit_id: CommitId,
+        source_namespace_id: NamespaceId,
+        message: typing.Optional[str] = OMIT,
+        through_seq: typing.Optional[CommitSeq] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> Commit:
+        """
+        Merges a fork's commits into the namespace as one commit. The merge applies the fork's net change since its previous merge, or since the fork point, through `through_seq` or the fork's head. A change that conflicts with the namespace returns `merge_conflict`, and nothing is committed. The commit ID makes retries idempotent. The merge's WAL object counts toward the namespace's fold triggers like any commit.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the merge commits into.
+
+        commit_id : CommitId
+            The caller's idempotency key for the merge.
+
+        source_namespace_id : NamespaceId
+            The fork whose commits the merge applies. It has to be a fork of the namespace that the
+            request merges into.
+
+        message : typing.Optional[str]
+            An annotation from the caller. The message is part of the merge's identity.
+
+        through_seq : typing.Optional[CommitSeq]
+            The fork sequence that the merge applies the fork's commits through. Without it, the merge
+            applies them through the fork's head.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        Commit
+            Fork merged
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.merge(
+                namespace_id="namespace_id",
+                commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
+                source_namespace_id="demo",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.merge(
+            namespace_id,
+            commit_id=commit_id,
+            source_namespace_id=source_namespace_id,
+            message=message,
+            through_seq=through_seq,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def fork_for_rebase(
+        self,
+        namespace_id: str,
+        *,
+        source_namespace_id: NamespaceId,
+        new_namespace_id: typing.Optional[NamespaceId] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> NamespaceMetadata:
+        """
+        Creates a rebase's new fork from the namespace's head, for a fork of the namespace whose unmerged commits the replay route then replays into the new fork. Without `new_namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new fork's ID, and its `fork_basis.rebased_from` identifies the fork. A request whose new fork already exists returns `namespace_exists`.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The namespace that the fork was forked from.
+
+        source_namespace_id : NamespaceId
+            The fork whose unmerged commits the new fork's replay commits replay. It has to be a fork
+            of the namespace that the request identifies in its path.
+
+        new_namespace_id : typing.Optional[NamespaceId]
+            The durable ID of the new fork. Without this field, LoonFS generates an ID. The response's
+            `namespace_id` is the new fork's ID.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        NamespaceMetadata
+            New fork created
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.fork_for_rebase(
+                namespace_id="namespace_id",
+                source_namespace_id="demo",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.fork_for_rebase(
+            namespace_id,
+            source_namespace_id=source_namespace_id,
+            new_namespace_id=new_namespace_id,
+            request_options=request_options,
+        )
+        return _response.data
+
+    async def replay(
+        self,
+        namespace_id: str,
+        *,
+        commit_id: CommitId,
+        source_namespace_id: NamespaceId,
+        message: typing.Optional[str] = OMIT,
+        through_seq: typing.Optional[CommitSeq] = OMIT,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ReplayForkResponse:
+        """
+        Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork without the conflict report.
+
+        Parameters
+        ----------
+        namespace_id : str
+            The rebase's new fork, which the replay commit commits into.
+
+        commit_id : CommitId
+            The caller's idempotency key for the replay commit.
+
+        source_namespace_id : NamespaceId
+            The fork whose unmerged commits the replay commit replays. The namespace that the request
+            identifies in its path has to be a rebase's new fork for this fork.
+
+        message : typing.Optional[str]
+            An annotation from the caller. The message is part of the replay commit's identity.
+
+        through_seq : typing.Optional[CommitSeq]
+            The fork sequence that the replay commit replays the fork's commits through. Without it,
+            the replay commit replays them through the fork's head.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ReplayForkResponse
+            Fork replayed
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            subject_id="YOUR_SUBJECT_ID",
+            principal_scope="YOUR_PRINCIPAL_SCOPE",
+            principals="YOUR_PRINCIPALS",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.replay(
+                namespace_id="namespace_id",
+                commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
+                source_namespace_id="demo",
+            )
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.replay(
+            namespace_id,
+            commit_id=commit_id,
+            source_namespace_id=source_namespace_id,
+            message=message,
+            through_seq=through_seq,
+            request_options=request_options,
         )
         return _response.data

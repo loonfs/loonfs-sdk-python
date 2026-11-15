@@ -18,12 +18,6 @@ if typing.TYPE_CHECKING:
     from .attributes_revision_no import AttributesRevisionNo
     from .binding_version import BindingVersion
     from .capability_document import CapabilityDocument
-    from .change_seq import ChangeSeq
-    from .checkpoint import Checkpoint
-    from .checkpoint_owner import CheckpointOwner, CheckpointOwner_Fork, CheckpointOwner_Snapshot, CheckpointOwner_User
-    from .checkpoint_owner_fork import CheckpointOwnerFork
-    from .checkpoint_owner_snapshot import CheckpointOwnerSnapshot
-    from .checkpoint_owner_user import CheckpointOwnerUser
     from .checksum import Checksum
     from .checksum_algorithm import ChecksumAlgorithm
     from .commit import Commit
@@ -47,19 +41,7 @@ if typing.TYPE_CHECKING:
     from .commit_precondition_namespace_head import CommitPreconditionNamespaceHead
     from .commit_precondition_path_absence import CommitPreconditionPathAbsence
     from .commit_precondition_path_binding import CommitPreconditionPathBinding
-    from .compaction_step_outcome import (
-        CompactionStepOutcome,
-        CompactionStepOutcome_BoundedMergePublished,
-        CompactionStepOutcome_Fenced,
-        CompactionStepOutcome_ManifestAdvanced,
-        CompactionStepOutcome_MetadataCompactionRequired,
-        CompactionStepOutcome_NotNeeded,
-    )
-    from .compaction_step_outcome_bounded_merge_published import CompactionStepOutcomeBoundedMergePublished
-    from .compaction_step_outcome_fenced import CompactionStepOutcomeFenced
-    from .compaction_step_outcome_manifest_advanced import CompactionStepOutcomeManifestAdvanced
-    from .compaction_step_outcome_metadata_compaction_required import CompactionStepOutcomeMetadataCompactionRequired
-    from .compaction_step_outcome_not_needed import CompactionStepOutcomeNotNeeded
+    from .commit_seq import CommitSeq
     from .complete_upload_body import (
         CompleteUploadBody,
         CompleteUploadBody_DirectMultipart,
@@ -85,38 +67,40 @@ if typing.TYPE_CHECKING:
     from .create_upload_body_direct_multipart import CreateUploadBodyDirectMultipart
     from .create_upload_body_direct_put import CreateUploadBodyDirectPut
     from .create_upload_body_service_proxied import CreateUploadBodyServiceProxied
-    from .delete_checkpoint_response import DeleteCheckpointResponse
     from .delete_directory_behavior import DeleteDirectoryBehavior
     from .delete_namespace_response import DeleteNamespaceResponse
     from .delete_snapshot_response import DeleteSnapshotResponse
-    from .deleted_checkpoints_by_owner import DeletedCheckpointsByOwner
     from .deleted_object_counts import DeletedObjectCounts
+    from .deleted_snapshots_by_owner import DeletedSnapshotsByOwner
     from .destination_behavior import DestinationBehavior
+    from .diff_entry import DiffEntry
+    from .diff_entry_kind import DiffEntryKind
+    from .diff_response import DiffResponse
     from .directory_binding import DirectoryBinding
     from .display_name import DisplayName
     from .download_range import DownloadRange
     from .error_details import ErrorDetails
     from .error_response import ErrorResponse
     from .file_revision import FileRevision
-    from .filesystem_change import (
-        FilesystemChange,
-        FilesystemChange_AccessChanged,
-        FilesystemChange_AttributesChanged,
-        FilesystemChange_ContentChanged,
-        FilesystemChange_Deleted,
-        FilesystemChange_DirectoryCreated,
-        FilesystemChange_FileCreated,
-        FilesystemChange_Moved,
-        FilesystemChange_Undeleted,
+    from .filesystem_event import (
+        FilesystemEvent,
+        FilesystemEvent_AccessChanged,
+        FilesystemEvent_AttributesChanged,
+        FilesystemEvent_ContentChanged,
+        FilesystemEvent_Deleted,
+        FilesystemEvent_DirectoryCreated,
+        FilesystemEvent_FileCreated,
+        FilesystemEvent_Moved,
+        FilesystemEvent_Restored,
     )
-    from .filesystem_change_access_changed import FilesystemChangeAccessChanged
-    from .filesystem_change_attributes_changed import FilesystemChangeAttributesChanged
-    from .filesystem_change_content_changed import FilesystemChangeContentChanged
-    from .filesystem_change_deleted import FilesystemChangeDeleted
-    from .filesystem_change_directory_created import FilesystemChangeDirectoryCreated
-    from .filesystem_change_file_created import FilesystemChangeFileCreated
-    from .filesystem_change_moved import FilesystemChangeMoved
-    from .filesystem_change_undeleted import FilesystemChangeUndeleted
+    from .filesystem_event_access_changed import FilesystemEventAccessChanged
+    from .filesystem_event_attributes_changed import FilesystemEventAttributesChanged
+    from .filesystem_event_content_changed import FilesystemEventContentChanged
+    from .filesystem_event_deleted import FilesystemEventDeleted
+    from .filesystem_event_directory_created import FilesystemEventDirectoryCreated
+    from .filesystem_event_file_created import FilesystemEventFileCreated
+    from .filesystem_event_moved import FilesystemEventMoved
+    from .filesystem_event_restored import FilesystemEventRestored
     from .filesystem_operation import (
         FilesystemOperation,
         FilesystemOperation_AppendFile,
@@ -132,9 +116,9 @@ if typing.TYPE_CHECKING:
         FilesystemOperation_MovePath,
         FilesystemOperation_PutFile,
         FilesystemOperation_PutFileRevisionByInode,
+        FilesystemOperation_RestoreDeleted,
         FilesystemOperation_RestoreRevision,
         FilesystemOperation_RestoreRevisionByInode,
-        FilesystemOperation_Undelete,
         FilesystemOperation_UpdateAccess,
         FilesystemOperation_UpdateAccessByInode,
         FilesystemOperation_UpdateAttributes,
@@ -153,13 +137,14 @@ if typing.TYPE_CHECKING:
     from .filesystem_operation_move_path import FilesystemOperationMovePath
     from .filesystem_operation_put_file import FilesystemOperationPutFile
     from .filesystem_operation_put_file_revision_by_inode import FilesystemOperationPutFileRevisionByInode
+    from .filesystem_operation_restore_deleted import FilesystemOperationRestoreDeleted
     from .filesystem_operation_restore_revision import FilesystemOperationRestoreRevision
     from .filesystem_operation_restore_revision_by_inode import FilesystemOperationRestoreRevisionByInode
-    from .filesystem_operation_undelete import FilesystemOperationUndelete
     from .filesystem_operation_update_access import FilesystemOperationUpdateAccess
     from .filesystem_operation_update_access_by_inode import FilesystemOperationUpdateAccessByInode
     from .filesystem_operation_update_attributes import FilesystemOperationUpdateAttributes
     from .filesystem_operation_update_attributes_by_inode import FilesystemOperationUpdateAttributesByInode
+    from .gc_skipped_work import GcSkippedWork
     from .grep_index import GrepIndex, GrepIndex_Active, GrepIndex_Backfilling, GrepIndex_Disabled
     from .grep_index_status_active import GrepIndexStatusActive
     from .grep_index_status_backfilling import GrepIndexStatusBackfilling
@@ -169,28 +154,20 @@ if typing.TYPE_CHECKING:
     from .inode_id import InodeId
     from .inode_kind import InodeKind
     from .list_changes_response import ListChangesResponse
-    from .list_checkpoints_response import ListCheckpointsResponse
     from .list_file_revisions_response import ListFileRevisionsResponse
     from .list_inode_children_response import ListInodeChildrenResponse
     from .list_path_entries_response import ListPathEntriesResponse
+    from .list_snapshot_records_response import ListSnapshotRecordsResponse
     from .list_snapshots_response import ListSnapshotsResponse
     from .list_trash_response import ListTrashResponse
     from .manifest_no import ManifestNo
-    from .metadata_compaction_outcome import (
-        MetadataCompactionOutcome,
-        MetadataCompactionOutcome_Abandoned,
-        MetadataCompactionOutcome_BoundedMergePublished,
-        MetadataCompactionOutcome_Cancelled,
-        MetadataCompactionOutcome_Fenced,
-        MetadataCompactionOutcome_NotNeeded,
-        MetadataCompactionOutcome_Published,
-    )
-    from .metadata_compaction_outcome_abandoned import MetadataCompactionOutcomeAbandoned
-    from .metadata_compaction_outcome_bounded_merge_published import MetadataCompactionOutcomeBoundedMergePublished
-    from .metadata_compaction_outcome_cancelled import MetadataCompactionOutcomeCancelled
-    from .metadata_compaction_outcome_fenced import MetadataCompactionOutcomeFenced
-    from .metadata_compaction_outcome_not_needed import MetadataCompactionOutcomeNotNeeded
-    from .metadata_compaction_outcome_published import MetadataCompactionOutcomePublished
+    from .merge import Merge
+    from .merge_bound import MergeBound
+    from .merge_conflict import MergeConflict
+    from .merge_conflict_kind import MergeConflictKind
+    from .merge_conflict_version import MergeConflictVersion
+    from .metadata_maintenance_outcome import MetadataMaintenanceOutcome
+    from .metadata_skipped_work import MetadataSkippedWork
     from .name_key import NameKey
     from .namespace_access import NamespaceAccess, NamespaceAccess_Acl, NamespaceAccess_Unrestricted
     from .namespace_access_acl import NamespaceAccessAcl
@@ -202,55 +179,79 @@ if typing.TYPE_CHECKING:
     from .namespace_fork_basis import NamespaceForkBasis
     from .namespace_id import NamespaceId
     from .namespace_metadata import NamespaceMetadata
-    from .namespace_naming import NamespaceNaming
-    from .object_transfer_access import ObjectTransferAccess, ObjectTransferAccess_PresignedUrl
-    from .object_transfer_access_presigned_url import ObjectTransferAccessPresignedUrl
-    from .path_entry import PathEntry, PathEntry_Dir, PathEntry_File
+    from .namespace_rebased_from import NamespaceRebasedFrom
+    from .next_merge_range_outcome_fork_point_below_floor import NextMergeRangeOutcomeForkPointBelowFloor
+    from .next_merge_range_outcome_open import NextMergeRangeOutcomeOpen
+    from .next_merge_range_outcome_range_start_below_floor import NextMergeRangeOutcomeRangeStartBelowFloor
+    from .next_merge_range_response import (
+        NextMergeRangeResponse,
+        NextMergeRangeResponse_ForkPointBelowFloor,
+        NextMergeRangeResponse_Open,
+        NextMergeRangeResponse_RangeStartBelowFloor,
+    )
+    from .object_transfer import ObjectTransfer, ObjectTransfer_PresignedUrl
+    from .object_transfer_presigned_url import ObjectTransferPresignedUrl
+    from .path_entry import PathEntry, PathEntry_Directory, PathEntry_File, PathEntry_Unknown
     from .path_entry_directory import PathEntryDirectory
     from .path_entry_file import PathEntryFile
-    from .pin_id import PinId
+    from .pool_deleted_object_counts import PoolDeletedObjectCounts
+    from .pool_id import PoolId
+    from .pool_retained_candidates import PoolRetainedCandidates
     from .principal_id import PrincipalId
     from .principal_scope import PrincipalScope
-    from .probe_run_id import ProbeRunId
+    from .probe_id import ProbeId
+    from .read_consistency import ReadConsistency
+    from .replay_fork_response import ReplayForkResponse
     from .retained_candidates import RetainedCandidates
     from .revision_no import RevisionNo
-    from .run_maintenance_request import (
-        RunMaintenanceRequest,
-        RunMaintenanceRequest_Gc,
-        RunMaintenanceRequest_GrepGc,
-        RunMaintenanceRequest_Metadata,
-        RunMaintenanceRequest_MetadataCompaction,
-        RunMaintenanceRequest_RecoverAdministrator,
-        RunMaintenanceRequest_Retention,
+    from .run_maintenance_job_request import (
+        RunMaintenanceJobRequest,
+        RunMaintenanceJobRequest_Gc,
+        RunMaintenanceJobRequest_Metadata,
+        RunMaintenanceJobRequest_RecoverAdministrator,
+        RunMaintenanceJobRequest_Retention,
+        RunMaintenanceJobRequest_RetentionWindow,
     )
-    from .run_maintenance_request_gc import RunMaintenanceRequestGc
-    from .run_maintenance_request_grep_gc import RunMaintenanceRequestGrepGc
-    from .run_maintenance_request_metadata import RunMaintenanceRequestMetadata
-    from .run_maintenance_request_metadata_compaction import RunMaintenanceRequestMetadataCompaction
-    from .run_maintenance_request_recover_administrator import RunMaintenanceRequestRecoverAdministrator
-    from .run_maintenance_request_retention import RunMaintenanceRequestRetention
-    from .run_maintenance_response import (
-        RunMaintenanceResponse,
-        RunMaintenanceResponse_Gc,
-        RunMaintenanceResponse_GrepGc,
-        RunMaintenanceResponse_Metadata,
-        RunMaintenanceResponse_MetadataCompaction,
-        RunMaintenanceResponse_RecoverAdministrator,
-        RunMaintenanceResponse_Retention,
+    from .run_maintenance_job_request_gc import RunMaintenanceJobRequestGc
+    from .run_maintenance_job_request_metadata import RunMaintenanceJobRequestMetadata
+    from .run_maintenance_job_request_recover_administrator import RunMaintenanceJobRequestRecoverAdministrator
+    from .run_maintenance_job_request_retention import RunMaintenanceJobRequestRetention
+    from .run_maintenance_job_request_retention_window import RunMaintenanceJobRequestRetentionWindow
+    from .run_maintenance_job_response import (
+        RunMaintenanceJobResponse,
+        RunMaintenanceJobResponse_Gc,
+        RunMaintenanceJobResponse_Metadata,
+        RunMaintenanceJobResponse_RecoverAdministrator,
+        RunMaintenanceJobResponse_Retention,
+        RunMaintenanceJobResponse_RetentionWindow,
     )
-    from .run_maintenance_response_gc import RunMaintenanceResponseGc
-    from .run_maintenance_response_grep_gc import RunMaintenanceResponseGrepGc
-    from .run_maintenance_response_metadata import RunMaintenanceResponseMetadata
-    from .run_maintenance_response_metadata_compaction import RunMaintenanceResponseMetadataCompaction
-    from .run_maintenance_response_recover_administrator import RunMaintenanceResponseRecoverAdministrator
-    from .run_maintenance_response_retention import RunMaintenanceResponseRetention
-    from .run_no import RunNo
+    from .run_maintenance_job_response_gc import RunMaintenanceJobResponseGc
+    from .run_maintenance_job_response_metadata import RunMaintenanceJobResponseMetadata
+    from .run_maintenance_job_response_recover_administrator import RunMaintenanceJobResponseRecoverAdministrator
+    from .run_maintenance_job_response_retention import RunMaintenanceJobResponseRetention
+    from .run_maintenance_job_response_retention_window import RunMaintenanceJobResponseRetentionWindow
+    from .run_pool_maintenance_job_request import RunPoolMaintenanceJobRequest, RunPoolMaintenanceJobRequest_Gc
+    from .run_pool_maintenance_job_request_gc import RunPoolMaintenanceJobRequestGc
+    from .run_pool_maintenance_job_response import RunPoolMaintenanceJobResponse, RunPoolMaintenanceJobResponse_Gc
+    from .run_pool_maintenance_job_response_gc import RunPoolMaintenanceJobResponseGc
     from .service_unavailable_error_body import ServiceUnavailableErrorBody
     from .sign_upload_parts_response import SignUploadPartsResponse
     from .signed_upload_part import SignedUploadPart
     from .snapshot import Snapshot
-    from .store_probe_check_outcome import StoreProbeCheckOutcome
-    from .store_probe_check_result import StoreProbeCheckResult
+    from .snapshot_id import SnapshotId
+    from .snapshot_record import SnapshotRecord
+    from .snapshot_record_owner import SnapshotRecordOwner, SnapshotRecordOwner_Fork, SnapshotRecordOwner_User
+    from .snapshot_record_owner_fork import SnapshotRecordOwnerFork
+    from .snapshot_record_owner_user import SnapshotRecordOwnerUser
+    from .store_probe_check import (
+        StoreProbeCheck,
+        StoreProbeCheck_Failed,
+        StoreProbeCheck_Passed,
+        StoreProbeCheck_Unsupported,
+    )
+    from .store_probe_check_failed import StoreProbeCheckFailed
+    from .store_probe_check_passed import StoreProbeCheckPassed
+    from .store_probe_check_unsupported import StoreProbeCheckUnsupported
     from .store_probe_request import StoreProbeRequest
     from .store_probe_response import StoreProbeResponse
     from .trash_entry import TrashEntry
@@ -262,17 +263,6 @@ if typing.TYPE_CHECKING:
     from .upload_session_status_aborted import UploadSessionStatusAborted
     from .upload_session_status_completed import UploadSessionStatusCompleted
     from .upload_session_status_open import UploadSessionStatusOpen
-    from .wal_fold_step_outcome import (
-        WalFoldStepOutcome,
-        WalFoldStepOutcome_AlreadyPublished,
-        WalFoldStepOutcome_Folded,
-        WalFoldStepOutcome_NotNeeded,
-        WalFoldStepOutcome_RetriesExhausted,
-    )
-    from .wal_fold_step_outcome_already_published import WalFoldStepOutcomeAlreadyPublished
-    from .wal_fold_step_outcome_folded import WalFoldStepOutcomeFolded
-    from .wal_fold_step_outcome_not_needed import WalFoldStepOutcomeNotNeeded
-    from .wal_fold_step_outcome_retries_exhausted import WalFoldStepOutcomeRetriesExhausted
     from .writer_epoch import WriterEpoch
     from .writer_id import WriterId
 _dynamic_imports: typing.Dict[str, str] = {
@@ -288,15 +278,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "AttributesRevisionNo": ".attributes_revision_no",
     "BindingVersion": ".binding_version",
     "CapabilityDocument": ".capability_document",
-    "ChangeSeq": ".change_seq",
-    "Checkpoint": ".checkpoint",
-    "CheckpointOwner": ".checkpoint_owner",
-    "CheckpointOwnerFork": ".checkpoint_owner_fork",
-    "CheckpointOwnerSnapshot": ".checkpoint_owner_snapshot",
-    "CheckpointOwnerUser": ".checkpoint_owner_user",
-    "CheckpointOwner_Fork": ".checkpoint_owner",
-    "CheckpointOwner_Snapshot": ".checkpoint_owner",
-    "CheckpointOwner_User": ".checkpoint_owner",
     "Checksum": ".checksum",
     "ChecksumAlgorithm": ".checksum_algorithm",
     "Commit": ".commit",
@@ -318,17 +299,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CommitPrecondition_NamespaceHead": ".commit_precondition",
     "CommitPrecondition_PathAbsence": ".commit_precondition",
     "CommitPrecondition_PathBinding": ".commit_precondition",
-    "CompactionStepOutcome": ".compaction_step_outcome",
-    "CompactionStepOutcomeBoundedMergePublished": ".compaction_step_outcome_bounded_merge_published",
-    "CompactionStepOutcomeFenced": ".compaction_step_outcome_fenced",
-    "CompactionStepOutcomeManifestAdvanced": ".compaction_step_outcome_manifest_advanced",
-    "CompactionStepOutcomeMetadataCompactionRequired": ".compaction_step_outcome_metadata_compaction_required",
-    "CompactionStepOutcomeNotNeeded": ".compaction_step_outcome_not_needed",
-    "CompactionStepOutcome_BoundedMergePublished": ".compaction_step_outcome",
-    "CompactionStepOutcome_Fenced": ".compaction_step_outcome",
-    "CompactionStepOutcome_ManifestAdvanced": ".compaction_step_outcome",
-    "CompactionStepOutcome_MetadataCompactionRequired": ".compaction_step_outcome",
-    "CompactionStepOutcome_NotNeeded": ".compaction_step_outcome",
+    "CommitSeq": ".commit_seq",
     "CompleteUploadBody": ".complete_upload_body",
     "CompleteUploadBodyDirectMultipart": ".complete_upload_body_direct_multipart",
     "CompleteUploadBodyDirectPut": ".complete_upload_body_direct_put",
@@ -350,36 +321,38 @@ _dynamic_imports: typing.Dict[str, str] = {
     "CreateUploadBody_DirectMultipart": ".create_upload_body",
     "CreateUploadBody_DirectPut": ".create_upload_body",
     "CreateUploadBody_ServiceProxied": ".create_upload_body",
-    "DeleteCheckpointResponse": ".delete_checkpoint_response",
     "DeleteDirectoryBehavior": ".delete_directory_behavior",
     "DeleteNamespaceResponse": ".delete_namespace_response",
     "DeleteSnapshotResponse": ".delete_snapshot_response",
-    "DeletedCheckpointsByOwner": ".deleted_checkpoints_by_owner",
     "DeletedObjectCounts": ".deleted_object_counts",
+    "DeletedSnapshotsByOwner": ".deleted_snapshots_by_owner",
     "DestinationBehavior": ".destination_behavior",
+    "DiffEntry": ".diff_entry",
+    "DiffEntryKind": ".diff_entry_kind",
+    "DiffResponse": ".diff_response",
     "DirectoryBinding": ".directory_binding",
     "DisplayName": ".display_name",
     "DownloadRange": ".download_range",
     "ErrorDetails": ".error_details",
     "ErrorResponse": ".error_response",
     "FileRevision": ".file_revision",
-    "FilesystemChange": ".filesystem_change",
-    "FilesystemChangeAccessChanged": ".filesystem_change_access_changed",
-    "FilesystemChangeAttributesChanged": ".filesystem_change_attributes_changed",
-    "FilesystemChangeContentChanged": ".filesystem_change_content_changed",
-    "FilesystemChangeDeleted": ".filesystem_change_deleted",
-    "FilesystemChangeDirectoryCreated": ".filesystem_change_directory_created",
-    "FilesystemChangeFileCreated": ".filesystem_change_file_created",
-    "FilesystemChangeMoved": ".filesystem_change_moved",
-    "FilesystemChangeUndeleted": ".filesystem_change_undeleted",
-    "FilesystemChange_AccessChanged": ".filesystem_change",
-    "FilesystemChange_AttributesChanged": ".filesystem_change",
-    "FilesystemChange_ContentChanged": ".filesystem_change",
-    "FilesystemChange_Deleted": ".filesystem_change",
-    "FilesystemChange_DirectoryCreated": ".filesystem_change",
-    "FilesystemChange_FileCreated": ".filesystem_change",
-    "FilesystemChange_Moved": ".filesystem_change",
-    "FilesystemChange_Undeleted": ".filesystem_change",
+    "FilesystemEvent": ".filesystem_event",
+    "FilesystemEventAccessChanged": ".filesystem_event_access_changed",
+    "FilesystemEventAttributesChanged": ".filesystem_event_attributes_changed",
+    "FilesystemEventContentChanged": ".filesystem_event_content_changed",
+    "FilesystemEventDeleted": ".filesystem_event_deleted",
+    "FilesystemEventDirectoryCreated": ".filesystem_event_directory_created",
+    "FilesystemEventFileCreated": ".filesystem_event_file_created",
+    "FilesystemEventMoved": ".filesystem_event_moved",
+    "FilesystemEventRestored": ".filesystem_event_restored",
+    "FilesystemEvent_AccessChanged": ".filesystem_event",
+    "FilesystemEvent_AttributesChanged": ".filesystem_event",
+    "FilesystemEvent_ContentChanged": ".filesystem_event",
+    "FilesystemEvent_Deleted": ".filesystem_event",
+    "FilesystemEvent_DirectoryCreated": ".filesystem_event",
+    "FilesystemEvent_FileCreated": ".filesystem_event",
+    "FilesystemEvent_Moved": ".filesystem_event",
+    "FilesystemEvent_Restored": ".filesystem_event",
     "FilesystemOperation": ".filesystem_operation",
     "FilesystemOperationAppendFile": ".filesystem_operation_append_file",
     "FilesystemOperationAppendFileByInode": ".filesystem_operation_append_file_by_inode",
@@ -394,9 +367,9 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperationMovePath": ".filesystem_operation_move_path",
     "FilesystemOperationPutFile": ".filesystem_operation_put_file",
     "FilesystemOperationPutFileRevisionByInode": ".filesystem_operation_put_file_revision_by_inode",
+    "FilesystemOperationRestoreDeleted": ".filesystem_operation_restore_deleted",
     "FilesystemOperationRestoreRevision": ".filesystem_operation_restore_revision",
     "FilesystemOperationRestoreRevisionByInode": ".filesystem_operation_restore_revision_by_inode",
-    "FilesystemOperationUndelete": ".filesystem_operation_undelete",
     "FilesystemOperationUpdateAccess": ".filesystem_operation_update_access",
     "FilesystemOperationUpdateAccessByInode": ".filesystem_operation_update_access_by_inode",
     "FilesystemOperationUpdateAttributes": ".filesystem_operation_update_attributes",
@@ -414,13 +387,14 @@ _dynamic_imports: typing.Dict[str, str] = {
     "FilesystemOperation_MovePath": ".filesystem_operation",
     "FilesystemOperation_PutFile": ".filesystem_operation",
     "FilesystemOperation_PutFileRevisionByInode": ".filesystem_operation",
+    "FilesystemOperation_RestoreDeleted": ".filesystem_operation",
     "FilesystemOperation_RestoreRevision": ".filesystem_operation",
     "FilesystemOperation_RestoreRevisionByInode": ".filesystem_operation",
-    "FilesystemOperation_Undelete": ".filesystem_operation",
     "FilesystemOperation_UpdateAccess": ".filesystem_operation",
     "FilesystemOperation_UpdateAccessByInode": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributes": ".filesystem_operation",
     "FilesystemOperation_UpdateAttributesByInode": ".filesystem_operation",
+    "GcSkippedWork": ".gc_skipped_work",
     "GrepIndex": ".grep_index",
     "GrepIndexStatusActive": ".grep_index_status_active",
     "GrepIndexStatusBackfilling": ".grep_index_status_backfilling",
@@ -433,26 +407,20 @@ _dynamic_imports: typing.Dict[str, str] = {
     "InodeId": ".inode_id",
     "InodeKind": ".inode_kind",
     "ListChangesResponse": ".list_changes_response",
-    "ListCheckpointsResponse": ".list_checkpoints_response",
     "ListFileRevisionsResponse": ".list_file_revisions_response",
     "ListInodeChildrenResponse": ".list_inode_children_response",
     "ListPathEntriesResponse": ".list_path_entries_response",
+    "ListSnapshotRecordsResponse": ".list_snapshot_records_response",
     "ListSnapshotsResponse": ".list_snapshots_response",
     "ListTrashResponse": ".list_trash_response",
     "ManifestNo": ".manifest_no",
-    "MetadataCompactionOutcome": ".metadata_compaction_outcome",
-    "MetadataCompactionOutcomeAbandoned": ".metadata_compaction_outcome_abandoned",
-    "MetadataCompactionOutcomeBoundedMergePublished": ".metadata_compaction_outcome_bounded_merge_published",
-    "MetadataCompactionOutcomeCancelled": ".metadata_compaction_outcome_cancelled",
-    "MetadataCompactionOutcomeFenced": ".metadata_compaction_outcome_fenced",
-    "MetadataCompactionOutcomeNotNeeded": ".metadata_compaction_outcome_not_needed",
-    "MetadataCompactionOutcomePublished": ".metadata_compaction_outcome_published",
-    "MetadataCompactionOutcome_Abandoned": ".metadata_compaction_outcome",
-    "MetadataCompactionOutcome_BoundedMergePublished": ".metadata_compaction_outcome",
-    "MetadataCompactionOutcome_Cancelled": ".metadata_compaction_outcome",
-    "MetadataCompactionOutcome_Fenced": ".metadata_compaction_outcome",
-    "MetadataCompactionOutcome_NotNeeded": ".metadata_compaction_outcome",
-    "MetadataCompactionOutcome_Published": ".metadata_compaction_outcome",
+    "Merge": ".merge",
+    "MergeBound": ".merge_bound",
+    "MergeConflict": ".merge_conflict",
+    "MergeConflictKind": ".merge_conflict_kind",
+    "MergeConflictVersion": ".merge_conflict_version",
+    "MetadataMaintenanceOutcome": ".metadata_maintenance_outcome",
+    "MetadataSkippedWork": ".metadata_skipped_work",
     "NameKey": ".name_key",
     "NamespaceAccess": ".namespace_access",
     "NamespaceAccessAcl": ".namespace_access_acl",
@@ -468,54 +436,79 @@ _dynamic_imports: typing.Dict[str, str] = {
     "NamespaceForkBasis": ".namespace_fork_basis",
     "NamespaceId": ".namespace_id",
     "NamespaceMetadata": ".namespace_metadata",
-    "NamespaceNaming": ".namespace_naming",
-    "ObjectTransferAccess": ".object_transfer_access",
-    "ObjectTransferAccessPresignedUrl": ".object_transfer_access_presigned_url",
-    "ObjectTransferAccess_PresignedUrl": ".object_transfer_access",
+    "NamespaceRebasedFrom": ".namespace_rebased_from",
+    "NextMergeRangeOutcomeForkPointBelowFloor": ".next_merge_range_outcome_fork_point_below_floor",
+    "NextMergeRangeOutcomeOpen": ".next_merge_range_outcome_open",
+    "NextMergeRangeOutcomeRangeStartBelowFloor": ".next_merge_range_outcome_range_start_below_floor",
+    "NextMergeRangeResponse": ".next_merge_range_response",
+    "NextMergeRangeResponse_ForkPointBelowFloor": ".next_merge_range_response",
+    "NextMergeRangeResponse_Open": ".next_merge_range_response",
+    "NextMergeRangeResponse_RangeStartBelowFloor": ".next_merge_range_response",
+    "ObjectTransfer": ".object_transfer",
+    "ObjectTransferPresignedUrl": ".object_transfer_presigned_url",
+    "ObjectTransfer_PresignedUrl": ".object_transfer",
     "PathEntry": ".path_entry",
     "PathEntryDirectory": ".path_entry_directory",
     "PathEntryFile": ".path_entry_file",
-    "PathEntry_Dir": ".path_entry",
+    "PathEntry_Directory": ".path_entry",
     "PathEntry_File": ".path_entry",
-    "PinId": ".pin_id",
+    "PathEntry_Unknown": ".path_entry",
+    "PoolDeletedObjectCounts": ".pool_deleted_object_counts",
+    "PoolId": ".pool_id",
+    "PoolRetainedCandidates": ".pool_retained_candidates",
     "PrincipalId": ".principal_id",
     "PrincipalScope": ".principal_scope",
-    "ProbeRunId": ".probe_run_id",
+    "ProbeId": ".probe_id",
+    "ReadConsistency": ".read_consistency",
+    "ReplayForkResponse": ".replay_fork_response",
     "RetainedCandidates": ".retained_candidates",
     "RevisionNo": ".revision_no",
-    "RunMaintenanceRequest": ".run_maintenance_request",
-    "RunMaintenanceRequestGc": ".run_maintenance_request_gc",
-    "RunMaintenanceRequestGrepGc": ".run_maintenance_request_grep_gc",
-    "RunMaintenanceRequestMetadata": ".run_maintenance_request_metadata",
-    "RunMaintenanceRequestMetadataCompaction": ".run_maintenance_request_metadata_compaction",
-    "RunMaintenanceRequestRecoverAdministrator": ".run_maintenance_request_recover_administrator",
-    "RunMaintenanceRequestRetention": ".run_maintenance_request_retention",
-    "RunMaintenanceRequest_Gc": ".run_maintenance_request",
-    "RunMaintenanceRequest_GrepGc": ".run_maintenance_request",
-    "RunMaintenanceRequest_Metadata": ".run_maintenance_request",
-    "RunMaintenanceRequest_MetadataCompaction": ".run_maintenance_request",
-    "RunMaintenanceRequest_RecoverAdministrator": ".run_maintenance_request",
-    "RunMaintenanceRequest_Retention": ".run_maintenance_request",
-    "RunMaintenanceResponse": ".run_maintenance_response",
-    "RunMaintenanceResponseGc": ".run_maintenance_response_gc",
-    "RunMaintenanceResponseGrepGc": ".run_maintenance_response_grep_gc",
-    "RunMaintenanceResponseMetadata": ".run_maintenance_response_metadata",
-    "RunMaintenanceResponseMetadataCompaction": ".run_maintenance_response_metadata_compaction",
-    "RunMaintenanceResponseRecoverAdministrator": ".run_maintenance_response_recover_administrator",
-    "RunMaintenanceResponseRetention": ".run_maintenance_response_retention",
-    "RunMaintenanceResponse_Gc": ".run_maintenance_response",
-    "RunMaintenanceResponse_GrepGc": ".run_maintenance_response",
-    "RunMaintenanceResponse_Metadata": ".run_maintenance_response",
-    "RunMaintenanceResponse_MetadataCompaction": ".run_maintenance_response",
-    "RunMaintenanceResponse_RecoverAdministrator": ".run_maintenance_response",
-    "RunMaintenanceResponse_Retention": ".run_maintenance_response",
-    "RunNo": ".run_no",
+    "RunMaintenanceJobRequest": ".run_maintenance_job_request",
+    "RunMaintenanceJobRequestGc": ".run_maintenance_job_request_gc",
+    "RunMaintenanceJobRequestMetadata": ".run_maintenance_job_request_metadata",
+    "RunMaintenanceJobRequestRecoverAdministrator": ".run_maintenance_job_request_recover_administrator",
+    "RunMaintenanceJobRequestRetention": ".run_maintenance_job_request_retention",
+    "RunMaintenanceJobRequestRetentionWindow": ".run_maintenance_job_request_retention_window",
+    "RunMaintenanceJobRequest_Gc": ".run_maintenance_job_request",
+    "RunMaintenanceJobRequest_Metadata": ".run_maintenance_job_request",
+    "RunMaintenanceJobRequest_RecoverAdministrator": ".run_maintenance_job_request",
+    "RunMaintenanceJobRequest_Retention": ".run_maintenance_job_request",
+    "RunMaintenanceJobRequest_RetentionWindow": ".run_maintenance_job_request",
+    "RunMaintenanceJobResponse": ".run_maintenance_job_response",
+    "RunMaintenanceJobResponseGc": ".run_maintenance_job_response_gc",
+    "RunMaintenanceJobResponseMetadata": ".run_maintenance_job_response_metadata",
+    "RunMaintenanceJobResponseRecoverAdministrator": ".run_maintenance_job_response_recover_administrator",
+    "RunMaintenanceJobResponseRetention": ".run_maintenance_job_response_retention",
+    "RunMaintenanceJobResponseRetentionWindow": ".run_maintenance_job_response_retention_window",
+    "RunMaintenanceJobResponse_Gc": ".run_maintenance_job_response",
+    "RunMaintenanceJobResponse_Metadata": ".run_maintenance_job_response",
+    "RunMaintenanceJobResponse_RecoverAdministrator": ".run_maintenance_job_response",
+    "RunMaintenanceJobResponse_Retention": ".run_maintenance_job_response",
+    "RunMaintenanceJobResponse_RetentionWindow": ".run_maintenance_job_response",
+    "RunPoolMaintenanceJobRequest": ".run_pool_maintenance_job_request",
+    "RunPoolMaintenanceJobRequestGc": ".run_pool_maintenance_job_request_gc",
+    "RunPoolMaintenanceJobRequest_Gc": ".run_pool_maintenance_job_request",
+    "RunPoolMaintenanceJobResponse": ".run_pool_maintenance_job_response",
+    "RunPoolMaintenanceJobResponseGc": ".run_pool_maintenance_job_response_gc",
+    "RunPoolMaintenanceJobResponse_Gc": ".run_pool_maintenance_job_response",
     "ServiceUnavailableErrorBody": ".service_unavailable_error_body",
     "SignUploadPartsResponse": ".sign_upload_parts_response",
     "SignedUploadPart": ".signed_upload_part",
     "Snapshot": ".snapshot",
-    "StoreProbeCheckOutcome": ".store_probe_check_outcome",
-    "StoreProbeCheckResult": ".store_probe_check_result",
+    "SnapshotId": ".snapshot_id",
+    "SnapshotRecord": ".snapshot_record",
+    "SnapshotRecordOwner": ".snapshot_record_owner",
+    "SnapshotRecordOwnerFork": ".snapshot_record_owner_fork",
+    "SnapshotRecordOwnerUser": ".snapshot_record_owner_user",
+    "SnapshotRecordOwner_Fork": ".snapshot_record_owner",
+    "SnapshotRecordOwner_User": ".snapshot_record_owner",
+    "StoreProbeCheck": ".store_probe_check",
+    "StoreProbeCheckFailed": ".store_probe_check_failed",
+    "StoreProbeCheckPassed": ".store_probe_check_passed",
+    "StoreProbeCheckUnsupported": ".store_probe_check_unsupported",
+    "StoreProbeCheck_Failed": ".store_probe_check",
+    "StoreProbeCheck_Passed": ".store_probe_check",
+    "StoreProbeCheck_Unsupported": ".store_probe_check",
     "StoreProbeRequest": ".store_probe_request",
     "StoreProbeResponse": ".store_probe_response",
     "TrashEntry": ".trash_entry",
@@ -530,15 +523,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "UploadSession_Aborted": ".upload_session",
     "UploadSession_Completed": ".upload_session",
     "UploadSession_Open": ".upload_session",
-    "WalFoldStepOutcome": ".wal_fold_step_outcome",
-    "WalFoldStepOutcomeAlreadyPublished": ".wal_fold_step_outcome_already_published",
-    "WalFoldStepOutcomeFolded": ".wal_fold_step_outcome_folded",
-    "WalFoldStepOutcomeNotNeeded": ".wal_fold_step_outcome_not_needed",
-    "WalFoldStepOutcomeRetriesExhausted": ".wal_fold_step_outcome_retries_exhausted",
-    "WalFoldStepOutcome_AlreadyPublished": ".wal_fold_step_outcome",
-    "WalFoldStepOutcome_Folded": ".wal_fold_step_outcome",
-    "WalFoldStepOutcome_NotNeeded": ".wal_fold_step_outcome",
-    "WalFoldStepOutcome_RetriesExhausted": ".wal_fold_step_outcome",
     "WriterEpoch": ".writer_epoch",
     "WriterId": ".writer_id",
 }
@@ -578,15 +562,6 @@ __all__ = [
     "AttributesRevisionNo",
     "BindingVersion",
     "CapabilityDocument",
-    "ChangeSeq",
-    "Checkpoint",
-    "CheckpointOwner",
-    "CheckpointOwnerFork",
-    "CheckpointOwnerSnapshot",
-    "CheckpointOwnerUser",
-    "CheckpointOwner_Fork",
-    "CheckpointOwner_Snapshot",
-    "CheckpointOwner_User",
     "Checksum",
     "ChecksumAlgorithm",
     "Commit",
@@ -608,17 +583,7 @@ __all__ = [
     "CommitPrecondition_NamespaceHead",
     "CommitPrecondition_PathAbsence",
     "CommitPrecondition_PathBinding",
-    "CompactionStepOutcome",
-    "CompactionStepOutcomeBoundedMergePublished",
-    "CompactionStepOutcomeFenced",
-    "CompactionStepOutcomeManifestAdvanced",
-    "CompactionStepOutcomeMetadataCompactionRequired",
-    "CompactionStepOutcomeNotNeeded",
-    "CompactionStepOutcome_BoundedMergePublished",
-    "CompactionStepOutcome_Fenced",
-    "CompactionStepOutcome_ManifestAdvanced",
-    "CompactionStepOutcome_MetadataCompactionRequired",
-    "CompactionStepOutcome_NotNeeded",
+    "CommitSeq",
     "CompleteUploadBody",
     "CompleteUploadBodyDirectMultipart",
     "CompleteUploadBodyDirectPut",
@@ -640,36 +605,38 @@ __all__ = [
     "CreateUploadBody_DirectMultipart",
     "CreateUploadBody_DirectPut",
     "CreateUploadBody_ServiceProxied",
-    "DeleteCheckpointResponse",
     "DeleteDirectoryBehavior",
     "DeleteNamespaceResponse",
     "DeleteSnapshotResponse",
-    "DeletedCheckpointsByOwner",
     "DeletedObjectCounts",
+    "DeletedSnapshotsByOwner",
     "DestinationBehavior",
+    "DiffEntry",
+    "DiffEntryKind",
+    "DiffResponse",
     "DirectoryBinding",
     "DisplayName",
     "DownloadRange",
     "ErrorDetails",
     "ErrorResponse",
     "FileRevision",
-    "FilesystemChange",
-    "FilesystemChangeAccessChanged",
-    "FilesystemChangeAttributesChanged",
-    "FilesystemChangeContentChanged",
-    "FilesystemChangeDeleted",
-    "FilesystemChangeDirectoryCreated",
-    "FilesystemChangeFileCreated",
-    "FilesystemChangeMoved",
-    "FilesystemChangeUndeleted",
-    "FilesystemChange_AccessChanged",
-    "FilesystemChange_AttributesChanged",
-    "FilesystemChange_ContentChanged",
-    "FilesystemChange_Deleted",
-    "FilesystemChange_DirectoryCreated",
-    "FilesystemChange_FileCreated",
-    "FilesystemChange_Moved",
-    "FilesystemChange_Undeleted",
+    "FilesystemEvent",
+    "FilesystemEventAccessChanged",
+    "FilesystemEventAttributesChanged",
+    "FilesystemEventContentChanged",
+    "FilesystemEventDeleted",
+    "FilesystemEventDirectoryCreated",
+    "FilesystemEventFileCreated",
+    "FilesystemEventMoved",
+    "FilesystemEventRestored",
+    "FilesystemEvent_AccessChanged",
+    "FilesystemEvent_AttributesChanged",
+    "FilesystemEvent_ContentChanged",
+    "FilesystemEvent_Deleted",
+    "FilesystemEvent_DirectoryCreated",
+    "FilesystemEvent_FileCreated",
+    "FilesystemEvent_Moved",
+    "FilesystemEvent_Restored",
     "FilesystemOperation",
     "FilesystemOperationAppendFile",
     "FilesystemOperationAppendFileByInode",
@@ -684,9 +651,9 @@ __all__ = [
     "FilesystemOperationMovePath",
     "FilesystemOperationPutFile",
     "FilesystemOperationPutFileRevisionByInode",
+    "FilesystemOperationRestoreDeleted",
     "FilesystemOperationRestoreRevision",
     "FilesystemOperationRestoreRevisionByInode",
-    "FilesystemOperationUndelete",
     "FilesystemOperationUpdateAccess",
     "FilesystemOperationUpdateAccessByInode",
     "FilesystemOperationUpdateAttributes",
@@ -704,13 +671,14 @@ __all__ = [
     "FilesystemOperation_MovePath",
     "FilesystemOperation_PutFile",
     "FilesystemOperation_PutFileRevisionByInode",
+    "FilesystemOperation_RestoreDeleted",
     "FilesystemOperation_RestoreRevision",
     "FilesystemOperation_RestoreRevisionByInode",
-    "FilesystemOperation_Undelete",
     "FilesystemOperation_UpdateAccess",
     "FilesystemOperation_UpdateAccessByInode",
     "FilesystemOperation_UpdateAttributes",
     "FilesystemOperation_UpdateAttributesByInode",
+    "GcSkippedWork",
     "GrepIndex",
     "GrepIndexStatusActive",
     "GrepIndexStatusBackfilling",
@@ -723,26 +691,20 @@ __all__ = [
     "InodeId",
     "InodeKind",
     "ListChangesResponse",
-    "ListCheckpointsResponse",
     "ListFileRevisionsResponse",
     "ListInodeChildrenResponse",
     "ListPathEntriesResponse",
+    "ListSnapshotRecordsResponse",
     "ListSnapshotsResponse",
     "ListTrashResponse",
     "ManifestNo",
-    "MetadataCompactionOutcome",
-    "MetadataCompactionOutcomeAbandoned",
-    "MetadataCompactionOutcomeBoundedMergePublished",
-    "MetadataCompactionOutcomeCancelled",
-    "MetadataCompactionOutcomeFenced",
-    "MetadataCompactionOutcomeNotNeeded",
-    "MetadataCompactionOutcomePublished",
-    "MetadataCompactionOutcome_Abandoned",
-    "MetadataCompactionOutcome_BoundedMergePublished",
-    "MetadataCompactionOutcome_Cancelled",
-    "MetadataCompactionOutcome_Fenced",
-    "MetadataCompactionOutcome_NotNeeded",
-    "MetadataCompactionOutcome_Published",
+    "Merge",
+    "MergeBound",
+    "MergeConflict",
+    "MergeConflictKind",
+    "MergeConflictVersion",
+    "MetadataMaintenanceOutcome",
+    "MetadataSkippedWork",
     "NameKey",
     "NamespaceAccess",
     "NamespaceAccessAcl",
@@ -758,54 +720,79 @@ __all__ = [
     "NamespaceForkBasis",
     "NamespaceId",
     "NamespaceMetadata",
-    "NamespaceNaming",
-    "ObjectTransferAccess",
-    "ObjectTransferAccessPresignedUrl",
-    "ObjectTransferAccess_PresignedUrl",
+    "NamespaceRebasedFrom",
+    "NextMergeRangeOutcomeForkPointBelowFloor",
+    "NextMergeRangeOutcomeOpen",
+    "NextMergeRangeOutcomeRangeStartBelowFloor",
+    "NextMergeRangeResponse",
+    "NextMergeRangeResponse_ForkPointBelowFloor",
+    "NextMergeRangeResponse_Open",
+    "NextMergeRangeResponse_RangeStartBelowFloor",
+    "ObjectTransfer",
+    "ObjectTransferPresignedUrl",
+    "ObjectTransfer_PresignedUrl",
     "PathEntry",
     "PathEntryDirectory",
     "PathEntryFile",
-    "PathEntry_Dir",
+    "PathEntry_Directory",
     "PathEntry_File",
-    "PinId",
+    "PathEntry_Unknown",
+    "PoolDeletedObjectCounts",
+    "PoolId",
+    "PoolRetainedCandidates",
     "PrincipalId",
     "PrincipalScope",
-    "ProbeRunId",
+    "ProbeId",
+    "ReadConsistency",
+    "ReplayForkResponse",
     "RetainedCandidates",
     "RevisionNo",
-    "RunMaintenanceRequest",
-    "RunMaintenanceRequestGc",
-    "RunMaintenanceRequestGrepGc",
-    "RunMaintenanceRequestMetadata",
-    "RunMaintenanceRequestMetadataCompaction",
-    "RunMaintenanceRequestRecoverAdministrator",
-    "RunMaintenanceRequestRetention",
-    "RunMaintenanceRequest_Gc",
-    "RunMaintenanceRequest_GrepGc",
-    "RunMaintenanceRequest_Metadata",
-    "RunMaintenanceRequest_MetadataCompaction",
-    "RunMaintenanceRequest_RecoverAdministrator",
-    "RunMaintenanceRequest_Retention",
-    "RunMaintenanceResponse",
-    "RunMaintenanceResponseGc",
-    "RunMaintenanceResponseGrepGc",
-    "RunMaintenanceResponseMetadata",
-    "RunMaintenanceResponseMetadataCompaction",
-    "RunMaintenanceResponseRecoverAdministrator",
-    "RunMaintenanceResponseRetention",
-    "RunMaintenanceResponse_Gc",
-    "RunMaintenanceResponse_GrepGc",
-    "RunMaintenanceResponse_Metadata",
-    "RunMaintenanceResponse_MetadataCompaction",
-    "RunMaintenanceResponse_RecoverAdministrator",
-    "RunMaintenanceResponse_Retention",
-    "RunNo",
+    "RunMaintenanceJobRequest",
+    "RunMaintenanceJobRequestGc",
+    "RunMaintenanceJobRequestMetadata",
+    "RunMaintenanceJobRequestRecoverAdministrator",
+    "RunMaintenanceJobRequestRetention",
+    "RunMaintenanceJobRequestRetentionWindow",
+    "RunMaintenanceJobRequest_Gc",
+    "RunMaintenanceJobRequest_Metadata",
+    "RunMaintenanceJobRequest_RecoverAdministrator",
+    "RunMaintenanceJobRequest_Retention",
+    "RunMaintenanceJobRequest_RetentionWindow",
+    "RunMaintenanceJobResponse",
+    "RunMaintenanceJobResponseGc",
+    "RunMaintenanceJobResponseMetadata",
+    "RunMaintenanceJobResponseRecoverAdministrator",
+    "RunMaintenanceJobResponseRetention",
+    "RunMaintenanceJobResponseRetentionWindow",
+    "RunMaintenanceJobResponse_Gc",
+    "RunMaintenanceJobResponse_Metadata",
+    "RunMaintenanceJobResponse_RecoverAdministrator",
+    "RunMaintenanceJobResponse_Retention",
+    "RunMaintenanceJobResponse_RetentionWindow",
+    "RunPoolMaintenanceJobRequest",
+    "RunPoolMaintenanceJobRequestGc",
+    "RunPoolMaintenanceJobRequest_Gc",
+    "RunPoolMaintenanceJobResponse",
+    "RunPoolMaintenanceJobResponseGc",
+    "RunPoolMaintenanceJobResponse_Gc",
     "ServiceUnavailableErrorBody",
     "SignUploadPartsResponse",
     "SignedUploadPart",
     "Snapshot",
-    "StoreProbeCheckOutcome",
-    "StoreProbeCheckResult",
+    "SnapshotId",
+    "SnapshotRecord",
+    "SnapshotRecordOwner",
+    "SnapshotRecordOwnerFork",
+    "SnapshotRecordOwnerUser",
+    "SnapshotRecordOwner_Fork",
+    "SnapshotRecordOwner_User",
+    "StoreProbeCheck",
+    "StoreProbeCheckFailed",
+    "StoreProbeCheckPassed",
+    "StoreProbeCheckUnsupported",
+    "StoreProbeCheck_Failed",
+    "StoreProbeCheck_Passed",
+    "StoreProbeCheck_Unsupported",
     "StoreProbeRequest",
     "StoreProbeResponse",
     "TrashEntry",
@@ -820,15 +807,6 @@ __all__ = [
     "UploadSession_Aborted",
     "UploadSession_Completed",
     "UploadSession_Open",
-    "WalFoldStepOutcome",
-    "WalFoldStepOutcomeAlreadyPublished",
-    "WalFoldStepOutcomeFolded",
-    "WalFoldStepOutcomeNotNeeded",
-    "WalFoldStepOutcomeRetriesExhausted",
-    "WalFoldStepOutcome_AlreadyPublished",
-    "WalFoldStepOutcome_Folded",
-    "WalFoldStepOutcome_NotNeeded",
-    "WalFoldStepOutcome_RetriesExhausted",
     "WriterEpoch",
     "WriterId",
 ]

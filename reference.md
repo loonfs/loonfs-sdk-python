@@ -75,7 +75,7 @@ client.capabilities.retrieve()
 <dl>
 <dd>
 
-Creates a new empty namespace.
+Creates a new empty namespace. Without `namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new namespace's ID.
 </dd>
 </dl>
 </dd>
@@ -97,9 +97,7 @@ client = LoonFS(
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.namespaces.create(
-    namespace_id="demo",
-)
+client.namespaces.create()
 
 ```
 </dd>
@@ -115,14 +113,6 @@ client.namespaces.create(
 <dl>
 <dd>
 
-**namespace_id:** `NamespaceId` — The durable ID of the new namespace.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **access:** `typing.Optional[NamespaceAccess]` 
 
 The namespace's access mode, which can't be changed after the namespace is created. The
@@ -134,10 +124,24 @@ default is unrestricted.
 <dl>
 <dd>
 
-**naming:** `typing.Optional[NamespaceNaming]` 
+**namespace_id:** `typing.Optional[NamespaceId]` 
 
-How the namespace compares sibling names. The mode can't be changed after the namespace is
-created, and it defaults to `case_insensitive`.
+The durable ID of the new namespace. Without this field, LoonFS generates an ID. The
+response's `namespace_id` is the new namespace's ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**retention_window_ms:** `typing.Optional[int]` 
+
+The namespace's retention window, in milliseconds, which must be at least the grace window
+(86400000, which is 24 hours). The reference server's maintenance sweep uses this window
+for the namespace. Without this field, the namespace's window is the server's
+`retention_window_ms` setting, if the server has that setting. A `retention_window`
+maintenance job can change or clear the window later.
     
 </dd>
 </dl>
@@ -289,7 +293,7 @@ client.namespaces.delete(
 <dl>
 <dd>
 
-**expected_head_seq:** `typing.Optional[ChangeSeq]` — The head sequence that the namespace must still have for the delete to succeed.
+**expected_head_seq:** `typing.Optional[CommitSeq]` — The head sequence that the namespace must still have for the delete to succeed.
     
 </dd>
 </dl>
@@ -321,7 +325,7 @@ client.namespaces.delete(
 <dl>
 <dd>
 
-Creates a new namespace from the source namespace's current head or from a live snapshot.
+Creates a new namespace from the source namespace's current head or from an unexpired snapshot. Without `new_namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new namespace's ID.
 </dd>
 </dl>
 </dd>
@@ -345,7 +349,6 @@ client = LoonFS(
 
 client.namespaces.fork(
     namespace_id="namespace_id",
-    new_namespace_id="demo",
 )
 
 ```
@@ -370,7 +373,10 @@ client.namespaces.fork(
 <dl>
 <dd>
 
-**new_namespace_id:** `NamespaceId` — The durable ID of the new namespace that the fork creates.
+**new_namespace_id:** `typing.Optional[NamespaceId]` 
+
+The durable ID of the new namespace that the fork creates. Without this field, LoonFS
+generates an ID. The response's `namespace_id` is the new namespace's ID.
     
 </dd>
 </dl>
@@ -378,7 +384,410 @@ client.namespaces.fork(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — A live snapshot to fork from. Without it, the fork starts from the current head.
+**snapshot_id:** `typing.Optional[SnapshotId]` — An unexpired snapshot to fork from. Without it, the fork starts from the current head.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">next_merge_range</a>(...) -> NextMergeRangeResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns where the fork's next merge into the namespace starts, without planning the merge: the fork's newest merge into the namespace, the fork sequence that the next merge starts after, the fork point, and the fork's head. When the namespace is a rebase's new fork for the fork, the range continues the new fork's replay commits. When a retention floor would refuse the merge with `below_retention_floor`, the response's `outcome` says which floor instead of failing.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.next_merge_range(
+    namespace_id="namespace_id",
+    source="demo",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — The namespace that the fork merges into.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**source:** `NamespaceId` 
+
+The fork whose next merge into the namespace the query reads. It has to be a fork of the
+namespace, or the fork that a rebase replays into the namespace.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">merge</a>(...) -> Commit</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Merges a fork's commits into the namespace as one commit. The merge applies the fork's net change since its previous merge, or since the fork point, through `through_seq` or the fork's head. A change that conflicts with the namespace returns `merge_conflict`, and nothing is committed. The commit ID makes retries idempotent. The merge's WAL object counts toward the namespace's fold triggers like any commit.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.merge(
+    namespace_id="namespace_id",
+    commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
+    source_namespace_id="demo",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — The namespace that the merge commits into.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**commit_id:** `CommitId` — The caller's idempotency key for the merge.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**source_namespace_id:** `NamespaceId` 
+
+The fork whose commits the merge applies. It has to be a fork of the namespace that the
+request merges into.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**message:** `typing.Optional[str]` — An annotation from the caller. The message is part of the merge's identity.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**through_seq:** `typing.Optional[CommitSeq]` 
+
+The fork sequence that the merge applies the fork's commits through. Without it, the merge
+applies them through the fork's head.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">fork_for_rebase</a>(...) -> NamespaceMetadata</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Creates a rebase's new fork from the namespace's head, for a fork of the namespace whose unmerged commits the replay route then replays into the new fork. Without `new_namespace_id` in the request, LoonFS generates an ID. The response's `namespace_id` is the new fork's ID, and its `fork_basis.rebased_from` identifies the fork. A request whose new fork already exists returns `namespace_exists`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.fork_for_rebase(
+    namespace_id="namespace_id",
+    source_namespace_id="demo",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — The namespace that the fork was forked from.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**source_namespace_id:** `NamespaceId` 
+
+The fork whose unmerged commits the new fork's replay commits replay. It has to be a fork
+of the namespace that the request identifies in its path.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**new_namespace_id:** `typing.Optional[NamespaceId]` 
+
+The durable ID of the new fork. Without this field, LoonFS generates an ID. The response's
+`namespace_id` is the new fork's ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">replay</a>(...) -> ReplayForkResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork without the conflict report.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.replay(
+    namespace_id="namespace_id",
+    commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
+    source_namespace_id="demo",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — The rebase's new fork, which the replay commit commits into.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**commit_id:** `CommitId` — The caller's idempotency key for the replay commit.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**source_namespace_id:** `NamespaceId` 
+
+The fork whose unmerged commits the replay commit replays. The namespace that the request
+identifies in its path has to be a rebase's new fork for this fork.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**message:** `typing.Optional[str]` — An annotation from the caller. The message is part of the replay commit's identity.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**through_seq:** `typing.Optional[CommitSeq]` 
+
+The fork sequence that the replay commit replays the fork's commits through. Without it,
+the replay commit replays them through the fork's head.
     
 </dd>
 </dl>
@@ -436,7 +845,7 @@ client = LoonFS(
 client.changes.list(
     namespace_id="namespace_id",
     after_seq=1000000,
-    snapshot_id="pin_00000000000000000001-0000000000000002",
+    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
 )
 
 ```
@@ -461,7 +870,33 @@ client.changes.list(
 <dl>
 <dd>
 
-**after_seq:** `ChangeSeq` — The sequence after which to return committed changes.
+**after_seq:** `CommitSeq` 
+
+The sequence after which to return committed changes. With `event_index`, the commit at
+this sequence that the page resumes.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**split_commits:** `typing.Optional[bool]` 
+
+Whether a page can end inside a commit that alone exceeds the page's budget. The default is
+`false`, which returns every commit whole.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**event_index:** `typing.Optional[int]` 
+
+The `next_event_index` that the previous page returned, which resumes the commit at
+`after_seq` at that event. It requires `split_commits=true`. The default is 0, which starts
+after the commit at `after_seq`.
     
 </dd>
 </dl>
@@ -477,7 +912,31 @@ client.changes.list(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — A snapshot to read the feed from. The feed ends at the sequence that the snapshot captured.
+**snapshot_id:** `typing.Optional[SnapshotId]` — A snapshot to read the feed from. The feed ends at the sequence that the snapshot captured.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
     
 </dd>
 </dl>
@@ -534,7 +993,7 @@ client = LoonFS(
 
 client.commits.create(
     namespace_id="namespace_id",
-    commit_id="c_f3a9c2d4b6e8417a90c5d2f8e1b7a6c0",
+    commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
     operations=[
         FilesystemOperation_AppendFile(
             inline_content="inline_content",
@@ -617,6 +1076,172 @@ client.commits.create(
 </dl>
 </details>
 
+## Diff
+<details><summary><code>client.diff.<a href="src/loonfs/diff/client.py">list</a>(...) -> DiffResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns a page of the inodes whose visible state at `to_seq` differs from their state at `from_seq`, read from the commits between the two sequences.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.diff.list(
+    namespace_id="namespace_id",
+    from_seq=1000000,
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — The namespace ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**from_seq:** `CommitSeq` 
+
+The sequence that the diff starts after. Each entry compares an inode's state at this
+sequence with its state at `to_seq`. It can't be below the namespace's retention floor.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**to_seq:** `typing.Optional[CommitSeq]` 
+
+The sequence that the diff ends at, inclusive. The default is the head that the request
+reads. A later page passes the `to_seq` that the first page returned.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**path:** `typing.Optional[str]` — The absolute path of the directory whose subtree the diff reports. The default is the root.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**after_seq:** `typing.Optional[CommitSeq]` — The `next_after_seq` that the previous page returned. The default is `from_seq`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**split_commits:** `typing.Optional[bool]` 
+
+Whether a page can end inside a commit that alone touches more inodes than one page
+examines. The default is `false`, which reads every commit whole.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**event_index:** `typing.Optional[int]` 
+
+The `next_event_index` that the previous page returned, which resumes the commit at
+`after_seq` at that event. It requires `split_commits=true`. The default is 0.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` — The maximum number of commits that the page reads.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 ## Files
 <details><summary><code>client.files.<a href="src/loonfs/files/client.py">content</a>(...) -> typing.Iterator[bytes]</code></summary>
 <dl>
@@ -630,7 +1255,7 @@ client.commits.create(
 <dl>
 <dd>
 
-Returns the current file bytes, a retained revision, or the revision captured by a live snapshot.
+Returns the current file bytes, a retained revision, or the revision captured by an unexpired snapshot. A `Range` header asks for one byte range of the file instead.
 </dd>
 </dl>
 </dd>
@@ -695,7 +1320,39 @@ client.files.content(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured file revision to read.
+**snapshot_id:** `typing.Optional[SnapshotId]` — The snapshot whose captured file revision to read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**range:** `typing.Optional[str]` — One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
     
 </dd>
 </dl>
@@ -727,7 +1384,7 @@ client.files.content(
 <dl>
 <dd>
 
-Returns ordered, signed object ranges that cover exactly `[start_offset, size_bytes)` of the selected revision. Each range includes its signed headers in `access.headers`, and the client sends them unchanged. The client checks each range's length and the complete revision's checksum. To resume a download, a client asks for a new grant from its current offset. A deployment that can't presign URLs returns 501 `not_supported`. The proxied `GET /filesystem/content` route is still available, up to the `download.service_proxied.max_content_bytes` limit.
+Returns ordered, signed object ranges that cover exactly `[start_offset, size_bytes)` of the selected revision. Each range includes its signed headers in `transfer.headers`, and the client sends them unchanged. The client checks each range's length and the complete revision's checksum. To resume a download, a client asks for a new download from its current offset. A deployment that can't presign URLs returns 501 `not_supported`. The proxied `GET /filesystem/content` route is still available, up to the `download.service_proxied.max_content_bytes` limit.
 </dd>
 </dl>
 </dd>
@@ -784,6 +1441,30 @@ client.files.create_download(
 <dl>
 <dd>
 
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+be, in milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **revision_no:** `typing.Optional[RevisionNo]` 
 
 The revision to read. Omit it to read the path's current revision. It can't be combined with
@@ -795,7 +1476,7 @@ The revision to read. Omit it to read the path's current revision. It can't be c
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` 
+**snapshot_id:** `typing.Optional[SnapshotId]` 
 
 A snapshot to read the file from. The download reads the revision that the snapshot
 captured. It can't be combined with `revision_no`.
@@ -808,8 +1489,8 @@ captured. It can't be combined with `revision_no`.
 
 **start_offset:** `typing.Optional[int]` 
 
-The first byte that the grant reads. The grant covers the revision's bytes from
-`start_offset` up to `size_bytes`, so a client that resumes a download asks for a new grant
+The first byte that the download reads. The download covers the revision's bytes from
+`start_offset` up to `size_bytes`, so a client that resumes a download asks for a new download
 that starts after the bytes it already has. The offset must be less than the revision's
 size. For a revision of zero bytes, it must be 0.
     
@@ -843,7 +1524,7 @@ size. For a revision of zero bytes, it must be 0.
 <dl>
 <dd>
 
-Lists a directory from the current state or a live snapshot.
+Lists a directory from the current state or an unexpired snapshot.
 </dd>
 </dl>
 </dd>
@@ -868,7 +1549,7 @@ client = LoonFS(
 client.files.list(
     namespace_id="namespace_id",
     path="path",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
+    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
 )
 
 ```
@@ -917,7 +1598,10 @@ client.files.list(
 <dl>
 <dd>
 
-**include_attributes:** `typing.Optional[bool]` — Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
+**include_attributes:** `typing.Optional[bool]` 
+
+Whether the response includes each entry's attribute map and attribute revision. The default
+is `false`, because a page can have many entries and each map can be up to 64 KiB.
     
 </dd>
 </dl>
@@ -925,7 +1609,43 @@ client.files.list(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured directory state to read.
+**recursive:** `typing.Optional[bool]` 
+
+Whether the listing includes the directory's whole subtree, depth first, with each
+directory's entry before its descendants. The default is `false`, which lists the
+directory's children only.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[SnapshotId]` — The snapshot whose captured directory state to read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
     
 </dd>
 </dl>
@@ -957,7 +1677,7 @@ client.files.list(
 <dl>
 <dd>
 
-Returns path metadata from the current state or a live snapshot.
+Returns path metadata from the current state or an unexpired snapshot.
 </dd>
 </dl>
 </dd>
@@ -982,7 +1702,7 @@ client = LoonFS(
 client.files.retrieve(
     namespace_id="namespace_id",
     path="path",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
+    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
 )
 
 ```
@@ -1015,7 +1735,10 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**include_attributes:** `typing.Optional[bool]` — Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
+**include_attributes:** `typing.Optional[bool]` 
+
+Whether the response includes the inode's attribute map and attribute revision. The default
+is `true`, because a stat reads one path and a map is at most 64 KiB.
     
 </dd>
 </dl>
@@ -1023,7 +1746,31 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured path state to read.
+**snapshot_id:** `typing.Optional[SnapshotId]` — The snapshot whose captured path state to read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
     
 </dd>
 </dl>
@@ -1128,6 +1875,30 @@ client.files.list_revisions(
 <dl>
 <dd>
 
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -1152,7 +1923,7 @@ client.files.list_revisions(
 <dl>
 <dd>
 
-Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches in ascending `(inode_id, byte_offset)` order. It scans every revision committed after the index watermark, unless `allow_stale` skips them. The deployment must serve grep, and the namespace must have a materialized, active grep index.
+Searches file content with a regular expression, using the namespace's grep index to narrow the candidates. The server checks each candidate against the full pattern and returns matches ordered by the content value of each file's revision, then by `inode_id`, and then by `byte_offset`. It scans every revision committed after the index watermark, unless `allow_stale` skips them. A first page reads the namespace at its head, and a later page reads at the first page's head. The deployment must serve grep, and the namespace must have a materialized, active grep index.
 </dd>
 </dl>
 </dd>
@@ -1177,7 +1948,7 @@ client = LoonFS(
 client.files.grep(
     namespace_id="namespace_id",
     pattern="pattern",
-    inode_id="ino_123",
+    inode_id="ino_000000r0000013kje0d47gc8kw",
 )
 
 ```
@@ -1202,7 +1973,10 @@ client.files.grep(
 <dl>
 <dd>
 
-**pattern:** `str` — The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most 1024 bytes.
+**pattern:** `str` 
+
+The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must be at most
+1024 bytes.
     
 </dd>
 </dl>
@@ -1218,7 +1992,10 @@ client.files.grep(
 <dl>
 <dd>
 
-**path_prefix:** `typing.Optional[str]` — A complete absolute path that limits matches to its descendants. It can't be combined with `inode_id`.
+**path_prefix:** `typing.Optional[str]` 
+
+A complete absolute path that limits matches to its descendants. It can't be combined with
+`inode_id`.
     
 </dd>
 </dl>
@@ -1234,7 +2011,10 @@ client.files.grep(
 <dl>
 <dd>
 
-**allow_scan:** `typing.Optional[bool]` — Whether a pattern with no required literal bytes can use a capped exhaustive scan. The default is `false`.
+**allow_scan:** `typing.Optional[bool]` 
+
+Whether a pattern with no required literal bytes can use a capped exhaustive scan. The
+default is `false`.
     
 </dd>
 </dl>
@@ -1242,7 +2022,10 @@ client.files.grep(
 <dl>
 <dd>
 
-**allow_stale:** `typing.Optional[bool]` — Whether the server returns results from the index alone when the unindexed tail exceeds the scan budget. The default is `false`.
+**allow_stale:** `typing.Optional[bool]` 
+
+Whether the server returns results from the index alone when the unindexed tail exceeds the
+scan budget. The default is `false`.
     
 </dd>
 </dl>
@@ -1291,7 +2074,7 @@ client.files.grep(
 <dl>
 <dd>
 
-Returns the namespace's recoverable deletions, oldest first. Advancing the retention floor doesn't remove entries. Each entry includes the inode ID and deletion sequence that an undelete needs, and the deleted name when the delete recorded one.
+Returns the namespace's trash entries, oldest deletion first. An entry leaves the trash when it's restored, or when the namespace's retention floor reaches its `deletion_seq`. Each entry includes the inode ID and deletion sequence that a restore needs, and the directory binding that the delete removed.
 </dd>
 </dl>
 </dd>
@@ -1355,6 +2138,30 @@ client.trash.list(
 <dl>
 <dd>
 
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -1380,7 +2187,7 @@ client.trash.list(
 <dl>
 <dd>
 
-Returns the path entry for a visible inode, from the current state or a live snapshot. An unknown or hidden inode returns `inode_not_found`.
+Returns the path entry for a visible inode, from the current state or an unexpired snapshot. An unknown or hidden inode returns `inode_not_found`.
 </dd>
 </dl>
 </dd>
@@ -1404,8 +2211,8 @@ client = LoonFS(
 
 client.inodes.retrieve(
     namespace_id="namespace_id",
-    inode_id="ino_123",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
+    inode_id="ino_000000r0000013kje0d47gc8kw",
+    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
 )
 
 ```
@@ -1438,7 +2245,10 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**include_attributes:** `typing.Optional[bool]` — Whether the response includes the inode's attribute map and attribute revision. The default is `true`, because a stat reads one path and a map is at most 64 KiB.
+**include_attributes:** `typing.Optional[bool]` 
+
+Whether the response includes the inode's attribute map and attribute revision. The default
+is `true`, because a stat reads one path and a map is at most 64 KiB.
     
 </dd>
 </dl>
@@ -1446,7 +2256,31 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured path state to read.
+**snapshot_id:** `typing.Optional[SnapshotId]` — The snapshot whose captured path state to read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
     
 </dd>
 </dl>
@@ -1478,7 +2312,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-Lists one page of a directory's children, in canonical name key order, from the current state or a live snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
+Lists one page of a directory's children, in canonical name key order, from the current state or an unexpired snapshot. The request identifies the directory by its inode ID, so a listing and its later pages stay on the same directory even if the directory is renamed or moved at the same time.
 </dd>
 </dl>
 </dd>
@@ -1502,8 +2336,8 @@ client = LoonFS(
 
 client.inodes.list_children(
     namespace_id="namespace_id",
-    inode_id="ino_123",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
+    inode_id="ino_000000r0000013kje0d47gc8kw",
+    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
 )
 
 ```
@@ -1552,7 +2386,10 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**include_attributes:** `typing.Optional[bool]` — Whether the response includes each entry's attribute map and attribute revision. The default is `false`, because a page can have many entries and each map can be up to 64 KiB.
+**include_attributes:** `typing.Optional[bool]` 
+
+Whether the response includes each entry's attribute map and attribute revision. The default
+is `false`, because a page can have many entries and each map can be up to 64 KiB.
     
 </dd>
 </dl>
@@ -1560,7 +2397,43 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured directory state to read.
+**recursive:** `typing.Optional[bool]` 
+
+Whether the listing includes the directory's whole subtree, depth first, with each
+directory's entry before its descendants. The default is `false`, which lists the
+directory's children only.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[SnapshotId]` — The snapshot whose captured directory state to read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
     
 </dd>
 </dl>
@@ -1592,7 +2465,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that a live snapshot captured. An unknown or hidden inode returns `inode_not_found`.
+Reads and verifies the current revision of a visible file inode, wherever the inode is bound, or the revision that an unexpired snapshot captured. A `Range` header asks for one byte range of the file instead. An unknown or hidden inode returns `inode_not_found`.
 </dd>
 </dl>
 </dd>
@@ -1649,7 +2522,39 @@ client.inodes.content(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` — The snapshot whose captured file revision to read.
+**snapshot_id:** `typing.Optional[SnapshotId]` — The snapshot whose captured file revision to read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**range:** `typing.Optional[str]` — One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
     
 </dd>
 </dl>
@@ -1681,7 +2586,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that a live snapshot captured. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+Authorizes a direct read of the current revision of a visible file inode, wherever the inode is bound, or of the revision that an unexpired snapshot captured. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 </dd>
 </dl>
 </dd>
@@ -1705,7 +2610,7 @@ client = LoonFS(
 
 client.inodes.create_download(
     namespace_id="namespace_id",
-    inode_id="ino_123",
+    inode_id="ino_000000r0000013kje0d47gc8kw",
 )
 
 ```
@@ -1738,7 +2643,31 @@ client.inodes.create_download(
 <dl>
 <dd>
 
-**snapshot_id:** `typing.Optional[PinId]` 
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+be, in milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[SnapshotId]` 
 
 A snapshot to read the file from. The download reads the revision that the snapshot
 captured.
@@ -1751,7 +2680,7 @@ captured.
 
 **start_offset:** `typing.Optional[int]` 
 
-The first byte that the grant reads. It defaults to 0 and must be less than the file's size.
+The first byte that the download reads. It defaults to 0 and must be less than the file's size.
 For a file of zero bytes, it must be 0.
     
 </dd>
@@ -1808,7 +2737,7 @@ client = LoonFS(
 
 client.inodes.list_revisions(
     namespace_id="namespace_id",
-    inode_id="ino_123",
+    inode_id="ino_000000r0000013kje0d47gc8kw",
 )
 
 ```
@@ -1857,6 +2786,30 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -1881,7 +2834,7 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
-Reads and verifies one retained file revision by inode ID and revision number.
+Reads and verifies one retained file revision by inode ID and revision number, at the live head or in the state that a snapshot or a fork snapshot keeps. A `Range` header asks for one byte range of the revision instead.
 </dd>
 </dl>
 </dd>
@@ -1947,6 +2900,49 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
+**snapshot_id:** `typing.Optional[SnapshotId]` 
+
+A snapshot, or one of the namespace's fork snapshots, whose state to find the revision
+in. The snapshot's manifest keeps the revision after the namespace's retention floor passes it.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head that it finds the revision in. `eventual`
+(the default, unless the server's `consistency` setting is `strong`) reads at the head that
+the server confirmed last while that confirmation is younger than the maximum staleness, and
+`strong` confirms the head before the read. It can't be combined with `snapshot_id`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**range:** `typing.Optional[str]` — One byte range of the file to read instead of the whole file, as `bytes=start-end`, where `end` is the offset of the last byte, or as `bytes=start-`. An `end` past the last byte reads to the end of the file. Any other value, including a suffix range or several ranges, returns 400 `invalid_request`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
     
 </dd>
@@ -1971,7 +2967,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-Authorizes a direct read of one retained inode revision. The capability reads exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+Authorizes a direct read of one retained inode revision. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 </dd>
 </dl>
 </dd>
@@ -1995,7 +2991,7 @@ client = LoonFS(
 
 client.inodes.create_revision_download(
     namespace_id="namespace_id",
-    inode_id="ino_123",
+    inode_id="ino_000000r0000013kje0d47gc8kw",
     revision_no=1000000,
 )
 
@@ -2037,9 +3033,33 @@ client.inodes.create_revision_download(
 <dl>
 <dd>
 
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head that it finds the revision in. `eventual`
+(the default, unless the server's `consistency` setting is `strong`) reads at the head that
+the server confirmed last while that confirmation is younger than the maximum staleness,
+and `strong` confirms the head before the read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency` set to `eventual`, how old the server's last confirmation of the head can
+be, in milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **start_offset:** `typing.Optional[int]` 
 
-The first byte that the grant reads. It defaults to 0 and must be less than the revision's
+The first byte that the download reads. It defaults to 0 and must be less than the revision's
 size. For a revision of zero bytes, it must be 0.
     
 </dd>
@@ -2073,7 +3093,7 @@ size. For a revision of zero bytes, it must be 0.
 <dl>
 <dd>
 
-Lists live snapshots in snapshot ID order. The list leaves out deleted and expired snapshots.
+Lists snapshots in snapshot ID order. The list leaves out expired snapshots, deleted snapshots, and fork snapshots, which the maintenance snapshot inventory lists. A deleted namespace returns `namespace_deleted`.
 </dd>
 </dl>
 </dd>
@@ -2161,7 +3181,7 @@ client.snapshots.list(
 <dl>
 <dd>
 
-Creates a snapshot of the current namespace state. Every accepted call creates a new snapshot.
+Creates a snapshot of the current namespace state. The server first folds any WAL tail after the current manifest. Every accepted call creates a new snapshot with a new ID, and the name is a label, not a key. A snapshot with `ttl_ms` expires that many milliseconds from the server's current time, and a snapshot without it doesn't expire. The snapshot keeps its manifest until garbage collection deletes it, after it expires or is deleted and its grace window passes.
 </dd>
 </dl>
 </dd>
@@ -2185,8 +3205,6 @@ client = LoonFS(
 
 client.snapshots.create(
     namespace_id="namespace_id",
-    name="name",
-    ttl_ms=1000000,
 )
 
 ```
@@ -2211,7 +3229,10 @@ client.snapshots.create(
 <dl>
 <dd>
 
-**name:** `str` — The snapshot's label, which doesn't need to be unique.
+**name:** `typing.Optional[str]` 
+
+The snapshot's label, which doesn't need to be unique. Omit the field for a snapshot with no
+label.
     
 </dd>
 </dl>
@@ -2219,7 +3240,10 @@ client.snapshots.create(
 <dl>
 <dd>
 
-**ttl_ms:** `int` — The snapshot's lifetime in milliseconds, counted from the server's current time.
+**ttl_ms:** `typing.Optional[int]` 
+
+The snapshot's lifetime in milliseconds, counted from the server's current time. Omit it to
+keep the snapshot until it's deleted.
     
 </dd>
 </dl>
@@ -2251,7 +3275,7 @@ client.snapshots.create(
 <dl>
 <dd>
 
-Returns one live snapshot, as the snapshot listing returns it. A missing ID, or the ID of a pin that isn't a snapshot, returns `snapshot_not_found`, and an expired snapshot returns `snapshot_gone`.
+Returns one snapshot, as the snapshot listing returns it. A missing ID, the ID of an expired or deleted snapshot, or the ID of a fork snapshot returns `snapshot_not_found`. A deleted namespace returns `namespace_deleted`.
 </dd>
 </dl>
 </dd>
@@ -2275,7 +3299,7 @@ client = LoonFS(
 
 client.snapshots.retrieve(
     namespace_id="namespace_id",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
+    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
 )
 
 ```
@@ -2300,7 +3324,7 @@ client.snapshots.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `PinId` — The snapshot ID.
+**snapshot_id:** `SnapshotId` — The snapshot ID.
     
 </dd>
 </dl>
@@ -2332,7 +3356,7 @@ client.snapshots.retrieve(
 <dl>
 <dd>
 
-Deletes a snapshot pin. A missing ID returns `snapshot_not_found`.
+Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
 </dd>
 </dl>
 </dd>
@@ -2356,7 +3380,7 @@ client = LoonFS(
 
 client.snapshots.delete(
     namespace_id="namespace_id",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
+    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
 )
 
 ```
@@ -2381,7 +3405,7 @@ client.snapshots.delete(
 <dl>
 <dd>
 
-**snapshot_id:** `PinId` — The snapshot ID.
+**snapshot_id:** `SnapshotId` — The snapshot ID.
     
 </dd>
 </dl>
@@ -2413,7 +3437,7 @@ client.snapshots.delete(
 <dl>
 <dd>
 
-Extends a live snapshot without passing its lifetime limit. Repeating the request has the same result.
+Moves an unexpired snapshot's expiry to `ttl_ms` from the server's current time. The expiry never moves earlier, so a snapshot without an expiry is returned unchanged. A missing, deleted, or expired snapshot returns `snapshot_not_found`. Repeating the request has the same result.
 </dd>
 </dl>
 </dd>
@@ -2437,7 +3461,7 @@ client = LoonFS(
 
 client.snapshots.extend(
     namespace_id="namespace_id",
-    snapshot_id="pin_00000000000000000001-0000000000000002",
+    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
     ttl_ms=1000000,
 )
 
@@ -2463,7 +3487,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-**snapshot_id:** `PinId` — The snapshot ID.
+**snapshot_id:** `SnapshotId` — The snapshot ID.
     
 </dd>
 </dl>
@@ -2504,7 +3528,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned upload capability.
+Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned URL for the upload.
 </dd>
 </dl>
 </dd>
@@ -2585,7 +3609,7 @@ client.uploads.create(
 <dl>
 <dd>
 
-Returns an upload session. An open `direct_put` session includes a newly signed upload capability. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
+Returns an upload session. An open `direct_put` session includes a new presigned URL for the upload. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
 </dd>
 </dl>
 </dd>
@@ -2933,7 +3957,7 @@ client.uploads.put_content(...)
 <dl>
 <dd>
 
-Returns one short-lived upload capability for each requested part of an open `direct_multipart` session. Each capability is bound to the part's checksum. To retry a part, a client asks for its capability again.
+Returns one short-lived presigned URL for each requested part of an open `direct_multipart` session. Each presigned URL is bound to the part's checksum. To retry a part, a client asks for its presigned URL again.
 </dd>
 </dl>
 </dd>
@@ -3000,349 +4024,6 @@ client.uploads.sign_parts(
 <dd>
 
 **parts:** `typing.List[UploadPartChecksumClaim]` — The parts to authorize. A repeated part number replaces the earlier upload of that part.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-## Maintenance Checkpoints
-<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">list</a>(...) -> ListCheckpointsResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Lists existing pins in checkpoint ID order. An expired pin stays in the list until garbage collection deletes it, after its expiry plus the grace window. A cursor continues the listing against the current set of pins.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs.server import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.maintenance.checkpoints.list(
-    namespace_id="namespace_id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**namespace_id:** `str` — The namespace ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**limit:** `typing.Optional[int]` — The maximum page size.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">create</a>(...) -> Checkpoint</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Creates a user checkpoint record that pins the current namespace view. The server first folds any WAL tail after the current manifest. Every call creates a new record with a new ID, and the name is a label, not a key. The record keeps its manifest until the record is deleted, either explicitly or by garbage collection after the record expires and its grace window passes. Because of that, routine maintenance should fold the WAL instead of creating checkpoints. This is a maintenance operation, not a file change.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs.server import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.maintenance.checkpoints.create(
-    namespace_id="namespace_id",
-    name="name",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**namespace_id:** `str` — The namespace ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**name:** `str` — A label to record on the checkpoint. Labels don't need to be unique.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**ttl_ms:** `typing.Optional[int]` 
-
-The checkpoint's lifetime in milliseconds. Omit it to keep the checkpoint until it's
-deleted.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">retrieve</a>(...) -> Checkpoint</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Returns one existing pin, as the checkpoint listing returns it, including an expired pin that garbage collection hasn't deleted. A missing ID returns `checkpoint_not_found`.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs.server import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.maintenance.checkpoints.retrieve(
-    namespace_id="namespace_id",
-    checkpoint_id="checkpoint_id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**namespace_id:** `str` — The namespace ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**checkpoint_id:** `str` — The checkpoint ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
-    
-</dd>
-</dl>
-</dd>
-</dl>
-
-
-</dd>
-</dl>
-</details>
-
-<details><summary><code>client.maintenance.checkpoints.<a href="src/loonfs/maintenance/checkpoints/client.py">delete</a>(...) -> DeleteCheckpointResponse</code></summary>
-<dl>
-<dd>
-
-#### 📝 Description
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-Deletes a user checkpoint pin. A missing ID returns `checkpoint_not_found`. Garbage collection can then reclaim the pin's unreferenced manifest and runs.
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### 🔌 Usage
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-```python
-from loonfs.server import LoonFS
-
-client = LoonFS(
-    token="<token>",
-    base_url="https://yourhost.com/path/to/api",
-)
-
-client.maintenance.checkpoints.delete(
-    namespace_id="namespace_id",
-    checkpoint_id="checkpoint_id",
-)
-
-```
-</dd>
-</dl>
-</dd>
-</dl>
-
-#### ⚙️ Parameters
-
-<dl>
-<dd>
-
-<dl>
-<dd>
-
-**namespace_id:** `str` — The namespace ID.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
-**checkpoint_id:** `str` — The checkpoint ID.
     
 </dd>
 </dl>
@@ -3520,7 +4201,7 @@ client.maintenance.grep_index.retrieve(
 <dl>
 <dd>
 
-Disables the namespace's grep index by publishing a manifest with the next number and no segment references. Index maintenance stops when a step reads the disabled manifest, and an explicit grep garbage collection run reclaims the segments later. Repeating the request has the same result. A deployment that doesn't maintain the grep index returns `not_supported`.
+Disables the namespace's grep index by publishing a namespace manifest whose grep entry lists no segments. Index maintenance stops when a step reads the disabled entry, and garbage collection reclaims the segments later. Repeating the request has the same result. If the grep entry is corrupt, the request replaces it with a disabled entry, so the index can be enabled again. If the entry has another version of the grep format, the request returns `index_corrupt` and leaves the entry unchanged. A deployment that doesn't maintain the grep index returns `not_supported`.
 </dd>
 </dl>
 </dd>
@@ -3592,7 +4273,7 @@ client.maintenance.grep_index.disable(
 <dl>
 <dd>
 
-Enables the namespace's grep index. A deployment that runs maintenance starts the backfill on its next session tick and continues until the index is active. The response reports the index state read after the change. A new enable reports `backfilling`, with the sequence that its checkpoint captured, and an index that was already enabled reports its current status. Repeating the request has the same result. A deployment that doesn't maintain the grep index returns `not_supported`.
+Enables the namespace's grep index. A deployment that runs maintenance starts the backfill at the next maintenance interval and continues until the index is active. The response reports the index state read after the change. A new enable reports `backfilling`, with the sequence whose files the backfill reads, and an index that was already enabled reports its current status. Repeating the request has the same result. A deployment that doesn't maintain the grep index returns `not_supported`.
 </dd>
 </dl>
 </dd>
@@ -3652,8 +4333,8 @@ client.maintenance.grep_index.enable(
 </dl>
 </details>
 
-## Maintenance Runs
-<details><summary><code>client.maintenance.runs.<a href="src/loonfs/maintenance/runs/client.py">create</a>(...) -> RunMaintenanceResponse</code></summary>
+## Maintenance Jobs
+<details><summary><code>client.maintenance.jobs.<a href="src/loonfs/maintenance/jobs/client.py">create</a>(...) -> RunMaintenanceJobResponse</code></summary>
 <dl>
 <dd>
 
@@ -3665,7 +4346,7 @@ client.maintenance.grep_index.enable(
 <dl>
 <dd>
 
-Runs one maintenance job for the namespace. The body's `kind` selects the job, which is one of `metadata`, `metadata_compaction`, `gc`, `grep_gc`, `retention`, or `recover_administrator`. The response includes the same `kind` and the job's result. A deleted namespace accepts only `gc` and `grep_gc`. A `grep_gc` job deletes aged, unreferenced grep index objects, and it requires `maintenance.grep.index`. A `gc` job reads the current manifest, lists the pins, and then sweeps every object family to the end. Each listing starts at the beginning, and the job doesn't keep a position to continue from. A `retention` job advances the retention floor to the folded manifest head, or to the one target that `to_seq` or `cutoff_at_ms` sets.
+Runs one maintenance job for the namespace. The body's `kind` selects the job, which is one of `metadata`, `gc`, `retention`, `retention_window`, or `recover_administrator`. The response includes the same `kind` and the job's result. A deleted namespace accepts only `gc`. A `metadata` job folds the WAL tail and compacts metadata until nothing is due, or until it publishes 16 compaction units. A compaction unit can take minutes, so the call can too. When the result's `outcome` is `due`, another `metadata` run continues the work. A `gc` job reads the current manifest, lists the snapshots, and then sweeps every object family under the namespace's prefix to the end, including the segments of extensions such as the grep index. The collection of the namespace's pool, which deletes content objects, upload records, and temporary objects, is a job of the pool. Each listing starts at the beginning, and the job doesn't keep a position to continue from. A `retention` job advances the retention floor to the folded manifest head, or to the one target that `to_seq` or `cutoff_at_ms` sets. A `retention_window` job sets the namespace's retention window to `retention_window_ms`, or clears it when the body doesn't include that field.
 </dd>
 </dl>
 </dd>
@@ -3680,16 +4361,16 @@ Runs one maintenance job for the namespace. The body's `kind` selects the job, w
 <dd>
 
 ```python
-from loonfs.server import LoonFS, RunMaintenanceRequest_Gc
+from loonfs.server import LoonFS, RunMaintenanceJobRequest_Gc
 
 client = LoonFS(
     token="<token>",
     base_url="https://yourhost.com/path/to/api",
 )
 
-client.maintenance.runs.create(
+client.maintenance.jobs.create(
     namespace_id="namespace_id",
-    request=RunMaintenanceRequest_Gc(),
+    request=RunMaintenanceJobRequest_Gc(),
 )
 
 ```
@@ -3714,7 +4395,177 @@ client.maintenance.runs.create(
 <dl>
 <dd>
 
-**request:** `RunMaintenanceRequest` 
+**request:** `RunMaintenanceJobRequest` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Maintenance Snapshots
+<details><summary><code>client.maintenance.snapshots.<a href="src/loonfs/maintenance/snapshots/client.py">list</a>(...) -> ListSnapshotRecordsResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists every snapshot, user snapshots and fork snapshots, in snapshot ID order. This is the inventory of what keeps manifests from garbage collection. An expired snapshot stays in the list until garbage collection deletes it, after its expiry plus the grace window, and a deleted snapshot stays, with its `deleted_at_ms`, until its delete time plus the grace window. A cursor continues the listing against the current set of snapshots.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.maintenance.snapshots.list(
+    namespace_id="namespace_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — The namespace ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` — The maximum page size.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+<details><summary><code>client.maintenance.snapshots.<a href="src/loonfs/maintenance/snapshots/client.py">retrieve</a>(...) -> SnapshotRecord</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Returns one existing snapshot of any owner, as the snapshot inventory lists it, including an expired or deleted snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.maintenance.snapshots.retrieve(
+    namespace_id="namespace_id",
+    snapshot_id="snapshot_id",
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**namespace_id:** `str` — The namespace ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `str` — The snapshot ID.
     
 </dd>
 </dl>
@@ -3790,6 +4641,88 @@ client.maintenance.store.probe(
 <dd>
 
 **request:** `StoreProbeRequest` 
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
+## Maintenance Pools Jobs
+<details><summary><code>client.maintenance.pools.jobs.<a href="src/loonfs/maintenance/pools/jobs/client.py">create</a>(...) -> RunPoolMaintenanceJobResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Runs one maintenance job for the pool. The body's `kind` selects the job, which is `gc`. The response includes the same `kind` and the job's result. A `gc` job lists the pool's upload sessions and member entries, reads the roots of every member of the pool, and then sweeps the pool's content objects, upload records, and temporary objects to the end. Each listing starts at the beginning, and the job doesn't keep a position to continue from.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS, RunPoolMaintenanceJobRequest_Gc
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.maintenance.pools.jobs.create(
+    pool_id="pool_id",
+    request=RunPoolMaintenanceJobRequest_Gc(),
+)
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**pool_id:** `str` — The pool ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request:** `RunPoolMaintenanceJobRequest` 
     
 </dd>
 </dl>

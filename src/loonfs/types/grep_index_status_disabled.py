@@ -5,7 +5,6 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .namespace_id import NamespaceId
-from .run_no import RunNo
 
 
 class GrepIndexStatusDisabled(UniversalBaseModel):
@@ -16,11 +15,6 @@ class GrepIndexStatusDisabled(UniversalBaseModel):
     namespace_id: NamespaceId = pydantic.Field()
     """
     The namespace that the status describes.
-    """
-
-    next_run_no: RunNo = pydantic.Field()
-    """
-    The next run number that the index allocates.
     """
 
     reorganize_pending: bool = pydantic.Field()

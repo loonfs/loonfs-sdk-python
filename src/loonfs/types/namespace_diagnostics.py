@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .actor_id import ActorId
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .manifest_no import ManifestNo
 from .namespace_fork_basis import NamespaceForkBasis
 from .namespace_id import NamespaceId
@@ -37,15 +37,9 @@ class NamespaceDiagnostics(UniversalBaseModel):
     field.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
+    head_seq: CommitSeq = pydantic.Field()
     """
     The sequence of the namespace's newest visible commit.
-    """
-
-    live_checkpoints: int = pydantic.Field()
-    """
-    The number of user checkpoints, including expired records that garbage collection hasn't
-    deleted yet.
     """
 
     live_snapshots: int = pydantic.Field()
@@ -58,7 +52,7 @@ class NamespaceDiagnostics(UniversalBaseModel):
     The namespace ID.
     """
 
-    retention_floor_seq: ChangeSeq = pydantic.Field()
+    retention_floor_seq: CommitSeq = pydantic.Field()
     """
     The namespace's retention floor. A change feed request can set `after_seq` to this sequence
     or any later one, and the feed returns the changes committed after it.

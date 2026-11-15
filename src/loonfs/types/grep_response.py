@@ -4,7 +4,7 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .grep_match import GrepMatch
 from .namespace_id import NamespaceId
 
@@ -14,20 +14,22 @@ class GrepResponse(UniversalBaseModel):
     One page of content search results.
     """
 
-    built_through_seq: ChangeSeq = pydantic.Field()
+    built_through_seq: CommitSeq = pydantic.Field()
     """
     The last sequence that the index covers. The server searched the commits at or below this
     sequence through the index.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
+    head_seq: CommitSeq = pydantic.Field()
     """
-    The namespace head sequence that the server used to evaluate this page.
+    The sequence that the server read the namespace at for this page. A first page reads at
+    the namespace's head, and a later page reads at the first page's `head_seq`.
     """
 
     matches: typing.List[GrepMatch] = pydantic.Field()
     """
-    The matches, in ascending `(inode_id, byte_offset)` order.
+    The matches, ordered by the content value of each file's revision (its content ID and
+    size), then by `inode_id`, and then by `byte_offset`.
     """
 
     namespace_id: NamespaceId = pydantic.Field()

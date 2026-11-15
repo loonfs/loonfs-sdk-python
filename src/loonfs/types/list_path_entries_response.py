@@ -5,7 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .absolute_path import AbsolutePath
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .namespace_id import NamespaceId
 from .path_entry import PathEntry
 
@@ -20,7 +20,7 @@ class ListPathEntriesResponse(UniversalBaseModel):
     The directory entries, in canonical name key order.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
+    head_seq: CommitSeq = pydantic.Field()
     """
     The namespace head sequence that this listing was read at.
     """

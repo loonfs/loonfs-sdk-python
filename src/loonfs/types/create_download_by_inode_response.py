@@ -13,7 +13,7 @@ from .revision_no import RevisionNo
 
 class CreateDownloadByInodeResponse(UniversalBaseModel):
     """
-    A short-lived capability to read one revision of an inode.
+    The signed object ranges for one revision of an inode.
     """
 
     content_ref: ContentRef = pydantic.Field()

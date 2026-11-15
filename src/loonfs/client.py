@@ -12,6 +12,7 @@ if typing.TYPE_CHECKING:
     from .capabilities.client import AsyncCapabilitiesClient, CapabilitiesClient
     from .changes.client import AsyncChangesClient, ChangesClient
     from .commits.client import AsyncCommitsClient, CommitsClient
+    from .diff.client import AsyncDiffClient, DiffClient
     from .files.client import AsyncFilesClient, FilesClient
     from .inodes.client import AsyncInodesClient, InodesClient
     from .maintenance.client import AsyncMaintenanceClient, MaintenanceClient
@@ -106,6 +107,7 @@ class LoonFS:
         self._namespaces: typing.Optional[NamespacesClient] = None
         self._changes: typing.Optional[ChangesClient] = None
         self._commits: typing.Optional[CommitsClient] = None
+        self._diff: typing.Optional[DiffClient] = None
         self._files: typing.Optional[FilesClient] = None
         self._trash: typing.Optional[TrashClient] = None
         self._inodes: typing.Optional[InodesClient] = None
@@ -144,6 +146,14 @@ class LoonFS:
 
             self._commits = CommitsClient(client_wrapper=self._client_wrapper)
         return self._commits
+
+    @property
+    def diff(self):
+        if self._diff is None:
+            from .diff.client import DiffClient  # noqa: E402
+
+            self._diff = DiffClient(client_wrapper=self._client_wrapper)
+        return self._diff
 
     @property
     def files(self):
@@ -300,6 +310,7 @@ class AsyncLoonFS:
         self._namespaces: typing.Optional[AsyncNamespacesClient] = None
         self._changes: typing.Optional[AsyncChangesClient] = None
         self._commits: typing.Optional[AsyncCommitsClient] = None
+        self._diff: typing.Optional[AsyncDiffClient] = None
         self._files: typing.Optional[AsyncFilesClient] = None
         self._trash: typing.Optional[AsyncTrashClient] = None
         self._inodes: typing.Optional[AsyncInodesClient] = None
@@ -338,6 +349,14 @@ class AsyncLoonFS:
 
             self._commits = AsyncCommitsClient(client_wrapper=self._client_wrapper)
         return self._commits
+
+    @property
+    def diff(self):
+        if self._diff is None:
+            from .diff.client import AsyncDiffClient  # noqa: E402
+
+            self._diff = AsyncDiffClient(client_wrapper=self._client_wrapper)
+        return self._diff
 
     @property
     def files(self):

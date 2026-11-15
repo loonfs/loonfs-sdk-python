@@ -4,9 +4,10 @@ import typing
 
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
-from ..types.change_seq import ChangeSeq
+from ..types.commit_seq import CommitSeq
 from ..types.list_changes_response import ListChangesResponse
-from ..types.pin_id import PinId
+from ..types.read_consistency import ReadConsistency
+from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawChangesClient, RawChangesClient
 
 
@@ -29,9 +30,13 @@ class ChangesClient:
         self,
         namespace_id: str,
         *,
-        after_seq: ChangeSeq,
+        after_seq: CommitSeq,
+        split_commits: typing.Optional[bool] = None,
+        event_index: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[PinId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListChangesResponse:
         """
@@ -42,14 +47,34 @@ class ChangesClient:
         namespace_id : str
             The namespace ID.
 
-        after_seq : ChangeSeq
-            The sequence after which to return committed changes.
+        after_seq : CommitSeq
+            The sequence after which to return committed changes. With `event_index`, the commit at
+            this sequence that the page resumes.
+
+        split_commits : typing.Optional[bool]
+            Whether a page can end inside a commit that alone exceeds the page's budget. The default is
+            `false`, which returns every commit whole.
+
+        event_index : typing.Optional[int]
+            The `next_event_index` that the previous page returned, which resumes the commit at
+            `after_seq` at that event. It requires `split_commits=true`. The default is 0, which starts
+            after the commit at `after_seq`.
 
         limit : typing.Optional[int]
             The maximum page size.
 
-        snapshot_id : typing.Optional[PinId]
+        snapshot_id : typing.Optional[SnapshotId]
             A snapshot to read the feed from. The feed ends at the sequence that the snapshot captured.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -74,11 +99,19 @@ class ChangesClient:
         client.changes.list(
             namespace_id="namespace_id",
             after_seq=1000000,
-            snapshot_id="pin_00000000000000000001-0000000000000002",
+            snapshot_id="snp_00000000000000000001-00000000000000000000000002",
         )
         """
         _response = self._raw_client.list(
-            namespace_id, after_seq=after_seq, limit=limit, snapshot_id=snapshot_id, request_options=request_options
+            namespace_id,
+            after_seq=after_seq,
+            split_commits=split_commits,
+            event_index=event_index,
+            limit=limit,
+            snapshot_id=snapshot_id,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
+            request_options=request_options,
         )
         return _response.data
 
@@ -102,9 +135,13 @@ class AsyncChangesClient:
         self,
         namespace_id: str,
         *,
-        after_seq: ChangeSeq,
+        after_seq: CommitSeq,
+        split_commits: typing.Optional[bool] = None,
+        event_index: typing.Optional[int] = None,
         limit: typing.Optional[int] = None,
-        snapshot_id: typing.Optional[PinId] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> ListChangesResponse:
         """
@@ -115,14 +152,34 @@ class AsyncChangesClient:
         namespace_id : str
             The namespace ID.
 
-        after_seq : ChangeSeq
-            The sequence after which to return committed changes.
+        after_seq : CommitSeq
+            The sequence after which to return committed changes. With `event_index`, the commit at
+            this sequence that the page resumes.
+
+        split_commits : typing.Optional[bool]
+            Whether a page can end inside a commit that alone exceeds the page's budget. The default is
+            `false`, which returns every commit whole.
+
+        event_index : typing.Optional[int]
+            The `next_event_index` that the previous page returned, which resumes the commit at
+            `after_seq` at that event. It requires `split_commits=true`. The default is 0, which starts
+            after the commit at `after_seq`.
 
         limit : typing.Optional[int]
             The maximum page size.
 
-        snapshot_id : typing.Optional[PinId]
+        snapshot_id : typing.Optional[SnapshotId]
             A snapshot to read the feed from. The feed ends at the sequence that the snapshot captured.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read. It can't be combined with `snapshot_id`.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -152,13 +209,21 @@ class AsyncChangesClient:
             await client.changes.list(
                 namespace_id="namespace_id",
                 after_seq=1000000,
-                snapshot_id="pin_00000000000000000001-0000000000000002",
+                snapshot_id="snp_00000000000000000001-00000000000000000000000002",
             )
 
 
         asyncio.run(main())
         """
         _response = await self._raw_client.list(
-            namespace_id, after_seq=after_seq, limit=limit, snapshot_id=snapshot_id, request_options=request_options
+            namespace_id,
+            after_seq=after_seq,
+            split_commits=split_commits,
+            event_index=event_index,
+            limit=limit,
+            snapshot_id=snapshot_id,
+            consistency=consistency,
+            max_staleness_ms=max_staleness_ms,
+            request_options=request_options,
         )
         return _response.data

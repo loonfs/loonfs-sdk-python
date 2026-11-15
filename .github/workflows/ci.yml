@@ -8,7 +8,8 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # ubuntu-latest is Ubuntu 26.04, which has no Python 3.8 build.
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         # 3.8 is the advertised floor; the import must stay valid there.

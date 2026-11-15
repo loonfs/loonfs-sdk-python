@@ -4,22 +4,22 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .change_seq import ChangeSeq
+from .commit_seq import CommitSeq
 from .namespace_id import NamespaceId
 from .trash_entry import TrashEntry
 
 
 class ListTrashResponse(UniversalBaseModel):
     """
-    One page of the namespace's recoverable deletions.
+    One page of the namespace's trash.
     """
 
     entries: typing.List[TrashEntry] = pydantic.Field()
     """
-    The recoverable deletions, oldest first.
+    The trash entries, oldest deletion first.
     """
 
-    head_seq: ChangeSeq = pydantic.Field()
+    head_seq: CommitSeq = pydantic.Field()
     """
     The head sequence that this page was evaluated at.
     """

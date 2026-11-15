@@ -11,7 +11,7 @@ from .upload_id import UploadId
 
 class SignUploadPartsResponse(UniversalBaseModel):
     """
-    One capability for each requested part.
+    One presigned URL for each requested part.
     """
 
     namespace_id: NamespaceId = pydantic.Field()
