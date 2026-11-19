@@ -13,12 +13,12 @@ class ReplayForkResponse(UniversalBaseModel):
     The result of a replay commit: the new fork, and the changes that the replay commit left out.
     """
 
-    conflicts: typing.Optional[typing.List[MergeConflict]] = pydantic.Field(default=None)
+    conflicts: typing.List[MergeConflict] = pydantic.Field()
     """
     The replay commit's conflict report, with one entry for each inode whose change the replay
-    commit didn't apply. It's absent when the request's commit ID identifies a replay commit
-    that an earlier request committed, because only the response that committed the replay
-    commit has its report.
+    commit didn't apply. It's empty when the replay commit left nothing out. The replay
+    commit's merge record stores the report, so a retry with the same commit ID returns the
+    same report.
     """
 
     namespace: NamespaceMetadata = pydantic.Field()

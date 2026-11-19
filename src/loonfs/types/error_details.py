@@ -9,6 +9,7 @@ from .attributes_revision_no import AttributesRevisionNo
 from .binding_version import BindingVersion
 from .commit_id import CommitId
 from .commit_seq import CommitSeq
+from .error_cause import ErrorCause
 from .inode_id import InodeId
 from .merge_bound import MergeBound
 from .merge_conflict import MergeConflict
@@ -84,6 +85,12 @@ class ErrorDetails(UniversalBaseModel):
     after_seq: typing.Optional[CommitSeq] = pydantic.Field(default=None)
     """
     The `after_seq` value from the change feed request.
+    """
+
+    cause: typing.Optional[ErrorCause] = pydantic.Field(default=None)
+    """
+    Which of the causes that share the error's code and remedy occurred, for a code whose row
+    in the details table lists causes.
     """
 
     commit_id: typing.Optional[CommitId] = pydantic.Field(default=None)

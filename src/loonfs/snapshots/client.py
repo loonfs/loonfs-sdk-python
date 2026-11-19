@@ -65,9 +65,8 @@ class SnapshotsClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -116,9 +115,8 @@ class SnapshotsClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -157,15 +155,14 @@ class SnapshotsClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.retrieve(
             namespace_id="namespace_id",
-            snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
         _response = self._raw_client.retrieve(namespace_id, snapshot_id, request_options=request_options)
@@ -199,15 +196,14 @@ class SnapshotsClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.delete(
             namespace_id="namespace_id",
-            snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
         _response = self._raw_client.delete(namespace_id, snapshot_id, request_options=request_options)
@@ -249,15 +245,14 @@ class SnapshotsClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.extend(
             namespace_id="namespace_id",
-            snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             ttl_ms=1000000,
         )
         """
@@ -318,9 +313,8 @@ class AsyncSnapshotsClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -379,9 +373,8 @@ class AsyncSnapshotsClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -430,9 +423,8 @@ class AsyncSnapshotsClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -441,7 +433,7 @@ class AsyncSnapshotsClient:
         async def main() -> None:
             await client.snapshots.retrieve(
                 namespace_id="namespace_id",
-                snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
 
@@ -480,9 +472,8 @@ class AsyncSnapshotsClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -491,7 +482,7 @@ class AsyncSnapshotsClient:
         async def main() -> None:
             await client.snapshots.delete(
                 namespace_id="namespace_id",
-                snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
 
@@ -538,9 +529,8 @@ class AsyncSnapshotsClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -549,7 +539,7 @@ class AsyncSnapshotsClient:
         async def main() -> None:
             await client.snapshots.extend(
                 namespace_id="namespace_id",
-                snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
                 ttl_ms=1000000,
             )
 

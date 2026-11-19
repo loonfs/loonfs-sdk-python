@@ -21,8 +21,7 @@ class ContentRef(UniversalBaseModel):
 
     content_id: ContentId = pydantic.Field()
     """
-    The immutable identity of the content. The content ID and the reading namespace's pool
-    together determine the object key.
+    The ID of the content chain in the reading namespace's pool.
     """
 
     kind: ContentRefKind = pydantic.Field()
@@ -32,7 +31,7 @@ class ContentRef(UniversalBaseModel):
 
     size_bytes: int = pydantic.Field()
     """
-    The length of the referenced bytes, which are a prefix of the content object.
+    The length of the referenced prefix of the chain, in bytes.
     """
 
     if IS_PYDANTIC_V2:

@@ -20,9 +20,8 @@ class BaseClientWrapper:
         self,
         *,
         actor_id: typing.Optional[str] = None,
-        subject_id: typing.Optional[str] = None,
-        principal_scope: typing.Optional[str] = None,
         principals: typing.Optional[str] = None,
+        loonfs_context: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
@@ -31,9 +30,8 @@ class BaseClientWrapper:
         logging: typing.Optional[typing.Union[LogConfig, Logger]] = None,
     ):
         self._actor_id = actor_id
-        self._subject_id = subject_id
-        self._principal_scope = principal_scope
         self._principals = principals
+        self._loonfs_context = loonfs_context
         self._token = token
         self._headers = headers
         self._base_url = base_url
@@ -53,12 +51,10 @@ class BaseClientWrapper:
         }
         if self._actor_id is not None:
             headers["Loonfs-Actor"] = self._actor_id
-        if self._subject_id is not None:
-            headers["Loonfs-Subject"] = self._subject_id
-        if self._principal_scope is not None:
-            headers["Loonfs-Principal-Scope"] = self._principal_scope
         if self._principals is not None:
             headers["Loonfs-Principals"] = self._principals
+        if self._loonfs_context is not None:
+            headers["Loonfs-Context"] = self._loonfs_context
         headers["Authorization"] = f"Bearer {self._get_token()}"
         return headers
 
@@ -86,9 +82,8 @@ class SyncClientWrapper(BaseClientWrapper):
         self,
         *,
         actor_id: typing.Optional[str] = None,
-        subject_id: typing.Optional[str] = None,
-        principal_scope: typing.Optional[str] = None,
         principals: typing.Optional[str] = None,
+        loonfs_context: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
@@ -99,9 +94,8 @@ class SyncClientWrapper(BaseClientWrapper):
     ):
         super().__init__(
             actor_id=actor_id,
-            subject_id=subject_id,
-            principal_scope=principal_scope,
             principals=principals,
+            loonfs_context=loonfs_context,
             token=token,
             headers=headers,
             base_url=base_url,
@@ -124,9 +118,8 @@ class AsyncClientWrapper(BaseClientWrapper):
         self,
         *,
         actor_id: typing.Optional[str] = None,
-        subject_id: typing.Optional[str] = None,
-        principal_scope: typing.Optional[str] = None,
         principals: typing.Optional[str] = None,
+        loonfs_context: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         base_url: str,
@@ -138,9 +131,8 @@ class AsyncClientWrapper(BaseClientWrapper):
     ):
         super().__init__(
             actor_id=actor_id,
-            subject_id=subject_id,
-            principal_scope=principal_scope,
             principals=principals,
+            loonfs_context=loonfs_context,
             token=token,
             headers=headers,
             base_url=base_url,

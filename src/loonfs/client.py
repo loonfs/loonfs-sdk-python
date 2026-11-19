@@ -32,9 +32,8 @@ class LoonFS:
         The base url to use for requests from the client.
 
     actor_id : typing.Optional[str]
-    subject_id : typing.Optional[str]
-    principal_scope : typing.Optional[str]
     principals : typing.Optional[str]
+    loonfs_context : typing.Optional[str]
     token : typing.Union[str, typing.Callable[[], str]]
     headers : typing.Optional[typing.Dict[str, str]]
         Additional headers to send with every request.
@@ -60,9 +59,8 @@ class LoonFS:
 
     client = LoonFS(
         actor_id="YOUR_ACTOR_ID",
-        subject_id="YOUR_SUBJECT_ID",
-        principal_scope="YOUR_PRINCIPAL_SCOPE",
         principals="YOUR_PRINCIPALS",
+        loonfs_context="YOUR_LOONFS_CONTEXT",
         token="YOUR_TOKEN",
         base_url="https://yourhost.com/path/to/api",
     )
@@ -73,9 +71,8 @@ class LoonFS:
         *,
         base_url: str,
         actor_id: typing.Optional[str] = None,
-        subject_id: typing.Optional[str] = None,
-        principal_scope: typing.Optional[str] = None,
         principals: typing.Optional[str] = None,
+        loonfs_context: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         timeout: typing.Optional[float] = None,
@@ -89,9 +86,8 @@ class LoonFS:
         self._client_wrapper = SyncClientWrapper(
             base_url=base_url,
             actor_id=actor_id,
-            subject_id=subject_id,
-            principal_scope=principal_scope,
             principals=principals,
+            loonfs_context=loonfs_context,
             token=token,
             headers=headers,
             httpx_client=httpx_client
@@ -232,9 +228,8 @@ class AsyncLoonFS:
         The base url to use for requests from the client.
 
     actor_id : typing.Optional[str]
-    subject_id : typing.Optional[str]
-    principal_scope : typing.Optional[str]
     principals : typing.Optional[str]
+    loonfs_context : typing.Optional[str]
     token : typing.Union[str, typing.Callable[[], str]]
     headers : typing.Optional[typing.Dict[str, str]]
         Additional headers to send with every request.
@@ -263,9 +258,8 @@ class AsyncLoonFS:
 
     client = AsyncLoonFS(
         actor_id="YOUR_ACTOR_ID",
-        subject_id="YOUR_SUBJECT_ID",
-        principal_scope="YOUR_PRINCIPAL_SCOPE",
         principals="YOUR_PRINCIPALS",
+        loonfs_context="YOUR_LOONFS_CONTEXT",
         token="YOUR_TOKEN",
         base_url="https://yourhost.com/path/to/api",
     )
@@ -276,9 +270,8 @@ class AsyncLoonFS:
         *,
         base_url: str,
         actor_id: typing.Optional[str] = None,
-        subject_id: typing.Optional[str] = None,
-        principal_scope: typing.Optional[str] = None,
         principals: typing.Optional[str] = None,
+        loonfs_context: typing.Optional[str] = None,
         token: typing.Union[str, typing.Callable[[], str]],
         headers: typing.Optional[typing.Dict[str, str]] = None,
         async_token: typing.Optional[typing.Callable[[], typing.Awaitable[str]]] = None,
@@ -293,9 +286,8 @@ class AsyncLoonFS:
         self._client_wrapper = AsyncClientWrapper(
             base_url=base_url,
             actor_id=actor_id,
-            subject_id=subject_id,
-            principal_scope=principal_scope,
             principals=principals,
+            loonfs_context=loonfs_context,
             token=token,
             headers=headers,
             async_token=async_token,

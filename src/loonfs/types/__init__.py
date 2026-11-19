@@ -79,6 +79,7 @@ if typing.TYPE_CHECKING:
     from .directory_binding import DirectoryBinding
     from .display_name import DisplayName
     from .download_range import DownloadRange
+    from .error_cause import ErrorCause
     from .error_details import ErrorDetails
     from .error_response import ErrorResponse
     from .file_revision import FileRevision
@@ -169,12 +170,6 @@ if typing.TYPE_CHECKING:
     from .metadata_maintenance_outcome import MetadataMaintenanceOutcome
     from .metadata_skipped_work import MetadataSkippedWork
     from .name_key import NameKey
-    from .namespace_access import NamespaceAccess, NamespaceAccess_Acl, NamespaceAccess_Unrestricted
-    from .namespace_access_acl import NamespaceAccessAcl
-    from .namespace_access_mode import NamespaceAccessMode, NamespaceAccessMode_Acl, NamespaceAccessMode_Unrestricted
-    from .namespace_access_mode_acl import NamespaceAccessModeAcl
-    from .namespace_access_mode_unrestricted import NamespaceAccessModeUnrestricted
-    from .namespace_access_unrestricted import NamespaceAccessUnrestricted
     from .namespace_diagnostics import NamespaceDiagnostics
     from .namespace_fork_basis import NamespaceForkBasis
     from .namespace_id import NamespaceId
@@ -197,8 +192,6 @@ if typing.TYPE_CHECKING:
     from .pool_deleted_object_counts import PoolDeletedObjectCounts
     from .pool_id import PoolId
     from .pool_retained_candidates import PoolRetainedCandidates
-    from .principal_id import PrincipalId
-    from .principal_scope import PrincipalScope
     from .probe_id import ProbeId
     from .read_consistency import ReadConsistency
     from .replay_fork_response import ReplayForkResponse
@@ -208,26 +201,22 @@ if typing.TYPE_CHECKING:
         RunMaintenanceJobRequest,
         RunMaintenanceJobRequest_Gc,
         RunMaintenanceJobRequest_Metadata,
-        RunMaintenanceJobRequest_RecoverAdministrator,
         RunMaintenanceJobRequest_Retention,
         RunMaintenanceJobRequest_RetentionWindow,
     )
     from .run_maintenance_job_request_gc import RunMaintenanceJobRequestGc
     from .run_maintenance_job_request_metadata import RunMaintenanceJobRequestMetadata
-    from .run_maintenance_job_request_recover_administrator import RunMaintenanceJobRequestRecoverAdministrator
     from .run_maintenance_job_request_retention import RunMaintenanceJobRequestRetention
     from .run_maintenance_job_request_retention_window import RunMaintenanceJobRequestRetentionWindow
     from .run_maintenance_job_response import (
         RunMaintenanceJobResponse,
         RunMaintenanceJobResponse_Gc,
         RunMaintenanceJobResponse_Metadata,
-        RunMaintenanceJobResponse_RecoverAdministrator,
         RunMaintenanceJobResponse_Retention,
         RunMaintenanceJobResponse_RetentionWindow,
     )
     from .run_maintenance_job_response_gc import RunMaintenanceJobResponseGc
     from .run_maintenance_job_response_metadata import RunMaintenanceJobResponseMetadata
-    from .run_maintenance_job_response_recover_administrator import RunMaintenanceJobResponseRecoverAdministrator
     from .run_maintenance_job_response_retention import RunMaintenanceJobResponseRetention
     from .run_maintenance_job_response_retention_window import RunMaintenanceJobResponseRetentionWindow
     from .run_pool_maintenance_job_request import RunPoolMaintenanceJobRequest, RunPoolMaintenanceJobRequest_Gc
@@ -333,6 +322,7 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DirectoryBinding": ".directory_binding",
     "DisplayName": ".display_name",
     "DownloadRange": ".download_range",
+    "ErrorCause": ".error_cause",
     "ErrorDetails": ".error_details",
     "ErrorResponse": ".error_response",
     "FileRevision": ".file_revision",
@@ -422,16 +412,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "MetadataMaintenanceOutcome": ".metadata_maintenance_outcome",
     "MetadataSkippedWork": ".metadata_skipped_work",
     "NameKey": ".name_key",
-    "NamespaceAccess": ".namespace_access",
-    "NamespaceAccessAcl": ".namespace_access_acl",
-    "NamespaceAccessMode": ".namespace_access_mode",
-    "NamespaceAccessModeAcl": ".namespace_access_mode_acl",
-    "NamespaceAccessModeUnrestricted": ".namespace_access_mode_unrestricted",
-    "NamespaceAccessMode_Acl": ".namespace_access_mode",
-    "NamespaceAccessMode_Unrestricted": ".namespace_access_mode",
-    "NamespaceAccessUnrestricted": ".namespace_access_unrestricted",
-    "NamespaceAccess_Acl": ".namespace_access",
-    "NamespaceAccess_Unrestricted": ".namespace_access",
     "NamespaceDiagnostics": ".namespace_diagnostics",
     "NamespaceForkBasis": ".namespace_fork_basis",
     "NamespaceId": ".namespace_id",
@@ -456,8 +436,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PoolDeletedObjectCounts": ".pool_deleted_object_counts",
     "PoolId": ".pool_id",
     "PoolRetainedCandidates": ".pool_retained_candidates",
-    "PrincipalId": ".principal_id",
-    "PrincipalScope": ".principal_scope",
     "ProbeId": ".probe_id",
     "ReadConsistency": ".read_consistency",
     "ReplayForkResponse": ".replay_fork_response",
@@ -466,23 +444,19 @@ _dynamic_imports: typing.Dict[str, str] = {
     "RunMaintenanceJobRequest": ".run_maintenance_job_request",
     "RunMaintenanceJobRequestGc": ".run_maintenance_job_request_gc",
     "RunMaintenanceJobRequestMetadata": ".run_maintenance_job_request_metadata",
-    "RunMaintenanceJobRequestRecoverAdministrator": ".run_maintenance_job_request_recover_administrator",
     "RunMaintenanceJobRequestRetention": ".run_maintenance_job_request_retention",
     "RunMaintenanceJobRequestRetentionWindow": ".run_maintenance_job_request_retention_window",
     "RunMaintenanceJobRequest_Gc": ".run_maintenance_job_request",
     "RunMaintenanceJobRequest_Metadata": ".run_maintenance_job_request",
-    "RunMaintenanceJobRequest_RecoverAdministrator": ".run_maintenance_job_request",
     "RunMaintenanceJobRequest_Retention": ".run_maintenance_job_request",
     "RunMaintenanceJobRequest_RetentionWindow": ".run_maintenance_job_request",
     "RunMaintenanceJobResponse": ".run_maintenance_job_response",
     "RunMaintenanceJobResponseGc": ".run_maintenance_job_response_gc",
     "RunMaintenanceJobResponseMetadata": ".run_maintenance_job_response_metadata",
-    "RunMaintenanceJobResponseRecoverAdministrator": ".run_maintenance_job_response_recover_administrator",
     "RunMaintenanceJobResponseRetention": ".run_maintenance_job_response_retention",
     "RunMaintenanceJobResponseRetentionWindow": ".run_maintenance_job_response_retention_window",
     "RunMaintenanceJobResponse_Gc": ".run_maintenance_job_response",
     "RunMaintenanceJobResponse_Metadata": ".run_maintenance_job_response",
-    "RunMaintenanceJobResponse_RecoverAdministrator": ".run_maintenance_job_response",
     "RunMaintenanceJobResponse_Retention": ".run_maintenance_job_response",
     "RunMaintenanceJobResponse_RetentionWindow": ".run_maintenance_job_response",
     "RunPoolMaintenanceJobRequest": ".run_pool_maintenance_job_request",
@@ -617,6 +591,7 @@ __all__ = [
     "DirectoryBinding",
     "DisplayName",
     "DownloadRange",
+    "ErrorCause",
     "ErrorDetails",
     "ErrorResponse",
     "FileRevision",
@@ -706,16 +681,6 @@ __all__ = [
     "MetadataMaintenanceOutcome",
     "MetadataSkippedWork",
     "NameKey",
-    "NamespaceAccess",
-    "NamespaceAccessAcl",
-    "NamespaceAccessMode",
-    "NamespaceAccessModeAcl",
-    "NamespaceAccessModeUnrestricted",
-    "NamespaceAccessMode_Acl",
-    "NamespaceAccessMode_Unrestricted",
-    "NamespaceAccessUnrestricted",
-    "NamespaceAccess_Acl",
-    "NamespaceAccess_Unrestricted",
     "NamespaceDiagnostics",
     "NamespaceForkBasis",
     "NamespaceId",
@@ -740,8 +705,6 @@ __all__ = [
     "PoolDeletedObjectCounts",
     "PoolId",
     "PoolRetainedCandidates",
-    "PrincipalId",
-    "PrincipalScope",
     "ProbeId",
     "ReadConsistency",
     "ReplayForkResponse",
@@ -750,23 +713,19 @@ __all__ = [
     "RunMaintenanceJobRequest",
     "RunMaintenanceJobRequestGc",
     "RunMaintenanceJobRequestMetadata",
-    "RunMaintenanceJobRequestRecoverAdministrator",
     "RunMaintenanceJobRequestRetention",
     "RunMaintenanceJobRequestRetentionWindow",
     "RunMaintenanceJobRequest_Gc",
     "RunMaintenanceJobRequest_Metadata",
-    "RunMaintenanceJobRequest_RecoverAdministrator",
     "RunMaintenanceJobRequest_Retention",
     "RunMaintenanceJobRequest_RetentionWindow",
     "RunMaintenanceJobResponse",
     "RunMaintenanceJobResponseGc",
     "RunMaintenanceJobResponseMetadata",
-    "RunMaintenanceJobResponseRecoverAdministrator",
     "RunMaintenanceJobResponseRetention",
     "RunMaintenanceJobResponseRetentionWindow",
     "RunMaintenanceJobResponse_Gc",
     "RunMaintenanceJobResponse_Metadata",
-    "RunMaintenanceJobResponse_RecoverAdministrator",
     "RunMaintenanceJobResponse_Retention",
     "RunMaintenanceJobResponse_RetentionWindow",
     "RunPoolMaintenanceJobRequest",
