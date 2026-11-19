@@ -162,7 +162,7 @@ class SnapshotsClient:
         )
         client.snapshots.retrieve(
             namespace_id="namespace_id",
-            snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
         _response = self._raw_client.retrieve(namespace_id, snapshot_id, request_options=request_options)
@@ -203,7 +203,7 @@ class SnapshotsClient:
         )
         client.snapshots.delete(
             namespace_id="namespace_id",
-            snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
         _response = self._raw_client.delete(namespace_id, snapshot_id, request_options=request_options)
@@ -252,7 +252,7 @@ class SnapshotsClient:
         )
         client.snapshots.extend(
             namespace_id="namespace_id",
-            snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             ttl_ms=1000000,
         )
         """
@@ -433,7 +433,7 @@ class AsyncSnapshotsClient:
         async def main() -> None:
             await client.snapshots.retrieve(
                 namespace_id="namespace_id",
-                snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
 
@@ -482,7 +482,7 @@ class AsyncSnapshotsClient:
         async def main() -> None:
             await client.snapshots.delete(
                 namespace_id="namespace_id",
-                snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
 
@@ -539,7 +539,7 @@ class AsyncSnapshotsClient:
         async def main() -> None:
             await client.snapshots.extend(
                 namespace_id="namespace_id",
-                snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
                 ttl_ms=1000000,
             )
 

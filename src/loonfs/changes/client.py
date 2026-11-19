@@ -98,7 +98,7 @@ class ChangesClient:
         client.changes.list(
             namespace_id="namespace_id",
             after_seq=1000000,
-            snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
         _response = self._raw_client.list(
@@ -207,7 +207,7 @@ class AsyncChangesClient:
             await client.changes.list(
                 namespace_id="namespace_id",
                 after_seq=1000000,
-                snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
 

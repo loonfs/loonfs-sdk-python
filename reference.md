@@ -883,7 +883,7 @@ client = LoonFS(
 client.changes.list(
     namespace_id="namespace_id",
     after_seq=1000000,
-    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -1587,7 +1587,7 @@ client = LoonFS(
 client.files.list(
     namespace_id="namespace_id",
     path="path",
-    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -1740,7 +1740,7 @@ client = LoonFS(
 client.files.retrieve(
     namespace_id="namespace_id",
     path="path",
-    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -2274,7 +2274,7 @@ client = LoonFS(
 client.inodes.retrieve(
     namespace_id="namespace_id",
     inode_id="ino_000000r0000013kje0d47gc8kw",
-    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -2399,7 +2399,7 @@ client = LoonFS(
 client.inodes.list_children(
     namespace_id="namespace_id",
     inode_id="ino_000000r0000013kje0d47gc8kw",
-    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -3373,7 +3373,7 @@ client = LoonFS(
 
 client.snapshots.retrieve(
     namespace_id="namespace_id",
-    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -3454,7 +3454,7 @@ client = LoonFS(
 
 client.snapshots.delete(
     namespace_id="namespace_id",
-    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -3535,7 +3535,7 @@ client = LoonFS(
 
 client.snapshots.extend(
     namespace_id="namespace_id",
-    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
     ttl_ms=1000000,
 )
 
