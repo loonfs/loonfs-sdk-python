@@ -8,7 +8,6 @@ import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .commit_seq import CommitSeq
-from .principal_id import PrincipalId
 
 
 class RunMaintenanceJobRequest_Gc(UniversalBaseModel):
@@ -35,24 +34,6 @@ class RunMaintenanceJobRequest_Metadata(UniversalBaseModel):
 
     kind: typing.Literal["metadata"] = "metadata"
     max_wal_tail_objects: typing.Optional[int] = None
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
-class RunMaintenanceJobRequest_RecoverAdministrator(UniversalBaseModel):
-    """
-    One maintenance job for one namespace.
-    """
-
-    kind: typing.Literal["recover_administrator"] = "recover_administrator"
-    principal_id: PrincipalId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -105,7 +86,6 @@ RunMaintenanceJobRequest = typing_extensions.Annotated[
     typing.Union[
         RunMaintenanceJobRequest_Gc,
         RunMaintenanceJobRequest_Metadata,
-        RunMaintenanceJobRequest_RecoverAdministrator,
         RunMaintenanceJobRequest_Retention,
         RunMaintenanceJobRequest_RetentionWindow,
     ],

@@ -113,17 +113,6 @@ client.namespaces.create()
 <dl>
 <dd>
 
-**access:** `typing.Optional[NamespaceAccess]` 
-
-The namespace's access mode, which can't be changed after the namespace is created. The
-default is unrestricted.
-    
-</dd>
-</dl>
-
-<dl>
-<dd>
-
 **namespace_id:** `typing.Optional[NamespaceId]` 
 
 The durable ID of the new namespace. Without this field, LoonFS generates an ID. The
@@ -139,9 +128,10 @@ response's `namespace_id` is the new namespace's ID.
 
 The namespace's retention window, in milliseconds, which must be at least the grace window
 (86400000, which is 24 hours). The reference server's maintenance sweep uses this window
-for the namespace. Without this field, the namespace's window is the server's
-`retention_window_ms` setting, if the server has that setting. A `retention_window`
-maintenance job can change or clear the window later.
+for the namespace. Without this field, the namespace's window is the server's default
+window, if the server has one, which the capability document reports as
+`namespace.default_retention_window_ms`. A `retention_window` maintenance job can change
+or clear the window later.
     
 </dd>
 </dl>
@@ -214,6 +204,30 @@ client.namespaces.retrieve(
 <dd>
 
 **namespace_id:** `str` — The namespace ID.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the namespace head. `eventual` (the default, unless the
+server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+while that confirmation is younger than the maximum staleness, and `strong` confirms the
+head before the read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
     
 </dd>
 </dl>
@@ -440,7 +454,7 @@ client = LoonFS(
 
 client.namespaces.next_merge_range(
     namespace_id="namespace_id",
-    source="demo",
+    source_namespace_id="demo",
 )
 
 ```
@@ -465,10 +479,34 @@ client.namespaces.next_merge_range(
 <dl>
 <dd>
 
-**source:** `NamespaceId` 
+**source_namespace_id:** `NamespaceId` 
 
 The fork whose next merge into the namespace the query reads. It has to be a fork of the
 namespace, or the fork that a rebase replays into the namespace.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently the read confirms the heads of the namespace and the fork. `eventual` (the
+default, unless the server's `consistency` setting is `strong`) reads at the heads that the
+server confirmed last while those confirmations are younger than the maximum staleness, and
+`strong` confirms both heads before the read.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of a head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
     
 </dd>
 </dl>
@@ -707,7 +745,7 @@ The durable ID of the new fork. Without this field, LoonFS generates an ID. The 
 <dl>
 <dd>
 
-Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork without the conflict report.
+Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork with the same conflict report. The report counts toward the replay commit's size, so a report that doesn't fit returns `merge_too_large` with a split hint.
 </dd>
 </dl>
 </dd>
@@ -845,7 +883,7 @@ client = LoonFS(
 client.changes.list(
     namespace_id="namespace_id",
     after_seq=1000000,
-    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
 )
 
 ```
@@ -1549,7 +1587,7 @@ client = LoonFS(
 client.files.list(
     namespace_id="namespace_id",
     path="path",
-    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
 )
 
 ```
@@ -1702,7 +1740,7 @@ client = LoonFS(
 client.files.retrieve(
     namespace_id="namespace_id",
     path="path",
-    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
 )
 
 ```
@@ -1738,7 +1776,7 @@ client.files.retrieve(
 **include_attributes:** `typing.Optional[bool]` 
 
 Whether the response includes the inode's attribute map and attribute revision. The default
-is `true`, because a stat reads one path and a map is at most 64 KiB.
+is `false`, as on every route that takes this parameter.
     
 </dd>
 </dl>
@@ -1992,7 +2030,7 @@ The search pattern, in the Rust `regex` crate's syntax. Its UTF-8 encoding must 
 <dl>
 <dd>
 
-**path_prefix:** `typing.Optional[str]` 
+**path:** `typing.Optional[str]` 
 
 A complete absolute path that limits matches to its descendants. It can't be combined with
 `inode_id`.
@@ -2003,7 +2041,7 @@ A complete absolute path that limits matches to its descendants. It can't be com
 <dl>
 <dd>
 
-**inode_id:** `typing.Optional[str]` — An inode that limits matches to its descendants. It can't be combined with `path_prefix`.
+**inode_id:** `typing.Optional[str]` — An inode that limits matches to its descendants. It can't be combined with `path`.
     
 </dd>
 </dl>
@@ -2042,6 +2080,30 @@ scan budget. The default is `false`.
 <dd>
 
 **cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**consistency:** `typing.Optional[ReadConsistency]` 
+
+How recently a first page confirms the namespace head that it reads. `eventual` (the
+default, unless the server's `consistency` setting is `strong`) reads at the head that the
+server confirmed last while that confirmation is younger than the maximum staleness, and
+`strong` confirms the head before the read. A later page reads at the first page's head.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**max_staleness_ms:** `typing.Optional[int]` 
+
+With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+milliseconds. The default is the server's `max_staleness_ms`.
     
 </dd>
 </dl>
@@ -2212,7 +2274,7 @@ client = LoonFS(
 client.inodes.retrieve(
     namespace_id="namespace_id",
     inode_id="ino_000000r0000013kje0d47gc8kw",
-    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
 )
 
 ```
@@ -2248,7 +2310,7 @@ client.inodes.retrieve(
 **include_attributes:** `typing.Optional[bool]` 
 
 Whether the response includes the inode's attribute map and attribute revision. The default
-is `true`, because a stat reads one path and a map is at most 64 KiB.
+is `false`, as on every route that takes this parameter.
     
 </dd>
 </dl>
@@ -2337,7 +2399,7 @@ client = LoonFS(
 client.inodes.list_children(
     namespace_id="namespace_id",
     inode_id="ino_000000r0000013kje0d47gc8kw",
-    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
 )
 
 ```
@@ -2967,7 +3029,7 @@ milliseconds. The default is the server's `max_staleness_ms`.
 <dl>
 <dd>
 
-Authorizes a direct read of one retained inode revision. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+Authorizes a direct read of one retained inode revision. With `snapshot_id`, the server finds the revision in the snapshot instead of at the live head. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 </dd>
 </dl>
 </dd>
@@ -3038,7 +3100,7 @@ client.inodes.create_revision_download(
 How recently the read confirms the namespace head that it finds the revision in. `eventual`
 (the default, unless the server's `consistency` setting is `strong`) reads at the head that
 the server confirmed last while that confirmation is younger than the maximum staleness,
-and `strong` confirms the head before the read.
+and `strong` confirms the head before the read. It can't be combined with `snapshot_id`.
     
 </dd>
 </dl>
@@ -3050,6 +3112,18 @@ and `strong` confirms the head before the read.
 
 With `consistency` set to `eventual`, how old the server's last confirmation of the head can
 be, in milliseconds. The default is the server's `max_staleness_ms`.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**snapshot_id:** `typing.Optional[SnapshotId]` 
+
+A snapshot to find the revision in instead of the live head. The snapshot keeps the
+revision readable after the namespace's retention floor passes it, and a revision committed
+after the snapshot returns `revision_not_found`.
     
 </dd>
 </dl>
@@ -3299,7 +3373,7 @@ client = LoonFS(
 
 client.snapshots.retrieve(
     namespace_id="namespace_id",
-    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
 )
 
 ```
@@ -3380,7 +3454,7 @@ client = LoonFS(
 
 client.snapshots.delete(
     namespace_id="namespace_id",
-    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
 )
 
 ```
@@ -3461,7 +3535,7 @@ client = LoonFS(
 
 client.snapshots.extend(
     namespace_id="namespace_id",
-    snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+    snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
     ttl_ms=1000000,
 )
 
@@ -4346,7 +4420,7 @@ client.maintenance.grep_index.enable(
 <dl>
 <dd>
 
-Runs one maintenance job for the namespace. The body's `kind` selects the job, which is one of `metadata`, `gc`, `retention`, `retention_window`, or `recover_administrator`. The response includes the same `kind` and the job's result. A deleted namespace accepts only `gc`. A `metadata` job folds the WAL tail and compacts metadata until nothing is due, or until it publishes 16 compaction units. A compaction unit can take minutes, so the call can too. When the result's `outcome` is `due`, another `metadata` run continues the work. A `gc` job reads the current manifest, lists the snapshots, and then sweeps every object family under the namespace's prefix to the end, including the segments of extensions such as the grep index. The collection of the namespace's pool, which deletes content objects, upload records, and temporary objects, is a job of the pool. Each listing starts at the beginning, and the job doesn't keep a position to continue from. A `retention` job advances the retention floor to the folded manifest head, or to the one target that `to_seq` or `cutoff_at_ms` sets. A `retention_window` job sets the namespace's retention window to `retention_window_ms`, or clears it when the body doesn't include that field.
+Runs one maintenance job for the namespace. The body's `kind` selects the job, which is one of `metadata`, `gc`, `retention`, or `retention_window`. The response includes the same `kind` and the job's result. A deleted namespace accepts only `gc`. A `metadata` job folds the WAL tail and compacts metadata until nothing is due, or until it publishes 16 compaction units. A compaction unit can take minutes, so the call can too. When the result's `outcome` is `due`, another `metadata` run continues the work. A `gc` job reads the current manifest, lists the snapshots, and then sweeps every object family under the namespace's prefix to the end, including the segments of extensions such as the grep index. The collection of the namespace's pool, which deletes content objects, upload records, and temporary objects, is a job of the pool. Each listing starts at the beginning, and the job doesn't keep a position to continue from. A `retention` job advances the retention floor to the folded manifest head, or to the one target that `to_seq` or `cutoff_at_ms` sets. A `retention_window` job sets the namespace's retention window to `retention_window_ms`, or clears it when the body doesn't include that field.
 </dd>
 </dl>
 </dd>

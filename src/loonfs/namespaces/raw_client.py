@@ -10,7 +10,6 @@ from ..core.jsonable_encoder import encode_path_param
 from ..core.parse_error import ParsingError
 from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
-from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
 from ..errors.content_too_large_error import ContentTooLargeError
@@ -25,10 +24,10 @@ from ..types.commit_id import CommitId
 from ..types.commit_seq import CommitSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.error_response import ErrorResponse
-from ..types.namespace_access import NamespaceAccess
 from ..types.namespace_id import NamespaceId
 from ..types.namespace_metadata import NamespaceMetadata
 from ..types.next_merge_range_response import NextMergeRangeResponse
+from ..types.read_consistency import ReadConsistency
 from ..types.replay_fork_response import ReplayForkResponse
 from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
@@ -44,7 +43,6 @@ class RawNamespacesClient:
     def create(
         self,
         *,
-        access: typing.Optional[NamespaceAccess] = OMIT,
         namespace_id: typing.Optional[NamespaceId] = OMIT,
         retention_window_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -54,10 +52,6 @@ class RawNamespacesClient:
 
         Parameters
         ----------
-        access : typing.Optional[NamespaceAccess]
-            The namespace's access mode, which can't be changed after the namespace is created. The
-            default is unrestricted.
-
         namespace_id : typing.Optional[NamespaceId]
             The durable ID of the new namespace. Without this field, LoonFS generates an ID. The
             response's `namespace_id` is the new namespace's ID.
@@ -65,9 +59,10 @@ class RawNamespacesClient:
         retention_window_ms : typing.Optional[int]
             The namespace's retention window, in milliseconds, which must be at least the grace window
             (86400000, which is 24 hours). The reference server's maintenance sweep uses this window
-            for the namespace. Without this field, the namespace's window is the server's
-            `retention_window_ms` setting, if the server has that setting. A `retention_window`
-            maintenance job can change or clear the window later.
+            for the namespace. Without this field, the namespace's window is the server's default
+            window, if the server has one, which the capability document reports as
+            `namespace.default_retention_window_ms`. A `retention_window` maintenance job can change
+            or clear the window later.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -84,9 +79,6 @@ class RawNamespacesClient:
             "v0/namespaces",
             method="POST",
             json={
-                "access": convert_and_respect_annotation_metadata(
-                    object_=access, annotation=NamespaceAccess, direction="write"
-                ),
                 "namespace_id": namespace_id,
                 "retention_window_ms": retention_window_ms,
             },
@@ -182,7 +174,12 @@ class RawNamespacesClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: str,
+        *,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[NamespaceMetadata]:
         """
         Returns the current head and retention state for a namespace.
@@ -191,6 +188,16 @@ class RawNamespacesClient:
         ----------
         namespace_id : str
             The namespace ID.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -203,6 +210,10 @@ class RawNamespacesClient:
         _response = self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}",
             method="GET",
+            params={
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
+            },
             request_options=request_options,
         )
         try:
@@ -545,7 +556,13 @@ class RawNamespacesClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def next_merge_range(
-        self, namespace_id: str, *, source: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: str,
+        *,
+        source_namespace_id: NamespaceId,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[NextMergeRangeResponse]:
         """
         Returns where the fork's next merge into the namespace starts, without planning the merge: the fork's newest merge into the namespace, the fork sequence that the next merge starts after, the fork point, and the fork's head. When the namespace is a rebase's new fork for the fork, the range continues the new fork's replay commits. When a retention floor would refuse the merge with `below_retention_floor`, the response's `outcome` says which floor instead of failing.
@@ -555,9 +572,19 @@ class RawNamespacesClient:
         namespace_id : str
             The namespace that the fork merges into.
 
-        source : NamespaceId
+        source_namespace_id : NamespaceId
             The fork whose next merge into the namespace the query reads. It has to be a fork of the
             namespace, or the fork that a rebase replays into the namespace.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the heads of the namespace and the fork. `eventual` (the
+            default, unless the server's `consistency` setting is `strong`) reads at the heads that the
+            server confirmed last while those confirmations are younger than the maximum staleness, and
+            `strong` confirms both heads before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of a head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -571,7 +598,9 @@ class RawNamespacesClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/merges",
             method="GET",
             params={
-                "source": source,
+                "source_namespace_id": source_namespace_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -1021,7 +1050,7 @@ class RawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[ReplayForkResponse]:
         """
-        Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork without the conflict report.
+        Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork with the same conflict report. The report counts toward the replay commit's size, so a report that doesn't fit returns `merge_too_large` with a split hint.
 
         Parameters
         ----------
@@ -1191,7 +1220,6 @@ class AsyncRawNamespacesClient:
     async def create(
         self,
         *,
-        access: typing.Optional[NamespaceAccess] = OMIT,
         namespace_id: typing.Optional[NamespaceId] = OMIT,
         retention_window_ms: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1201,10 +1229,6 @@ class AsyncRawNamespacesClient:
 
         Parameters
         ----------
-        access : typing.Optional[NamespaceAccess]
-            The namespace's access mode, which can't be changed after the namespace is created. The
-            default is unrestricted.
-
         namespace_id : typing.Optional[NamespaceId]
             The durable ID of the new namespace. Without this field, LoonFS generates an ID. The
             response's `namespace_id` is the new namespace's ID.
@@ -1212,9 +1236,10 @@ class AsyncRawNamespacesClient:
         retention_window_ms : typing.Optional[int]
             The namespace's retention window, in milliseconds, which must be at least the grace window
             (86400000, which is 24 hours). The reference server's maintenance sweep uses this window
-            for the namespace. Without this field, the namespace's window is the server's
-            `retention_window_ms` setting, if the server has that setting. A `retention_window`
-            maintenance job can change or clear the window later.
+            for the namespace. Without this field, the namespace's window is the server's default
+            window, if the server has one, which the capability document reports as
+            `namespace.default_retention_window_ms`. A `retention_window` maintenance job can change
+            or clear the window later.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1231,9 +1256,6 @@ class AsyncRawNamespacesClient:
             "v0/namespaces",
             method="POST",
             json={
-                "access": convert_and_respect_annotation_metadata(
-                    object_=access, annotation=NamespaceAccess, direction="write"
-                ),
                 "namespace_id": namespace_id,
                 "retention_window_ms": retention_window_ms,
             },
@@ -1329,7 +1351,12 @@ class AsyncRawNamespacesClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: str,
+        *,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[NamespaceMetadata]:
         """
         Returns the current head and retention state for a namespace.
@@ -1338,6 +1365,16 @@ class AsyncRawNamespacesClient:
         ----------
         namespace_id : str
             The namespace ID.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the namespace head. `eventual` (the default, unless the
+            server's `consistency` setting is `strong`) reads at the head that the server confirmed last
+            while that confirmation is younger than the maximum staleness, and `strong` confirms the
+            head before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1350,6 +1387,10 @@ class AsyncRawNamespacesClient:
         _response = await self._client_wrapper.httpx_client.request(
             f"v0/namespaces/{encode_path_param(namespace_id)}",
             method="GET",
+            params={
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
+            },
             request_options=request_options,
         )
         try:
@@ -1692,7 +1733,13 @@ class AsyncRawNamespacesClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def next_merge_range(
-        self, namespace_id: str, *, source: NamespaceId, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: str,
+        *,
+        source_namespace_id: NamespaceId,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[NextMergeRangeResponse]:
         """
         Returns where the fork's next merge into the namespace starts, without planning the merge: the fork's newest merge into the namespace, the fork sequence that the next merge starts after, the fork point, and the fork's head. When the namespace is a rebase's new fork for the fork, the range continues the new fork's replay commits. When a retention floor would refuse the merge with `below_retention_floor`, the response's `outcome` says which floor instead of failing.
@@ -1702,9 +1749,19 @@ class AsyncRawNamespacesClient:
         namespace_id : str
             The namespace that the fork merges into.
 
-        source : NamespaceId
+        source_namespace_id : NamespaceId
             The fork whose next merge into the namespace the query reads. It has to be a fork of the
             namespace, or the fork that a rebase replays into the namespace.
+
+        consistency : typing.Optional[ReadConsistency]
+            How recently the read confirms the heads of the namespace and the fork. `eventual` (the
+            default, unless the server's `consistency` setting is `strong`) reads at the heads that the
+            server confirmed last while those confirmations are younger than the maximum staleness, and
+            `strong` confirms both heads before the read.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of a head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
@@ -1718,7 +1775,9 @@ class AsyncRawNamespacesClient:
             f"v0/namespaces/{encode_path_param(namespace_id)}/merges",
             method="GET",
             params={
-                "source": source,
+                "source_namespace_id": source_namespace_id,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -2168,7 +2227,7 @@ class AsyncRawNamespacesClient:
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[ReplayForkResponse]:
         """
-        Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork without the conflict report.
+        Replays a fork's unmerged commits into the namespace, a rebase's new fork for the fork, as one replay commit, which applies the changes that don't conflict with the new fork and reports the ones that do. Each request continues after the new fork's previous replay commit. The commit ID makes retries idempotent, and a retry of a committed replay commit returns the new fork with the same conflict report. The report counts toward the replay commit's size, so a report that doesn't fit returns `merge_too_large` with a split hint.
 
         Parameters
         ----------

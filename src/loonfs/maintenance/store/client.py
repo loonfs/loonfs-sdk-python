@@ -51,9 +51,8 @@ class StoreClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -106,9 +105,8 @@ class AsyncStoreClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )

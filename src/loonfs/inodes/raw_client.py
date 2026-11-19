@@ -62,7 +62,7 @@ class RawInodesClient:
 
         include_attributes : typing.Optional[bool]
             Whether the response includes the inode's attribute map and attribute revision. The default
-            is `true`, because a stat reads one path and a map is at most 64 KiB.
+            is `false`, as on every route that takes this parameter.
 
         snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured path state to read.
@@ -1001,11 +1001,12 @@ class RawInodesClient:
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
         max_staleness_ms: typing.Optional[int] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+        Authorizes a direct read of one retained inode revision. With `snapshot_id`, the server finds the revision in the snapshot instead of at the live head. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
@@ -1022,11 +1023,16 @@ class RawInodesClient:
             How recently the read confirms the namespace head that it finds the revision in. `eventual`
             (the default, unless the server's `consistency` setting is `strong`) reads at the head that
             the server confirmed last while that confirmation is younger than the maximum staleness,
-            and `strong` confirms the head before the read.
+            and `strong` confirms the head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency` set to `eventual`, how old the server's last confirmation of the head can
             be, in milliseconds. The default is the server's `max_staleness_ms`.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            A snapshot to find the revision in instead of the live head. The snapshot keeps the
+            revision readable after the namespace's retention floor passes it, and a revision committed
+            after the snapshot returns `revision_not_found`.
 
         start_offset : typing.Optional[int]
             The first byte that the download reads. It defaults to 0 and must be less than the revision's
@@ -1046,6 +1052,7 @@ class RawInodesClient:
             json={
                 "consistency": consistency,
                 "max_staleness_ms": max_staleness_ms,
+                "snapshot_id": snapshot_id,
                 "start_offset": start_offset,
             },
             headers={
@@ -1190,7 +1197,7 @@ class AsyncRawInodesClient:
 
         include_attributes : typing.Optional[bool]
             Whether the response includes the inode's attribute map and attribute revision. The default
-            is `true`, because a stat reads one path and a map is at most 64 KiB.
+            is `false`, as on every route that takes this parameter.
 
         snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured path state to read.
@@ -2131,11 +2138,12 @@ class AsyncRawInodesClient:
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
         max_staleness_ms: typing.Optional[int] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[CreateDownloadByInodeResponse]:
         """
-        Authorizes a direct read of one retained inode revision. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+        Authorizes a direct read of one retained inode revision. With `snapshot_id`, the server finds the revision in the snapshot instead of at the live head. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
@@ -2152,11 +2160,16 @@ class AsyncRawInodesClient:
             How recently the read confirms the namespace head that it finds the revision in. `eventual`
             (the default, unless the server's `consistency` setting is `strong`) reads at the head that
             the server confirmed last while that confirmation is younger than the maximum staleness,
-            and `strong` confirms the head before the read.
+            and `strong` confirms the head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency` set to `eventual`, how old the server's last confirmation of the head can
             be, in milliseconds. The default is the server's `max_staleness_ms`.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            A snapshot to find the revision in instead of the live head. The snapshot keeps the
+            revision readable after the namespace's retention floor passes it, and a revision committed
+            after the snapshot returns `revision_not_found`.
 
         start_offset : typing.Optional[int]
             The first byte that the download reads. It defaults to 0 and must be less than the revision's
@@ -2176,6 +2189,7 @@ class AsyncRawInodesClient:
             json={
                 "consistency": consistency,
                 "max_staleness_ms": max_staleness_ms,
+                "snapshot_id": snapshot_id,
                 "start_offset": start_offset,
             },
             headers={

@@ -13,7 +13,7 @@ class DeletedSnapshotsByOwner(UniversalBaseModel):
 
     fork: int = pydantic.Field()
     """
-    The fork snapshot on the namespace's source that the collection deleted when it retired the namespace (0 or 1).
+    The fork snapshots that the collection deleted when it retired the namespace, the one on the namespace's source and the namespace's own fork point snapshot (0 to 2).
     """
 
     user: int = pydantic.Field()

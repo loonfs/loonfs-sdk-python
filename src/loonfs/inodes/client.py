@@ -56,7 +56,7 @@ class InodesClient:
 
         include_attributes : typing.Optional[bool]
             Whether the response includes the inode's attribute map and attribute revision. The default
-            is `true`, because a stat reads one path and a map is at most 64 KiB.
+            is `false`, as on every route that takes this parameter.
 
         snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured path state to read.
@@ -85,16 +85,15 @@ class InodesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.retrieve(
             namespace_id="namespace_id",
             inode_id="ino_000000r0000013kje0d47gc8kw",
-            snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+            snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
         )
         """
         _response = self._raw_client.retrieve(
@@ -175,16 +174,15 @@ class InodesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.list_children(
             namespace_id="namespace_id",
             inode_id="ino_000000r0000013kje0d47gc8kw",
-            snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+            snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
         )
         """
         _response = self._raw_client.list_children(
@@ -253,9 +251,8 @@ class InodesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -329,9 +326,8 @@ class InodesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -403,9 +399,8 @@ class InodesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -482,9 +477,8 @@ class InodesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -514,11 +508,12 @@ class InodesClient:
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
         max_staleness_ms: typing.Optional[int] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of one retained inode revision. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+        Authorizes a direct read of one retained inode revision. With `snapshot_id`, the server finds the revision in the snapshot instead of at the live head. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
@@ -535,11 +530,16 @@ class InodesClient:
             How recently the read confirms the namespace head that it finds the revision in. `eventual`
             (the default, unless the server's `consistency` setting is `strong`) reads at the head that
             the server confirmed last while that confirmation is younger than the maximum staleness,
-            and `strong` confirms the head before the read.
+            and `strong` confirms the head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency` set to `eventual`, how old the server's last confirmation of the head can
             be, in milliseconds. The default is the server's `max_staleness_ms`.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            A snapshot to find the revision in instead of the live head. The snapshot keeps the
+            revision readable after the namespace's retention floor passes it, and a revision committed
+            after the snapshot returns `revision_not_found`.
 
         start_offset : typing.Optional[int]
             The first byte that the download reads. It defaults to 0 and must be less than the revision's
@@ -559,9 +559,8 @@ class InodesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -577,6 +576,7 @@ class InodesClient:
             revision_no,
             consistency=consistency,
             max_staleness_ms=max_staleness_ms,
+            snapshot_id=snapshot_id,
             start_offset=start_offset,
             request_options=request_options,
         )
@@ -622,7 +622,7 @@ class AsyncInodesClient:
 
         include_attributes : typing.Optional[bool]
             Whether the response includes the inode's attribute map and attribute revision. The default
-            is `true`, because a stat reads one path and a map is at most 64 KiB.
+            is `false`, as on every route that takes this parameter.
 
         snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured path state to read.
@@ -653,9 +653,8 @@ class AsyncInodesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -665,7 +664,7 @@ class AsyncInodesClient:
             await client.inodes.retrieve(
                 namespace_id="namespace_id",
                 inode_id="ino_000000r0000013kje0d47gc8kw",
-                snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+                snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
             )
 
 
@@ -751,9 +750,8 @@ class AsyncInodesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -763,7 +761,7 @@ class AsyncInodesClient:
             await client.inodes.list_children(
                 namespace_id="namespace_id",
                 inode_id="ino_000000r0000013kje0d47gc8kw",
-                snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+                snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
             )
 
 
@@ -837,9 +835,8 @@ class AsyncInodesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -922,9 +919,8 @@ class AsyncInodesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -1004,9 +1000,8 @@ class AsyncInodesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -1091,9 +1086,8 @@ class AsyncInodesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -1130,11 +1124,12 @@ class AsyncInodesClient:
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
         max_staleness_ms: typing.Optional[int] = OMIT,
+        snapshot_id: typing.Optional[SnapshotId] = OMIT,
         start_offset: typing.Optional[int] = OMIT,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> CreateDownloadByInodeResponse:
         """
-        Authorizes a direct read of one retained inode revision. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
+        Authorizes a direct read of one retained inode revision. With `snapshot_id`, the server finds the revision in the snapshot instead of at the live head. The presigned URLs read exactly `[start_offset, size_bytes)`, as on the path route. The response doesn't include a path.
 
         Parameters
         ----------
@@ -1151,11 +1146,16 @@ class AsyncInodesClient:
             How recently the read confirms the namespace head that it finds the revision in. `eventual`
             (the default, unless the server's `consistency` setting is `strong`) reads at the head that
             the server confirmed last while that confirmation is younger than the maximum staleness,
-            and `strong` confirms the head before the read.
+            and `strong` confirms the head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency` set to `eventual`, how old the server's last confirmation of the head can
             be, in milliseconds. The default is the server's `max_staleness_ms`.
+
+        snapshot_id : typing.Optional[SnapshotId]
+            A snapshot to find the revision in instead of the live head. The snapshot keeps the
+            revision readable after the namespace's retention floor passes it, and a revision committed
+            after the snapshot returns `revision_not_found`.
 
         start_offset : typing.Optional[int]
             The first byte that the download reads. It defaults to 0 and must be less than the revision's
@@ -1177,9 +1177,8 @@ class AsyncInodesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -1201,6 +1200,7 @@ class AsyncInodesClient:
             revision_no,
             consistency=consistency,
             max_staleness_ms=max_staleness_ms,
+            snapshot_id=snapshot_id,
             start_offset=start_offset,
             request_options=request_options,
         )

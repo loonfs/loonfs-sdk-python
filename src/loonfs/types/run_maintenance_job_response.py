@@ -7,8 +7,6 @@ import typing
 import pydantic
 import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
-from .access_revision_no import AccessRevisionNo
-from .commit_id import CommitId
 from .commit_seq import CommitSeq
 from .deleted_object_counts import DeletedObjectCounts
 from .deleted_snapshots_by_owner import DeletedSnapshotsByOwner
@@ -67,29 +65,6 @@ class RunMaintenanceJobResponse_Metadata(UniversalBaseModel):
             extra = pydantic.Extra.allow
 
 
-class RunMaintenanceJobResponse_RecoverAdministrator(UniversalBaseModel):
-    """
-    The result of one maintenance job.
-
-    The `kind` matches the request.
-    """
-
-    kind: typing.Literal["recover_administrator"] = "recover_administrator"
-    access_revision_no: AccessRevisionNo
-    commit_id: CommitId
-    committed_seq: CommitSeq
-    namespace_id: NamespaceId
-
-    if IS_PYDANTIC_V2:
-        model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
-    else:
-
-        class Config:
-            frozen = True
-            smart_union = True
-            extra = pydantic.Extra.allow
-
-
 class RunMaintenanceJobResponse_Retention(UniversalBaseModel):
     """
     The result of one maintenance job.
@@ -136,7 +111,6 @@ RunMaintenanceJobResponse = typing_extensions.Annotated[
     typing.Union[
         RunMaintenanceJobResponse_Gc,
         RunMaintenanceJobResponse_Metadata,
-        RunMaintenanceJobResponse_RecoverAdministrator,
         RunMaintenanceJobResponse_Retention,
         RunMaintenanceJobResponse_RetentionWindow,
     ],

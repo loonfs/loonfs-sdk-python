@@ -20,6 +20,13 @@ class NamespaceForkBasis(UniversalBaseModel):
     The source namespace's sequence that the fork captured.
     """
 
+    fork_point_snapshot_id: SnapshotId = pydantic.Field()
+    """
+    The fork point snapshot, which keeps this namespace's state at `fork_point_seq` readable.
+    That state is the source's state at the fork point. A read of this namespace accepts the
+    ID as `snapshot_id`.
+    """
+
     rebased_from: typing.Optional[NamespaceRebasedFrom] = pydantic.Field(default=None)
     """
     The fork whose unmerged commits a rebase replays into this namespace. Only a namespace that
@@ -29,12 +36,6 @@ class NamespaceForkBasis(UniversalBaseModel):
     source_namespace_id: NamespaceId = pydantic.Field()
     """
     The namespace that the fork was taken from.
-    """
-
-    source_snapshot_id: SnapshotId = pydantic.Field()
-    """
-    The fork snapshot that keeps the source's state at `fork_point_seq` readable. A read of the
-    source namespace accepts it as `snapshot_id`.
     """
 
     if IS_PYDANTIC_V2:

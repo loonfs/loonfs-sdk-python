@@ -551,7 +551,7 @@ class RawFilesClient:
 
         include_attributes : typing.Optional[bool]
             Whether the response includes the inode's attribute map and attribute revision. The default
-            is `true`, because a stat reads one path and a map is at most 64 KiB.
+            is `false`, as on every route that takes this parameter.
 
         snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured path state to read.
@@ -798,12 +798,14 @@ class RawFilesClient:
         *,
         pattern: str,
         case_insensitive: typing.Optional[bool] = None,
-        path_prefix: typing.Optional[str] = None,
+        path: typing.Optional[str] = None,
         inode_id: typing.Optional[str] = None,
         allow_scan: typing.Optional[bool] = None,
         allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[GrepResponse]:
         """
@@ -821,12 +823,12 @@ class RawFilesClient:
         case_insensitive : typing.Optional[bool]
             Whether matching ignores case. The default is `false`.
 
-        path_prefix : typing.Optional[str]
+        path : typing.Optional[str]
             A complete absolute path that limits matches to its descendants. It can't be combined with
             `inode_id`.
 
         inode_id : typing.Optional[str]
-            An inode that limits matches to its descendants. It can't be combined with `path_prefix`.
+            An inode that limits matches to its descendants. It can't be combined with `path`.
 
         allow_scan : typing.Optional[bool]
             Whether a pattern with no required literal bytes can use a capped exhaustive scan. The
@@ -842,6 +844,16 @@ class RawFilesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        consistency : typing.Optional[ReadConsistency]
+            How recently a first page confirms the namespace head that it reads. `eventual` (the
+            default, unless the server's `consistency` setting is `strong`) reads at the head that the
+            server confirmed last while that confirmation is younger than the maximum staleness, and
+            `strong` confirms the head before the read. A later page reads at the first page's head.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -856,12 +868,14 @@ class RawFilesClient:
             params={
                 "pattern": pattern,
                 "case_insensitive": case_insensitive,
-                "path_prefix": path_prefix,
+                "path": path,
                 "inode_id": inode_id,
                 "allow_scan": allow_scan,
                 "allow_stale": allow_stale,
                 "limit": limit,
                 "cursor": cursor,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )
@@ -1488,7 +1502,7 @@ class AsyncRawFilesClient:
 
         include_attributes : typing.Optional[bool]
             Whether the response includes the inode's attribute map and attribute revision. The default
-            is `true`, because a stat reads one path and a map is at most 64 KiB.
+            is `false`, as on every route that takes this parameter.
 
         snapshot_id : typing.Optional[SnapshotId]
             The snapshot whose captured path state to read.
@@ -1735,12 +1749,14 @@ class AsyncRawFilesClient:
         *,
         pattern: str,
         case_insensitive: typing.Optional[bool] = None,
-        path_prefix: typing.Optional[str] = None,
+        path: typing.Optional[str] = None,
         inode_id: typing.Optional[str] = None,
         allow_scan: typing.Optional[bool] = None,
         allow_stale: typing.Optional[bool] = None,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        consistency: typing.Optional[ReadConsistency] = None,
+        max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[GrepResponse]:
         """
@@ -1758,12 +1774,12 @@ class AsyncRawFilesClient:
         case_insensitive : typing.Optional[bool]
             Whether matching ignores case. The default is `false`.
 
-        path_prefix : typing.Optional[str]
+        path : typing.Optional[str]
             A complete absolute path that limits matches to its descendants. It can't be combined with
             `inode_id`.
 
         inode_id : typing.Optional[str]
-            An inode that limits matches to its descendants. It can't be combined with `path_prefix`.
+            An inode that limits matches to its descendants. It can't be combined with `path`.
 
         allow_scan : typing.Optional[bool]
             Whether a pattern with no required literal bytes can use a capped exhaustive scan. The
@@ -1779,6 +1795,16 @@ class AsyncRawFilesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        consistency : typing.Optional[ReadConsistency]
+            How recently a first page confirms the namespace head that it reads. `eventual` (the
+            default, unless the server's `consistency` setting is `strong`) reads at the head that the
+            server confirmed last while that confirmation is younger than the maximum staleness, and
+            `strong` confirms the head before the read. A later page reads at the first page's head.
+
+        max_staleness_ms : typing.Optional[int]
+            With `consistency=eventual`, how old the server's last confirmation of the head can be, in
+            milliseconds. The default is the server's `max_staleness_ms`.
+
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
@@ -1793,12 +1819,14 @@ class AsyncRawFilesClient:
             params={
                 "pattern": pattern,
                 "case_insensitive": case_insensitive,
-                "path_prefix": path_prefix,
+                "path": path,
                 "inode_id": inode_id,
                 "allow_scan": allow_scan,
                 "allow_stale": allow_stale,
                 "limit": limit,
                 "cursor": cursor,
+                "consistency": consistency,
+                "max_staleness_ms": max_staleness_ms,
             },
             request_options=request_options,
         )

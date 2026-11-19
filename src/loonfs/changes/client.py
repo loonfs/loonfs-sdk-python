@@ -90,16 +90,15 @@ class ChangesClient:
 
         client = LoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
         client.changes.list(
             namespace_id="namespace_id",
             after_seq=1000000,
-            snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+            snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
         )
         """
         _response = self._raw_client.list(
@@ -197,9 +196,8 @@ class AsyncChangesClient:
 
         client = AsyncLoonFS(
             actor_id="YOUR_ACTOR_ID",
-            subject_id="YOUR_SUBJECT_ID",
-            principal_scope="YOUR_PRINCIPAL_SCOPE",
             principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
             token="YOUR_TOKEN",
             base_url="https://yourhost.com/path/to/api",
         )
@@ -209,7 +207,7 @@ class AsyncChangesClient:
             await client.changes.list(
                 namespace_id="namespace_id",
                 after_seq=1000000,
-                snapshot_id="snp_00000000000000000001-00000000000000000000000002",
+                snapshot_id="snp_00000000000000000001-1m55n87n588gnafy68ekkbj6bx",
             )
 
 
