@@ -6,6 +6,7 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.commit_seq import CommitSeq
 from ..types.list_changes_response import ListChangesResponse
+from ..types.namespace_id import NamespaceId
 from ..types.read_consistency import ReadConsistency
 from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawChangesClient, RawChangesClient
@@ -28,7 +29,7 @@ class ChangesClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         after_seq: CommitSeq,
         split_commits: typing.Optional[bool] = None,
@@ -44,7 +45,7 @@ class ChangesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         after_seq : CommitSeq
@@ -96,7 +97,7 @@ class ChangesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.changes.list(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             after_seq=1000000,
             snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
@@ -132,7 +133,7 @@ class AsyncChangesClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         after_seq: CommitSeq,
         split_commits: typing.Optional[bool] = None,
@@ -148,7 +149,7 @@ class AsyncChangesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         after_seq : CommitSeq
@@ -205,7 +206,7 @@ class AsyncChangesClient:
 
         async def main() -> None:
             await client.changes.list(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 after_seq=1000000,
                 snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )

@@ -14,6 +14,7 @@ from ..core.request_options import RequestOptions
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
 from ..errors.content_too_large_error import ContentTooLargeError
+from ..errors.forbidden_error import ForbiddenError
 from ..errors.gone_error import GoneError
 from ..errors.internal_server_error import InternalServerError
 from ..errors.not_found_error import NotFoundError
@@ -27,6 +28,7 @@ from ..types.error_response import ErrorResponse
 from ..types.grep_response import GrepResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
+from ..types.namespace_id import NamespaceId
 from ..types.path_entry import PathEntry
 from ..types.read_consistency import ReadConsistency
 from ..types.revision_no import RevisionNo
@@ -44,7 +46,7 @@ class RawFilesClient:
     @contextlib.contextmanager
     def content(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
@@ -59,7 +61,7 @@ class RawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -138,8 +140,30 @@ class RawFilesClient:
                                 ),
                             ),
                         )
+                    if _response.status_code == 403:
+                        raise ForbiddenError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
                     if _response.status_code == 404:
                         raise NotFoundError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 409:
+                        raise ConflictError(
                             headers=dict(_response.headers),
                             body=typing.cast(
                                 ErrorResponse,
@@ -211,7 +235,7 @@ class RawFilesClient:
 
     def create_download(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: AbsolutePath,
         consistency: typing.Optional[ReadConsistency] = OMIT,
@@ -226,7 +250,7 @@ class RawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : AbsolutePath
@@ -313,8 +337,30 @@ class RawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -379,7 +425,7 @@ class RawFilesClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         limit: typing.Optional[int] = None,
@@ -396,7 +442,7 @@ class RawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -485,8 +531,30 @@ class RawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -529,7 +597,7 @@ class RawFilesClient:
 
     def retrieve(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         include_attributes: typing.Optional[bool] = None,
@@ -543,7 +611,7 @@ class RawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -618,8 +686,30 @@ class RawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -662,11 +752,12 @@ class RawFilesClient:
 
     def list_revisions(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -676,7 +767,7 @@ class RawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -688,11 +779,15 @@ class RawFilesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            The snapshot whose state to list the file's revisions in. The listing starts at the
+            revision that the snapshot captured.
+
         consistency : typing.Optional[ReadConsistency]
             How recently the read confirms the namespace head. `eventual` (the default, unless the
             server's `consistency` setting is `strong`) reads at the head that the server confirmed last
             while that confirmation is younger than the maximum staleness, and `strong` confirms the
-            head before the read.
+            head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency=eventual`, how old the server's last confirmation of the head can be, in
@@ -713,6 +808,7 @@ class RawFilesClient:
                 "path": path,
                 "limit": limit,
                 "cursor": cursor,
+                "snapshot_id": snapshot_id,
                 "consistency": consistency,
                 "max_staleness_ms": max_staleness_ms,
             },
@@ -750,8 +846,30 @@ class RawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -794,7 +912,7 @@ class RawFilesClient:
 
     def grep(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         pattern: str,
         case_insensitive: typing.Optional[bool] = None,
@@ -813,7 +931,7 @@ class RawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         pattern : str
@@ -911,6 +1029,17 @@ class RawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -994,7 +1123,7 @@ class AsyncRawFilesClient:
     @contextlib.asynccontextmanager
     async def content(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
@@ -1009,7 +1138,7 @@ class AsyncRawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -1089,8 +1218,30 @@ class AsyncRawFilesClient:
                                 ),
                             ),
                         )
+                    if _response.status_code == 403:
+                        raise ForbiddenError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
                     if _response.status_code == 404:
                         raise NotFoundError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 409:
+                        raise ConflictError(
                             headers=dict(_response.headers),
                             body=typing.cast(
                                 ErrorResponse,
@@ -1162,7 +1313,7 @@ class AsyncRawFilesClient:
 
     async def create_download(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: AbsolutePath,
         consistency: typing.Optional[ReadConsistency] = OMIT,
@@ -1177,7 +1328,7 @@ class AsyncRawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : AbsolutePath
@@ -1264,8 +1415,30 @@ class AsyncRawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1330,7 +1503,7 @@ class AsyncRawFilesClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         limit: typing.Optional[int] = None,
@@ -1347,7 +1520,7 @@ class AsyncRawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -1436,8 +1609,30 @@ class AsyncRawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1480,7 +1675,7 @@ class AsyncRawFilesClient:
 
     async def retrieve(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         include_attributes: typing.Optional[bool] = None,
@@ -1494,7 +1689,7 @@ class AsyncRawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -1569,8 +1764,30 @@ class AsyncRawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1613,11 +1830,12 @@ class AsyncRawFilesClient:
 
     async def list_revisions(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1627,7 +1845,7 @@ class AsyncRawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -1639,11 +1857,15 @@ class AsyncRawFilesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            The snapshot whose state to list the file's revisions in. The listing starts at the
+            revision that the snapshot captured.
+
         consistency : typing.Optional[ReadConsistency]
             How recently the read confirms the namespace head. `eventual` (the default, unless the
             server's `consistency` setting is `strong`) reads at the head that the server confirmed last
             while that confirmation is younger than the maximum staleness, and `strong` confirms the
-            head before the read.
+            head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency=eventual`, how old the server's last confirmation of the head can be, in
@@ -1664,6 +1886,7 @@ class AsyncRawFilesClient:
                 "path": path,
                 "limit": limit,
                 "cursor": cursor,
+                "snapshot_id": snapshot_id,
                 "consistency": consistency,
                 "max_staleness_ms": max_staleness_ms,
             },
@@ -1701,8 +1924,30 @@ class AsyncRawFilesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 409:
+                raise ConflictError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1745,7 +1990,7 @@ class AsyncRawFilesClient:
 
     async def grep(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         pattern: str,
         case_insensitive: typing.Optional[bool] = None,
@@ -1764,7 +2009,7 @@ class AsyncRawFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         pattern : str
@@ -1853,6 +2098,17 @@ class AsyncRawFilesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

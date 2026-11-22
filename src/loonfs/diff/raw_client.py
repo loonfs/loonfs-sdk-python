@@ -12,13 +12,15 @@ from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
+from ..errors.forbidden_error import ForbiddenError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.commit_seq import CommitSeq
-from ..types.diff_response import DiffResponse
 from ..types.error_response import ErrorResponse
+from ..types.list_diff_response import ListDiffResponse
+from ..types.namespace_id import NamespaceId
 from ..types.read_consistency import ReadConsistency
 from pydantic import ValidationError
 
@@ -29,7 +31,7 @@ class RawDiffClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         from_seq: CommitSeq,
         to_seq: typing.Optional[CommitSeq] = None,
@@ -41,13 +43,13 @@ class RawDiffClient:
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> HttpResponse[DiffResponse]:
+    ) -> HttpResponse[ListDiffResponse]:
         """
         Returns a page of the inodes whose visible state at `to_seq` differs from their state at `from_seq`, read from the commits between the two sequences.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         from_seq : CommitSeq
@@ -90,7 +92,7 @@ class RawDiffClient:
 
         Returns
         -------
-        HttpResponse[DiffResponse]
+        HttpResponse[ListDiffResponse]
             A page of the diff
         """
         _response = self._client_wrapper.httpx_client.request(
@@ -112,9 +114,9 @@ class RawDiffClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DiffResponse,
+                    ListDiffResponse,
                     parse_obj_as(
-                        type_=DiffResponse,  # type: ignore
+                        type_=ListDiffResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -132,6 +134,17 @@ class RawDiffClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -201,7 +214,7 @@ class AsyncRawDiffClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         from_seq: CommitSeq,
         to_seq: typing.Optional[CommitSeq] = None,
@@ -213,13 +226,13 @@ class AsyncRawDiffClient:
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> AsyncHttpResponse[DiffResponse]:
+    ) -> AsyncHttpResponse[ListDiffResponse]:
         """
         Returns a page of the inodes whose visible state at `to_seq` differs from their state at `from_seq`, read from the commits between the two sequences.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         from_seq : CommitSeq
@@ -262,7 +275,7 @@ class AsyncRawDiffClient:
 
         Returns
         -------
-        AsyncHttpResponse[DiffResponse]
+        AsyncHttpResponse[ListDiffResponse]
             A page of the diff
         """
         _response = await self._client_wrapper.httpx_client.request(
@@ -284,9 +297,9 @@ class AsyncRawDiffClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    DiffResponse,
+                    ListDiffResponse,
                     parse_obj_as(
-                        type_=DiffResponse,  # type: ignore
+                        type_=ListDiffResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -304,6 +317,17 @@ class AsyncRawDiffClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

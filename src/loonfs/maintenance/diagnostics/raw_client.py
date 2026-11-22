@@ -17,6 +17,7 @@ from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.error_response import ErrorResponse
 from ...types.namespace_diagnostics import NamespaceDiagnostics
+from ...types.namespace_id import NamespaceId
 from pydantic import ValidationError
 
 
@@ -25,14 +26,14 @@ class RawDiagnosticsClient:
         self._client_wrapper = client_wrapper
 
     def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[NamespaceDiagnostics]:
         """
         Returns namespace state together with the current manifest and visible WAL tail.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -128,14 +129,14 @@ class AsyncRawDiagnosticsClient:
         self._client_wrapper = client_wrapper
 
     async def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[NamespaceDiagnostics]:
         """
         Returns namespace state together with the current manifest and visible WAL tail.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]

@@ -14,8 +14,8 @@ from ...errors.content_too_large_error import ContentTooLargeError
 from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.error_response import ErrorResponse
-from ...types.store_probe_request import StoreProbeRequest
-from ...types.store_probe_response import StoreProbeResponse
+from ...types.probe_store_request import ProbeStoreRequest
+from ...types.probe_store_response import ProbeStoreResponse
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -27,21 +27,21 @@ class RawStoreClient:
         self._client_wrapper = client_wrapper
 
     def probe(
-        self, *, request: StoreProbeRequest, request_options: typing.Optional[RequestOptions] = None
-    ) -> HttpResponse[StoreProbeResponse]:
+        self, *, request: ProbeStoreRequest, request_options: typing.Optional[RequestOptions] = None
+    ) -> HttpResponse[ProbeStoreResponse]:
         """
         Checks that the configured object store supports the create-if-absent, compare-and-swap, visibility, listing, and ranged-read behavior that LoonFS depends on, and reports the result of each check. The probe runs only when a client calls this route, because it writes and deletes objects. It writes them all under a scratch prefix that isn't a durable object family, and its last check deletes them and confirms that the prefix is empty. If the store fails a check, the response is still 200, and it reports that check as `failed`. If the store declares that it doesn't support an optional capability, the response reports that check as `unsupported`, which isn't a failure. The probe doesn't control whether the deployment can serve presigned direct uploads. The endpoint allowlist controls that, because the probe tests only the server's own requests and never a presigned capability issued to a client.
 
         Parameters
         ----------
-        request : StoreProbeRequest
+        request : ProbeStoreRequest
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        HttpResponse[StoreProbeResponse]
+        HttpResponse[ProbeStoreResponse]
             The probe completed, and the body reports each check's outcome
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -57,9 +57,9 @@ class RawStoreClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    StoreProbeResponse,
+                    ProbeStoreResponse,
                     parse_obj_as(
-                        type_=StoreProbeResponse,  # type: ignore
+                        type_=ProbeStoreResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )
@@ -123,21 +123,21 @@ class AsyncRawStoreClient:
         self._client_wrapper = client_wrapper
 
     async def probe(
-        self, *, request: StoreProbeRequest, request_options: typing.Optional[RequestOptions] = None
-    ) -> AsyncHttpResponse[StoreProbeResponse]:
+        self, *, request: ProbeStoreRequest, request_options: typing.Optional[RequestOptions] = None
+    ) -> AsyncHttpResponse[ProbeStoreResponse]:
         """
         Checks that the configured object store supports the create-if-absent, compare-and-swap, visibility, listing, and ranged-read behavior that LoonFS depends on, and reports the result of each check. The probe runs only when a client calls this route, because it writes and deletes objects. It writes them all under a scratch prefix that isn't a durable object family, and its last check deletes them and confirms that the prefix is empty. If the store fails a check, the response is still 200, and it reports that check as `failed`. If the store declares that it doesn't support an optional capability, the response reports that check as `unsupported`, which isn't a failure. The probe doesn't control whether the deployment can serve presigned direct uploads. The endpoint allowlist controls that, because the probe tests only the server's own requests and never a presigned capability issued to a client.
 
         Parameters
         ----------
-        request : StoreProbeRequest
+        request : ProbeStoreRequest
 
         request_options : typing.Optional[RequestOptions]
             Request-specific configuration.
 
         Returns
         -------
-        AsyncHttpResponse[StoreProbeResponse]
+        AsyncHttpResponse[ProbeStoreResponse]
             The probe completed, and the body reports each check's outcome
         """
         _request_options_with_retries_disabled: typing.Optional[RequestOptions] = (
@@ -153,9 +153,9 @@ class AsyncRawStoreClient:
         try:
             if 200 <= _response.status_code < 300:
                 _data = typing.cast(
-                    StoreProbeResponse,
+                    ProbeStoreResponse,
                     parse_obj_as(
-                        type_=StoreProbeResponse,  # type: ignore
+                        type_=ProbeStoreResponse,  # type: ignore
                         object_=_response.json(),
                     ),
                 )

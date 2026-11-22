@@ -12,6 +12,7 @@ from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..errors.bad_request_error import BadRequestError
 from ..errors.content_too_large_error import ContentTooLargeError
+from ..errors.forbidden_error import ForbiddenError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
@@ -19,6 +20,7 @@ from ..errors.unauthorized_error import UnauthorizedError
 from ..types.delete_snapshot_response import DeleteSnapshotResponse
 from ..types.error_response import ErrorResponse
 from ..types.list_snapshots_response import ListSnapshotsResponse
+from ..types.namespace_id import NamespaceId
 from ..types.snapshot import Snapshot
 from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
@@ -33,7 +35,7 @@ class RawSnapshotsClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -44,7 +46,7 @@ class RawSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -102,6 +104,17 @@ class RawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -146,7 +159,7 @@ class RawSnapshotsClient:
 
     def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         name: typing.Optional[str] = OMIT,
         ttl_ms: typing.Optional[int] = OMIT,
@@ -157,7 +170,7 @@ class RawSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         name : typing.Optional[str]
@@ -215,6 +228,17 @@ class RawSnapshotsClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -278,14 +302,18 @@ class RawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def retrieve(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[Snapshot]:
         """
         Returns one snapshot, as the snapshot listing returns it. A missing ID, the ID of an expired or deleted snapshot, or the ID of a fork snapshot returns `snapshot_not_found`. A deleted namespace returns `namespace_deleted`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -327,6 +355,17 @@ class RawSnapshotsClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -379,14 +418,18 @@ class RawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def delete(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[DeleteSnapshotResponse]:
         """
-        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
+        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted, except to a request with principals, which returns `namespace_deleted`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -437,8 +480,30 @@ class RawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -470,7 +535,7 @@ class RawSnapshotsClient:
 
     def extend(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
@@ -481,7 +546,7 @@ class RawSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -542,8 +607,30 @@ class RawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -591,7 +678,7 @@ class AsyncRawSnapshotsClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -602,7 +689,7 @@ class AsyncRawSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -660,6 +747,17 @@ class AsyncRawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -704,7 +802,7 @@ class AsyncRawSnapshotsClient:
 
     async def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         name: typing.Optional[str] = OMIT,
         ttl_ms: typing.Optional[int] = OMIT,
@@ -715,7 +813,7 @@ class AsyncRawSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         name : typing.Optional[str]
@@ -782,6 +880,17 @@ class AsyncRawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -836,14 +945,18 @@ class AsyncRawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def retrieve(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[Snapshot]:
         """
         Returns one snapshot, as the snapshot listing returns it. A missing ID, the ID of an expired or deleted snapshot, or the ID of a fork snapshot returns `snapshot_not_found`. A deleted namespace returns `namespace_deleted`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -885,6 +998,17 @@ class AsyncRawSnapshotsClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -937,14 +1061,18 @@ class AsyncRawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def delete(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[DeleteSnapshotResponse]:
         """
-        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
+        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted, except to a request with principals, which returns `namespace_deleted`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -995,8 +1123,30 @@ class AsyncRawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1028,7 +1178,7 @@ class AsyncRawSnapshotsClient:
 
     async def extend(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
@@ -1039,7 +1189,7 @@ class AsyncRawSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -1100,8 +1250,30 @@ class AsyncRawSnapshotsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 410:
+                raise GoneError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

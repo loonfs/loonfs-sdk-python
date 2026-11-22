@@ -9,6 +9,7 @@ from ..types.create_download_response import CreateDownloadResponse
 from ..types.grep_response import GrepResponse
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_path_entries_response import ListPathEntriesResponse
+from ..types.namespace_id import NamespaceId
 from ..types.path_entry import PathEntry
 from ..types.read_consistency import ReadConsistency
 from ..types.revision_no import RevisionNo
@@ -36,7 +37,7 @@ class FilesClient:
 
     def content(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
@@ -51,7 +52,7 @@ class FilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -114,7 +115,7 @@ class FilesClient:
 
     def create_download(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: AbsolutePath,
         consistency: typing.Optional[ReadConsistency] = OMIT,
@@ -129,7 +130,7 @@ class FilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : AbsolutePath
@@ -179,7 +180,7 @@ class FilesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.files.create_download(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             path="/docs/report.txt",
         )
         """
@@ -197,7 +198,7 @@ class FilesClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         limit: typing.Optional[int] = None,
@@ -214,7 +215,7 @@ class FilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -268,7 +269,7 @@ class FilesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.files.list(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             path="path",
             snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
@@ -289,7 +290,7 @@ class FilesClient:
 
     def retrieve(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         include_attributes: typing.Optional[bool] = None,
@@ -303,7 +304,7 @@ class FilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -346,7 +347,7 @@ class FilesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.files.retrieve(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             path="path",
             snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
@@ -364,11 +365,12 @@ class FilesClient:
 
     def list_revisions(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -378,7 +380,7 @@ class FilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -390,11 +392,15 @@ class FilesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            The snapshot whose state to list the file's revisions in. The listing starts at the
+            revision that the snapshot captured.
+
         consistency : typing.Optional[ReadConsistency]
             How recently the read confirms the namespace head. `eventual` (the default, unless the
             server's `consistency` setting is `strong`) reads at the head that the server confirmed last
             while that confirmation is younger than the maximum staleness, and `strong` confirms the
-            head before the read.
+            head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency=eventual`, how old the server's last confirmation of the head can be, in
@@ -420,8 +426,9 @@ class FilesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.files.list_revisions(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             path="path",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
         _response = self._raw_client.list_revisions(
@@ -429,6 +436,7 @@ class FilesClient:
             path=path,
             limit=limit,
             cursor=cursor,
+            snapshot_id=snapshot_id,
             consistency=consistency,
             max_staleness_ms=max_staleness_ms,
             request_options=request_options,
@@ -437,7 +445,7 @@ class FilesClient:
 
     def grep(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         pattern: str,
         case_insensitive: typing.Optional[bool] = None,
@@ -456,7 +464,7 @@ class FilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         pattern : str
@@ -517,7 +525,7 @@ class FilesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.files.grep(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             pattern="pattern",
             inode_id="ino_000000r0000013kje0d47gc8kw",
         )
@@ -556,7 +564,7 @@ class AsyncFilesClient:
 
     async def content(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         revision_no: typing.Optional[RevisionNo] = None,
@@ -571,7 +579,7 @@ class AsyncFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -643,7 +651,7 @@ class AsyncFilesClient:
 
     async def create_download(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: AbsolutePath,
         consistency: typing.Optional[ReadConsistency] = OMIT,
@@ -658,7 +666,7 @@ class AsyncFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : AbsolutePath
@@ -713,7 +721,7 @@ class AsyncFilesClient:
 
         async def main() -> None:
             await client.files.create_download(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 path="/docs/report.txt",
             )
 
@@ -734,7 +742,7 @@ class AsyncFilesClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         limit: typing.Optional[int] = None,
@@ -751,7 +759,7 @@ class AsyncFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -810,7 +818,7 @@ class AsyncFilesClient:
 
         async def main() -> None:
             await client.files.list(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 path="path",
                 snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
@@ -834,7 +842,7 @@ class AsyncFilesClient:
 
     async def retrieve(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         include_attributes: typing.Optional[bool] = None,
@@ -848,7 +856,7 @@ class AsyncFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -896,7 +904,7 @@ class AsyncFilesClient:
 
         async def main() -> None:
             await client.files.retrieve(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 path="path",
                 snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
@@ -917,11 +925,12 @@ class AsyncFilesClient:
 
     async def list_revisions(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         path: str,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -931,7 +940,7 @@ class AsyncFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         path : str
@@ -943,11 +952,15 @@ class AsyncFilesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            The snapshot whose state to list the file's revisions in. The listing starts at the
+            revision that the snapshot captured.
+
         consistency : typing.Optional[ReadConsistency]
             How recently the read confirms the namespace head. `eventual` (the default, unless the
             server's `consistency` setting is `strong`) reads at the head that the server confirmed last
             while that confirmation is younger than the maximum staleness, and `strong` confirms the
-            head before the read.
+            head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency=eventual`, how old the server's last confirmation of the head can be, in
@@ -978,8 +991,9 @@ class AsyncFilesClient:
 
         async def main() -> None:
             await client.files.list_revisions(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 path="path",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
 
@@ -990,6 +1004,7 @@ class AsyncFilesClient:
             path=path,
             limit=limit,
             cursor=cursor,
+            snapshot_id=snapshot_id,
             consistency=consistency,
             max_staleness_ms=max_staleness_ms,
             request_options=request_options,
@@ -998,7 +1013,7 @@ class AsyncFilesClient:
 
     async def grep(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         pattern: str,
         case_insensitive: typing.Optional[bool] = None,
@@ -1017,7 +1032,7 @@ class AsyncFilesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         pattern : str
@@ -1083,7 +1098,7 @@ class AsyncFilesClient:
 
         async def main() -> None:
             await client.files.grep(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 pattern="pattern",
                 inode_id="ino_000000r0000013kje0d47gc8kw",
             )

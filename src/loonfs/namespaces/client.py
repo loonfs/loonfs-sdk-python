@@ -8,6 +8,7 @@ from ..types.commit import Commit
 from ..types.commit_id import CommitId
 from ..types.commit_seq import CommitSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
+from ..types.list_namespaces_response import ListNamespacesResponse
 from ..types.namespace_id import NamespaceId
 from ..types.namespace_metadata import NamespaceMetadata
 from ..types.next_merge_range_response import NextMergeRangeResponse
@@ -34,6 +35,48 @@ class NamespacesClient:
         RawNamespacesClient
         """
         return self._raw_client
+
+    def list(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListNamespacesResponse:
+        """
+        Lists the store's namespaces in object-key order (namespace ID order, except that an ID sorts after the longer IDs that extend it with `-` or `.`), and returns for each one the object that `GET /v0/namespaces/{namespace_id}` returns. The list leaves out deleted namespaces and namespaces whose creation hasn't finished, so a page can have fewer namespaces than `limit`, even none, and still include `next_cursor`. Without `limit`, a page lists up to 100 namespaces.
+
+        Parameters
+        ----------
+        limit : typing.Optional[int]
+            The maximum number of namespace IDs the page lists from the store.
+
+        cursor : typing.Optional[str]
+            The opaque cursor that the previous page returned.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListNamespacesResponse
+            Namespaces
+
+        Examples
+        --------
+        from loonfs.server import LoonFS
+
+        client = LoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+        client.namespaces.list()
+        """
+        _response = self._raw_client.list(limit=limit, cursor=cursor, request_options=request_options)
+        return _response.data
 
     def create(
         self,
@@ -87,7 +130,7 @@ class NamespacesClient:
 
     def retrieve(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
@@ -98,7 +141,7 @@ class NamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         consistency : typing.Optional[ReadConsistency]
@@ -131,7 +174,7 @@ class NamespacesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.namespaces.retrieve(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.retrieve(
@@ -141,7 +184,7 @@ class NamespacesClient:
 
     def delete(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         expected_head_seq: typing.Optional[CommitSeq] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -151,7 +194,7 @@ class NamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         expected_head_seq : typing.Optional[CommitSeq]
@@ -177,7 +220,7 @@ class NamespacesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.namespaces.delete(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.delete(
@@ -187,7 +230,7 @@ class NamespacesClient:
 
     def fork(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         new_namespace_id: typing.Optional[NamespaceId] = OMIT,
         snapshot_id: typing.Optional[SnapshotId] = OMIT,
@@ -198,7 +241,7 @@ class NamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The source namespace ID.
 
         new_namespace_id : typing.Optional[NamespaceId]
@@ -228,7 +271,7 @@ class NamespacesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.namespaces.fork(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.fork(
@@ -238,7 +281,7 @@ class NamespacesClient:
 
     def next_merge_range(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         source_namespace_id: NamespaceId,
         consistency: typing.Optional[ReadConsistency] = None,
@@ -250,7 +293,7 @@ class NamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the fork merges into.
 
         source_namespace_id : NamespaceId
@@ -287,7 +330,7 @@ class NamespacesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.namespaces.next_merge_range(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             source_namespace_id="demo",
         )
         """
@@ -302,7 +345,7 @@ class NamespacesClient:
 
     def merge(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         source_namespace_id: NamespaceId,
@@ -315,7 +358,7 @@ class NamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the merge commits into.
 
         commit_id : CommitId
@@ -352,7 +395,7 @@ class NamespacesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.namespaces.merge(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
             source_namespace_id="demo",
         )
@@ -369,7 +412,7 @@ class NamespacesClient:
 
     def fork_for_rebase(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         source_namespace_id: NamespaceId,
         new_namespace_id: typing.Optional[NamespaceId] = OMIT,
@@ -380,7 +423,7 @@ class NamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the fork was forked from.
 
         source_namespace_id : NamespaceId
@@ -411,7 +454,7 @@ class NamespacesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.namespaces.fork_for_rebase(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             source_namespace_id="demo",
         )
         """
@@ -425,7 +468,7 @@ class NamespacesClient:
 
     def replay(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         source_namespace_id: NamespaceId,
@@ -438,7 +481,7 @@ class NamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The rebase's new fork, which the replay commit commits into.
 
         commit_id : CommitId
@@ -475,7 +518,7 @@ class NamespacesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.namespaces.replay(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
             source_namespace_id="demo",
         )
@@ -505,6 +548,56 @@ class AsyncNamespacesClient:
         AsyncRawNamespacesClient
         """
         return self._raw_client
+
+    async def list(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> ListNamespacesResponse:
+        """
+        Lists the store's namespaces in object-key order (namespace ID order, except that an ID sorts after the longer IDs that extend it with `-` or `.`), and returns for each one the object that `GET /v0/namespaces/{namespace_id}` returns. The list leaves out deleted namespaces and namespaces whose creation hasn't finished, so a page can have fewer namespaces than `limit`, even none, and still include `next_cursor`. Without `limit`, a page lists up to 100 namespaces.
+
+        Parameters
+        ----------
+        limit : typing.Optional[int]
+            The maximum number of namespace IDs the page lists from the store.
+
+        cursor : typing.Optional[str]
+            The opaque cursor that the previous page returned.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        ListNamespacesResponse
+            Namespaces
+
+        Examples
+        --------
+        import asyncio
+
+        from loonfs.server import AsyncLoonFS
+
+        client = AsyncLoonFS(
+            actor_id="YOUR_ACTOR_ID",
+            principals="YOUR_PRINCIPALS",
+            loonfs_context="YOUR_LOONFS_CONTEXT",
+            token="YOUR_TOKEN",
+            base_url="https://yourhost.com/path/to/api",
+        )
+
+
+        async def main() -> None:
+            await client.namespaces.list()
+
+
+        asyncio.run(main())
+        """
+        _response = await self._raw_client.list(limit=limit, cursor=cursor, request_options=request_options)
+        return _response.data
 
     async def create(
         self,
@@ -566,7 +659,7 @@ class AsyncNamespacesClient:
 
     async def retrieve(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
@@ -577,7 +670,7 @@ class AsyncNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         consistency : typing.Optional[ReadConsistency]
@@ -615,7 +708,7 @@ class AsyncNamespacesClient:
 
         async def main() -> None:
             await client.namespaces.retrieve(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 
@@ -628,7 +721,7 @@ class AsyncNamespacesClient:
 
     async def delete(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         expected_head_seq: typing.Optional[CommitSeq] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -638,7 +731,7 @@ class AsyncNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         expected_head_seq : typing.Optional[CommitSeq]
@@ -669,7 +762,7 @@ class AsyncNamespacesClient:
 
         async def main() -> None:
             await client.namespaces.delete(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 
@@ -682,7 +775,7 @@ class AsyncNamespacesClient:
 
     async def fork(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         new_namespace_id: typing.Optional[NamespaceId] = OMIT,
         snapshot_id: typing.Optional[SnapshotId] = OMIT,
@@ -693,7 +786,7 @@ class AsyncNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The source namespace ID.
 
         new_namespace_id : typing.Optional[NamespaceId]
@@ -728,7 +821,7 @@ class AsyncNamespacesClient:
 
         async def main() -> None:
             await client.namespaces.fork(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 
@@ -741,7 +834,7 @@ class AsyncNamespacesClient:
 
     async def next_merge_range(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         source_namespace_id: NamespaceId,
         consistency: typing.Optional[ReadConsistency] = None,
@@ -753,7 +846,7 @@ class AsyncNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the fork merges into.
 
         source_namespace_id : NamespaceId
@@ -795,7 +888,7 @@ class AsyncNamespacesClient:
 
         async def main() -> None:
             await client.namespaces.next_merge_range(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 source_namespace_id="demo",
             )
 
@@ -813,7 +906,7 @@ class AsyncNamespacesClient:
 
     async def merge(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         source_namespace_id: NamespaceId,
@@ -826,7 +919,7 @@ class AsyncNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the merge commits into.
 
         commit_id : CommitId
@@ -868,7 +961,7 @@ class AsyncNamespacesClient:
 
         async def main() -> None:
             await client.namespaces.merge(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
                 source_namespace_id="demo",
             )
@@ -888,7 +981,7 @@ class AsyncNamespacesClient:
 
     async def fork_for_rebase(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         source_namespace_id: NamespaceId,
         new_namespace_id: typing.Optional[NamespaceId] = OMIT,
@@ -899,7 +992,7 @@ class AsyncNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the fork was forked from.
 
         source_namespace_id : NamespaceId
@@ -935,7 +1028,7 @@ class AsyncNamespacesClient:
 
         async def main() -> None:
             await client.namespaces.fork_for_rebase(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 source_namespace_id="demo",
             )
 
@@ -952,7 +1045,7 @@ class AsyncNamespacesClient:
 
     async def replay(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         source_namespace_id: NamespaceId,
@@ -965,7 +1058,7 @@ class AsyncNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The rebase's new fork, which the replay commit commits into.
 
         commit_id : CommitId
@@ -1007,7 +1100,7 @@ class AsyncNamespacesClient:
 
         async def main() -> None:
             await client.namespaces.replay(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
                 source_namespace_id="demo",
             )

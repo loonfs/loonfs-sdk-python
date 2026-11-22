@@ -5,6 +5,7 @@ import typing
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.request_options import RequestOptions
 from ...types.grep_index import GrepIndex
+from ...types.namespace_id import NamespaceId
 from .raw_client import AsyncRawGrepIndexClient, RawGrepIndexClient
 
 
@@ -23,13 +24,15 @@ class GrepIndexClient:
         """
         return self._raw_client
 
-    def retrieve(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
+    def retrieve(
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> GrepIndex:
         """
         Reports whether the namespace's grep index is `disabled`, `backfilling`, or `active`, with build progress when it's available. A namespace that has never enabled the index is `disabled`. A deployment that doesn't maintain grep indexes returns `not_supported`, and this operation doesn't change the index.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -52,19 +55,21 @@ class GrepIndexClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.maintenance.grep_index.retrieve(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.retrieve(namespace_id, request_options=request_options)
         return _response.data
 
-    def disable(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
+    def disable(
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> GrepIndex:
         """
         Disables the namespace's grep index by publishing a namespace manifest whose grep entry lists no segments. Index maintenance stops when a step reads the disabled entry, and garbage collection reclaims the segments later. Repeating the request has the same result. If the grep entry is corrupt, the request replaces it with a disabled entry, so the index can be enabled again. If the entry has another version of the grep format, the request returns `index_corrupt` and leaves the entry unchanged. A deployment that doesn't maintain the grep index returns `not_supported`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -87,19 +92,21 @@ class GrepIndexClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.maintenance.grep_index.disable(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.disable(namespace_id, request_options=request_options)
         return _response.data
 
-    def enable(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
+    def enable(
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> GrepIndex:
         """
         Enables the namespace's grep index. A deployment that runs maintenance starts the backfill at the next maintenance interval and continues until the index is active. The response reports the index state read after the change. A new enable reports `backfilling`, with the sequence whose files the backfill reads, and an index that was already enabled reports its current status. Repeating the request has the same result. A deployment that doesn't maintain the grep index returns `not_supported`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -122,7 +129,7 @@ class GrepIndexClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.maintenance.grep_index.enable(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.enable(namespace_id, request_options=request_options)
@@ -145,14 +152,14 @@ class AsyncGrepIndexClient:
         return self._raw_client
 
     async def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> GrepIndex:
         """
         Reports whether the namespace's grep index is `disabled`, `backfilling`, or `active`, with build progress when it's available. A namespace that has never enabled the index is `disabled`. A deployment that doesn't maintain grep indexes returns `not_supported`, and this operation doesn't change the index.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -180,7 +187,7 @@ class AsyncGrepIndexClient:
 
         async def main() -> None:
             await client.maintenance.grep_index.retrieve(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 
@@ -189,13 +196,15 @@ class AsyncGrepIndexClient:
         _response = await self._raw_client.retrieve(namespace_id, request_options=request_options)
         return _response.data
 
-    async def disable(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
+    async def disable(
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> GrepIndex:
         """
         Disables the namespace's grep index by publishing a namespace manifest whose grep entry lists no segments. Index maintenance stops when a step reads the disabled entry, and garbage collection reclaims the segments later. Repeating the request has the same result. If the grep entry is corrupt, the request replaces it with a disabled entry, so the index can be enabled again. If the entry has another version of the grep format, the request returns `index_corrupt` and leaves the entry unchanged. A deployment that doesn't maintain the grep index returns `not_supported`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -223,7 +232,7 @@ class AsyncGrepIndexClient:
 
         async def main() -> None:
             await client.maintenance.grep_index.disable(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 
@@ -232,13 +241,15 @@ class AsyncGrepIndexClient:
         _response = await self._raw_client.disable(namespace_id, request_options=request_options)
         return _response.data
 
-    async def enable(self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None) -> GrepIndex:
+    async def enable(
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
+    ) -> GrepIndex:
         """
         Enables the namespace's grep index. A deployment that runs maintenance starts the backfill at the next maintenance interval and continues until the index is active. The response reports the index state read after the change. A new enable reports `backfilling`, with the sequence whose files the backfill reads, and an index that was already enabled reports its current status. Repeating the request has the same result. A deployment that doesn't maintain the grep index returns `not_supported`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -266,7 +277,7 @@ class AsyncGrepIndexClient:
 
         async def main() -> None:
             await client.maintenance.grep_index.enable(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 

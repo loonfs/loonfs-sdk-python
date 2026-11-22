@@ -9,6 +9,7 @@ import typing_extensions
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .commit_seq import CommitSeq
 from .merge import Merge
+from .namespace_id import NamespaceId
 
 
 class NextMergeRangeResponse_ForkPointBelowFloor(UniversalBaseModel):
@@ -18,8 +19,10 @@ class NextMergeRangeResponse_ForkPointBelowFloor(UniversalBaseModel):
 
     outcome: typing.Literal["fork_point_below_floor"] = "fork_point_below_floor"
     fork_point_seq: CommitSeq
+    namespace_id: NamespaceId
     retention_floor_seq: CommitSeq
     source_head_seq: CommitSeq
+    source_namespace_id: NamespaceId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -39,8 +42,10 @@ class NextMergeRangeResponse_Open(UniversalBaseModel):
     outcome: typing.Literal["open"] = "open"
     fork_point_seq: CommitSeq
     merge: typing.Optional[Merge] = None
+    namespace_id: NamespaceId
     next_after_seq: CommitSeq
     source_head_seq: CommitSeq
+    source_namespace_id: NamespaceId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2
@@ -60,9 +65,11 @@ class NextMergeRangeResponse_RangeStartBelowFloor(UniversalBaseModel):
     outcome: typing.Literal["range_start_below_floor"] = "range_start_below_floor"
     fork_point_seq: CommitSeq
     merge: typing.Optional[Merge] = None
+    namespace_id: NamespaceId
     next_after_seq: CommitSeq
     retention_floor_seq: CommitSeq
     source_head_seq: CommitSeq
+    source_namespace_id: NamespaceId
 
     if IS_PYDANTIC_V2:
         model_config: typing.ClassVar[pydantic.ConfigDict] = pydantic.ConfigDict(extra="allow", frozen=True)  # type: ignore # Pydantic v2

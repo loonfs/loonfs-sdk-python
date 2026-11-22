@@ -8,7 +8,7 @@ from .probe_id import ProbeId
 from .store_probe_check import StoreProbeCheck
 
 
-class StoreProbeResponse(UniversalBaseModel):
+class ProbeStoreResponse(UniversalBaseModel):
     """
     The results of one store contract probe, in order.
     """

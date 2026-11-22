@@ -14,6 +14,7 @@ from ..core.serialization import convert_and_respect_annotation_metadata
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
 from ..errors.content_too_large_error import ContentTooLargeError
+from ..errors.forbidden_error import ForbiddenError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
@@ -25,6 +26,7 @@ from ..types.commit_precondition import CommitPrecondition
 from ..types.content_token import ContentToken
 from ..types.error_response import ErrorResponse
 from ..types.filesystem_operation import FilesystemOperation
+from ..types.namespace_id import NamespaceId
 from pydantic import ValidationError
 
 # this is used as the default value for optional parameters
@@ -37,7 +39,7 @@ class RawCommitsClient:
 
     def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
@@ -51,7 +53,7 @@ class RawCommitsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         commit_id : CommitId
@@ -122,6 +124,17 @@ class RawCommitsClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -213,7 +226,7 @@ class AsyncRawCommitsClient:
 
     async def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
@@ -227,7 +240,7 @@ class AsyncRawCommitsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         commit_id : CommitId
@@ -298,6 +311,17 @@ class AsyncRawCommitsClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

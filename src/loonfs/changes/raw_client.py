@@ -12,6 +12,7 @@ from ..core.pydantic_utilities import parse_obj_as
 from ..core.request_options import RequestOptions
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
+from ..errors.forbidden_error import ForbiddenError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.service_unavailable_error import ServiceUnavailableError
@@ -19,6 +20,7 @@ from ..errors.unauthorized_error import UnauthorizedError
 from ..types.commit_seq import CommitSeq
 from ..types.error_response import ErrorResponse
 from ..types.list_changes_response import ListChangesResponse
+from ..types.namespace_id import NamespaceId
 from ..types.read_consistency import ReadConsistency
 from ..types.snapshot_id import SnapshotId
 from pydantic import ValidationError
@@ -30,7 +32,7 @@ class RawChangesClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         after_seq: CommitSeq,
         split_commits: typing.Optional[bool] = None,
@@ -46,7 +48,7 @@ class RawChangesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         after_seq : CommitSeq
@@ -132,6 +134,17 @@ class RawChangesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -192,7 +205,7 @@ class AsyncRawChangesClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         after_seq: CommitSeq,
         split_commits: typing.Optional[bool] = None,
@@ -208,7 +221,7 @@ class AsyncRawChangesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         after_seq : CommitSeq
@@ -285,6 +298,17 @@ class AsyncRawChangesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,

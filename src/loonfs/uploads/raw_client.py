@@ -22,7 +22,9 @@ from ..errors.unauthorized_error import UnauthorizedError
 from ..types.complete_upload_body import CompleteUploadBody
 from ..types.create_upload_body import CreateUploadBody
 from ..types.error_response import ErrorResponse
+from ..types.namespace_id import NamespaceId
 from ..types.sign_upload_parts_response import SignUploadPartsResponse
+from ..types.upload_id import UploadId
 from ..types.upload_part_checksum_claim import UploadPartChecksumClaim
 from ..types.upload_session import UploadSession
 from pydantic import ValidationError
@@ -36,14 +38,18 @@ class RawUploadsClient:
         self._client_wrapper = client_wrapper
 
     def create(
-        self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        *,
+        request: CreateUploadBody,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[UploadSession]:
         """
         Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned URL for the upload.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request : CreateUploadBody
@@ -168,17 +174,17 @@ class RawUploadsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def retrieve(
-        self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, upload_id: UploadId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadSession]:
         """
         Returns an upload session. An open `direct_put` session includes a new presigned URL for the upload. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -248,6 +254,17 @@ class RawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -269,17 +286,17 @@ class RawUploadsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def abort(
-        self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, upload_id: UploadId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> HttpResponse[UploadSession]:
         """
         Aborts an open upload session and deletes the object that the session was writing. Repeating the request succeeds, but a completed session can't be aborted.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -382,8 +399,8 @@ class RawUploadsClient:
 
     def complete(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         request: CompleteUploadBody,
         request_options: typing.Optional[RequestOptions] = None,
@@ -393,10 +410,10 @@ class RawUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request : CompleteUploadBody
@@ -519,8 +536,8 @@ class RawUploadsClient:
 
     def put_content(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         request: typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]],
         request_options: typing.Optional[RequestOptions] = None,
@@ -530,10 +547,10 @@ class RawUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request : typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]]
@@ -654,8 +671,8 @@ class RawUploadsClient:
 
     def sign_parts(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         parts: typing.Sequence[UploadPartChecksumClaim],
         request_options: typing.Optional[RequestOptions] = None,
@@ -665,10 +682,10 @@ class RawUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         parts : typing.Sequence[UploadPartChecksumClaim]
@@ -809,14 +826,18 @@ class AsyncRawUploadsClient:
         self._client_wrapper = client_wrapper
 
     async def create(
-        self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        *,
+        request: CreateUploadBody,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[UploadSession]:
         """
         Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned URL for the upload.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request : CreateUploadBody
@@ -941,17 +962,17 @@ class AsyncRawUploadsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def retrieve(
-        self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, upload_id: UploadId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadSession]:
         """
         Returns an upload session. An open `direct_put` session includes a new presigned URL for the upload. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -1021,6 +1042,17 @@ class AsyncRawUploadsClient:
                         ),
                     ),
                 )
+            if _response.status_code == 501:
+                raise NotImplementedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 503:
                 raise ServiceUnavailableError(
                     headers=dict(_response.headers),
@@ -1042,17 +1074,17 @@ class AsyncRawUploadsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def abort(
-        self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, upload_id: UploadId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> AsyncHttpResponse[UploadSession]:
         """
         Aborts an open upload session and deletes the object that the session was writing. Repeating the request succeeds, but a completed session can't be aborted.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -1155,8 +1187,8 @@ class AsyncRawUploadsClient:
 
     async def complete(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         request: CompleteUploadBody,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1166,10 +1198,10 @@ class AsyncRawUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request : CompleteUploadBody
@@ -1292,8 +1324,8 @@ class AsyncRawUploadsClient:
 
     async def put_content(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         request: typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]],
         request_options: typing.Optional[RequestOptions] = None,
@@ -1303,10 +1335,10 @@ class AsyncRawUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request : typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]]
@@ -1427,8 +1459,8 @@ class AsyncRawUploadsClient:
 
     async def sign_parts(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         parts: typing.Sequence[UploadPartChecksumClaim],
         request_options: typing.Optional[RequestOptions] = None,
@@ -1438,10 +1470,10 @@ class AsyncRawUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         parts : typing.Sequence[UploadPartChecksumClaim]

@@ -16,6 +16,8 @@ from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.error_response import ErrorResponse
 from ...types.list_snapshot_records_response import ListSnapshotRecordsResponse
+from ...types.namespace_id import NamespaceId
+from ...types.snapshot_id import SnapshotId
 from ...types.snapshot_record import SnapshotRecord
 from pydantic import ValidationError
 
@@ -26,7 +28,7 @@ class RawSnapshotsClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -37,7 +39,7 @@ class RawSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -127,17 +129,21 @@ class RawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def retrieve(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> HttpResponse[SnapshotRecord]:
         """
         Returns one existing snapshot of any owner, as the snapshot inventory lists it, including an expired or deleted snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -223,7 +229,7 @@ class AsyncRawSnapshotsClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -234,7 +240,7 @@ class AsyncRawSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -324,17 +330,21 @@ class AsyncRawSnapshotsClient:
         raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     async def retrieve(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> AsyncHttpResponse[SnapshotRecord]:
         """
         Returns one existing snapshot of any owner, as the snapshot inventory lists it, including an expired or deleted snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]

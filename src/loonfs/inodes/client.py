@@ -5,8 +5,10 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.create_download_by_inode_response import CreateDownloadByInodeResponse
+from ..types.inode_id import InodeId
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_inode_children_response import ListInodeChildrenResponse
+from ..types.namespace_id import NamespaceId
 from ..types.path_entry import PathEntry
 from ..types.read_consistency import ReadConsistency
 from ..types.revision_no import RevisionNo
@@ -34,8 +36,8 @@ class InodesClient:
 
     def retrieve(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         include_attributes: typing.Optional[bool] = None,
         snapshot_id: typing.Optional[SnapshotId] = None,
@@ -48,10 +50,10 @@ class InodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The inode ID.
 
         include_attributes : typing.Optional[bool]
@@ -91,7 +93,7 @@ class InodesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.retrieve(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             inode_id="ino_000000r0000013kje0d47gc8kw",
             snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
@@ -109,8 +111,8 @@ class InodesClient:
 
     def list_children(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -126,10 +128,10 @@ class InodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The directory's inode ID.
 
         limit : typing.Optional[int]
@@ -180,7 +182,7 @@ class InodesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.list_children(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             inode_id="ino_000000r0000013kje0d47gc8kw",
             snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
@@ -201,8 +203,8 @@ class InodesClient:
 
     def content(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
@@ -215,10 +217,10 @@ class InodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         snapshot_id : typing.Optional[SnapshotId]
@@ -274,8 +276,8 @@ class InodesClient:
 
     def create_download(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
         max_staleness_ms: typing.Optional[int] = OMIT,
@@ -288,10 +290,10 @@ class InodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         consistency : typing.Optional[ReadConsistency]
@@ -332,7 +334,7 @@ class InodesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.create_download(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             inode_id="ino_000000r0000013kje0d47gc8kw",
         )
         """
@@ -349,11 +351,12 @@ class InodesClient:
 
     def list_revisions(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -363,10 +366,10 @@ class InodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         limit : typing.Optional[int]
@@ -375,11 +378,15 @@ class InodesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            The snapshot whose state to list the file's revisions in. The listing starts at the
+            revision that the snapshot captured.
+
         consistency : typing.Optional[ReadConsistency]
             How recently the read confirms the namespace head. `eventual` (the default, unless the
             server's `consistency` setting is `strong`) reads at the head that the server confirmed last
             while that confirmation is younger than the maximum staleness, and `strong` confirms the
-            head before the read.
+            head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency=eventual`, how old the server's last confirmation of the head can be, in
@@ -405,8 +412,9 @@ class InodesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.list_revisions(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             inode_id="ino_000000r0000013kje0d47gc8kw",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
         _response = self._raw_client.list_revisions(
@@ -414,6 +422,7 @@ class InodesClient:
             inode_id,
             limit=limit,
             cursor=cursor,
+            snapshot_id=snapshot_id,
             consistency=consistency,
             max_staleness_ms=max_staleness_ms,
             request_options=request_options,
@@ -422,8 +431,8 @@ class InodesClient:
 
     def revision_content(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         revision_no: RevisionNo,
         *,
         snapshot_id: typing.Optional[SnapshotId] = None,
@@ -437,10 +446,10 @@ class InodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         revision_no : RevisionNo
@@ -502,8 +511,8 @@ class InodesClient:
 
     def create_revision_download(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         revision_no: RevisionNo,
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
@@ -517,10 +526,10 @@ class InodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         revision_no : RevisionNo
@@ -565,7 +574,7 @@ class InodesClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.inodes.create_revision_download(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             inode_id="ino_000000r0000013kje0d47gc8kw",
             revision_no=1000000,
         )
@@ -600,8 +609,8 @@ class AsyncInodesClient:
 
     async def retrieve(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         include_attributes: typing.Optional[bool] = None,
         snapshot_id: typing.Optional[SnapshotId] = None,
@@ -614,10 +623,10 @@ class AsyncInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The inode ID.
 
         include_attributes : typing.Optional[bool]
@@ -662,7 +671,7 @@ class AsyncInodesClient:
 
         async def main() -> None:
             await client.inodes.retrieve(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 inode_id="ino_000000r0000013kje0d47gc8kw",
                 snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
@@ -683,8 +692,8 @@ class AsyncInodesClient:
 
     async def list_children(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -700,10 +709,10 @@ class AsyncInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The directory's inode ID.
 
         limit : typing.Optional[int]
@@ -759,7 +768,7 @@ class AsyncInodesClient:
 
         async def main() -> None:
             await client.inodes.list_children(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 inode_id="ino_000000r0000013kje0d47gc8kw",
                 snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
@@ -783,8 +792,8 @@ class AsyncInodesClient:
 
     async def content(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
@@ -797,10 +806,10 @@ class AsyncInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         snapshot_id : typing.Optional[SnapshotId]
@@ -865,8 +874,8 @@ class AsyncInodesClient:
 
     async def create_download(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
         max_staleness_ms: typing.Optional[int] = OMIT,
@@ -879,10 +888,10 @@ class AsyncInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         consistency : typing.Optional[ReadConsistency]
@@ -928,7 +937,7 @@ class AsyncInodesClient:
 
         async def main() -> None:
             await client.inodes.create_download(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 inode_id="ino_000000r0000013kje0d47gc8kw",
             )
 
@@ -948,11 +957,12 @@ class AsyncInodesClient:
 
     async def list_revisions(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -962,10 +972,10 @@ class AsyncInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         limit : typing.Optional[int]
@@ -974,11 +984,15 @@ class AsyncInodesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            The snapshot whose state to list the file's revisions in. The listing starts at the
+            revision that the snapshot captured.
+
         consistency : typing.Optional[ReadConsistency]
             How recently the read confirms the namespace head. `eventual` (the default, unless the
             server's `consistency` setting is `strong`) reads at the head that the server confirmed last
             while that confirmation is younger than the maximum staleness, and `strong` confirms the
-            head before the read.
+            head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency=eventual`, how old the server's last confirmation of the head can be, in
@@ -1009,8 +1023,9 @@ class AsyncInodesClient:
 
         async def main() -> None:
             await client.inodes.list_revisions(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 inode_id="ino_000000r0000013kje0d47gc8kw",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
 
@@ -1021,6 +1036,7 @@ class AsyncInodesClient:
             inode_id,
             limit=limit,
             cursor=cursor,
+            snapshot_id=snapshot_id,
             consistency=consistency,
             max_staleness_ms=max_staleness_ms,
             request_options=request_options,
@@ -1029,8 +1045,8 @@ class AsyncInodesClient:
 
     async def revision_content(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         revision_no: RevisionNo,
         *,
         snapshot_id: typing.Optional[SnapshotId] = None,
@@ -1044,10 +1060,10 @@ class AsyncInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         revision_no : RevisionNo
@@ -1118,8 +1134,8 @@ class AsyncInodesClient:
 
     async def create_revision_download(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         revision_no: RevisionNo,
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
@@ -1133,10 +1149,10 @@ class AsyncInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         revision_no : RevisionNo
@@ -1186,7 +1202,7 @@ class AsyncInodesClient:
 
         async def main() -> None:
             await client.inodes.create_revision_download(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 inode_id="ino_000000r0000013kje0d47gc8kw",
                 revision_no=1000000,
             )

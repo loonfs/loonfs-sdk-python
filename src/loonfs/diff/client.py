@@ -5,7 +5,8 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.commit_seq import CommitSeq
-from ..types.diff_response import DiffResponse
+from ..types.list_diff_response import ListDiffResponse
+from ..types.namespace_id import NamespaceId
 from ..types.read_consistency import ReadConsistency
 from .raw_client import AsyncRawDiffClient, RawDiffClient
 
@@ -27,7 +28,7 @@ class DiffClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         from_seq: CommitSeq,
         to_seq: typing.Optional[CommitSeq] = None,
@@ -39,13 +40,13 @@ class DiffClient:
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> DiffResponse:
+    ) -> ListDiffResponse:
         """
         Returns a page of the inodes whose visible state at `to_seq` differs from their state at `from_seq`, read from the commits between the two sequences.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         from_seq : CommitSeq
@@ -88,7 +89,7 @@ class DiffClient:
 
         Returns
         -------
-        DiffResponse
+        ListDiffResponse
             A page of the diff
 
         Examples
@@ -103,7 +104,7 @@ class DiffClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.diff.list(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             from_seq=1000000,
         )
         """
@@ -140,7 +141,7 @@ class AsyncDiffClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         from_seq: CommitSeq,
         to_seq: typing.Optional[CommitSeq] = None,
@@ -152,13 +153,13 @@ class AsyncDiffClient:
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
-    ) -> DiffResponse:
+    ) -> ListDiffResponse:
         """
         Returns a page of the inodes whose visible state at `to_seq` differs from their state at `from_seq`, read from the commits between the two sequences.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         from_seq : CommitSeq
@@ -201,7 +202,7 @@ class AsyncDiffClient:
 
         Returns
         -------
-        DiffResponse
+        ListDiffResponse
             A page of the diff
 
         Examples
@@ -221,7 +222,7 @@ class AsyncDiffClient:
 
         async def main() -> None:
             await client.diff.list(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 from_seq=1000000,
             )
 

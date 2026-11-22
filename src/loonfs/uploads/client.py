@@ -6,7 +6,9 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.complete_upload_body import CompleteUploadBody
 from ..types.create_upload_body import CreateUploadBody
+from ..types.namespace_id import NamespaceId
 from ..types.sign_upload_parts_response import SignUploadPartsResponse
+from ..types.upload_id import UploadId
 from ..types.upload_part_checksum_claim import UploadPartChecksumClaim
 from ..types.upload_session import UploadSession
 from .raw_client import AsyncRawUploadsClient, RawUploadsClient
@@ -31,14 +33,18 @@ class UploadsClient:
         return self._raw_client
 
     def create(
-        self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        *,
+        request: CreateUploadBody,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> UploadSession:
         """
         Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned URL for the upload.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request : CreateUploadBody
@@ -63,7 +69,7 @@ class UploadsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.uploads.create(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             request=CreateUploadBody_DirectMultipart(),
         )
         """
@@ -71,17 +77,17 @@ class UploadsClient:
         return _response.data
 
     def retrieve(
-        self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, upload_id: UploadId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
         Returns an upload session. An open `direct_put` session includes a new presigned URL for the upload. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -104,25 +110,25 @@ class UploadsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.uploads.retrieve(
-            namespace_id="namespace_id",
-            upload_id="upload_id",
+            namespace_id="demo",
+            upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
         )
         """
         _response = self._raw_client.retrieve(namespace_id, upload_id, request_options=request_options)
         return _response.data
 
     def abort(
-        self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, upload_id: UploadId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
         Aborts an open upload session and deletes the object that the session was writing. Repeating the request succeeds, but a completed session can't be aborted.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -145,8 +151,8 @@ class UploadsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.uploads.abort(
-            namespace_id="namespace_id",
-            upload_id="upload_id",
+            namespace_id="demo",
+            upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
         )
         """
         _response = self._raw_client.abort(namespace_id, upload_id, request_options=request_options)
@@ -154,8 +160,8 @@ class UploadsClient:
 
     def complete(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         request: CompleteUploadBody,
         request_options: typing.Optional[RequestOptions] = None,
@@ -165,10 +171,10 @@ class UploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request : CompleteUploadBody
@@ -199,8 +205,8 @@ class UploadsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.uploads.complete(
-            namespace_id="namespace_id",
-            upload_id="upload_id",
+            namespace_id="demo",
+            upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
             request=CompleteUploadBody_DirectMultipart(
                 content=UploadContentClaim(
                     checksum=Checksum(
@@ -227,8 +233,8 @@ class UploadsClient:
 
     def put_content(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         request: typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]],
         request_options: typing.Optional[RequestOptions] = None,
@@ -238,10 +244,10 @@ class UploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request : typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]]
@@ -261,8 +267,8 @@ class UploadsClient:
 
     def sign_parts(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         parts: typing.Sequence[UploadPartChecksumClaim],
         request_options: typing.Optional[RequestOptions] = None,
@@ -272,10 +278,10 @@ class UploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         parts : typing.Sequence[UploadPartChecksumClaim]
@@ -301,8 +307,8 @@ class UploadsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.uploads.sign_parts(
-            namespace_id="namespace_id",
-            upload_id="upload_id",
+            namespace_id="demo",
+            upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
             parts=[
                 UploadPartChecksumClaim(
                     checksum=Checksum(
@@ -334,14 +340,18 @@ class AsyncUploadsClient:
         return self._raw_client
 
     async def create(
-        self, namespace_id: str, *, request: CreateUploadBody, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        *,
+        request: CreateUploadBody,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> UploadSession:
         """
         Starts an upload session for content that a later commit can reference. A service-proxied upload sends the bytes through the server, and a direct PUT upload returns a presigned URL for the upload.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request : CreateUploadBody
@@ -371,7 +381,7 @@ class AsyncUploadsClient:
 
         async def main() -> None:
             await client.uploads.create(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 request=CreateUploadBody_DirectMultipart(),
             )
 
@@ -382,17 +392,17 @@ class AsyncUploadsClient:
         return _response.data
 
     async def retrieve(
-        self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, upload_id: UploadId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
         Returns an upload session. An open `direct_put` session includes a new presigned URL for the upload. A completed session includes a new content token, so the client can retry the commit without uploading the content again.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -420,8 +430,8 @@ class AsyncUploadsClient:
 
         async def main() -> None:
             await client.uploads.retrieve(
-                namespace_id="namespace_id",
-                upload_id="upload_id",
+                namespace_id="demo",
+                upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
             )
 
 
@@ -431,17 +441,17 @@ class AsyncUploadsClient:
         return _response.data
 
     async def abort(
-        self, namespace_id: str, upload_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, upload_id: UploadId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> UploadSession:
         """
         Aborts an open upload session and deletes the object that the session was writing. Repeating the request succeeds, but a completed session can't be aborted.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -469,8 +479,8 @@ class AsyncUploadsClient:
 
         async def main() -> None:
             await client.uploads.abort(
-                namespace_id="namespace_id",
-                upload_id="upload_id",
+                namespace_id="demo",
+                upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
             )
 
 
@@ -481,8 +491,8 @@ class AsyncUploadsClient:
 
     async def complete(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         request: CompleteUploadBody,
         request_options: typing.Optional[RequestOptions] = None,
@@ -492,10 +502,10 @@ class AsyncUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request : CompleteUploadBody
@@ -531,8 +541,8 @@ class AsyncUploadsClient:
 
         async def main() -> None:
             await client.uploads.complete(
-                namespace_id="namespace_id",
-                upload_id="upload_id",
+                namespace_id="demo",
+                upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
                 request=CompleteUploadBody_DirectMultipart(
                     content=UploadContentClaim(
                         checksum=Checksum(
@@ -564,8 +574,8 @@ class AsyncUploadsClient:
 
     async def put_content(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         request: typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]],
         request_options: typing.Optional[RequestOptions] = None,
@@ -575,10 +585,10 @@ class AsyncUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         request : typing.Union[bytes, typing.Iterator[bytes], typing.AsyncIterator[bytes]]
@@ -598,8 +608,8 @@ class AsyncUploadsClient:
 
     async def sign_parts(
         self,
-        namespace_id: str,
-        upload_id: str,
+        namespace_id: NamespaceId,
+        upload_id: UploadId,
         *,
         parts: typing.Sequence[UploadPartChecksumClaim],
         request_options: typing.Optional[RequestOptions] = None,
@@ -609,10 +619,10 @@ class AsyncUploadsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        upload_id : str
+        upload_id : UploadId
             The upload session ID.
 
         parts : typing.Sequence[UploadPartChecksumClaim]
@@ -643,8 +653,8 @@ class AsyncUploadsClient:
 
         async def main() -> None:
             await client.uploads.sign_parts(
-                namespace_id="namespace_id",
-                upload_id="upload_id",
+                namespace_id="demo",
+                upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
                 parts=[
                     UploadPartChecksumClaim(
                         checksum=Checksum(

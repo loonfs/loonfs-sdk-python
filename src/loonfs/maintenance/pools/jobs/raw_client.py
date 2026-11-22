@@ -17,6 +17,7 @@ from ....errors.not_found_error import NotFoundError
 from ....errors.service_unavailable_error import ServiceUnavailableError
 from ....errors.unauthorized_error import UnauthorizedError
 from ....types.error_response import ErrorResponse
+from ....types.pool_id import PoolId
 from ....types.run_pool_maintenance_job_request import RunPoolMaintenanceJobRequest
 from ....types.run_pool_maintenance_job_response import RunPoolMaintenanceJobResponse
 from pydantic import ValidationError
@@ -31,7 +32,7 @@ class RawJobsClient:
 
     def create(
         self,
-        pool_id: str,
+        pool_id: PoolId,
         *,
         request: RunPoolMaintenanceJobRequest,
         request_options: typing.Optional[RequestOptions] = None,
@@ -41,7 +42,7 @@ class RawJobsClient:
 
         Parameters
         ----------
-        pool_id : str
+        pool_id : PoolId
             The pool ID.
 
         request : RunPoolMaintenanceJobRequest
@@ -150,7 +151,7 @@ class AsyncRawJobsClient:
 
     async def create(
         self,
-        pool_id: str,
+        pool_id: PoolId,
         *,
         request: RunPoolMaintenanceJobRequest,
         request_options: typing.Optional[RequestOptions] = None,
@@ -160,7 +161,7 @@ class AsyncRawJobsClient:
 
         Parameters
         ----------
-        pool_id : str
+        pool_id : PoolId
             The pool ID.
 
         request : RunPoolMaintenanceJobRequest
