@@ -63,6 +63,84 @@ client.capabilities.retrieve()
 </details>
 
 ## namespaces
+<details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">list</a>(...) -> ListNamespacesResponse</code></summary>
+<dl>
+<dd>
+
+#### 📝 Description
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+Lists the store's namespaces in object-key order (namespace ID order, except that an ID sorts after the longer IDs that extend it with `-` or `.`), and returns for each one the object that `GET /v0/namespaces/{namespace_id}` returns. The list leaves out deleted namespaces and namespaces whose creation hasn't finished, so a page can have fewer namespaces than `limit`, even none, and still include `next_cursor`. Without `limit`, a page lists up to 100 namespaces.
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### 🔌 Usage
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+```python
+from loonfs.server import LoonFS
+
+client = LoonFS(
+    token="<token>",
+    base_url="https://yourhost.com/path/to/api",
+)
+
+client.namespaces.list()
+
+```
+</dd>
+</dl>
+</dd>
+</dl>
+
+#### ⚙️ Parameters
+
+<dl>
+<dd>
+
+<dl>
+<dd>
+
+**limit:** `typing.Optional[int]` — The maximum number of namespace IDs the page lists from the store.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**cursor:** `typing.Optional[str]` — The opaque cursor that the previous page returned.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
+**request_options:** `typing.Optional[RequestOptions]` — Request-specific configuration.
+    
+</dd>
+</dl>
+</dd>
+</dl>
+
+
+</dd>
+</dl>
+</details>
+
 <details><summary><code>client.namespaces.<a href="src/loonfs/namespaces/client.py">create</a>(...) -> NamespaceMetadata</code></summary>
 <dl>
 <dd>
@@ -186,7 +264,7 @@ client = LoonFS(
 )
 
 client.namespaces.retrieve(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -203,7 +281,7 @@ client.namespaces.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -282,7 +360,7 @@ client = LoonFS(
 )
 
 client.namespaces.delete(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -299,7 +377,7 @@ client.namespaces.delete(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -362,7 +440,7 @@ client = LoonFS(
 )
 
 client.namespaces.fork(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -379,7 +457,7 @@ client.namespaces.fork(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The source namespace ID.
+**namespace_id:** `NamespaceId` — The source namespace ID.
     
 </dd>
 </dl>
@@ -453,7 +531,7 @@ client = LoonFS(
 )
 
 client.namespaces.next_merge_range(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     source_namespace_id="demo",
 )
 
@@ -471,7 +549,7 @@ client.namespaces.next_merge_range(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace that the fork merges into.
+**namespace_id:** `NamespaceId` — The namespace that the fork merges into.
     
 </dd>
 </dl>
@@ -561,7 +639,7 @@ client = LoonFS(
 )
 
 client.namespaces.merge(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
     source_namespace_id="demo",
 )
@@ -580,7 +658,7 @@ client.namespaces.merge(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace that the merge commits into.
+**namespace_id:** `NamespaceId` — The namespace that the merge commits into.
     
 </dd>
 </dl>
@@ -673,7 +751,7 @@ client = LoonFS(
 )
 
 client.namespaces.fork_for_rebase(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     source_namespace_id="demo",
 )
 
@@ -691,7 +769,7 @@ client.namespaces.fork_for_rebase(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace that the fork was forked from.
+**namespace_id:** `NamespaceId` — The namespace that the fork was forked from.
     
 </dd>
 </dl>
@@ -768,7 +846,7 @@ client = LoonFS(
 )
 
 client.namespaces.replay(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
     source_namespace_id="demo",
 )
@@ -787,7 +865,7 @@ client.namespaces.replay(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The rebase's new fork, which the replay commit commits into.
+**namespace_id:** `NamespaceId` — The rebase's new fork, which the replay commit commits into.
     
 </dd>
 </dl>
@@ -881,7 +959,7 @@ client = LoonFS(
 )
 
 client.changes.list(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     after_seq=1000000,
     snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
@@ -900,7 +978,7 @@ client.changes.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -1030,7 +1108,7 @@ client = LoonFS(
 )
 
 client.commits.create(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
     operations=[
         FilesystemOperation_AppendFile(
@@ -1054,7 +1132,7 @@ client.commits.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -1115,7 +1193,7 @@ client.commits.create(
 </details>
 
 ## Diff
-<details><summary><code>client.diff.<a href="src/loonfs/diff/client.py">list</a>(...) -> DiffResponse</code></summary>
+<details><summary><code>client.diff.<a href="src/loonfs/diff/client.py">list</a>(...) -> ListDiffResponse</code></summary>
 <dl>
 <dd>
 
@@ -1150,7 +1228,7 @@ client = LoonFS(
 )
 
 client.diff.list(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     from_seq=1000000,
 )
 
@@ -1168,7 +1246,7 @@ client.diff.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -1334,7 +1412,7 @@ client.files.content(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -1445,7 +1523,7 @@ client = LoonFS(
 )
 
 client.files.create_download(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     path="/docs/report.txt",
 )
 
@@ -1463,7 +1541,7 @@ client.files.create_download(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -1585,7 +1663,7 @@ client = LoonFS(
 )
 
 client.files.list(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     path="path",
     snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
@@ -1604,7 +1682,7 @@ client.files.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -1738,7 +1816,7 @@ client = LoonFS(
 )
 
 client.files.retrieve(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     path="path",
     snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
@@ -1757,7 +1835,7 @@ client.files.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -1863,8 +1941,9 @@ client = LoonFS(
 )
 
 client.files.list_revisions(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     path="path",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -1881,7 +1960,7 @@ client.files.list_revisions(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -1913,12 +1992,23 @@ client.files.list_revisions(
 <dl>
 <dd>
 
+**snapshot_id:** `typing.Optional[SnapshotId]` 
+
+The snapshot whose state to list the file's revisions in. The listing starts at the
+revision that the snapshot captured.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **consistency:** `typing.Optional[ReadConsistency]` 
 
 How recently the read confirms the namespace head. `eventual` (the default, unless the
 server's `consistency` setting is `strong`) reads at the head that the server confirmed last
 while that confirmation is younger than the maximum staleness, and `strong` confirms the
-head before the read.
+head before the read. It can't be combined with `snapshot_id`.
     
 </dd>
 </dl>
@@ -1984,7 +2074,7 @@ client = LoonFS(
 )
 
 client.files.grep(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     pattern="pattern",
     inode_id="ino_000000r0000013kje0d47gc8kw",
 )
@@ -2003,7 +2093,7 @@ client.files.grep(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -2159,7 +2249,7 @@ client = LoonFS(
 )
 
 client.trash.list(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -2176,7 +2266,7 @@ client.trash.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -2272,7 +2362,7 @@ client = LoonFS(
 )
 
 client.inodes.retrieve(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     inode_id="ino_000000r0000013kje0d47gc8kw",
     snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
@@ -2291,7 +2381,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -2299,7 +2389,7 @@ client.inodes.retrieve(
 <dl>
 <dd>
 
-**inode_id:** `str` — The inode ID.
+**inode_id:** `InodeId` — The inode ID.
     
 </dd>
 </dl>
@@ -2397,7 +2487,7 @@ client = LoonFS(
 )
 
 client.inodes.list_children(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     inode_id="ino_000000r0000013kje0d47gc8kw",
     snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
@@ -2416,7 +2506,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -2424,7 +2514,7 @@ client.inodes.list_children(
 <dl>
 <dd>
 
-**inode_id:** `str` — The directory's inode ID.
+**inode_id:** `InodeId` — The directory's inode ID.
     
 </dd>
 </dl>
@@ -2568,7 +2658,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -2576,7 +2666,7 @@ client.inodes.content(
 <dl>
 <dd>
 
-**inode_id:** `str` — The file's inode ID.
+**inode_id:** `InodeId` — The file's inode ID.
     
 </dd>
 </dl>
@@ -2671,7 +2761,7 @@ client = LoonFS(
 )
 
 client.inodes.create_download(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     inode_id="ino_000000r0000013kje0d47gc8kw",
 )
 
@@ -2689,7 +2779,7 @@ client.inodes.create_download(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -2697,7 +2787,7 @@ client.inodes.create_download(
 <dl>
 <dd>
 
-**inode_id:** `str` — The file's inode ID.
+**inode_id:** `InodeId` — The file's inode ID.
     
 </dd>
 </dl>
@@ -2798,8 +2888,9 @@ client = LoonFS(
 )
 
 client.inodes.list_revisions(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     inode_id="ino_000000r0000013kje0d47gc8kw",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -2816,7 +2907,7 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -2824,7 +2915,7 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
-**inode_id:** `str` — The file's inode ID.
+**inode_id:** `InodeId` — The file's inode ID.
     
 </dd>
 </dl>
@@ -2848,12 +2939,23 @@ client.inodes.list_revisions(
 <dl>
 <dd>
 
+**snapshot_id:** `typing.Optional[SnapshotId]` 
+
+The snapshot whose state to list the file's revisions in. The listing starts at the
+revision that the snapshot captured.
+    
+</dd>
+</dl>
+
+<dl>
+<dd>
+
 **consistency:** `typing.Optional[ReadConsistency]` 
 
 How recently the read confirms the namespace head. `eventual` (the default, unless the
 server's `consistency` setting is `strong`) reads at the head that the server confirmed last
 while that confirmation is younger than the maximum staleness, and `strong` confirms the
-head before the read.
+head before the read. It can't be combined with `snapshot_id`.
     
 </dd>
 </dl>
@@ -2938,7 +3040,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -2946,7 +3048,7 @@ client.inodes.revision_content(
 <dl>
 <dd>
 
-**inode_id:** `str` — The file's inode ID.
+**inode_id:** `InodeId` — The file's inode ID.
     
 </dd>
 </dl>
@@ -3052,7 +3154,7 @@ client = LoonFS(
 )
 
 client.inodes.create_revision_download(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     inode_id="ino_000000r0000013kje0d47gc8kw",
     revision_no=1000000,
 )
@@ -3071,7 +3173,7 @@ client.inodes.create_revision_download(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3079,7 +3181,7 @@ client.inodes.create_revision_download(
 <dl>
 <dd>
 
-**inode_id:** `str` — The file's inode ID.
+**inode_id:** `InodeId` — The file's inode ID.
     
 </dd>
 </dl>
@@ -3190,7 +3292,7 @@ client = LoonFS(
 )
 
 client.snapshots.list(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -3207,7 +3309,7 @@ client.snapshots.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3278,7 +3380,7 @@ client = LoonFS(
 )
 
 client.snapshots.create(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -3295,7 +3397,7 @@ client.snapshots.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3372,7 +3474,7 @@ client = LoonFS(
 )
 
 client.snapshots.retrieve(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
@@ -3390,7 +3492,7 @@ client.snapshots.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3430,7 +3532,7 @@ client.snapshots.retrieve(
 <dl>
 <dd>
 
-Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
+Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted, except to a request with principals, which returns `namespace_deleted`.
 </dd>
 </dl>
 </dd>
@@ -3453,7 +3555,7 @@ client = LoonFS(
 )
 
 client.snapshots.delete(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
@@ -3471,7 +3573,7 @@ client.snapshots.delete(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3534,7 +3636,7 @@ client = LoonFS(
 )
 
 client.snapshots.extend(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     snapshot_id="snp_0000000000000tfy68ekkbj6bx",
     ttl_ms=1000000,
 )
@@ -3553,7 +3655,7 @@ client.snapshots.extend(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3625,7 +3727,7 @@ client = LoonFS(
 )
 
 client.uploads.create(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     request=CreateUploadBody_DirectMultipart(),
 )
 
@@ -3643,7 +3745,7 @@ client.uploads.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3706,8 +3808,8 @@ client = LoonFS(
 )
 
 client.uploads.retrieve(
-    namespace_id="namespace_id",
-    upload_id="upload_id",
+    namespace_id="demo",
+    upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
 )
 
 ```
@@ -3724,7 +3826,7 @@ client.uploads.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3732,7 +3834,7 @@ client.uploads.retrieve(
 <dl>
 <dd>
 
-**upload_id:** `str` — The upload session ID.
+**upload_id:** `UploadId` — The upload session ID.
     
 </dd>
 </dl>
@@ -3787,8 +3889,8 @@ client = LoonFS(
 )
 
 client.uploads.abort(
-    namespace_id="namespace_id",
-    upload_id="upload_id",
+    namespace_id="demo",
+    upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
 )
 
 ```
@@ -3805,7 +3907,7 @@ client.uploads.abort(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3813,7 +3915,7 @@ client.uploads.abort(
 <dl>
 <dd>
 
-**upload_id:** `str` — The upload session ID.
+**upload_id:** `UploadId` — The upload session ID.
     
 </dd>
 </dl>
@@ -3868,8 +3970,8 @@ client = LoonFS(
 )
 
 client.uploads.complete(
-    namespace_id="namespace_id",
-    upload_id="upload_id",
+    namespace_id="demo",
+    upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
     request=CompleteUploadBody_DirectMultipart(
         content=UploadContentClaim(
             checksum=Checksum(
@@ -3905,7 +4007,7 @@ client.uploads.complete(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3913,7 +4015,7 @@ client.uploads.complete(
 <dl>
 <dd>
 
-**upload_id:** `str` — The upload session ID.
+**upload_id:** `UploadId` — The upload session ID.
     
 </dd>
 </dl>
@@ -3983,7 +4085,7 @@ client.uploads.put_content(...)
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -3991,7 +4093,7 @@ client.uploads.put_content(...)
 <dl>
 <dd>
 
-**upload_id:** `str` — The upload session ID.
+**upload_id:** `UploadId` — The upload session ID.
     
 </dd>
 </dl>
@@ -4054,8 +4156,8 @@ client = LoonFS(
 )
 
 client.uploads.sign_parts(
-    namespace_id="namespace_id",
-    upload_id="upload_id",
+    namespace_id="demo",
+    upload_id="upl_2dhwp939xk9r7srv8t5cz5yw4c",
     parts=[
         UploadPartChecksumClaim(
             checksum=Checksum(
@@ -4081,7 +4183,7 @@ client.uploads.sign_parts(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -4089,7 +4191,7 @@ client.uploads.sign_parts(
 <dl>
 <dd>
 
-**upload_id:** `str` — The upload session ID.
+**upload_id:** `UploadId` — The upload session ID.
     
 </dd>
 </dl>
@@ -4153,7 +4255,7 @@ client = LoonFS(
 )
 
 client.maintenance.diagnostics.retrieve(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -4170,7 +4272,7 @@ client.maintenance.diagnostics.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -4226,7 +4328,7 @@ client = LoonFS(
 )
 
 client.maintenance.grep_index.retrieve(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -4243,7 +4345,7 @@ client.maintenance.grep_index.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -4298,7 +4400,7 @@ client = LoonFS(
 )
 
 client.maintenance.grep_index.disable(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -4315,7 +4417,7 @@ client.maintenance.grep_index.disable(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -4370,7 +4472,7 @@ client = LoonFS(
 )
 
 client.maintenance.grep_index.enable(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -4387,7 +4489,7 @@ client.maintenance.grep_index.enable(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -4443,7 +4545,7 @@ client = LoonFS(
 )
 
 client.maintenance.jobs.create(
-    namespace_id="namespace_id",
+    namespace_id="demo",
     request=RunMaintenanceJobRequest_Gc(),
 )
 
@@ -4461,7 +4563,7 @@ client.maintenance.jobs.create(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -4525,7 +4627,7 @@ client = LoonFS(
 )
 
 client.maintenance.snapshots.list(
-    namespace_id="namespace_id",
+    namespace_id="demo",
 )
 
 ```
@@ -4542,7 +4644,7 @@ client.maintenance.snapshots.list(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -4613,8 +4715,8 @@ client = LoonFS(
 )
 
 client.maintenance.snapshots.retrieve(
-    namespace_id="namespace_id",
-    snapshot_id="snapshot_id",
+    namespace_id="demo",
+    snapshot_id="snp_0000000000000tfy68ekkbj6bx",
 )
 
 ```
@@ -4631,7 +4733,7 @@ client.maintenance.snapshots.retrieve(
 <dl>
 <dd>
 
-**namespace_id:** `str` — The namespace ID.
+**namespace_id:** `NamespaceId` — The namespace ID.
     
 </dd>
 </dl>
@@ -4639,7 +4741,7 @@ client.maintenance.snapshots.retrieve(
 <dl>
 <dd>
 
-**snapshot_id:** `str` — The snapshot ID.
+**snapshot_id:** `SnapshotId` — The snapshot ID.
     
 </dd>
 </dl>
@@ -4660,7 +4762,7 @@ client.maintenance.snapshots.retrieve(
 </details>
 
 ## Maintenance Store
-<details><summary><code>client.maintenance.store.<a href="src/loonfs/maintenance/store/client.py">probe</a>(...) -> StoreProbeResponse</code></summary>
+<details><summary><code>client.maintenance.store.<a href="src/loonfs/maintenance/store/client.py">probe</a>(...) -> ProbeStoreResponse</code></summary>
 <dl>
 <dd>
 
@@ -4714,7 +4816,7 @@ client.maintenance.store.probe(
 <dl>
 <dd>
 
-**request:** `StoreProbeRequest` 
+**request:** `ProbeStoreRequest` 
     
 </dd>
 </dl>
@@ -4770,7 +4872,7 @@ client = LoonFS(
 )
 
 client.maintenance.pools.jobs.create(
-    pool_id="pool_id",
+    pool_id="pool_3s0drmj8em84yb4mnetqkz2j0x",
     request=RunPoolMaintenanceJobRequest_Gc(),
 )
 
@@ -4788,7 +4890,7 @@ client.maintenance.pools.jobs.create(
 <dl>
 <dd>
 
-**pool_id:** `str` — The pool ID.
+**pool_id:** `PoolId` — The pool ID.
     
 </dd>
 </dl>

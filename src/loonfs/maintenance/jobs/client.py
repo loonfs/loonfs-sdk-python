@@ -4,6 +4,7 @@ import typing
 
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.request_options import RequestOptions
+from ...types.namespace_id import NamespaceId
 from ...types.run_maintenance_job_request import RunMaintenanceJobRequest
 from ...types.run_maintenance_job_response import RunMaintenanceJobResponse
 from .raw_client import AsyncRawJobsClient, RawJobsClient
@@ -29,7 +30,7 @@ class JobsClient:
 
     def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         request: RunMaintenanceJobRequest,
         request_options: typing.Optional[RequestOptions] = None,
@@ -39,7 +40,7 @@ class JobsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request : RunMaintenanceJobRequest
@@ -64,7 +65,7 @@ class JobsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.maintenance.jobs.create(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             request=RunMaintenanceJobRequest_Gc(),
         )
         """
@@ -89,7 +90,7 @@ class AsyncJobsClient:
 
     async def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         request: RunMaintenanceJobRequest,
         request_options: typing.Optional[RequestOptions] = None,
@@ -99,7 +100,7 @@ class AsyncJobsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request : RunMaintenanceJobRequest
@@ -129,7 +130,7 @@ class AsyncJobsClient:
 
         async def main() -> None:
             await client.maintenance.jobs.create(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 request=RunMaintenanceJobRequest_Gc(),
             )
 

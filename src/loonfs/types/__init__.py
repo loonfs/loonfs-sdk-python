@@ -75,7 +75,6 @@ if typing.TYPE_CHECKING:
     from .destination_behavior import DestinationBehavior
     from .diff_entry import DiffEntry
     from .diff_entry_kind import DiffEntryKind
-    from .diff_response import DiffResponse
     from .directory_binding import DirectoryBinding
     from .display_name import DisplayName
     from .download_range import DownloadRange
@@ -155,8 +154,10 @@ if typing.TYPE_CHECKING:
     from .inode_id import InodeId
     from .inode_kind import InodeKind
     from .list_changes_response import ListChangesResponse
+    from .list_diff_response import ListDiffResponse
     from .list_file_revisions_response import ListFileRevisionsResponse
     from .list_inode_children_response import ListInodeChildrenResponse
+    from .list_namespaces_response import ListNamespacesResponse
     from .list_path_entries_response import ListPathEntriesResponse
     from .list_snapshot_records_response import ListSnapshotRecordsResponse
     from .list_snapshots_response import ListSnapshotsResponse
@@ -193,6 +194,8 @@ if typing.TYPE_CHECKING:
     from .pool_id import PoolId
     from .pool_retained_candidates import PoolRetainedCandidates
     from .probe_id import ProbeId
+    from .probe_store_request import ProbeStoreRequest
+    from .probe_store_response import ProbeStoreResponse
     from .read_consistency import ReadConsistency
     from .replay_fork_response import ReplayForkResponse
     from .retained_candidates import RetainedCandidates
@@ -241,8 +244,6 @@ if typing.TYPE_CHECKING:
     from .store_probe_check_failed import StoreProbeCheckFailed
     from .store_probe_check_passed import StoreProbeCheckPassed
     from .store_probe_check_unsupported import StoreProbeCheckUnsupported
-    from .store_probe_request import StoreProbeRequest
-    from .store_probe_response import StoreProbeResponse
     from .trash_entry import TrashEntry
     from .upload_content_claim import UploadContentClaim
     from .upload_id import UploadId
@@ -318,7 +319,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "DestinationBehavior": ".destination_behavior",
     "DiffEntry": ".diff_entry",
     "DiffEntryKind": ".diff_entry_kind",
-    "DiffResponse": ".diff_response",
     "DirectoryBinding": ".directory_binding",
     "DisplayName": ".display_name",
     "DownloadRange": ".download_range",
@@ -397,8 +397,10 @@ _dynamic_imports: typing.Dict[str, str] = {
     "InodeId": ".inode_id",
     "InodeKind": ".inode_kind",
     "ListChangesResponse": ".list_changes_response",
+    "ListDiffResponse": ".list_diff_response",
     "ListFileRevisionsResponse": ".list_file_revisions_response",
     "ListInodeChildrenResponse": ".list_inode_children_response",
+    "ListNamespacesResponse": ".list_namespaces_response",
     "ListPathEntriesResponse": ".list_path_entries_response",
     "ListSnapshotRecordsResponse": ".list_snapshot_records_response",
     "ListSnapshotsResponse": ".list_snapshots_response",
@@ -437,6 +439,8 @@ _dynamic_imports: typing.Dict[str, str] = {
     "PoolId": ".pool_id",
     "PoolRetainedCandidates": ".pool_retained_candidates",
     "ProbeId": ".probe_id",
+    "ProbeStoreRequest": ".probe_store_request",
+    "ProbeStoreResponse": ".probe_store_response",
     "ReadConsistency": ".read_consistency",
     "ReplayForkResponse": ".replay_fork_response",
     "RetainedCandidates": ".retained_candidates",
@@ -483,8 +487,6 @@ _dynamic_imports: typing.Dict[str, str] = {
     "StoreProbeCheck_Failed": ".store_probe_check",
     "StoreProbeCheck_Passed": ".store_probe_check",
     "StoreProbeCheck_Unsupported": ".store_probe_check",
-    "StoreProbeRequest": ".store_probe_request",
-    "StoreProbeResponse": ".store_probe_response",
     "TrashEntry": ".trash_entry",
     "UploadContentClaim": ".upload_content_claim",
     "UploadId": ".upload_id",
@@ -587,7 +589,6 @@ __all__ = [
     "DestinationBehavior",
     "DiffEntry",
     "DiffEntryKind",
-    "DiffResponse",
     "DirectoryBinding",
     "DisplayName",
     "DownloadRange",
@@ -666,8 +667,10 @@ __all__ = [
     "InodeId",
     "InodeKind",
     "ListChangesResponse",
+    "ListDiffResponse",
     "ListFileRevisionsResponse",
     "ListInodeChildrenResponse",
+    "ListNamespacesResponse",
     "ListPathEntriesResponse",
     "ListSnapshotRecordsResponse",
     "ListSnapshotsResponse",
@@ -706,6 +709,8 @@ __all__ = [
     "PoolId",
     "PoolRetainedCandidates",
     "ProbeId",
+    "ProbeStoreRequest",
+    "ProbeStoreResponse",
     "ReadConsistency",
     "ReplayForkResponse",
     "RetainedCandidates",
@@ -752,8 +757,6 @@ __all__ = [
     "StoreProbeCheck_Failed",
     "StoreProbeCheck_Passed",
     "StoreProbeCheck_Unsupported",
-    "StoreProbeRequest",
-    "StoreProbeResponse",
     "TrashEntry",
     "UploadContentClaim",
     "UploadId",

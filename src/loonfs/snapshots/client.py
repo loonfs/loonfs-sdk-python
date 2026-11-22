@@ -6,6 +6,7 @@ from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.delete_snapshot_response import DeleteSnapshotResponse
 from ..types.list_snapshots_response import ListSnapshotsResponse
+from ..types.namespace_id import NamespaceId
 from ..types.snapshot import Snapshot
 from ..types.snapshot_id import SnapshotId
 from .raw_client import AsyncRawSnapshotsClient, RawSnapshotsClient
@@ -31,7 +32,7 @@ class SnapshotsClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -42,7 +43,7 @@ class SnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -71,7 +72,7 @@ class SnapshotsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.list(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.list(namespace_id, limit=limit, cursor=cursor, request_options=request_options)
@@ -79,7 +80,7 @@ class SnapshotsClient:
 
     def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         name: typing.Optional[str] = OMIT,
         ttl_ms: typing.Optional[int] = OMIT,
@@ -90,7 +91,7 @@ class SnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         name : typing.Optional[str]
@@ -121,21 +122,25 @@ class SnapshotsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.create(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.create(namespace_id, name=name, ttl_ms=ttl_ms, request_options=request_options)
         return _response.data
 
     def retrieve(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> Snapshot:
         """
         Returns one snapshot, as the snapshot listing returns it. A missing ID, the ID of an expired or deleted snapshot, or the ID of a fork snapshot returns `snapshot_not_found`. A deleted namespace returns `namespace_deleted`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -161,7 +166,7 @@ class SnapshotsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.retrieve(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
@@ -169,14 +174,18 @@ class SnapshotsClient:
         return _response.data
 
     def delete(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> DeleteSnapshotResponse:
         """
-        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
+        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted, except to a request with principals, which returns `namespace_deleted`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -202,7 +211,7 @@ class SnapshotsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.delete(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
@@ -211,7 +220,7 @@ class SnapshotsClient:
 
     def extend(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
@@ -222,7 +231,7 @@ class SnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -251,7 +260,7 @@ class SnapshotsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.snapshots.extend(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             ttl_ms=1000000,
         )
@@ -277,7 +286,7 @@ class AsyncSnapshotsClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -288,7 +297,7 @@ class AsyncSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -322,7 +331,7 @@ class AsyncSnapshotsClient:
 
         async def main() -> None:
             await client.snapshots.list(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 
@@ -335,7 +344,7 @@ class AsyncSnapshotsClient:
 
     async def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         name: typing.Optional[str] = OMIT,
         ttl_ms: typing.Optional[int] = OMIT,
@@ -346,7 +355,7 @@ class AsyncSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         name : typing.Optional[str]
@@ -382,7 +391,7 @@ class AsyncSnapshotsClient:
 
         async def main() -> None:
             await client.snapshots.create(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 
@@ -394,14 +403,18 @@ class AsyncSnapshotsClient:
         return _response.data
 
     async def retrieve(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> Snapshot:
         """
         Returns one snapshot, as the snapshot listing returns it. A missing ID, the ID of an expired or deleted snapshot, or the ID of a fork snapshot returns `snapshot_not_found`. A deleted namespace returns `namespace_deleted`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -432,7 +445,7 @@ class AsyncSnapshotsClient:
 
         async def main() -> None:
             await client.snapshots.retrieve(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
@@ -443,14 +456,18 @@ class AsyncSnapshotsClient:
         return _response.data
 
     async def delete(
-        self, namespace_id: str, snapshot_id: SnapshotId, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> DeleteSnapshotResponse:
         """
-        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted.
+        Deletes a snapshot by recording the server's current time as its delete time. From then on, the snapshot can't be read, forked, extended, or retrieved, and the snapshot listing leaves it out. Garbage collection can then reclaim its unreferenced manifest and runs after the grace window. Deleting a missing or deleted snapshot succeeds without a write, so repeating the request has the same result. The ID of a fork snapshot returns `snapshot_not_found`. Deletion stays available after the namespace is deleted, except to a request with principals, which returns `namespace_deleted`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -481,7 +498,7 @@ class AsyncSnapshotsClient:
 
         async def main() -> None:
             await client.snapshots.delete(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
@@ -493,7 +510,7 @@ class AsyncSnapshotsClient:
 
     async def extend(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         snapshot_id: SnapshotId,
         *,
         ttl_ms: int,
@@ -504,7 +521,7 @@ class AsyncSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         snapshot_id : SnapshotId
@@ -538,7 +555,7 @@ class AsyncSnapshotsClient:
 
         async def main() -> None:
             await client.snapshots.extend(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 snapshot_id="snp_0000000000000tfy68ekkbj6bx",
                 ttl_ms=1000000,
             )

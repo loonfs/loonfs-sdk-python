@@ -24,6 +24,7 @@ from ..types.commit_id import CommitId
 from ..types.commit_seq import CommitSeq
 from ..types.delete_namespace_response import DeleteNamespaceResponse
 from ..types.error_response import ErrorResponse
+from ..types.list_namespaces_response import ListNamespacesResponse
 from ..types.namespace_id import NamespaceId
 from ..types.namespace_metadata import NamespaceMetadata
 from ..types.next_merge_range_response import NextMergeRangeResponse
@@ -39,6 +40,93 @@ OMIT = typing.cast(typing.Any, ...)
 class RawNamespacesClient:
     def __init__(self, *, client_wrapper: SyncClientWrapper):
         self._client_wrapper = client_wrapper
+
+    def list(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> HttpResponse[ListNamespacesResponse]:
+        """
+        Lists the store's namespaces in object-key order (namespace ID order, except that an ID sorts after the longer IDs that extend it with `-` or `.`), and returns for each one the object that `GET /v0/namespaces/{namespace_id}` returns. The list leaves out deleted namespaces and namespaces whose creation hasn't finished, so a page can have fewer namespaces than `limit`, even none, and still include `next_cursor`. Without `limit`, a page lists up to 100 namespaces.
+
+        Parameters
+        ----------
+        limit : typing.Optional[int]
+            The maximum number of namespace IDs the page lists from the store.
+
+        cursor : typing.Optional[str]
+            The opaque cursor that the previous page returned.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        HttpResponse[ListNamespacesResponse]
+            Namespaces
+        """
+        _response = self._client_wrapper.httpx_client.request(
+            "v0/namespaces",
+            method="GET",
+            params={
+                "limit": limit,
+                "cursor": cursor,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ListNamespacesResponse,
+                    parse_obj_as(
+                        type_=ListNamespacesResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return HttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
 
     def create(
         self,
@@ -175,7 +263,7 @@ class RawNamespacesClient:
 
     def retrieve(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
@@ -186,7 +274,7 @@ class RawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         consistency : typing.Optional[ReadConsistency]
@@ -292,7 +380,7 @@ class RawNamespacesClient:
 
     def delete(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         expected_head_seq: typing.Optional[CommitSeq] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -302,7 +390,7 @@ class RawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         expected_head_seq : typing.Optional[CommitSeq]
@@ -350,6 +438,17 @@ class RawNamespacesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -414,7 +513,7 @@ class RawNamespacesClient:
 
     def fork(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         new_namespace_id: typing.Optional[NamespaceId] = OMIT,
         snapshot_id: typing.Optional[SnapshotId] = OMIT,
@@ -425,7 +524,7 @@ class RawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The source namespace ID.
 
         new_namespace_id : typing.Optional[NamespaceId]
@@ -482,6 +581,17 @@ class RawNamespacesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -557,7 +667,7 @@ class RawNamespacesClient:
 
     def next_merge_range(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         source_namespace_id: NamespaceId,
         consistency: typing.Optional[ReadConsistency] = None,
@@ -569,7 +679,7 @@ class RawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the fork merges into.
 
         source_namespace_id : NamespaceId
@@ -702,7 +812,7 @@ class RawNamespacesClient:
 
     def merge(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         source_namespace_id: NamespaceId,
@@ -715,7 +825,7 @@ class RawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the merge commits into.
 
         commit_id : CommitId
@@ -875,7 +985,7 @@ class RawNamespacesClient:
 
     def fork_for_rebase(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         source_namespace_id: NamespaceId,
         new_namespace_id: typing.Optional[NamespaceId] = OMIT,
@@ -886,7 +996,7 @@ class RawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the fork was forked from.
 
         source_namespace_id : NamespaceId
@@ -1041,7 +1151,7 @@ class RawNamespacesClient:
 
     def replay(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         source_namespace_id: NamespaceId,
@@ -1054,7 +1164,7 @@ class RawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The rebase's new fork, which the replay commit commits into.
 
         commit_id : CommitId
@@ -1217,6 +1327,93 @@ class AsyncRawNamespacesClient:
     def __init__(self, *, client_wrapper: AsyncClientWrapper):
         self._client_wrapper = client_wrapper
 
+    async def list(
+        self,
+        *,
+        limit: typing.Optional[int] = None,
+        cursor: typing.Optional[str] = None,
+        request_options: typing.Optional[RequestOptions] = None,
+    ) -> AsyncHttpResponse[ListNamespacesResponse]:
+        """
+        Lists the store's namespaces in object-key order (namespace ID order, except that an ID sorts after the longer IDs that extend it with `-` or `.`), and returns for each one the object that `GET /v0/namespaces/{namespace_id}` returns. The list leaves out deleted namespaces and namespaces whose creation hasn't finished, so a page can have fewer namespaces than `limit`, even none, and still include `next_cursor`. Without `limit`, a page lists up to 100 namespaces.
+
+        Parameters
+        ----------
+        limit : typing.Optional[int]
+            The maximum number of namespace IDs the page lists from the store.
+
+        cursor : typing.Optional[str]
+            The opaque cursor that the previous page returned.
+
+        request_options : typing.Optional[RequestOptions]
+            Request-specific configuration.
+
+        Returns
+        -------
+        AsyncHttpResponse[ListNamespacesResponse]
+            Namespaces
+        """
+        _response = await self._client_wrapper.httpx_client.request(
+            "v0/namespaces",
+            method="GET",
+            params={
+                "limit": limit,
+                "cursor": cursor,
+            },
+            request_options=request_options,
+        )
+        try:
+            if 200 <= _response.status_code < 300:
+                _data = typing.cast(
+                    ListNamespacesResponse,
+                    parse_obj_as(
+                        type_=ListNamespacesResponse,  # type: ignore
+                        object_=_response.json(),
+                    ),
+                )
+                return AsyncHttpResponse(response=_response, data=_data)
+            if _response.status_code == 400:
+                raise BadRequestError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 401:
+                raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 503:
+                raise ServiceUnavailableError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        typing.Any,
+                        parse_obj_as(
+                            type_=typing.Any,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            _response_json = _response.json()
+        except JSONDecodeError:
+            raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response.text)
+        except ValidationError as e:
+            raise ParsingError(
+                status_code=_response.status_code, headers=dict(_response.headers), body=_response.json(), cause=e
+            )
+        raise ApiError(status_code=_response.status_code, headers=dict(_response.headers), body=_response_json)
+
     async def create(
         self,
         *,
@@ -1352,7 +1549,7 @@ class AsyncRawNamespacesClient:
 
     async def retrieve(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
@@ -1363,7 +1560,7 @@ class AsyncRawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         consistency : typing.Optional[ReadConsistency]
@@ -1469,7 +1666,7 @@ class AsyncRawNamespacesClient:
 
     async def delete(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         expected_head_seq: typing.Optional[CommitSeq] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1479,7 +1676,7 @@ class AsyncRawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         expected_head_seq : typing.Optional[CommitSeq]
@@ -1527,6 +1724,17 @@ class AsyncRawNamespacesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1591,7 +1799,7 @@ class AsyncRawNamespacesClient:
 
     async def fork(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         new_namespace_id: typing.Optional[NamespaceId] = OMIT,
         snapshot_id: typing.Optional[SnapshotId] = OMIT,
@@ -1602,7 +1810,7 @@ class AsyncRawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The source namespace ID.
 
         new_namespace_id : typing.Optional[NamespaceId]
@@ -1659,6 +1867,17 @@ class AsyncRawNamespacesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1734,7 +1953,7 @@ class AsyncRawNamespacesClient:
 
     async def next_merge_range(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         source_namespace_id: NamespaceId,
         consistency: typing.Optional[ReadConsistency] = None,
@@ -1746,7 +1965,7 @@ class AsyncRawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the fork merges into.
 
         source_namespace_id : NamespaceId
@@ -1879,7 +2098,7 @@ class AsyncRawNamespacesClient:
 
     async def merge(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         source_namespace_id: NamespaceId,
@@ -1892,7 +2111,7 @@ class AsyncRawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the merge commits into.
 
         commit_id : CommitId
@@ -2052,7 +2271,7 @@ class AsyncRawNamespacesClient:
 
     async def fork_for_rebase(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         source_namespace_id: NamespaceId,
         new_namespace_id: typing.Optional[NamespaceId] = OMIT,
@@ -2063,7 +2282,7 @@ class AsyncRawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace that the fork was forked from.
 
         source_namespace_id : NamespaceId
@@ -2218,7 +2437,7 @@ class AsyncRawNamespacesClient:
 
     async def replay(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         source_namespace_id: NamespaceId,
@@ -2231,7 +2450,7 @@ class AsyncRawNamespacesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The rebase's new fork, which the replay commit commits into.
 
         commit_id : CommitId

@@ -9,7 +9,7 @@ from .diff_entry import DiffEntry
 from .namespace_id import NamespaceId
 
 
-class DiffResponse(UniversalBaseModel):
+class ListDiffResponse(UniversalBaseModel):
     """
     One page of a diff: the inodes whose visible state at `to_seq` differs from their state at
     `from_seq`.

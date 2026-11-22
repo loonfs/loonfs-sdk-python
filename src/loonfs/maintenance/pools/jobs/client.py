@@ -4,6 +4,7 @@ import typing
 
 from ....core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ....core.request_options import RequestOptions
+from ....types.pool_id import PoolId
 from ....types.run_pool_maintenance_job_request import RunPoolMaintenanceJobRequest
 from ....types.run_pool_maintenance_job_response import RunPoolMaintenanceJobResponse
 from .raw_client import AsyncRawJobsClient, RawJobsClient
@@ -29,7 +30,7 @@ class JobsClient:
 
     def create(
         self,
-        pool_id: str,
+        pool_id: PoolId,
         *,
         request: RunPoolMaintenanceJobRequest,
         request_options: typing.Optional[RequestOptions] = None,
@@ -39,7 +40,7 @@ class JobsClient:
 
         Parameters
         ----------
-        pool_id : str
+        pool_id : PoolId
             The pool ID.
 
         request : RunPoolMaintenanceJobRequest
@@ -64,7 +65,7 @@ class JobsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.maintenance.pools.jobs.create(
-            pool_id="pool_id",
+            pool_id="pool_3s0drmj8em84yb4mnetqkz2j0x",
             request=RunPoolMaintenanceJobRequest_Gc(),
         )
         """
@@ -89,7 +90,7 @@ class AsyncJobsClient:
 
     async def create(
         self,
-        pool_id: str,
+        pool_id: PoolId,
         *,
         request: RunPoolMaintenanceJobRequest,
         request_options: typing.Optional[RequestOptions] = None,
@@ -99,7 +100,7 @@ class AsyncJobsClient:
 
         Parameters
         ----------
-        pool_id : str
+        pool_id : PoolId
             The pool ID.
 
         request : RunPoolMaintenanceJobRequest
@@ -129,7 +130,7 @@ class AsyncJobsClient:
 
         async def main() -> None:
             await client.maintenance.pools.jobs.create(
-                pool_id="pool_id",
+                pool_id="pool_3s0drmj8em84yb4mnetqkz2j0x",
                 request=RunPoolMaintenanceJobRequest_Gc(),
             )
 

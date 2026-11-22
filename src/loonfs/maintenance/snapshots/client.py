@@ -5,6 +5,8 @@ import typing
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.request_options import RequestOptions
 from ...types.list_snapshot_records_response import ListSnapshotRecordsResponse
+from ...types.namespace_id import NamespaceId
+from ...types.snapshot_id import SnapshotId
 from ...types.snapshot_record import SnapshotRecord
 from .raw_client import AsyncRawSnapshotsClient, RawSnapshotsClient
 
@@ -26,7 +28,7 @@ class SnapshotsClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -37,7 +39,7 @@ class SnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -66,24 +68,28 @@ class SnapshotsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.maintenance.snapshots.list(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.list(namespace_id, limit=limit, cursor=cursor, request_options=request_options)
         return _response.data
 
     def retrieve(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> SnapshotRecord:
         """
         Returns one existing snapshot of any owner, as the snapshot inventory lists it, including an expired or deleted snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -106,8 +112,8 @@ class SnapshotsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.maintenance.snapshots.retrieve(
-            namespace_id="namespace_id",
-            snapshot_id="snapshot_id",
+            namespace_id="demo",
+            snapshot_id="snp_0000000000000tfy68ekkbj6bx",
         )
         """
         _response = self._raw_client.retrieve(namespace_id, snapshot_id, request_options=request_options)
@@ -131,7 +137,7 @@ class AsyncSnapshotsClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -142,7 +148,7 @@ class AsyncSnapshotsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -176,7 +182,7 @@ class AsyncSnapshotsClient:
 
         async def main() -> None:
             await client.maintenance.snapshots.list(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 
@@ -188,17 +194,21 @@ class AsyncSnapshotsClient:
         return _response.data
 
     async def retrieve(
-        self, namespace_id: str, snapshot_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self,
+        namespace_id: NamespaceId,
+        snapshot_id: SnapshotId,
+        *,
+        request_options: typing.Optional[RequestOptions] = None,
     ) -> SnapshotRecord:
         """
         Returns one existing snapshot of any owner, as the snapshot inventory lists it, including an expired or deleted snapshot that garbage collection hasn't deleted. A missing ID returns `snapshot_not_found`.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        snapshot_id : str
+        snapshot_id : SnapshotId
             The snapshot ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -226,8 +236,8 @@ class AsyncSnapshotsClient:
 
         async def main() -> None:
             await client.maintenance.snapshots.retrieve(
-                namespace_id="namespace_id",
-                snapshot_id="snapshot_id",
+                namespace_id="demo",
+                snapshot_id="snp_0000000000000tfy68ekkbj6bx",
             )
 
 

@@ -6,6 +6,7 @@ import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .commit_seq import CommitSeq
 from .merge import Merge
+from .namespace_id import NamespaceId
 
 
 class NextMergeRangeOutcomeOpen(UniversalBaseModel):
@@ -26,6 +27,11 @@ class NextMergeRangeOutcomeOpen(UniversalBaseModel):
     replay commit, never a merge that the new fork inherited.
     """
 
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    The namespace that the fork merges into (or, for a rebase, the rebase's new fork).
+    """
+
     next_after_seq: CommitSeq = pydantic.Field()
     """
     The fork sequence that the next merge starts after: the newest merge's
@@ -36,6 +42,11 @@ class NextMergeRangeOutcomeOpen(UniversalBaseModel):
     source_head_seq: CommitSeq = pydantic.Field()
     """
     The fork's head sequence when the server read it.
+    """
+
+    source_namespace_id: NamespaceId = pydantic.Field()
+    """
+    The fork whose next merge range was queried.
     """
 
     if IS_PYDANTIC_V2:

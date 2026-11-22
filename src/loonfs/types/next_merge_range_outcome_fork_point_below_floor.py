@@ -5,6 +5,7 @@ import typing
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
 from .commit_seq import CommitSeq
+from .namespace_id import NamespaceId
 
 
 class NextMergeRangeOutcomeForkPointBelowFloor(UniversalBaseModel):
@@ -20,6 +21,11 @@ class NextMergeRangeOutcomeForkPointBelowFloor(UniversalBaseModel):
     the namespace that the rebase forked.
     """
 
+    namespace_id: NamespaceId = pydantic.Field()
+    """
+    The namespace that the fork merges into (or, for a rebase, the rebase's new fork).
+    """
+
     retention_floor_seq: CommitSeq = pydantic.Field()
     """
     The namespace's retention floor, which is above the fork point (for a rebase's new
@@ -29,6 +35,11 @@ class NextMergeRangeOutcomeForkPointBelowFloor(UniversalBaseModel):
     source_head_seq: CommitSeq = pydantic.Field()
     """
     The fork's head sequence when the server read it.
+    """
+
+    source_namespace_id: NamespaceId = pydantic.Field()
+    """
+    The fork whose next merge range was queried.
     """
 
     if IS_PYDANTIC_V2:

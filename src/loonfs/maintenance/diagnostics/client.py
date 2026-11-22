@@ -5,6 +5,7 @@ import typing
 from ...core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ...core.request_options import RequestOptions
 from ...types.namespace_diagnostics import NamespaceDiagnostics
+from ...types.namespace_id import NamespaceId
 from .raw_client import AsyncRawDiagnosticsClient, RawDiagnosticsClient
 
 
@@ -24,14 +25,14 @@ class DiagnosticsClient:
         return self._raw_client
 
     def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> NamespaceDiagnostics:
         """
         Returns namespace state together with the current manifest and visible WAL tail.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -54,7 +55,7 @@ class DiagnosticsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.maintenance.diagnostics.retrieve(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.retrieve(namespace_id, request_options=request_options)
@@ -77,14 +78,14 @@ class AsyncDiagnosticsClient:
         return self._raw_client
 
     async def retrieve(
-        self, namespace_id: str, *, request_options: typing.Optional[RequestOptions] = None
+        self, namespace_id: NamespaceId, *, request_options: typing.Optional[RequestOptions] = None
     ) -> NamespaceDiagnostics:
         """
         Returns namespace state together with the current manifest and visible WAL tail.
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request_options : typing.Optional[RequestOptions]
@@ -112,7 +113,7 @@ class AsyncDiagnosticsClient:
 
         async def main() -> None:
             await client.maintenance.diagnostics.retrieve(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 

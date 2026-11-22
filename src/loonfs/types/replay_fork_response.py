@@ -4,13 +4,21 @@ import typing
 
 import pydantic
 from ..core.pydantic_utilities import IS_PYDANTIC_V2, UniversalBaseModel
+from .commit import Commit
 from .merge_conflict import MergeConflict
 from .namespace_metadata import NamespaceMetadata
 
 
 class ReplayForkResponse(UniversalBaseModel):
     """
-    The result of a replay commit: the new fork, and the changes that the replay commit left out.
+    The result of a replay commit: the new fork, the replay commit, and the
+    changes that the replay commit left out.
+    """
+
+    commit: Commit = pydantic.Field()
+    """
+    The replay commit applied to the new fork. A retry with the same commit
+    ID returns the same commit.
     """
 
     conflicts: typing.List[MergeConflict] = pydantic.Field()

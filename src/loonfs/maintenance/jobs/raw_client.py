@@ -18,6 +18,7 @@ from ...errors.not_found_error import NotFoundError
 from ...errors.service_unavailable_error import ServiceUnavailableError
 from ...errors.unauthorized_error import UnauthorizedError
 from ...types.error_response import ErrorResponse
+from ...types.namespace_id import NamespaceId
 from ...types.run_maintenance_job_request import RunMaintenanceJobRequest
 from ...types.run_maintenance_job_response import RunMaintenanceJobResponse
 from pydantic import ValidationError
@@ -32,7 +33,7 @@ class RawJobsClient:
 
     def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         request: RunMaintenanceJobRequest,
         request_options: typing.Optional[RequestOptions] = None,
@@ -42,7 +43,7 @@ class RawJobsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request : RunMaintenanceJobRequest
@@ -162,7 +163,7 @@ class AsyncRawJobsClient:
 
     async def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         request: RunMaintenanceJobRequest,
         request_options: typing.Optional[RequestOptions] = None,
@@ -172,7 +173,7 @@ class AsyncRawJobsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         request : RunMaintenanceJobRequest

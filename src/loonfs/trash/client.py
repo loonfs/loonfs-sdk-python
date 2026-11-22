@@ -5,6 +5,7 @@ import typing
 from ..core.client_wrapper import AsyncClientWrapper, SyncClientWrapper
 from ..core.request_options import RequestOptions
 from ..types.list_trash_response import ListTrashResponse
+from ..types.namespace_id import NamespaceId
 from ..types.read_consistency import ReadConsistency
 from .raw_client import AsyncRawTrashClient, RawTrashClient
 
@@ -26,7 +27,7 @@ class TrashClient:
 
     def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -39,7 +40,7 @@ class TrashClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -78,7 +79,7 @@ class TrashClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.trash.list(
-            namespace_id="namespace_id",
+            namespace_id="demo",
         )
         """
         _response = self._raw_client.list(
@@ -109,7 +110,7 @@ class AsyncTrashClient:
 
     async def list(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -122,7 +123,7 @@ class AsyncTrashClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         limit : typing.Optional[int]
@@ -166,7 +167,7 @@ class AsyncTrashClient:
 
         async def main() -> None:
             await client.trash.list(
-                namespace_id="namespace_id",
+                namespace_id="demo",
             )
 
 

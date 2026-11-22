@@ -9,6 +9,7 @@ from ..types.commit_id import CommitId
 from ..types.commit_precondition import CommitPrecondition
 from ..types.content_token import ContentToken
 from ..types.filesystem_operation import FilesystemOperation
+from ..types.namespace_id import NamespaceId
 from .raw_client import AsyncRawCommitsClient, RawCommitsClient
 
 # this is used as the default value for optional parameters
@@ -32,7 +33,7 @@ class CommitsClient:
 
     def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
@@ -46,7 +47,7 @@ class CommitsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         commit_id : CommitId
@@ -84,7 +85,7 @@ class CommitsClient:
             base_url="https://yourhost.com/path/to/api",
         )
         client.commits.create(
-            namespace_id="namespace_id",
+            namespace_id="demo",
             commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
             operations=[
                 FilesystemOperation_AppendFile(
@@ -123,7 +124,7 @@ class AsyncCommitsClient:
 
     async def create(
         self,
-        namespace_id: str,
+        namespace_id: NamespaceId,
         *,
         commit_id: CommitId,
         operations: typing.Sequence[FilesystemOperation],
@@ -137,7 +138,7 @@ class AsyncCommitsClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
         commit_id : CommitId
@@ -180,7 +181,7 @@ class AsyncCommitsClient:
 
         async def main() -> None:
             await client.commits.create(
-                namespace_id="namespace_id",
+                namespace_id="demo",
                 commit_id="cmt_7kn71d9dq885x91hejz3gvf9p0",
                 operations=[
                     FilesystemOperation_AppendFile(

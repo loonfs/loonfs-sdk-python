@@ -14,6 +14,7 @@ from ..core.request_options import RequestOptions
 from ..errors.bad_request_error import BadRequestError
 from ..errors.conflict_error import ConflictError
 from ..errors.content_too_large_error import ContentTooLargeError
+from ..errors.forbidden_error import ForbiddenError
 from ..errors.gone_error import GoneError
 from ..errors.not_found_error import NotFoundError
 from ..errors.not_implemented_error import NotImplementedError
@@ -22,8 +23,10 @@ from ..errors.service_unavailable_error import ServiceUnavailableError
 from ..errors.unauthorized_error import UnauthorizedError
 from ..types.create_download_by_inode_response import CreateDownloadByInodeResponse
 from ..types.error_response import ErrorResponse
+from ..types.inode_id import InodeId
 from ..types.list_file_revisions_response import ListFileRevisionsResponse
 from ..types.list_inode_children_response import ListInodeChildrenResponse
+from ..types.namespace_id import NamespaceId
 from ..types.path_entry import PathEntry
 from ..types.read_consistency import ReadConsistency
 from ..types.revision_no import RevisionNo
@@ -40,8 +43,8 @@ class RawInodesClient:
 
     def retrieve(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         include_attributes: typing.Optional[bool] = None,
         snapshot_id: typing.Optional[SnapshotId] = None,
@@ -54,10 +57,10 @@ class RawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The inode ID.
 
         include_attributes : typing.Optional[bool]
@@ -128,6 +131,17 @@ class RawInodesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -172,8 +186,8 @@ class RawInodesClient:
 
     def list_children(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -189,10 +203,10 @@ class RawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The directory's inode ID.
 
         limit : typing.Optional[int]
@@ -277,6 +291,17 @@ class RawInodesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -333,8 +358,8 @@ class RawInodesClient:
     @contextlib.contextmanager
     def content(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
@@ -347,10 +372,10 @@ class RawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         snapshot_id : typing.Optional[SnapshotId]
@@ -412,6 +437,17 @@ class RawInodesClient:
                         )
                     if _response.status_code == 401:
                         raise UnauthorizedError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 403:
+                        raise ForbiddenError(
                             headers=dict(_response.headers),
                             body=typing.cast(
                                 ErrorResponse,
@@ -505,8 +541,8 @@ class RawInodesClient:
 
     def create_download(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
         max_staleness_ms: typing.Optional[int] = OMIT,
@@ -519,10 +555,10 @@ class RawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         consistency : typing.Optional[ReadConsistency]
@@ -589,6 +625,17 @@ class RawInodesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -675,11 +722,12 @@ class RawInodesClient:
 
     def list_revisions(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -689,10 +737,10 @@ class RawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         limit : typing.Optional[int]
@@ -701,11 +749,15 @@ class RawInodesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            The snapshot whose state to list the file's revisions in. The listing starts at the
+            revision that the snapshot captured.
+
         consistency : typing.Optional[ReadConsistency]
             How recently the read confirms the namespace head. `eventual` (the default, unless the
             server's `consistency` setting is `strong`) reads at the head that the server confirmed last
             while that confirmation is younger than the maximum staleness, and `strong` confirms the
-            head before the read.
+            head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency=eventual`, how old the server's last confirmation of the head can be, in
@@ -725,6 +777,7 @@ class RawInodesClient:
             params={
                 "limit": limit,
                 "cursor": cursor,
+                "snapshot_id": snapshot_id,
                 "consistency": consistency,
                 "max_staleness_ms": max_staleness_ms,
             },
@@ -753,6 +806,17 @@ class RawInodesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -818,8 +882,8 @@ class RawInodesClient:
     @contextlib.contextmanager
     def revision_content(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         revision_no: RevisionNo,
         *,
         snapshot_id: typing.Optional[SnapshotId] = None,
@@ -833,10 +897,10 @@ class RawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         revision_no : RevisionNo
@@ -902,6 +966,17 @@ class RawInodesClient:
                         )
                     if _response.status_code == 401:
                         raise UnauthorizedError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 403:
+                        raise ForbiddenError(
                             headers=dict(_response.headers),
                             body=typing.cast(
                                 ErrorResponse,
@@ -995,8 +1070,8 @@ class RawInodesClient:
 
     def create_revision_download(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         revision_no: RevisionNo,
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
@@ -1010,10 +1085,10 @@ class RawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         revision_no : RevisionNo
@@ -1084,6 +1159,17 @@ class RawInodesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1175,8 +1261,8 @@ class AsyncRawInodesClient:
 
     async def retrieve(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         include_attributes: typing.Optional[bool] = None,
         snapshot_id: typing.Optional[SnapshotId] = None,
@@ -1189,10 +1275,10 @@ class AsyncRawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The inode ID.
 
         include_attributes : typing.Optional[bool]
@@ -1263,6 +1349,17 @@ class AsyncRawInodesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -1307,8 +1404,8 @@ class AsyncRawInodesClient:
 
     async def list_children(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
@@ -1324,10 +1421,10 @@ class AsyncRawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The directory's inode ID.
 
         limit : typing.Optional[int]
@@ -1412,6 +1509,17 @@ class AsyncRawInodesClient:
                         ),
                     ),
                 )
+            if _response.status_code == 403:
+                raise ForbiddenError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
             if _response.status_code == 404:
                 raise NotFoundError(
                     headers=dict(_response.headers),
@@ -1468,8 +1576,8 @@ class AsyncRawInodesClient:
     @contextlib.asynccontextmanager
     async def content(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
@@ -1482,10 +1590,10 @@ class AsyncRawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         snapshot_id : typing.Optional[SnapshotId]
@@ -1548,6 +1656,17 @@ class AsyncRawInodesClient:
                         )
                     if _response.status_code == 401:
                         raise UnauthorizedError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 403:
+                        raise ForbiddenError(
                             headers=dict(_response.headers),
                             body=typing.cast(
                                 ErrorResponse,
@@ -1641,8 +1760,8 @@ class AsyncRawInodesClient:
 
     async def create_download(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
         max_staleness_ms: typing.Optional[int] = OMIT,
@@ -1655,10 +1774,10 @@ class AsyncRawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         consistency : typing.Optional[ReadConsistency]
@@ -1725,6 +1844,17 @@ class AsyncRawInodesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1811,11 +1941,12 @@ class AsyncRawInodesClient:
 
     async def list_revisions(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         *,
         limit: typing.Optional[int] = None,
         cursor: typing.Optional[str] = None,
+        snapshot_id: typing.Optional[SnapshotId] = None,
         consistency: typing.Optional[ReadConsistency] = None,
         max_staleness_ms: typing.Optional[int] = None,
         request_options: typing.Optional[RequestOptions] = None,
@@ -1825,10 +1956,10 @@ class AsyncRawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         limit : typing.Optional[int]
@@ -1837,11 +1968,15 @@ class AsyncRawInodesClient:
         cursor : typing.Optional[str]
             The opaque cursor that the previous page returned.
 
+        snapshot_id : typing.Optional[SnapshotId]
+            The snapshot whose state to list the file's revisions in. The listing starts at the
+            revision that the snapshot captured.
+
         consistency : typing.Optional[ReadConsistency]
             How recently the read confirms the namespace head. `eventual` (the default, unless the
             server's `consistency` setting is `strong`) reads at the head that the server confirmed last
             while that confirmation is younger than the maximum staleness, and `strong` confirms the
-            head before the read.
+            head before the read. It can't be combined with `snapshot_id`.
 
         max_staleness_ms : typing.Optional[int]
             With `consistency=eventual`, how old the server's last confirmation of the head can be, in
@@ -1861,6 +1996,7 @@ class AsyncRawInodesClient:
             params={
                 "limit": limit,
                 "cursor": cursor,
+                "snapshot_id": snapshot_id,
                 "consistency": consistency,
                 "max_staleness_ms": max_staleness_ms,
             },
@@ -1889,6 +2025,17 @@ class AsyncRawInodesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
@@ -1954,8 +2101,8 @@ class AsyncRawInodesClient:
     @contextlib.asynccontextmanager
     async def revision_content(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         revision_no: RevisionNo,
         *,
         snapshot_id: typing.Optional[SnapshotId] = None,
@@ -1969,10 +2116,10 @@ class AsyncRawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         revision_no : RevisionNo
@@ -2039,6 +2186,17 @@ class AsyncRawInodesClient:
                         )
                     if _response.status_code == 401:
                         raise UnauthorizedError(
+                            headers=dict(_response.headers),
+                            body=typing.cast(
+                                ErrorResponse,
+                                parse_obj_as(
+                                    type_=ErrorResponse,  # type: ignore
+                                    object_=_response.json(),
+                                ),
+                            ),
+                        )
+                    if _response.status_code == 403:
+                        raise ForbiddenError(
                             headers=dict(_response.headers),
                             body=typing.cast(
                                 ErrorResponse,
@@ -2132,8 +2290,8 @@ class AsyncRawInodesClient:
 
     async def create_revision_download(
         self,
-        namespace_id: str,
-        inode_id: str,
+        namespace_id: NamespaceId,
+        inode_id: InodeId,
         revision_no: RevisionNo,
         *,
         consistency: typing.Optional[ReadConsistency] = OMIT,
@@ -2147,10 +2305,10 @@ class AsyncRawInodesClient:
 
         Parameters
         ----------
-        namespace_id : str
+        namespace_id : NamespaceId
             The namespace ID.
 
-        inode_id : str
+        inode_id : InodeId
             The file's inode ID.
 
         revision_no : RevisionNo
@@ -2221,6 +2379,17 @@ class AsyncRawInodesClient:
                 )
             if _response.status_code == 401:
                 raise UnauthorizedError(
+                    headers=dict(_response.headers),
+                    body=typing.cast(
+                        ErrorResponse,
+                        parse_obj_as(
+                            type_=ErrorResponse,  # type: ignore
+                            object_=_response.json(),
+                        ),
+                    ),
+                )
+            if _response.status_code == 403:
+                raise ForbiddenError(
                     headers=dict(_response.headers),
                     body=typing.cast(
                         ErrorResponse,
